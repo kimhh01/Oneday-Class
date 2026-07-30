@@ -1,0 +1,258 @@
+@charset "UTF-8";
+
+/* =============================================================
+   common.css - 전 페이지 공통 (디자인 토큰 / 기본 레이아웃 / 공통 컴포넌트)
+   * 헤더  -> css/header.css
+   * 사이드바 -> css/sidebar.css
+   ============================================================= */
+
+/* ---------- 1. reset ---------- */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+	font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif;
+	font-size: 14px;
+	line-height: 1.5;
+	color: var(--text-strong);
+	background: var(--bg-page);
+	-webkit-font-smoothing: antialiased;
+}
+ul, ol { list-style: none; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+table { border-collapse: collapse; width: 100%; }
+img { max-width: 100%; display: block; }
+
+/* 아이콘 기본 스타일 - 스프라이트(<use>)로 복제되는 도형까지 상속됩니다 */
+svg {
+	display: block;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.6;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+/* ---------- 2. design token ---------- */
+:root {
+	/* color - brand */
+	--green-700: #1F7A45;
+	--green-600: #2E9E5B;
+	--green-500: #3FAE6C;
+	--green-100: #E4F4EA;
+	--green-50 : #F2FAF5;
+
+	/* color - text */
+	--text-strong: #1A211C;
+	--text-body  : #4B5550;
+	--text-muted : #8A938D;
+
+	/* color - surface */
+	--bg-page  : #F5F8F6;
+	--bg-card  : #FFFFFF;
+	--bg-soft  : #F7F9F8;
+	--border   : #E5EAE7;
+	--border-strong: #D5DCD8;
+
+	/* color - status */
+	--amber-600: #B4780A;
+	--amber-100: #FDF3DF;
+	--blue-600 : #2C6ECB;
+	--blue-100 : #E7EFFB;
+	--red-600  : #C8442F;
+	--red-100  : #FCEAE6;
+
+	/* layout */
+	--header-h  : 64px;
+	--sidebar-w : 232px;
+	--content-max: 1180px;
+
+	/* shape */
+	--radius-sm: 8px;
+	--radius   : 12px;
+	--radius-lg: 16px;
+	--shadow-card: 0 1px 2px rgba(26, 33, 28, .04);
+	--shadow-pop : 0 8px 24px rgba(26, 33, 28, .10);
+}
+
+/* ---------- 3. layout ---------- */
+.app { min-height: 100%; }
+
+.app-body {
+	display: flex;
+	align-items: flex-start;
+	padding-top: var(--header-h);
+}
+
+.content {
+	flex: 1;
+	min-width: 0;
+	padding: 28px 32px 64px;
+}
+.content__inner { max-width: var(--content-max); margin: 0 auto; }
+
+/* 아이콘 스프라이트(includes/icons.html)는 화면에 보이지 않게 */
+.icon-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* ---------- 4. avatar ---------- */
+.avatar {
+	display: grid;
+	place-items: center;
+	width: 32px; height: 32px;
+	border-radius: 50%;
+	background: var(--green-100);
+	color: var(--green-700);
+	font-size: 12px;
+	font-weight: 700;
+	overflow: hidden;
+	flex: none;
+}
+.avatar--lg { width: 48px; height: 48px; font-size: 15px; }
+
+/* ---------- 5. button ---------- */
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	height: 34px;
+	padding: 0 14px;
+	border-radius: 999px;
+	font-size: 12.5px;
+	font-weight: 600;
+	white-space: nowrap;
+	border: 1px solid transparent;
+	transition: background .15s, border-color .15s;
+}
+.btn svg { width: 14px; height: 14px; }
+.btn--primary { background: var(--green-600); color: #fff; }
+.btn--primary:hover { background: var(--green-700); }
+.btn--outline {
+	background: var(--bg-card);
+	border-color: var(--green-500);
+	color: var(--green-700);
+}
+.btn--outline:hover { background: var(--green-50); }
+.btn--ghost {
+	background: var(--bg-card);
+	border-color: var(--border-strong);
+	color: var(--text-body);
+}
+.btn--ghost:hover { background: var(--bg-soft); }
+.btn--sm { height: 28px; padding: 0 10px; font-size: 11.5px; }
+
+/* ---------- 6. card ---------- */
+.card {
+	background: var(--bg-card);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-lg);
+	box-shadow: var(--shadow-card);
+}
+.card + .card { margin-top: 20px; }
+.card__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 18px 20px 12px;
+}
+.card__title { font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
+.card__body { padding: 0 20px 18px; }
+.card__foot {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 12px 20px;
+	border-top: 1px solid var(--border);
+	font-size: 12px;
+	color: var(--text-muted);
+}
+.card__foot svg { width: 14px; height: 14px; flex: none; }
+
+.link-more {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--text-muted);
+}
+.link-more:hover { color: var(--green-700); }
+.link-more svg { width: 13px; height: 13px; }
+
+/* ---------- 7. icon box ---------- */
+.icon-box {
+	display: grid;
+	place-items: center;
+	width: 40px; height: 40px;
+	flex: none;
+	border-radius: var(--radius);
+	background: var(--green-50);
+	color: var(--green-600);
+}
+.icon-box svg { width: 20px; height: 20px; }
+.icon-box--sm { width: 32px; height: 32px; border-radius: var(--radius-sm); }
+.icon-box--sm svg { width: 16px; height: 16px; }
+.icon-box--amber { background: var(--amber-100); color: var(--amber-600); }
+.icon-box--blue  { background: var(--blue-100);  color: var(--blue-600); }
+
+/* ---------- 8. badge ---------- */
+.badge {
+	display: inline-flex;
+	align-items: center;
+	height: 22px;
+	padding: 0 9px;
+	border-radius: 999px;
+	font-size: 11.5px;
+	font-weight: 700;
+	white-space: nowrap;
+}
+.badge--green { background: var(--green-100); color: var(--green-700); }
+.badge--amber { background: var(--amber-100); color: var(--amber-600); }
+.badge--blue  { background: var(--blue-100);  color: var(--blue-600); }
+.badge--red   { background: var(--red-100);   color: var(--red-600); }
+.badge--gray  { background: var(--bg-soft);   color: var(--text-muted); }
+
+/* ---------- 9. table ---------- */
+.table-wrap { overflow-x: auto; }
+.table { font-size: 13px; white-space: nowrap; }
+.table th,
+.table td {
+	padding: 12px 10px;
+	text-align: left;
+	border-bottom: 1px solid var(--border);
+}
+.table thead th {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--text-muted);
+	background: var(--bg-soft);
+	border-bottom: 1px solid var(--border);
+}
+.table thead th:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.table thead th:last-child  { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.table tbody tr:last-child td { border-bottom: 0; }
+.table tbody tr:hover td { background: var(--bg-soft); }
+.table .col-center { text-align: center; }
+.table .col-right  { text-align: right; }
+/* 클래스명은 좁은 화면에서 가로 스크롤 대신 줄바꿈 */
+.table__name { font-weight: 600; color: var(--text-strong); white-space: normal; }
+
+/* ---------- 10. util ---------- */
+.sr-only {
+	position: absolute; width: 1px; height: 1px;
+	margin: -1px; padding: 0; overflow: hidden;
+	clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.text-muted { color: var(--text-muted); }
+
+/* ---------- 11. responsive ---------- */
+@media (max-width: 1024px) {
+	.content { padding: 24px 20px 56px; }
+}
+@media (max-width: 640px) {
+	.content { padding: 20px 14px 48px; }
+	.card__head { padding: 16px 14px 10px; }
+	.card__body { padding: 0 14px 14px; }
+	.card__foot { padding: 10px 14px; }
+}

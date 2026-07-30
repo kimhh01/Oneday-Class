@@ -1,0 +1,97 @@
+@charset "UTF-8";
+
+/* =============================================================
+   sidebar.css - 작가페이지 좌측 공통 메뉴 (includes/sidebar.html 전용)
+   ============================================================= */
+
+.sidebar {
+	position: sticky;
+	top: var(--header-h);
+	flex: none;
+	width: var(--sidebar-w);
+	height: calc(100vh - var(--header-h));
+	display: flex;
+	flex-direction: column;
+	padding: 20px 16px;
+	background: var(--bg-card);
+	border-right: 1px solid var(--border);
+	overflow-y: auto;
+}
+
+/* 메뉴 그룹 */
+.nav-group + .nav-group { margin-top: 18px; }
+.nav-group__title {
+	padding: 0 10px;
+	margin-bottom: 6px;
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: .02em;
+	color: var(--text-muted);
+}
+
+/* 메뉴 링크 */
+.nav-link {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	height: 40px;
+	padding: 0 10px;
+	border-radius: var(--radius-sm);
+	font-size: 13.5px;
+	font-weight: 500;
+	color: var(--text-body);
+}
+.nav-link svg { width: 18px; height: 18px; flex: none; color: var(--text-muted); }
+.nav-link:hover { background: var(--bg-soft); color: var(--text-strong); }
+.nav-link.is-active {
+	background: var(--green-100);
+	color: var(--green-700);
+	font-weight: 700;
+}
+.nav-link.is-active svg { color: var(--green-600); }
+
+.sidebar__spacer { flex: 1 1 auto; min-height: 24px; }
+
+/* 하단 작가 가이드 카드 */
+.guide-card {
+	padding: 16px;
+	border-radius: var(--radius);
+	background: var(--green-50);
+	border: 1px solid var(--green-100);
+}
+.guide-card__title { font-size: 13px; font-weight: 700; }
+.guide-card__desc {
+	margin-top: 4px;
+	font-size: 11.5px;
+	line-height: 1.45;
+	color: var(--text-muted);
+}
+.guide-card .btn { margin-top: 12px; }
+
+/* 모바일: 오프캔버스 */
+.sidebar-backdrop { display: none; }
+
+@media (max-width: 1024px) {
+	.sidebar {
+		position: fixed;
+		top: var(--header-h);
+		left: 0;
+		z-index: 90;
+		transform: translateX(-100%);
+		transition: transform .2s ease;
+		box-shadow: var(--shadow-pop);
+	}
+	.sidebar.is-open { transform: translateX(0); }
+
+	.sidebar-backdrop {
+		display: block;
+		position: fixed;
+		inset: var(--header-h) 0 0 0;
+		z-index: 80;
+		background: rgba(26, 33, 28, .35);
+		opacity: 0;
+		visibility: hidden;
+		transition: opacity .2s;
+	}
+	.sidebar-backdrop.is-open { opacity: 1; visibility: visible; }
+}
