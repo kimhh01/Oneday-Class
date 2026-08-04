@@ -1,0 +1,392 @@
+/* ===========================
+   숨쉬당 일반계정 회원가입 화면 스타일
+   - 기존 로그인 화면과 동일한 컬러/타이포 토큰 유지
+   =========================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap");
+
+:root {
+    --color-cream: #f1f5f0;
+    --color-cream-deep: #e2e9df;
+    --color-sage: #7c9070;
+    --color-sage-dark: #647a5a;
+    --color-clay: #c17a4e;
+    --color-ink: #33361f;
+    --color-ink-soft: #6f6a58;
+    --color-paper: #ffffff;
+    --color-line: #e6dfcd;
+    --color-error: #c0503f;
+    --color-ok: #4f7a52;
+
+    --font-display: "Gowun Batang", serif;
+    --font-body: "Noto Sans KR", sans-serif;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    font-family: var(--font-body);
+}
+
+.signup-wrapper {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    min-height: 100vh;
+    padding: 56px 20px 80px;
+    box-sizing: border-box;
+    background:
+        radial-gradient(ellipse 620px 420px at 12% 15%, rgba(124, 144, 112, 0.16), transparent 60%),
+        radial-gradient(ellipse 560px 420px at 90% 85%, rgba(193, 122, 78, 0.14), transparent 60%),
+        linear-gradient(180deg, var(--color-cream) 0%, var(--color-cream-deep) 100%);
+}
+
+.signup-wrapper::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(51, 54, 31, 0.05) 1px, transparent 1px);
+    background-size: 22px 22px;
+    pointer-events: none;
+}
+
+.signup-card {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 620px;
+    background: var(--color-paper);
+    border-radius: 24px;
+    padding: 40px 48px 40px;
+    box-shadow: 0 24px 60px -20px rgba(51, 54, 31, 0.22);
+    box-sizing: border-box;
+    height: fit-content;
+}
+
+.signup-card__head {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.signup-card__title {
+    margin: 0 0 8px;
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--color-ink);
+}
+
+.signup-card__subtitle {
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--color-ink-soft);
+}
+
+/* 폼: 라벨 + 입력 2열 배치 */
+.signup-form__row {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    margin-bottom: 16px;
+}
+
+.signup-form__label {
+    flex: 0 0 84px;
+    padding-top: 12px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--color-ink);
+}
+
+.signup-form__control {
+    flex: 1;
+    min-width: 0;
+}
+
+.signup-form__control--with-button {
+    display: flex;
+    gap: 8px;
+}
+
+.signup-form__input {
+    width: 100%;
+    padding: 12px 14px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--color-ink);
+    background: var(--color-cream);
+    border: 1px solid var(--color-line);
+    border-radius: 10px;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.signup-form__input::placeholder {
+    color: #a8a397;
+}
+
+.signup-form__input:focus {
+    outline: none;
+    border-color: var(--color-sage);
+    box-shadow: 0 0 0 3px rgba(124, 144, 112, 0.18);
+}
+
+.signup-form__input[readonly] {
+    background: var(--color-cream-deep);
+    color: var(--color-ink-soft);
+}
+
+.signup-form__input-wrap {
+    position: relative;
+}
+
+.signup-form__input-wrap .signup-form__input {
+    padding-right: 42px;
+}
+
+.signup-form__toggle-visibility {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.signup-form__toggle-visibility svg {
+    width: 100%;
+    height: 100%;
+}
+
+.signup-form__hint {
+    margin: -10px 0 14px 102px;
+    font-size: 12.5px;
+    min-height: 15px;
+}
+
+.signup-form__hint--ok {
+    color: var(--color-ok);
+}
+
+.signup-form__hint--error {
+    color: var(--color-error);
+}
+
+.signup-form__error {
+    margin: 0 0 18px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--color-error);
+    background: rgba(192, 80, 63, 0.08);
+    border: 1px solid rgba(192, 80, 63, 0.25);
+    border-radius: 10px;
+}
+
+/* 주소 영역 */
+.signup-form__address {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.signup-form__address-line {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.signup-form__address-label {
+    display: none; /* 좌측 공통 라벨("주소")로 대체, 줄별 보조 라벨은 시각적으로 숨김 */
+}
+
+.signup-form__address-line:first-child .signup-form__input {
+    max-width: 160px;
+}
+
+/* 버튼 */
+.btn {
+    font-family: var(--font-body);
+    font-weight: 700;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+    white-space: nowrap;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn--primary {
+    background-color: var(--color-sage);
+    color: #ffffff;
+}
+
+.btn--primary:hover {
+    background-color: var(--color-sage-dark);
+    box-shadow: 0 8px 18px -8px rgba(100, 122, 90, 0.55);
+}
+
+.btn--full {
+    width: 100%;
+    padding: 14px 0;
+    font-size: 15px;
+    margin-top: 26px;
+}
+
+.btn--outline {
+    padding: 0 16px;
+    font-size: 13px;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    border: 1px solid var(--color-line);
+}
+
+.btn--outline:hover {
+    background: var(--color-cream);
+}
+
+/* 약관 동의 영역 */
+.signup-terms {
+    margin-top: 8px;
+    padding: 18px 20px;
+    background: var(--color-cream);
+    border: 1px solid var(--color-line);
+    border-radius: 14px;
+}
+
+.signup-terms__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    cursor: pointer;
+}
+
+.signup-terms__check {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 13.5px;
+    color: var(--color-ink);
+}
+
+.signup-terms__check input {
+    accent-color: var(--color-sage);
+    width: 16px;
+    height: 16px;
+}
+
+.signup-terms__toggle {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0;
+    background: none;
+    border: none;
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    color: var(--color-ink-soft);
+    cursor: pointer;
+}
+
+.signup-terms__chevron {
+    display: inline-block;
+    transition: transform 0.15s ease;
+}
+
+.signup-terms__toggle.is-open .signup-terms__chevron {
+    transform: rotate(180deg);
+}
+
+.signup-terms__detail {
+    margin: 0 0 6px;
+    padding: 12px 14px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--color-ink-soft);
+    background: var(--color-paper);
+    border: 1px solid var(--color-line);
+    border-radius: 8px;
+}
+
+.signup-terms__sub {
+    display: flex;
+    gap: 22px;
+    padding: 6px 0 4px 26px;
+    border-top: 1px solid var(--color-line);
+    margin-top: 4px;
+}
+
+.signup-terms__sub-check {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--color-ink-soft);
+    cursor: pointer;
+}
+
+.signup-terms__sub-check input {
+    accent-color: var(--color-sage);
+    width: 15px;
+    height: 15px;
+}
+
+/* 로그인 링크 */
+.signup-login-link {
+    margin: 16px 0 0;
+    text-align: center;
+    font-size: 13.5px;
+    color: var(--color-ink-soft);
+}
+
+.signup-login-link a {
+    margin-left: 4px;
+    color: var(--color-sage-dark);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.signup-login-link a:hover {
+    text-decoration: underline;
+}
+
+/* 모바일 대응 */
+@media (max-width: 600px) {
+    .signup-card {
+        padding: 30px 22px 30px;
+        border-radius: 18px;
+    }
+
+    .signup-form__row {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .signup-form__label {
+        flex: none;
+        padding-top: 0;
+    }
+
+    .signup-form__hint {
+        margin-left: 0;
+    }
+
+    .signup-form__address-line:first-child .signup-form__input {
+        max-width: none;
+    }
+}

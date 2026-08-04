@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<!--
+  Spring Boot 프로젝트의 View 파일 (Thymeleaf HTML)
+  위치 예시   : src/main/resources/templates/member/signup.html
+  매핑 예시   : @GetMapping("/member/signup") -> Model에 "signUpDTO"(빈 SignUpDTO) 담아서 return "member/signup";
+  참고 사항   :
+    - 캡처 이미지의 좌우 화살표 선은 디자인 가이드용 표시일 뿐 실제 화면 요소가 아니므로 제작하지 않았습니다.
+    - 폼 input은 th:object="${signUpDTO}" 기준으로 th:field 바인딩되어 있습니다. (SignUpDTO 기준)
+    - 화면/디자인만 구성한 상태이며, 중복확인·주소검색·가입처리 등 실제 기능은 아직 구현하지 않았습니다.
+-->
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 | 숨쉬당</title>
+    <link rel="stylesheet" th:href="@{css/signup.css}">
+</head>
+<body>
+
+<div class="signup-wrapper">
+    <div class="signup-card">
+
+        <div class="signup-card__head">
+            <h2 class="signup-card__title">일반계정 회원가입</h2>
+            <p class="signup-card__subtitle">기본 정보를 입력하고 계정을 만들어보세요.</p>
+        </div>
+
+        <form th:action="@{/member/signup}" th:object="${signUpDTO}" method="post" class="signup-form">
+
+            <div class="signup-form__row">
+                <label for="memberId" class="signup-form__label">아이디</label>
+                <div class="signup-form__control signup-form__control--with-button">
+                    <input type="text" id="memberId" th:field="*{memberId}" class="signup-form__input"
+                           placeholder="아이디를 입력해주세요.">
+                    <button type="button" class="btn btn--outline">중복확인</button>
+                </div>
+            </div>
+
+            <div class="signup-form__row">
+                <label for="name" class="signup-form__label">이름</label>
+                <div class="signup-form__control">
+                    <input type="text" id="name" th:field="*{name}" class="signup-form__input"
+                           placeholder="이름을 입력해주세요.">
+                </div>
+            </div>
+
+            <div class="signup-form__row">
+                <label for="password" class="signup-form__label">비밀번호</label>
+                <div class="signup-form__control">
+                    <div class="signup-form__input-wrap">
+                        <input type="password" id="password" th:field="*{password}" class="signup-form__input"
+                               placeholder="비밀번호를 입력해주세요.">
+                        <button type="button" class="signup-form__toggle-visibility" aria-label="비밀번호 표시">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" stroke="#9a9a8f" stroke-width="1.6"/>
+                                <circle cx="12" cy="12" r="3.2" stroke="#9a9a8f" stroke-width="1.6"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="signup-form__row">
+                <label for="passwordConfirm" class="signup-form__label">비밀번호 확인</label>
+                <div class="signup-form__control">
+                    <div class="signup-form__input-wrap">
+                        <input type="password" id="passwordConfirm" th:field="*{passwordConfirm}" class="signup-form__input"
+                               placeholder="비밀번호를 다시 입력해주세요.">
+                        <button type="button" class="signup-form__toggle-visibility" aria-label="비밀번호 표시">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" stroke="#9a9a8f" stroke-width="1.6"/>
+                                <circle cx="12" cy="12" r="3.2" stroke="#9a9a8f" stroke-width="1.6"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="signup-form__row">
+                <label for="phone" class="signup-form__label">휴대폰 번호</label>
+                <div class="signup-form__control">
+                    <input type="text" id="phone" th:field="*{phone}" class="signup-form__input"
+                           placeholder="010-0000-0000">
+                </div>
+            </div>
+
+            <div class="signup-form__row">
+                <label for="email" class="signup-form__label">이메일 주소</label>
+                <div class="signup-form__control">
+                    <input type="email" id="email" th:field="*{email}" class="signup-form__input"
+                           placeholder="example@email.com">
+                </div>
+            </div>
+
+            <div class="signup-form__row signup-form__row--address">
+                <label class="signup-form__label">주소</label>
+                <div class="signup-form__control signup-form__address">
+
+                    <div class="signup-form__address-line">
+                        <input type="text" id="zipcode" th:field="*{zipcode}" class="signup-form__input" placeholder="우편번호">
+                        <button type="button" class="btn btn--outline">우편번호 검색</button>
+                    </div>
+
+                    <div class="signup-form__address-line">
+                        <input type="text" id="baseAddress" th:field="*{baseAddress}" class="signup-form__input" placeholder="기본 주소를 입력해주세요.">
+                    </div>
+
+                    <div class="signup-form__address-line">
+                        <input type="text" id="detailAddress" th:field="*{detailAddress}" class="signup-form__input" placeholder="상세 주소를 입력해주세요.">
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="signup-terms">
+
+                <label class="signup-terms__row">
+                    <span class="signup-terms__check">
+                        <input type="checkbox" th:field="*{agreeTerms}" value="Y">
+                        <span>[필수] 이용약관 동의</span>
+                    </span>
+                    <span class="signup-terms__toggle">보기 <span class="signup-terms__chevron">⌄</span></span>
+                </label>
+
+                <label class="signup-terms__row">
+                    <span class="signup-terms__check">
+                        <input type="checkbox" th:field="*{agreePrivacy}" value="Y">
+                        <span>[필수] 개인정보 수집 및 이용 동의</span>
+                    </span>
+                    <span class="signup-terms__toggle">보기 <span class="signup-terms__chevron">⌄</span></span>
+                </label>
+
+                <label class="signup-terms__row">
+                    <span class="signup-terms__check">
+                        <input type="checkbox" th:field="*{agreeMarketing}" value="Y">
+                        <span>[선택] 마케팅 정보 수신 동의</span>
+                    </span>
+                    <span class="signup-terms__toggle">보기 <span class="signup-terms__chevron">⌄</span></span>
+                </label>
+
+                <div class="signup-terms__sub">
+                    <label class="signup-terms__sub-check">
+                        <input type="checkbox" th:field="*{agreeSms}" value="Y">
+                        <span>SMS</span>
+                    </label>
+                    <label class="signup-terms__sub-check">
+                        <input type="checkbox" th:field="*{agreeEmail}" value="Y">
+                        <span>이메일</span>
+                    </label>
+                </div>
+
+            </div>
+
+            <button type="submit" class="btn btn--primary btn--full">회원가입</button>
+
+            <p class="signup-login-link">
+                이미 계정이 있으신가요?
+                <a th:href="@{/member/login/general}">로그인</a>
+            </p>
+
+        </form>
+
+    </div>
+</div>
+
+</body>
+</html>
