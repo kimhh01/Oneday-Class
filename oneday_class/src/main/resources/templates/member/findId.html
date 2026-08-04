@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<!--
+  Spring Boot 프로젝트의 View 파일 (Thymeleaf HTML)
+  위치 예시   : src/main/resources/templates/member/findId.html
+  매핑 예시   : @GetMapping("/member/find-id") -> Model에 "findIdDTO"(빈 FindIdDTO) 담아서 return "member/findId";
+  참고 사항   :
+    - 공통 로고 영역은 member/fragments/common.html의 miniLogo fragment를 사용합니다.
+    - 폼 input은 th:object="${findIdDTO}" 기준으로 th:field 바인딩되어 있습니다. (FindIdDTO 기준)
+    - 화면/디자인만 구성한 상태이며, 인증번호 발송·확인·아이디 찾기 등 실제 기능은 아직 구현하지 않았습니다.
+-->
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아이디 찾기 | 숨쉬당</title>
+    <link rel="stylesheet" th:href="@{css/findId.css}">
+</head>
+<body>
+
+<div class="login-wrapper">
+
+    <div th:replace="~{member/fragments/common :: miniLogo}"></div>
+
+    <div class="login-card">
+
+        <div class="login-card__head">
+            <h2 class="login-card__title">아이디 찾기</h2>
+            <p class="login-card__subtitle">
+                이름과 이메일 주소를 입력하고 인증을 완료하면<br>
+                아이디를 확인하실 수 있습니다.
+            </p>
+        </div>
+
+        <form th:action="@{/member/findId}" th:object="${findIdDTO}" method="post" class="login-form">
+
+            <div class="login-form__field">
+                <label for="name" class="login-form__label">이름</label>
+                <input type="text" id="name" th:field="*{name}" class="login-form__input"
+                       placeholder="이름을 입력해주세요">
+            </div>
+
+            <div class="login-form__field">
+                <label for="email" class="login-form__label">이메일 주소</label>
+                <input type="email" id="email" th:field="*{email}" class="login-form__input"
+                       placeholder="이메일 주소를 입력해주세요">
+            </div>
+
+            <div class="login-form__field">
+                <label for="authCode" class="login-form__label">인증번호</label>
+                <div class="login-form__control--with-button">
+                    <input type="text" id="authCode" th:field="*{authCode}" class="login-form__input"
+                           placeholder="인증코드를 입력해주세요">
+                    <button type="button" class="btn btn--outline">인증번호 발송</button>
+                </div>
+                <p class="login-form__hint">입력하신 이메일로 인증번호가 발송됩니다.</p>
+            </div>
+
+            <button type="submit" class="btn btn--primary">아이디 찾기</button>
+
+        </form>
+
+    </div>
+
+    <p class="login-signup">
+        아직 계정이 없으신가요?
+        <a th:href="@{/member/signup}">회원가입</a>
+    </p>
+
+</div>
+
+</body>
+</html>
