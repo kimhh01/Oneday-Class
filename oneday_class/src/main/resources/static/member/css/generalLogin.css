@@ -291,6 +291,33 @@ body {
     text-decoration: underline;
 }
 
+.login-card {
+            position: relative;
+        }
+
+        .page-close-x {
+            position: absolute;
+            top: 18px;
+            left: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+        }
+
+        .page-close-x:hover {
+            background-color: #f0f4ee;
+        }
+
+        .page-close-x svg {
+            width: 20px;
+            height: 20px;
+        }
+
 /* 모바일 대응 */
 @media (max-width: 480px) {
     .login-card {

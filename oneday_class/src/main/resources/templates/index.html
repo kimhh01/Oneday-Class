@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>숨쉬당 - 메인</title>
+</head>
+<body>
+
+    <h1>숨쉬당 메인 페이지</h1>
+
+    <!-- 로그인한 유저 정보 출력 -->
+    <div th:if="${session.loginMember != null}">
+        <p>
+            <strong th:text="${session.loginMember.name}">회원</strong>님 환영합니다! 
+            (아이디: <span th:text="${session.loginMember.email}">email</span>)
+        </p>
+        <a th:href="@{/member/logout}">로그아웃</a>
+    </div>
+
+    <!-- 미로그인 상태 -->
+    <div th:if="${session.loginMember == null}">
+        <a th:href="@{/member/login/general}">로그인</a>
+        <a th:href="@{/member/signUp}">회원가입</a>
+    </div>
+
+</body>
+</html>
