@@ -21,30 +21,23 @@ public class SecurityConfig {
             // 1. 개발 편의를 위한 CSRF 비활성화
             .csrf(csrf -> csrf.disable())
 
-            // 2. 권한 설정 (로그인 선택 화면, 회원가입, 아이디/비밀번호 찾기 및 static 자원은 무조건 허용)
+            // 2. 모든 요청에 대해 접근 전체 허용 (로그인 없이 모든 페이지/정적 자원 접근 가능)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/", 
-                    "/member/**", 
-                    "/css/**", 
-                    "/js/**", 
-                    "/images/**"
-                ).permitAll()
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
             )
 
-            // 3. OAuth2 로그인 커스텀 설정
+            // 3. OAuth2 로그인 기능은 유지 (사용자가 직접 구글 로그인 버튼 클릭 시 작동)
             .oauth2Login(oauth2 -> oauth2
-            	    .loginPage("/member/login")
-            	    // 스프링 시큐리티가 리다이렉트 요청을 수신할 엔드포인트 세팅
-            	    .redirectionEndpoint(redirection -> redirection
-            	        .baseUri("/login/oauth2/*")
-            	    )
-            	    .userInfoEndpoint(userInfo -> userInfo
-            	        .userService(customOAuth2UserService)
-            	    )
-            	    .defaultSuccessUrl("/", true)
-            	);
+                .loginPage("/member/login")
+                .redirectionEndpoint(redirection -> redirection
+                    .baseUri("/login/oauth2/*")
+                )
+                .userInfoEndpoint(userInfo -> userInfo
+                    .userService(customOAuth2UserService)
+                )
+                .defaultSuccessUrl("/", true)
+            );
+
         return http.build();
     }
 }
