@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>클래스 등록 | 숨비당 원데이 클래스</title>
+<link rel="stylesheet" href="/author/css/common.css" th:href="@{/author/css/common.css}">
+<link rel="stylesheet" href="/author/css/header.css" th:href="@{/author/css/header.css}">
+<link rel="stylesheet" href="/author/css/sidebar.css" th:href="@{/author/css/sidebar.css}">
+<link rel="stylesheet" href="/author/css/class-register.css" th:href="@{/author/css/class-register.css}">
+<script src="/author/js/layout.js" th:src="@{/author/js/layout.js}" defer></script>
+</head>
+<!--
+	클래스 등록 1단계(등록 시작).
+	등록 흐름: 등록 시작 → 기본 정보 → 일정 및 가격 → 상세 정보 → 커리큘럼 → 미리보기 → 등록 완료
+-->
+<body class="author-page register-start-page" data-menu="class-register" data-page="클래스 등록">
+
+<div class="app">
+	<div th:replace="~{author/fragments/icons :: icons}"></div>
+	<div th:replace="~{author/fragments/header :: header}"></div>
+
+	<div class="app-body">
+		<div th:replace="~{author/fragments/sidebar :: sidebar}"></div>
+
+		<main class="content">
+			<div class="content__inner">
+				<header class="register-page-head">
+					<p class="register-eyebrow">작가페이지 <span aria-hidden="true">›</span> 클래스 등록</p>
+					<h1 class="page-title">클래스 등록하기 <svg class="title-leaf" aria-hidden="true"><use href="#icon-title-leaf"></use></svg></h1>
+					<p class="page-desc">당신의 솜씨와 이야기가 누군가의 하루를 특별하게 만듭니다.</p>
+				</header>
+
+				<section class="register-hero" aria-labelledby="startTitle">
+					<div class="register-hero__copy">
+						<p class="register-hero__kicker">ONE-DAY CLASS</p>
+						<h2 id="startTitle">당신의 작품이 되는<br>단 하루의 클래스</h2>
+						<p>
+							손끝에서 시작된 취향과 영감,<br>
+							쉼비당에서 더 많은 사람들과<br>
+							아름답게 나누어 보세요.
+						</p>
+						<form id="registerStartForm" method="post" th:action="@{/author/classes/register/start}">
+							<button type="submit" id="registerStartButton"
+									class="btn btn--primary btn--lg register-hero__button"
+									th:attr="data-resume-url=${draftResumeUrl},data-draft-title=${latestDraft == null ? '' : latestDraft.classTitle}">
+								클래스 등록 시작하기
+								<svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
+							</button>
+						</form>
+						<p class="register-hero__note" th:if="${latestDraft != null}"
+						   th:text="${'최근 작성중 초안: ' + latestDraft.classTitle}">최근 작성중 초안</p>
+						<p class="register-hero__note">
+							<svg aria-hidden="true"><use href="#icon-clock"></use></svg>
+							등록은 언제든지 중단하고 이어서 작성할 수 있어요.
+						</p>
+					</div>
+					<div class="register-hero__photo" role="img" aria-label="도예, 캔들, 플라워 클래스를 담은 감성적인 작업 사진"></div>
+				</section>
+
+				<section class="start-guide" aria-label="클래스 등록 안내">
+					<article class="start-guide__item">
+						<span class="start-guide__icon"><svg aria-hidden="true"><use href="#icon-clipboard-list"></use></svg></span>
+						<div>
+							<h2>차근차근, 쉬운 등록 가이드</h2>
+							<p>단계별 안내로 클래스 정보를<br>차근차근 입력할 수 있어요.</p>
+						</div>
+					</article>
+					<article class="start-guide__item">
+						<span class="start-guide__icon"><svg aria-hidden="true"><use href="#icon-cloud-check"></use></svg></span>
+						<div>
+							<h2>임시 저장으로 안전하게</h2>
+							<p>단계별 임시 저장을 이용해<br>언제든 이어서 작성할 수 있어요.</p>
+						</div>
+					</article>
+					<article class="start-guide__item">
+						<span class="start-guide__icon"><svg aria-hidden="true"><use href="#icon-image"></use></svg></span>
+						<div>
+							<h2>아름답게 노출되는 클래스</h2>
+							<p>감성적인 이미지로 더 많은<br>수강생에게 보여질 수 있어요.</p>
+						</div>
+					</article>
+				</section>
+
+				<section class="start-ready" aria-labelledby="readyTitle">
+					<div class="start-ready__title">
+						<span class="start-ready__mark" aria-hidden="true"><svg><use href="#icon-sprout"></use></svg></span>
+						<h2 id="readyTitle">지금 시작하면 이런 점이 좋아요</h2>
+					</div>
+					<ul>
+						<li><svg aria-hidden="true"><use href="#icon-check"></use></svg> 클래스 등록 수수료 0% (오픈 기념)</li>
+						<li><svg aria-hidden="true"><use href="#icon-check"></use></svg> 신규 작가 전용 노출 혜택 제공</li>
+						<li><svg aria-hidden="true"><use href="#icon-check"></use></svg> 등록 완료 시 알림으로 빠르게 안내</li>
+					</ul>
+				</section>
+
+				<footer class="site-footer" th:replace="~{author/fragments/footer :: footer}">
+					<div class="site-footer__links">
+						<a href="#" aria-disabled="true" title="준비 중">작가 가이드</a>
+						<a href="#" aria-disabled="true" title="준비 중">공지사항</a>
+						<a href="#" aria-disabled="true" title="준비 중">사업자 문의</a>
+						<a href="#">이용약관</a>
+						<a href="#">개인정보처리방침</a>
+					</div>
+					<p class="site-footer__copy">
+						<b>숨비당 원데이 클래스</b> 작가센터 · 평일 10:00 ~ 18:00 (점심 12:00 ~ 13:00)<br>
+						© 2026 숨비당. All rights reserved.
+					</p>
+				</footer>
+			</div>
+		</main>
+	</div>
+</div>
+
+<script>
+(function () {
+	'use strict';
+	var button = document.getElementById('registerStartButton');
+	if (!button) return;
+	button.addEventListener('click', function (event) {
+		var resumeUrl = button.dataset.resumeUrl;
+		if (!resumeUrl) return;
+		var title = button.dataset.draftTitle || '작성중인 클래스';
+		var resume = window.confirm('진행 중인 클래스 등록이 있습니다.\n[' + title + ']\n\n확인: 이어서 작성\n취소: 새 클래스 등록');
+		if (resume) {
+			event.preventDefault();
+			window.location.assign(resumeUrl);
+		}
+	});
+}());
+</script>
+
+</body>
+</html>
+

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 클래스 등록 일정·반복규칙 Mapper -->
+<mapper namespace="kr.co.oneclass.author.classbasic.dao.ScheduleDAO">
+
+	<select id="selectRepeatScheduleList" parameterType="int"
+		resultType="kr.co.oneclass.author.classbasic.dto.RepeatScheduleDTO">
+		SELECT
+			r.REPEAT_RULE_CODE AS REPEAT_SCHEDULE_CODE,
+			r.CLASS_CODE,
+			r.OPERATION_START_DATE AS REPEAT_START_DATE,
+			r.OPERATION_END_DATE AS REPEAT_END_DATE
+		FROM CLASS_REPEAT_RULE r
+		WHERE r.CLASS_CODE = #{classCode}
+		ORDER BY r.OPERATION_START_DATE, r.REPEAT_RULE_CODE
+	</select>
+
+	<select id="selectScheduleList" parameterType="int"
+		resultType="kr.co.oneclass.author.classbasic.dto.ScheduleDTO">
+		SELECT
+			s.SCHEDULE_CODE,
+			r.CLASS_CODE,
+			s.REPEAT_RULE_CODE,
+			s.CLASS_DATE AS SCHEDULE_DATE,
+			s.START_TIME,
+			s.END_TIME,
+			s.MIN_PEOPLE,
+			s.MAX_PEOPLE,
+			CASE
+				WHEN s.SOLD_OUT_YN = 'Y' THEN '모집 마감'
+				WHEN TRUNC(s.CLASS_DATE) &lt; TRUNC(SYSDATE) THEN '진행 완료'
+				ELSE '모집중'
+			END AS SCHEDULE_STATUS
+		FROM SCHEDULE s
+		JOIN CLASS_REPEAT_RULE r ON r.REPEAT_RULE_CODE = s.REPEAT_RULE_CODE
+		WHERE r.CLASS_CODE = #{classCode}
+		ORDER BY s.CLASS_DATE, s.START_TIME, s.SCHEDULE_CODE
+	</select>
+
+	<!-- SCHEDULE 이 CLASS_REPEAT_RULE 을 참조하므로 일정부터 지운다 -->
+	<delete id="deleteScheduleList" parameterType="int">
+		DELETE FROM SCHEDULE
+		WHERE REPEAT_RULE_CODE IN (
+			SELECT REPEAT_RULE_CODE
+			FROM CLASS_REPEAT_RULE
+			WHERE CLASS_CODE = #{classCode}
+		)
+	</delete>
+
+	<delete id="deleteRepeatScheduleList" parameterType="int">
+		DELETE FROM CLASS_REPEAT_RULE
+		WHERE CLASS_CODE = #{classCode}
+	</delete>
+
+	<insert id="insertRepeatSchedule"
+		parameterType="kr.co.oneclass.author.classbasic.dto.RepeatScheduleDTO">
+		<selectKey keyProperty="repeatScheduleCode" resultType="int" order="BEFORE">
+			SELECT (SELECT NVL(MAX(REPEAT_RULE_CODE), 0) FROM CLASS_REPEAT_RULE)
+				+ SEQ_CLASS_REPEAT_RULE_CODE.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO CLASS_REPEAT_RULE (
+			REPEAT_RULE_CODE, CLASS_CODE, OPERATION_START_DATE, OPERATION_END_DATE
+		) VALUES (
+			#{repeatScheduleCode}, #{classCode}, #{repeatStartDate}, #{repeatEndDate}
+		)
+	</insert>
+
+	<insert id="insertSchedule"
+		parameterType="kr.co.oneclass.author.classbasic.dto.ScheduleDTO">
+		<selectKey keyProperty="scheduleCode" resultType="int" order="BEFORE">
+			SELECT (SELECT NVL(MAX(SCHEDULE_CODE), 0) FROM SCHEDULE)
+				+ SEQ_SCHEDULE_CODE.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO SCHEDULE (
+			SCHEDULE_CODE, REPEAT_RULE_CODE, CLASS_DATE, START_TIME, END_TIME,
+			MIN_PEOPLE, MAX_PEOPLE, REMAINING_PEOPLE, SOLD_OUT_YN
+		) VALUES (
+			#{scheduleCode}, #{repeatRuleCode}, #{scheduleDate}, #{startTime}, #{endTime},
+			#{minPeople}, #{maxPeople}, #{maxPeople}, 'N'
+		)
+	</insert>
+
+</mapper>

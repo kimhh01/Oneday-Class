@@ -1,0 +1,435 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	작가 매출·정산 Mapper.
+	CALCULATE 는 정산 헤더/상세가 분리된 구조가 아니라 결제 한 건당 한 행이다.
+	한 번의 신청에 포함된 행들은 CALCULATE_GROUP_CODE 로 묶는다.
+-->
+<mapper namespace="kr.co.oneclass.author.settlement.dao.SettlementDAO">
+
+	<sql id="salesJoin">
+		FROM PAYMENT p
+		JOIN RESERVATION r ON r.RESERVATION_CODE = p.RESERVATION_CODE
+		JOIN CLASS c ON c.CLASS_CODE = r.CLASS_CODE
+		JOIN SCHEDULE s ON s.SCHEDULE_CODE = r.SCHEDULE_CODE
+		JOIN MEMBER m ON m.MEMBER_CODE = r.MEMBER_CODE
+	</sql>
+
+	<sql id="salesSearchWhere">
+		WHERE c.OPERATOR_CODE = #{authorCode}
+		<if test="startDate != null">
+			AND p.PAYMENT_DATE &gt;= #{startDate}
+		</if>
+		<if test="endDate != null">
+			AND p.PAYMENT_DATE &lt;= #{endDate}
+		</if>
+		<if test="paymentStatus != null and paymentStatus != ''">
+			AND p.STATUS = #{paymentStatus}
+		</if>
+		<if test="keyword != null and keyword != ''">
+			AND (
+				TO_CHAR(p.PAYMENT_CODE) LIKE '%' || #{keyword} || '%'
+				OR c.NAME LIKE '%' || #{keyword} || '%'
+				OR m.NAME LIKE '%' || #{keyword} || '%'
+			)
+		</if>
+	</sql>
+
+	<sql id="calculatedSettlementAmount">
+		CASE
+			WHEN NVL(p.REFUND, 0) &gt;= p.AMOUNT THEN 0
+			ELSE NVL(
+				(SELECT MAX(ca.AMOUNT) FROM CALCULATE ca WHERE ca.PAYMENT_CODE = p.PAYMENT_CODE),
+				(p.AMOUNT - NVL(p.REFUND, 0))
+					- ROUND((p.AMOUNT - NVL(p.REFUND, 0)) * 0.1)
+			)
+		END
+	</sql>
+
+	<select id="selectSalesSummary" parameterType="long"
+		resultType="kr.co.oneclass.author.settlement.dto.SalesSummaryDTO">
+		SELECT
+			NVL(SUM(p.AMOUNT), 0) AS TOTAL_PAYMENT_AMOUNT,
+			NVL(SUM(NVL(p.REFUND, 0)), 0) AS TOTAL_CANCEL_AMOUNT,
+			NVL(SUM(<include refid="calculatedSettlementAmount"/>), 0) AS EXPECTED_SETTLEMENT_AMOUNT
+		<include refid="salesJoin"/>
+		WHERE c.OPERATOR_CODE = #{authorCode}
+	</select>
+
+	<select id="selectSalesList"
+		parameterType="kr.co.oneclass.author.settlement.dto.SalesSearchDTO"
+		resultType="kr.co.oneclass.author.settlement.dto.SalesListDTO">
+		SELECT *
+		FROM (
+			SELECT sales_page.*, ROWNUM AS RN
+			FROM (
+				SELECT
+					p.PAYMENT_CODE,
+					p.RESERVATION_CODE,
+					c.CLASS_CODE,
+					c.NAME AS CLASS_TITLE,
+					m.NAME AS MEMBER_NAME,
+					s.CLASS_DATE AS SCHEDULE_DATE,
+					p.AMOUNT AS PAYMENT_AMOUNT,
+					NVL(p.REFUND, 0) AS DISCOUNT_AMOUNT,
+					<include refid="calculatedSettlementAmount"/> AS SETTLEMENT_AMOUNT,
+					p.STATUS AS PAYMENT_STATUS,
+					CAST(p.PAYMENT_DATE AS DATE) AS PAYMENT_DATE
+				<include refid="salesJoin"/>
+				<include refid="salesSearchWhere"/>
+				ORDER BY p.PAYMENT_DATE DESC, p.PAYMENT_CODE DESC
+			) sales_page
+			WHERE ROWNUM &lt;= #{endRow}
+		)
+		WHERE RN &gt;= #{startRow}
+	</select>
+
+	<select id="selectSalesCount"
+		parameterType="kr.co.oneclass.author.settlement.dto.SalesSearchDTO"
+		resultType="int">
+		SELECT COUNT(*)
+		<include refid="salesJoin"/>
+		<include refid="salesSearchWhere"/>
+	</select>
+
+	<select id="selectSalesDetail" parameterType="map"
+		resultType="kr.co.oneclass.author.settlement.dto.SalesDetailDTO">
+		SELECT
+			p.PAYMENT_CODE,
+			p.RESERVATION_CODE,
+			c.CLASS_CODE,
+			c.NAME AS CLASS_TITLE,
+			s.SCHEDULE_CODE,
+			s.CLASS_DATE AS SCHEDULE_DATE,
+			m.MEMBER_CODE,
+			m.NAME AS MEMBER_NAME,
+			m.EMAIL AS MEMBER_EMAIL,
+			p.MEANS AS PAYMENT_METHOD,
+			p.AMOUNT AS PAYMENT_AMOUNT,
+			0 AS COUPON_DISCOUNT_AMOUNT,
+			0 AS POINT_DISCOUNT_AMOUNT,
+			NVL(p.REFUND, 0) AS CANCEL_AMOUNT,
+			0 AS CANCEL_FEE_AMOUNT,
+			CASE WHEN NVL(p.REFUND, 0) &gt;= p.AMOUNT THEN 0
+				ELSE ROUND((p.AMOUNT - NVL(p.REFUND, 0)) * 0.1) END AS PLATFORM_FEE_AMOUNT,
+			<include refid="calculatedSettlementAmount"/> AS SETTLEMENT_AMOUNT,
+			CASE
+				WHEN p.STATUS = '환불완료' OR NVL(p.REFUND, 0) &gt; 0 THEN '정산제외'
+				WHEN EXISTS (
+					SELECT 1 FROM CALCULATE ca WHERE ca.PAYMENT_CODE = p.PAYMENT_CODE
+				) THEN (
+					SELECT MAX(ca.STATUS) FROM CALCULATE ca WHERE ca.PAYMENT_CODE = p.PAYMENT_CODE
+				)
+				WHEN r.STATUS != '예약' THEN '정산제외'
+				WHEN TRUNC(s.CLASS_DATE) &gt; TRUNC(SYSDATE) THEN '정산대기'
+				ELSE '정산가능'
+			END AS SETTLEMENT_STATUS,
+			p.STATUS AS PAYMENT_STATUS,
+			CAST(p.PAYMENT_DATE AS DATE) AS PAYMENT_DATE
+		<include refid="salesJoin"/>
+		WHERE c.OPERATOR_CODE = #{authorCode}
+		  AND p.PAYMENT_CODE = #{paymentCode}
+	</select>
+
+	<select id="selectSettlementDashboard" parameterType="long"
+		resultType="kr.co.oneclass.author.settlement.dto.SettlementDashboardDTO">
+		SELECT
+			NVL((
+				SELECT SUM((p.AMOUNT - NVL(p.REFUND, 0))
+					- ROUND((p.AMOUNT - NVL(p.REFUND, 0)) * 0.1))
+				FROM PAYMENT p
+				JOIN RESERVATION r ON r.RESERVATION_CODE = p.RESERVATION_CODE
+				JOIN CLASS c ON c.CLASS_CODE = r.CLASS_CODE
+				JOIN SCHEDULE s ON s.SCHEDULE_CODE = r.SCHEDULE_CODE
+				WHERE c.OPERATOR_CODE = #{authorCode}
+				  AND p.STATUS = '결제완료'
+				  AND NVL(p.REFUND, 0) = 0
+				  AND r.STATUS = '예약'
+				  AND TRUNC(s.CLASS_DATE) &lt;= TRUNC(SYSDATE)
+				  AND NOT EXISTS (SELECT 1 FROM CALCULATE ca WHERE ca.PAYMENT_CODE = p.PAYMENT_CODE)
+			), 0) AS AVAILABLE_AMOUNT,
+			NVL((
+				SELECT SUM((p.AMOUNT - NVL(p.REFUND, 0))
+					- ROUND((p.AMOUNT - NVL(p.REFUND, 0)) * 0.1))
+				FROM PAYMENT p
+				JOIN RESERVATION r ON r.RESERVATION_CODE = p.RESERVATION_CODE
+				JOIN CLASS c ON c.CLASS_CODE = r.CLASS_CODE
+				JOIN SCHEDULE s ON s.SCHEDULE_CODE = r.SCHEDULE_CODE
+				WHERE c.OPERATOR_CODE = #{authorCode}
+				  AND p.STATUS = '결제완료'
+				  AND NVL(p.REFUND, 0) = 0
+				  AND r.STATUS = '예약'
+				  AND TRUNC(s.CLASS_DATE) &gt; TRUNC(SYSDATE)
+				  AND NOT EXISTS (SELECT 1 FROM CALCULATE ca WHERE ca.PAYMENT_CODE = p.PAYMENT_CODE)
+			), 0) AS WAITING_AMOUNT,
+			NVL((
+				SELECT SUM(ca.AMOUNT)
+				FROM CALCULATE ca
+				WHERE ca.OPERATOR_CODE = #{authorCode}
+				  AND ca.STATUS IN ('정산대기', '정산보류')
+			), 0) AS REQUESTED_AMOUNT,
+			NVL((
+				SELECT SUM(ca.AMOUNT)
+				FROM CALCULATE ca
+				WHERE ca.OPERATOR_CODE = #{authorCode}
+				  AND ca.STATUS = '정산완료'
+			), 0) AS COMPLETED_AMOUNT,
+			NVL((
+				SELECT COUNT(DISTINCT NVL(ca.CALCULATE_GROUP_CODE, ca.CALCULATE_CODE))
+				FROM CALCULATE ca
+				WHERE ca.OPERATOR_CODE = #{authorCode}
+				  AND ca.STATUS = '정산완료'
+			), 0) AS COMPLETED_COUNT,
+			NVL((
+				SELECT COUNT(DISTINCT NVL(ca.CALCULATE_GROUP_CODE, ca.CALCULATE_CODE))
+				FROM CALCULATE ca
+				WHERE ca.OPERATOR_CODE = #{authorCode}
+				  AND ca.STATUS IN ('정산대기', '정산보류')
+			), 0) AS REQUESTED_COUNT
+		FROM DUAL
+	</select>
+
+	<select id="selectSettlementAccount" parameterType="long"
+		resultType="kr.co.oneclass.author.settlement.dto.SettlementAccountDTO">
+		SELECT
+			cr.OPERATOR_CODE AS AUTHOR_CODE,
+			cr.ACTIVITY_NAME AS BUSINESS_NAME,
+			m.NAME AS AUTHOR_NAME,
+			CAST(NULL AS VARCHAR2(50)) AS BANK_NAME,
+			cr.SETTLEMENT_ACCOUNT AS ACCOUNT_NUMBER,
+			cr.SETTLEMENT_ACCOUNT_IMG AS BANKBOOK_PATH,
+			CAST(NULL AS DATE) AS UPDATED_AT
+		FROM CREATOR cr
+		JOIN MEMBER m ON m.MEMBER_CODE = cr.MEMBER_CODE
+		WHERE cr.OPERATOR_CODE = #{authorCode}
+	</select>
+
+	<!-- 실제 DB에는 계좌 테이블이 없으므로 최초 등록도 CREATOR UPDATE 다 -->
+	<update id="insertSettlementAccount"
+		parameterType="kr.co.oneclass.author.settlement.dto.SettlementAccountDTO">
+		UPDATE CREATOR
+		<set>
+			SETTLEMENT_ACCOUNT = #{accountNumber},
+			<if test="bankbookPath != null and bankbookPath != ''">
+				SETTLEMENT_ACCOUNT_IMG = #{bankbookPath},
+			</if>
+		</set>
+		WHERE OPERATOR_CODE = #{authorCode}
+		  AND SETTLEMENT_ACCOUNT IS NULL
+	</update>
+
+	<update id="updateSettlementAccount"
+		parameterType="kr.co.oneclass.author.settlement.dto.SettlementAccountDTO">
+		UPDATE CREATOR
+		<set>
+			SETTLEMENT_ACCOUNT = #{accountNumber},
+			<if test="bankbookPath != null and bankbookPath != ''">
+				SETTLEMENT_ACCOUNT_IMG = #{bankbookPath},
+			</if>
+		</set>
+		WHERE OPERATOR_CODE = #{authorCode}
+	</update>
+
+	<sql id="settlementTargetSelect">
+		SELECT
+			p.PAYMENT_CODE,
+			p.RESERVATION_CODE,
+			c.CLASS_CODE,
+			c.NAME AS CLASS_TITLE,
+			p.AMOUNT AS PAYMENT_AMOUNT,
+			ROUND((p.AMOUNT - NVL(p.REFUND, 0)) * 0.1) AS FEE_AMOUNT,
+			(p.AMOUNT - NVL(p.REFUND, 0))
+				- ROUND((p.AMOUNT - NVL(p.REFUND, 0)) * 0.1) AS SETTLEMENT_AMOUNT,
+			s.CLASS_DATE AS AVAILABLE_DATE,
+			'정산가능' AS SETTLEMENT_STATUS
+		FROM PAYMENT p
+		JOIN RESERVATION r ON r.RESERVATION_CODE = p.RESERVATION_CODE
+		JOIN CLASS c ON c.CLASS_CODE = r.CLASS_CODE
+		JOIN SCHEDULE s ON s.SCHEDULE_CODE = r.SCHEDULE_CODE
+		WHERE c.OPERATOR_CODE = #{authorCode}
+		  AND p.STATUS = '결제완료'
+		  AND NVL(p.REFUND, 0) = 0
+		  AND r.STATUS = '예약'
+		  AND TRUNC(s.CLASS_DATE) &lt;= TRUNC(SYSDATE)
+		  AND NOT EXISTS (SELECT 1 FROM CALCULATE ca WHERE ca.PAYMENT_CODE = p.PAYMENT_CODE)
+	</sql>
+
+	<select id="selectSettlementTargetList" parameterType="long"
+		resultType="kr.co.oneclass.author.settlement.dto.SettlementTargetDTO">
+		<include refid="settlementTargetSelect"/>
+		ORDER BY p.PAYMENT_DATE, p.PAYMENT_CODE
+	</select>
+
+	<select id="selectSelectedSettlementTargetList" parameterType="map"
+		resultType="kr.co.oneclass.author.settlement.dto.SettlementTargetDTO">
+		<include refid="settlementTargetSelect"/>
+		AND p.PAYMENT_CODE IN
+		<foreach collection="paymentCodeList" item="paymentCode" open="(" separator="," close=")">
+			#{paymentCode}
+		</foreach>
+		ORDER BY p.PAYMENT_CODE
+	</select>
+
+	<!--
+		기존 데이터보다 시퀀스가 뒤에 있다는 보장이 없어 현재 최댓값을 오프셋으로 사용한다.
+		시퀀스 값은 세션 간 유일하므로 동시 신청에서도 서로 다른 코드가 발급된다.
+	-->
+	<insert id="insertSettlementTargetList"
+		parameterType="kr.co.oneclass.author.settlement.dto.SettlementApplyDTO">
+		<selectKey keyProperty="settlementCode" resultType="int" order="BEFORE">
+			SELECT
+				(SELECT NVL(MAX(NVL(CALCULATE_GROUP_CODE, CALCULATE_CODE)), 0) FROM CALCULATE)
+				+ SEQ_CALCULATE_GROUP_CODE.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO CALCULATE (
+			CALCULATE_CODE, PAYMENT_CODE, OPERATOR_CODE, MANAGER_CODE,
+			COMMISSION, AMOUNT, STATUS, CALCULATE_DATE, CALCULATE_GROUP_CODE
+		)
+		SELECT
+			(SELECT NVL(MAX(existing.CALCULATE_CODE), 0) FROM CALCULATE existing)
+				+ SEQ_CALCULATE_CODE.NEXTVAL,
+			p.PAYMENT_CODE,
+			#{authorCode},
+			NULL,
+			ROUND((p.AMOUNT - NVL(p.REFUND, 0)) * 0.1),
+			(p.AMOUNT - NVL(p.REFUND, 0))
+				- ROUND((p.AMOUNT - NVL(p.REFUND, 0)) * 0.1),
+			'정산대기',
+			SYSDATE,
+			#{settlementCode}
+		FROM PAYMENT p
+		JOIN RESERVATION r ON r.RESERVATION_CODE = p.RESERVATION_CODE
+		JOIN CLASS c ON c.CLASS_CODE = r.CLASS_CODE
+		JOIN SCHEDULE s ON s.SCHEDULE_CODE = r.SCHEDULE_CODE
+		WHERE c.OPERATOR_CODE = #{authorCode}
+		  AND p.PAYMENT_CODE IN
+		  <foreach collection="paymentCodeList" item="paymentCode" open="(" separator="," close=")">
+			  #{paymentCode}
+		  </foreach>
+		  AND p.STATUS = '결제완료'
+		  AND NVL(p.REFUND, 0) = 0
+		  AND r.STATUS = '예약'
+		  AND TRUNC(s.CLASS_DATE) &lt;= TRUNC(SYSDATE)
+		  AND NOT EXISTS (SELECT 1 FROM CALCULATE ca WHERE ca.PAYMENT_CODE = p.PAYMENT_CODE)
+	</insert>
+
+	<sql id="settlementGroupSource">
+		SELECT
+			NVL(ca.CALCULATE_GROUP_CODE, ca.CALCULATE_CODE) AS SETTLEMENT_CODE,
+			MIN(ca.CALCULATE_DATE) AS APPLIED_AT,
+			MIN(CAST(p.PAYMENT_DATE AS DATE)) AS PERIOD_START_DATE,
+			MAX(CAST(p.PAYMENT_DATE AS DATE)) AS PERIOD_END_DATE,
+			COUNT(*) AS PAYMENT_COUNT,
+			SUM(p.AMOUNT - NVL(p.REFUND, 0)) AS TOTAL_PAYMENT_AMOUNT,
+			SUM(ca.COMMISSION) AS TOTAL_FEE_AMOUNT,
+			SUM(ca.AMOUNT) AS SETTLEMENT_AMOUNT,
+			CASE
+				WHEN SUM(CASE WHEN ca.STATUS = '정산보류' THEN 1 ELSE 0 END) &gt; 0 THEN '정산보류'
+				WHEN SUM(CASE WHEN ca.STATUS = '정산대기' THEN 1 ELSE 0 END) &gt; 0 THEN '정산대기'
+				ELSE '정산완료'
+			END AS SETTLEMENT_STATUS,
+			CASE
+				WHEN SUM(CASE WHEN ca.STATUS = '정산완료' THEN 1 ELSE 0 END) = COUNT(*)
+				THEN MAX(ca.CALCULATE_DATE)
+			END AS PAID_AT
+		FROM CALCULATE ca
+		JOIN PAYMENT p ON p.PAYMENT_CODE = ca.PAYMENT_CODE
+		WHERE ca.OPERATOR_CODE = #{authorCode}
+		GROUP BY NVL(ca.CALCULATE_GROUP_CODE, ca.CALCULATE_CODE)
+	</sql>
+
+	<sql id="settlementSearchWhere">
+		WHERE 1 = 1
+		<if test="startDate != null">
+			AND settlement_group.APPLIED_AT &gt;= #{startDate}
+		</if>
+		<if test="endDate != null">
+			AND settlement_group.APPLIED_AT &lt;= #{endDate}
+		</if>
+		<if test="settlementStatus != null and settlementStatus != ''">
+			AND settlement_group.SETTLEMENT_STATUS = #{settlementStatus}
+		</if>
+		<if test="keyword != null and keyword != ''">
+			AND (
+				TO_CHAR(settlement_group.SETTLEMENT_CODE) LIKE '%' || #{keyword} || '%'
+				OR EXISTS (
+					SELECT 1 FROM CREATOR cr
+					WHERE cr.OPERATOR_CODE = #{authorCode}
+					  AND cr.SETTLEMENT_ACCOUNT LIKE '%' || #{keyword} || '%'
+				)
+			)
+		</if>
+	</sql>
+
+	<select id="selectSettlementList"
+		parameterType="kr.co.oneclass.author.settlement.dto.SettlementSearchDTO"
+		resultType="kr.co.oneclass.author.settlement.dto.SettlementListDTO">
+		SELECT *
+		FROM (
+			SELECT settlement_page.*, ROWNUM AS RN
+			FROM (
+				SELECT settlement_group.*,
+					(SELECT cr.SETTLEMENT_ACCOUNT FROM CREATOR cr
+					 WHERE cr.OPERATOR_CODE = #{authorCode}) AS ACCOUNT_NUMBER
+				FROM (<include refid="settlementGroupSource"/>) settlement_group
+				<include refid="settlementSearchWhere"/>
+				ORDER BY settlement_group.APPLIED_AT DESC, settlement_group.SETTLEMENT_CODE DESC
+			) settlement_page
+			WHERE ROWNUM &lt;= #{endRow}
+		)
+		WHERE RN &gt;= #{startRow}
+	</select>
+
+	<select id="selectSettlementCount"
+		parameterType="kr.co.oneclass.author.settlement.dto.SettlementSearchDTO"
+		resultType="int">
+		SELECT COUNT(*)
+		FROM (<include refid="settlementGroupSource"/>) settlement_group
+		<include refid="settlementSearchWhere"/>
+	</select>
+
+	<select id="selectSettlementDetail" parameterType="map"
+		resultType="kr.co.oneclass.author.settlement.dto.SettlementDetailDTO">
+		SELECT
+			settlement_group.SETTLEMENT_CODE,
+			settlement_group.APPLIED_AT,
+			settlement_group.SETTLEMENT_STATUS,
+			settlement_group.TOTAL_PAYMENT_AMOUNT,
+			settlement_group.TOTAL_FEE_AMOUNT,
+			settlement_group.SETTLEMENT_AMOUNT,
+			cr.ACTIVITY_NAME AS BUSINESS_NAME,
+			m.NAME AS AUTHOR_NAME,
+			CAST(NULL AS VARCHAR2(50)) AS BANK_NAME,
+			cr.SETTLEMENT_ACCOUNT AS ACCOUNT_NUMBER,
+			settlement_group.PAID_AT
+		FROM (<include refid="settlementGroupSource"/>) settlement_group
+		JOIN CREATOR cr ON cr.OPERATOR_CODE = #{authorCode}
+		JOIN MEMBER m ON m.MEMBER_CODE = cr.MEMBER_CODE
+		WHERE settlement_group.SETTLEMENT_CODE = #{settlementCode}
+	</select>
+
+	<select id="selectSettlementDetailTargetList" parameterType="int"
+		resultType="kr.co.oneclass.author.settlement.dto.SettlementTargetDTO">
+		SELECT
+			p.PAYMENT_CODE,
+			p.RESERVATION_CODE,
+			c.CLASS_CODE,
+			c.NAME AS CLASS_TITLE,
+			p.AMOUNT AS PAYMENT_AMOUNT,
+			ca.COMMISSION AS FEE_AMOUNT,
+			ca.AMOUNT AS SETTLEMENT_AMOUNT,
+			s.CLASS_DATE AS AVAILABLE_DATE,
+			ca.STATUS AS SETTLEMENT_STATUS
+		FROM CALCULATE ca
+		JOIN PAYMENT p ON p.PAYMENT_CODE = ca.PAYMENT_CODE
+		JOIN RESERVATION r ON r.RESERVATION_CODE = p.RESERVATION_CODE
+		JOIN CLASS c ON c.CLASS_CODE = r.CLASS_CODE
+		JOIN SCHEDULE s ON s.SCHEDULE_CODE = r.SCHEDULE_CODE
+		WHERE NVL(ca.CALCULATE_GROUP_CODE, ca.CALCULATE_CODE) = #{settlementCode}
+		ORDER BY p.PAYMENT_CODE
+	</select>
+
+</mapper>

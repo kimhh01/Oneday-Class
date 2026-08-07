@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>프로필 관리 | 숨비당 원데이 클래스</title>
+<link rel="stylesheet" href="/author/css/common.css" th:href="@{/author/css/common.css}">
+<link rel="stylesheet" href="/author/css/header.css" th:href="@{/author/css/header.css}">
+<link rel="stylesheet" href="/author/css/sidebar.css" th:href="@{/author/css/sidebar.css}">
+<link rel="stylesheet" href="/author/css/profile.css" th:href="@{/author/css/profile.css}">
+<script src="/author/js/layout.js" th:src="@{/author/js/layout.js}" defer></script>
+</head>
+<!--
+	작가 프로필 관리 화면 초안.
+	실제 연동 시 로그인 세션의 회원 정보로 작가를 조회하고, 클라이언트의 작가 코드를 권한 근거로 사용하지 않는다.
+	계좌 정보와 통장 사본은 별도 테이블을 가정하지 않고 CREATOR의 정산 관련 컬럼에 저장한다.
+-->
+<body class="author-page profile-page" data-menu="profile" data-page="프로필 관리">
+<div class="app">
+	<div th:replace="~{author/fragments/icons :: icons}"></div>
+	<div th:replace="~{author/fragments/header :: header}"></div>
+	<div class="app-body">
+		<div th:replace="~{author/fragments/sidebar :: sidebar}"></div>
+
+		<main class="content">
+			<div class="content__inner profile-shell">
+				<header class="profile-page-head">
+					<div>
+						<h1 class="page-title">프로필 관리</h1>
+						<p class="page-desc">작가 페이지에 공개되는 정보와 정산 계좌를 안전하게 관리할 수 있습니다.</p>
+					</div>
+					<a href="index.html" th:href="@{/author}" class="profile-preview-link"><svg aria-hidden="true"><use href="#icon-eye"></use></svg> 작가 페이지 보기</a>
+				</header>
+
+				<form id="profileForm" method="post" enctype="multipart/form-data" th:action="@{/author/profile}" th:object="${profile}">
+					<section class="profile-overview" aria-label="프로필 요약 및 상태">
+						<div class="profile-identity">
+							<div class="profile-photo-wrap">
+								<img id="profilePhotoPreview" src="/author/images/photo/studio-profile.png" th:src="${#strings.isEmpty(profile.profileImagePath) ? '/author/images/photo/studio-profile.png' : profile.profileImagePath}" th:alt="${profile.authorNickname + ' 프로필 사진'}" onerror="this.onerror=null;this.src='/author/images/photo/studio-profile.png';">
+								<label class="profile-photo-edit" for="profilePhoto"><svg aria-hidden="true"><use href="#icon-image"></use></svg><span>사진 변경</span></label>
+								<input type="file" id="profilePhoto" name="profileFile" accept="image/jpeg,image/png" hidden>
+							</div>
+							<div class="profile-identity__copy">
+								<div><h2 th:text="${profile.authorNickname}">작가 활동명</h2><span class="approval-badge"><svg aria-hidden="true"><use href="#icon-check"></use></svg> 작가 계정</span></div>
+								<p th:text="${profile.introduction}">작가 소개</p>
+								<small>JPG, PNG 파일 · 최대 5MB · 정사각형 이미지 권장</small>
+							</div>
+						</div>
+
+						<div class="profile-overview__controls">
+							<section class="visibility-panel" aria-labelledby="visibilityTitle">
+								<span class="profile-control-icon"><svg aria-hidden="true"><use href="#icon-eye"></use></svg></span>
+								<div class="profile-control-copy"><h2 id="visibilityTitle">프로필 정보</h2><p>활동명과 소개, 활동 지역을 관리할 수 있습니다.</p></div>
+								<span class="approval-badge"><svg aria-hidden="true"><use href="#icon-check"></use></svg> <span th:text="${profile.openStatus == '승인' ? '승인 완료' : '승인 대기'}">승인 완료</span></span>
+							</section>
+
+							<section class="settlement-panel" aria-labelledby="settlementTitle">
+								<span class="profile-control-icon profile-control-icon--beige"><svg aria-hidden="true"><use href="#icon-wallet"></use></svg></span>
+								<div class="profile-control-copy"><h2 id="settlementTitle">정산 계좌</h2><p><strong id="maskedAccount" th:text="${#strings.isEmpty(account.accountNumber) ? '등록된 계좌 없음' : account.accountNumber}">등록된 계좌 없음</strong><span id="accountDocumentState" th:text="${#strings.isEmpty(account.bankbookPath) ? '통장 사본 미등록' : '통장 사본 등록됨'}">통장 사본 미등록</span></p></div>
+								<button type="button" class="btn btn--outline btn--sm account-manage-button" id="openAccountDialog">계좌 정보 관리 <svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg></button>
+							</section>
+						</div>
+					</section>
+
+					<section class="profile-form-card" aria-labelledby="profileBasicTitle">
+						<div class="profile-card-head">
+							<span><svg aria-hidden="true"><use href="#icon-user"></use></svg></span>
+							<div><h2 id="profileBasicTitle">기본 정보</h2><p>작가 페이지와 클래스 상세에 표시되는 정보를 입력해주세요.</p></div>
+						</div>
+
+						<div class="profile-fields">
+							<div class="profile-field">
+								<label for="profileName">이름</label>
+									<input id="profileName" name="profileName" th:value="${profile.authorName}" readonly aria-describedby="profileNameHelp">
+								<small id="profileNameHelp">회원 기본 정보에서 불러온 값입니다.</small>
+							</div>
+							<div class="profile-field">
+								<label for="profileEmail">이메일</label>
+									<input type="email" id="profileEmail" name="profileEmail" th:value="${profile.email}" readonly aria-describedby="profileEmailHelp">
+								<small id="profileEmailHelp">로그인 계정 이메일입니다.</small>
+							</div>
+							<div class="profile-field">
+								<label for="activityName">작가명 <em>필수</em></label>
+								<input id="activityName" th:field="*{authorNickname}" maxlength="50" required>
+								<small>클래스에 표시되는 활동명입니다.</small>
+							</div>
+							<div class="profile-field">
+								<label for="activityRegion">활동 지역 <em>필수</em></label>
+								<div class="profile-select"><select id="activityRegion" th:field="*{activityField}" required><option value="서울">서울</option><option value="경기">경기</option><option value="인천">인천</option><option value="부산">부산</option><option value="대구">대구</option><option value="대전">대전</option><option value="광주">광주</option><option value="제주">제주</option></select><svg aria-hidden="true"><use href="#icon-chevron-down"></use></svg></div>
+								<small>주로 클래스를 운영하는 지역입니다.</small>
+							</div>
+							<div class="profile-field profile-field--wide">
+								<label for="introduction">소개글 <em>필수</em></label>
+								<textarea id="introduction" th:field="*{introduction}" maxlength="300" required></textarea>
+								<div class="profile-field-foot"><small>작가의 분위기와 클래스 이야기를 소개해주세요.</small><span><b id="introCount">0</b> / 300</span></div>
+							</div>
+							<div class="profile-field profile-field--wide">
+								<label for="kakaoLink">SNS 링크 <span>선택</span></label>
+								<div class="kakao-input"><span aria-hidden="true">S</span><input type="text" id="kakaoLink" th:field="*{kakaoUrl}" maxlength="50" placeholder="인스타그램 또는 카카오톡 채널 주소"></div>
+								<small>작가 활동을 소개하거나 수강생 문의에 사용할 SNS 주소를 입력해주세요.</small>
+							</div>
+						</div>
+					</section>
+
+					<div class="profile-actions">
+						<p><svg aria-hidden="true"><use href="#icon-info"></use></svg> 변경한 정보는 작가 페이지와 클래스 상세에 반영됩니다.</p>
+						<div><button type="reset" class="btn btn--ghost" id="resetProfile">취소</button><button type="submit" class="btn btn--primary">변경사항 저장</button></div>
+					</div>
+				</form>
+				<div th:replace="~{author/fragments/footer :: footer}"></div>
+			</div>
+		</main>
+	</div>
+</div>
+
+<dialog class="account-dialog" id="accountDialog" aria-labelledby="accountDialogTitle">
+	<form id="accountForm" method="post" enctype="multipart/form-data" th:action="@{/author/settlements/account}">
+		<div class="account-dialog__head"><div><span>정산 정보</span><h2 id="accountDialogTitle">계좌 정보 관리</h2><p>정산금을 받을 계좌와 통장 사본을 등록해주세요.</p></div><button type="button" id="closeAccountDialog" aria-label="닫기">×</button></div>
+		<div class="account-dialog__body">
+			<label for="settlementAccount">계좌 정보</label>
+			<input id="settlementAccount" name="accountNumber" maxlength="20" placeholder="계좌번호" th:value="${account.accountNumber}" required>
+			<small>계좌번호는 화면에서 일부만 표시됩니다.</small>
+			<label class="bankbook-upload" for="bankbookFile"><svg aria-hidden="true"><use href="#icon-image"></use></svg><span><strong id="bankbookFileName">통장 사본이 등록되어 있습니다.</strong><small>JPG, PNG 파일 · 최대 5MB</small></span><b>파일 선택</b></label>
+			<input type="file" id="bankbookFile" name="bankbookFile" accept="image/jpeg,image/png" hidden>
+		</div>
+		<div class="account-dialog__foot"><button type="button" id="cancelAccountDialog">취소</button><button type="submit">계좌 정보 저장</button></div>
+	</form>
+</dialog>
+
+<div class="profile-toast" id="profileToast" role="status" aria-live="polite" th:hidden="${message == null}"><svg aria-hidden="true"><use href="#icon-check-circle"></use></svg><span th:text="${message}"></span></div>
+
+<script>
+(function(){
+	'use strict';
+	var form=document.getElementById('profileForm'),photoInput=document.getElementById('profilePhoto'),photoPreview=document.getElementById('profilePhotoPreview'),initialPhoto=photoPreview.src,previewUrl='';
+	var intro=document.getElementById('introduction'),introCount=document.getElementById('introCount'),toast=document.getElementById('profileToast'),toastTimer;
+	var accountDialog=document.getElementById('accountDialog'),accountForm=document.getElementById('accountForm'),accountInput=document.getElementById('settlementAccount'),bankbookInput=document.getElementById('bankbookFile');
+
+	function updateIntroCount(){introCount.textContent=intro.value.length;}
+	function showToast(message){clearTimeout(toastTimer);toast.querySelector('span').textContent=message;toast.hidden=false;toastTimer=setTimeout(function(){toast.hidden=true;},2600);}
+	function closeAccountDialog(){accountDialog.close();}
+
+	updateIntroCount();
+	intro.addEventListener('input',updateIntroCount);
+	photoInput.addEventListener('change',function(){var file=photoInput.files[0];if(!file)return;if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl=URL.createObjectURL(file);photoPreview.src=previewUrl;});
+
+	document.getElementById('resetProfile').addEventListener('click',function(){setTimeout(function(){if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl='';photoPreview.src=initialPhoto;updateIntroCount();showToast('변경사항을 되돌렸습니다.');},0);});
+
+	document.getElementById('openAccountDialog').addEventListener('click',function(){accountDialog.showModal();});
+	document.getElementById('closeAccountDialog').addEventListener('click',closeAccountDialog);
+	document.getElementById('cancelAccountDialog').addEventListener('click',closeAccountDialog);
+	accountDialog.addEventListener('click',function(event){if(event.target===accountDialog)closeAccountDialog();});
+	bankbookInput.addEventListener('change',function(){var file=bankbookInput.files[0];document.getElementById('bankbookFileName').textContent=file?file.name:'통장 사본을 선택해주세요.';});
+}());
+</script>
+</body>
+</html>

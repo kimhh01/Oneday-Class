@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 작가가 관리자에게 보내는 1:1 문의 Mapper -->
+<mapper namespace="kr.co.oneclass.author.inquiry.dao.InquiryDAO">
+
+	<sql id="authorInquiryWhere">
+		WHERE i.OPERATOR_CODE = #{authorCode}
+		  AND i.WRITER_TYPE = '작가'
+	</sql>
+
+	<select id="selectInquirySummary" parameterType="long"
+		resultType="kr.co.oneclass.author.inquiry.dto.InquirySummaryDTO">
+		SELECT
+			COUNT(*) AS TOTAL_COUNT,
+			NVL(SUM(CASE WHEN i.ANSWER IS NULL THEN 1 ELSE 0 END), 0) AS WAITING_COUNT,
+			COUNT(i.ANSWER) AS ANSWERED_COUNT
+		FROM INQUIRY i
+		<include refid="authorInquiryWhere"/>
+	</select>
+
+	<select id="selectInquiryTypeList"
+		resultType="kr.co.oneclass.author.inquiry.dto.InquiryTypeDTO">
+		SELECT INQUIRY_TYPE_CODE, INQUIRY_TYPE_NAME
+		FROM INQUIRY_TYPE
+		ORDER BY INQUIRY_TYPE_CODE
+	</select>
+
+	<select id="selectInquiryList"
+		parameterType="kr.co.oneclass.author.inquiry.dto.InquirySearchDTO"
+		resultType="kr.co.oneclass.author.inquiry.dto.InquiryListDTO">
+		SELECT
+			i.INQUIRY_CODE,
+			i.INQUIRY_TYPE_CODE,
+			it.INQUIRY_TYPE_NAME,
+			i.TITLE,
+			i.INQUIRY_DATE,
+			CASE WHEN i.ANSWER IS NULL THEN 0 ELSE 1 END AS ANSWERED
+		FROM INQUIRY i
+		JOIN INQUIRY_TYPE it ON it.INQUIRY_TYPE_CODE = i.INQUIRY_TYPE_CODE
+		<include refid="authorInquiryWhere"/>
+		<if test="inquiryTypeCode > 0">
+			AND i.INQUIRY_TYPE_CODE = #{inquiryTypeCode}
+		</if>
+		<if test="keyword != null and keyword != ''">
+			AND i.TITLE LIKE '%' || #{keyword} || '%'
+		</if>
+		<if test="answerStatus == 'waiting'">
+			AND i.ANSWER IS NULL
+		</if>
+		<if test="answerStatus == 'answered'">
+			AND i.ANSWER IS NOT NULL
+		</if>
+		ORDER BY i.INQUIRY_DATE DESC, i.INQUIRY_CODE DESC
+	</select>
+
+	<!-- 문의 코드와 작가 코드가 모두 맞아야 상세를 반환한다 -->
+	<select id="selectInquiryDetail" parameterType="map"
+		resultType="kr.co.oneclass.author.inquiry.dto.InquiryDetailDTO">
+		SELECT
+			i.INQUIRY_CODE,
+			i.INQUIRY_TYPE_CODE,
+			it.INQUIRY_TYPE_NAME,
+			i.TITLE,
+			i.CONTENT,
+			i.ANSWER,
+			i.INQUIRY_DATE,
+			i.ANSWER_DATE,
+			i.INQUIRY_IMG,
+			ma.NAME AS MANAGER_NAME,
+			CASE WHEN i.ANSWER IS NULL THEN 0 ELSE 1 END AS ANSWERED
+		FROM INQUIRY i
+		JOIN INQUIRY_TYPE it ON it.INQUIRY_TYPE_CODE = i.INQUIRY_TYPE_CODE
+		LEFT JOIN MANAGER ma ON ma.MANAGER_CODE = i.MANAGER_CODE
+		WHERE i.INQUIRY_CODE = #{inquiryCode}
+		  AND i.OPERATOR_CODE = #{authorCode}
+		  AND i.WRITER_TYPE = '작가'
+	</select>
+
+	<!--
+		기존 문의 코드 1~5와 시퀀스 시작값이 겹쳐도 충돌하지 않도록
+		현재 최대 코드에 세션 간 유일한 NEXTVAL을 더해 신규 코드를 발급한다.
+	-->
+	<insert id="insertInquiry"
+		parameterType="kr.co.oneclass.author.inquiry.dto.InquiryFormDTO">
+		<selectKey keyProperty="inquiryCode" resultType="int" order="BEFORE">
+			SELECT
+				(SELECT NVL(MAX(INQUIRY_CODE), 0) FROM INQUIRY)
+				+ SEQ_INQUIRY_CODE.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO INQUIRY (
+			INQUIRY_CODE, INQUIRY_TYPE_CODE, MANAGER_CODE, OPERATOR_CODE, MEMBER_CODE,
+			TITLE, CONTENT, ANSWER, INQUIRY_DATE, ANSWER_DATE, WRITER_TYPE, INQUIRY_IMG
+		)
+		SELECT
+			#{inquiryCode},
+			it.INQUIRY_TYPE_CODE,
+			NULL,
+			#{authorCode},
+			NULL,
+			#{title},
+			#{content},
+			NULL,
+			SYSDATE,
+			NULL,
+			'작가',
+			#{inquiryImg}
+		FROM INQUIRY_TYPE it
+		WHERE it.INQUIRY_TYPE_CODE = #{inquiryTypeCode}
+	</insert>
+
+</mapper>

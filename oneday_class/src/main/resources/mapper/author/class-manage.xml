@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	작가센터 클래스 관리 조회 Mapper.
+	승인 완료(APPROVAL_STATUS = '승인') 클래스만 운영 대상으로 본다.
+	CLASS.STATUS 실측값은 모집중 / 준비중 이다.
+-->
+<mapper namespace="kr.co.oneclass.author.classmanage.dao.ClassManagementDAO">
+
+	<!--
+		목록과 상세 상단이 공유하는 컬럼.
+		SCHEDULE_TYPE 은 대응 컬럼이 없다 - CLASS_REPEAT_RULE 에 반복 유형 컬럼이
+		없으므로 고정값으로 내려보낸다. 컬럼이 생기면 이 한 줄만 바꾸면 된다.
+	-->
+	<sql id="classManagementColumns">
+		c.CLASS_CODE,
+		c.OPERATOR_CODE AS AUTHOR_CODE,
+		c.NAME AS CLASS_TITLE,
+		(
+			SELECT MIN(ci.IMAGE) KEEP (DENSE_RANK FIRST ORDER BY ci.SORT_ORDER)
+			FROM CLASS_IMG ci
+			WHERE ci.CLASS_CODE = c.CLASS_CODE
+			  AND ci.TYPE = '대표'
+		) AS THUMBNAIL_PATH,
+		(
+			SELECT ct.NAME
+			FROM CATEGORY ct
+			WHERE ct.CATEGORY_CODE = c.CATEGORY_CODE
+		) AS CATEGORY_NAME,
+		'개별일정' AS SCHEDULE_TYPE,
+		c.DESIRED_PRICE,
+		c.WRITE_DATE AS REGISTERED_DATE,
+		(
+			SELECT MIN(r.OPERATION_START_DATE)
+			FROM CLASS_REPEAT_RULE r
+			WHERE r.CLASS_CODE = c.CLASS_CODE
+		) AS RECRUIT_START_DATE,
+		(
+			SELECT MAX(r.OPERATION_END_DATE)
+			FROM CLASS_REPEAT_RULE r
+			WHERE r.CLASS_CODE = c.CLASS_CODE
+		) AS RECRUIT_END_DATE,
+		(
+			SELECT COUNT(*)
+			FROM SCHEDULE s
+			JOIN CLASS_REPEAT_RULE r ON s.REPEAT_RULE_CODE = r.REPEAT_RULE_CODE
+			WHERE r.CLASS_CODE = c.CLASS_CODE
+			  AND s.CLASS_DATE &gt;= TRUNC(SYSDATE)
+		) AS UPCOMING_SCHEDULE_COUNT,
+		(
+			SELECT NVL(SUM(rv.PEOPLE_NUMBER), 0)
+			FROM RESERVATION rv
+			WHERE rv.CLASS_CODE = c.CLASS_CODE
+			  AND rv.STATUS = '예약'
+		) AS APPLICANT_COUNT,
+		c.STATUS AS CLASS_STATUS
+	</sql>
+
+	<!-- 운영 클래스 목록을 상태·일정 유형·클래스명으로 검색한다 -->
+	<select id="selectClassManagementList" parameterType="map"
+		resultType="kr.co.oneclass.author.classmanage.dto.ClassManagementDTO">
+		SELECT
+			<include refid="classManagementColumns"/>
+		FROM CLASS c
+		WHERE c.OPERATOR_CODE = #{authorCode}
+		  AND c.APPROVAL_STATUS = '승인'
+		<if test="classStatus != null and classStatus != '' and classStatus != 'all'">
+			AND c.STATUS = #{classStatus}
+		</if>
+		<if test="scheduleType != null and scheduleType != ''">
+			AND #{scheduleType} = '개별일정'
+		</if>
+		<if test="keyword != null and keyword != ''">
+			AND c.NAME LIKE '%' || #{keyword} || '%'
+		</if>
+		ORDER BY c.WRITE_DATE DESC, c.CLASS_CODE DESC
+	</select>
+
+	<!-- 클래스 관리 상세 상단에 필요한 상태와 요약정보를 조회한다 -->
+	<select id="selectClassManagementInfo" parameterType="map"
+		resultType="kr.co.oneclass.author.classmanage.dto.ClassManagementDTO">
+		SELECT
+			<include refid="classManagementColumns"/>
+		FROM CLASS c
+		WHERE c.OPERATOR_CODE = #{authorCode}
+		  AND c.CLASS_CODE = #{classCode}
+	</select>
+
+	<!-- 해당 클래스의 전체 신청 인원을 조회한다 (취소 제외) -->
+	<select id="countClassApplicant" parameterType="int" resultType="int">
+		SELECT NVL(SUM(rv.PEOPLE_NUMBER), 0)
+		FROM RESERVATION rv
+		WHERE rv.CLASS_CODE = #{classCode}
+		  AND rv.STATUS = '예약'
+	</select>
+
+	<!-- 클래스 폐쇄 전 취소되지 않은 향후 예약 수를 조회한다 -->
+	<select id="countActiveReservation" parameterType="int" resultType="int">
+		SELECT COUNT(*)
+		FROM RESERVATION rv
+		JOIN SCHEDULE s ON rv.SCHEDULE_CODE = s.SCHEDULE_CODE
+		WHERE rv.CLASS_CODE = #{classCode}
+		  AND rv.STATUS = '예약'
+		  AND s.CLASS_DATE &gt;= TRUNC(SYSDATE)
+	</select>
+
+	<!-- 클래스 폐쇄 전 아직 종료되지 않은 일정 수를 조회한다 -->
+	<select id="countActiveSchedule" parameterType="int" resultType="int">
+		SELECT COUNT(*)
+		FROM SCHEDULE s
+		JOIN CLASS_REPEAT_RULE r ON s.REPEAT_RULE_CODE = r.REPEAT_RULE_CODE
+		WHERE r.CLASS_CODE = #{classCode}
+		  AND s.CLASS_DATE &gt;= TRUNC(SYSDATE)
+	</select>
+
+</mapper>
