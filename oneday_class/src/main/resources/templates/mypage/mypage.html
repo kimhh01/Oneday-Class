@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마이페이지 | 숨쉬당</title>
+    <link rel="stylesheet" th:href="@{/mypage/css/mypage.css}">
+</head>
+<body>
+
+<div class="mypage-wrapper">
+    <div class="mypage-container">
+
+        <!-- 1. 상단 공지사항 배너 (Notice DB 데이터 연결) -->
+        <a th:href="@{/notice}" class="notice-banner">
+            <div class="notice-left">
+                <!-- 공지 타입 -->
+                <span class="notice-badge" 
+                      th:text="${recentNotice != null ? recentNotice.noticeType : '공지'}">공지</span>
+                
+                <!-- 최신 공지 제목 -->
+                <span class="notice-title" 
+                      th:text="${recentNotice != null ? recentNotice.title : '등록된 공지사항이 없습니다.'}"></span>
+            </div>
+            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 18l6-6-6-6"/>
+            </svg>
+        </a>
+
+        <!-- 2. 마이페이지 메인 콘텐츠 그리드 -->
+        <div class="mypage-grid">
+
+            <!-- 좌측 프로필 & 사이드 카드 -->
+            <aside class="mypage-sidebar">
+                <!-- 프로필 카드 (Member DB 데이터 연결) -->
+                <div class="profile-card">
+                    <div class="avatar-wrapper">
+                        <!-- 프로필 이미지가 존재할 때 -->
+                        <img th:if="${member != null and member.profileImg != null and #strings.length(member.profileImg) > 0}" 
+                             th:src="@{${member.profileImg}}" alt="프로필 이미지">
+
+                        <!-- 프로필 이미지가 없을 때 기본 SVG 아바타 -->
+                        <svg th:unless="${member != null and member.profileImg != null and #strings.length(member.profileImg) > 0}" 
+                             class="avatar-svg" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" r="50" fill="#E2EFCB"/>
+                            <circle cx="50" cy="40" r="18" fill="#526848"/>
+                            <path d="M20 82c0-16.5 13.5-30 30-30s30 13.5 30 30" fill="#526848"/>
+                        </svg>
+                    </div>
+
+                    <!-- 로그인한 회원 이름 -->
+                    <h2 class="user-name" 
+                        th:text="${member != null ? member.name : ''}">홍길동</h2>
+                    
+                    <a th:href="@{/profile}" class="btn-edit-profile">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        <span>프로필 수정</span>
+                    </a>
+                </div>
+
+                <!-- 하단 브랜드 프로모션 카드 -->
+                <div class="promo-card">
+                    <div class="promo-icon">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#526848" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22v-8"/>
+                            <path d="M12 14c-2.5-3-6-3-8 0 2 5 8 8 8 8s6-3 8-8c-2-3-5.5-3-8 0z"/>
+                        </svg>
+                    </div>
+                    <p class="promo-text">
+                        원하는 취미와 배움,<br>
+                        <strong>숨쉬당</strong>이 함께할게요.
+                    </p>
+                    <p class="promo-sub">
+                        다양한 클래스와 정보를<br>
+                        마이페이지에서 한눈에 관리하세요.
+                    </p>
+                </div>
+            </aside>
+
+            <!-- 우측 메뉴 카드 영역 -->
+            <main class="mypage-menu-area">
+                
+                <!-- 상단 3개 메뉴 -->
+                <div class="menu-row menu-row-3">
+                    
+                    <a th:href="@{/mypage/orders}" class="menu-card">
+                        <div class="icon-box icon-green">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2">
+                                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+                                <line x1="3" y1="6" x2="21" y2="6"/>
+                                <path d="M16 10a4 4 0 0 1-8 0"/>
+                            </svg>
+                        </div>
+                        <h3 class="card-title">구매내역</h3>
+                        <p class="card-sub">주문 및 구매 내역을 확인하세요 <span class="arrow">&gt;</span></p>
+                    </a>
+
+                    <!-- 관심 클래스 경로를 /mypage/bookmark 로 연동 -->
+                    <a th:href="@{/mypage/bookmark}" class="menu-card">
+                        <div class="icon-box icon-red">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                            </svg>
+                        </div>
+                        <h3 class="card-title">관심 클래스</h3>
+                        <p class="card-sub">찜한 클래스를 모아보세요 <span class="arrow">&gt;</span></p>
+                    </a>
+
+                    <a th:href="@{/creator/apply}" class="menu-card">
+                        <div class="icon-box icon-yellow">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                            </svg>
+                        </div>
+                        <h3 class="card-title">작가 시작하기</h3>
+                        <p class="card-sub">작가로 활동을 시작해보세요 <span class="arrow">&gt;</span></p>
+                    </a>
+
+                </div>
+
+                <!-- 하단 2개 메뉴 -->
+                <div class="menu-row menu-row-2">
+
+                    <a th:href="@{/support/inquiry}" class="menu-card">
+                        <div class="icon-box icon-blue">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2">
+                                <path d="M3 18v-6a9 9 0 0 1 18 0v6"/>
+                                <path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/>
+                            </svg>
+                        </div>
+                        <h3 class="card-title">문의하기</h3>
+                        <p class="card-sub">궁금한 점이 있으신가요? 문의 접수하기 <span class="arrow">&gt;</span></p>
+                    </a>
+
+                    <a th:href="@{/notice}" class="menu-card">
+                        <div class="icon-box icon-orange">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2">
+                                <path d="M22 12A10 10 0 0 0 12 2v10z"/>
+                                <path d="M18.7 18.7a10 10 0 1 1 2.3-11.7"/>
+                                <path d="M11 15h2a2 2 0 1 0 0-4h-2v4z"/>
+                            </svg>
+                        </div>
+                        <h3 class="card-title">공지사항</h3>
+                        <p class="card-sub">서비스 공지 및 업데이트 소식 <span class="arrow">&gt;</span></p>
+                    </a>
+
+                </div>
+
+            </main>
+
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

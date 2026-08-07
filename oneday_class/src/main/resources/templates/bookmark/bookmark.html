@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관심 클래스 | 숨쉬당</title>
+    <!-- CSS 연결 -->
+    <link rel="stylesheet" th:href="@{/profile/css/profile.css}">
+    <link rel="stylesheet" th:href="@{/profile/css/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/mypage/css/bookmark.css}">
+</head>
+<body>
+
+<!-- 상단 헤더 -->
+<header class="header">
+    <div class="header-inner">
+        <a th:href="@{/}" class="logo">숨쉬당</a>
+        <button type="button" class="btn-menu" aria-label="메뉴">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#333333" stroke-width="2">
+                <line x1="3" y1="6" x2="21" y2="6"></line>
+                <line x1="3" y1="12" x2="21" y2="12"></line>
+                <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+</header>
+
+<!-- 메인 컨테이너 -->
+<div class="bookmark-wrapper">
+    <div class="bookmark-container">
+
+        <!-- 1. 좌측 사이드바 Fragment 불러오기 (현재 활성화 메뉴: 'bookmark') -->
+        <aside th:replace="~{profile/fragments/sidebar :: sidebar('bookmark')}"></aside>
+
+        <!-- 2. 우측 메인 관심 클래스 콘텐츠 영역 -->
+        <main class="bookmark-main">
+            
+            <!-- 페이지 헤더 -->
+            <div class="page-header">
+                <h1 class="page-title">관심 클래스</h1>
+                <p class="page-subtitle">찜한 클래스를 모아보고 원하는 수업을 빠르게 예약하세요.</p>
+            </div>
+
+            <!-- 카테고리 필터 탭 -->
+            <div class="filter-tabs">
+                <button type="button" class="tab-btn active">전체 <span class="count">6</span></button>
+                <button type="button" class="tab-btn">베이킹 <span class="count">2</span></button>
+                <button type="button" class="tab-btn">공예 <span class="count">2</span></button>
+                <button type="button" class="tab-btn">뷰티 <span class="count">2</span></button>
+            </div>
+
+            <!-- 클래스 카드 리스트 그리드 -->
+            <div class="class-grid">
+                
+                <!-- 카드 1 -->
+                <div class="class-card">
+                    <div class="card-thumb thumb-bg-1">
+                        <img th:if="${false}" src="" alt="나만의 도자기 머그컵">
+                    </div>
+                    <div class="card-body">
+                        <div class="card-title-row">
+                            <h3 class="class-title">나만의 도자기 머그컵</h3>
+                            <button type="button" class="btn-heart active" aria-label="관심 해제">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="#ff4d4f" stroke="#ff4d4f" stroke-width="2">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="class-location">성수</p>
+                        <p class="class-price">42,000원</p>
+                    </div>
+                </div>
+
+                <!-- 카드 2 -->
+                <div class="class-card">
+                    <div class="card-thumb thumb-bg-2">
+                        <img th:if="${false}" src="" alt="프렌치 마들렌 베이킹">
+                    </div>
+                    <div class="card-body">
+                        <div class="card-title-row">
+                            <h3 class="class-title">프렌치 마들렌 베이킹</h3>
+                            <button type="button" class="btn-heart active" aria-label="관심 해제">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="#ff4d4f" stroke="#ff4d4f" stroke-width="2">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="class-location">홍대</p>
+                        <p class="class-price">35,000원</p>
+                    </div>
+                </div>
+
+                <!-- 카드 3 -->
+                <div class="class-card">
+                    <div class="card-thumb thumb-bg-3">
+                        <img th:if="${false}" src="" alt="퍼스널 컬러 진단">
+                    </div>
+                    <div class="card-body">
+                        <div class="card-title-row">
+                            <h3 class="class-title">퍼스널 컬러 진단</h3>
+                            <button type="button" class="btn-heart active" aria-label="관심 해제">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="#ff4d4f" stroke="#ff4d4f" stroke-width="2">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="class-location">강남</p>
+                        <p class="class-price">59,000원</p>
+                    </div>
+                </div>
+
+                <!-- 카드 4 -->
+                <div class="class-card">
+                    <div class="card-thumb thumb-bg-4">
+                        <img th:if="${false}" src="" alt="실버 반지 만들기">
+                    </div>
+                    <div class="card-body">
+                        <div class="card-title-row">
+                            <h3 class="class-title">실버 반지 만들기</h3>
+                            <button type="button" class="btn-heart active" aria-label="관심 해제">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="#ff4d4f" stroke="#ff4d4f" stroke-width="2">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="class-location">을지로</p>
+                        <p class="class-price">48,000원</p>
+                    </div>
+                </div>
+
+                <!-- 카드 5 -->
+                <div class="class-card">
+                    <div class="card-thumb thumb-bg-5">
+                        <img th:if="${false}" src="" alt="플라워 바스켓 클래스">
+                    </div>
+                    <div class="card-body">
+                        <div class="card-title-row">
+                            <h3 class="class-title">플라워 바스켓 클래스</h3>
+                            <button type="button" class="btn-heart active" aria-label="관심 해제">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="#ff4d4f" stroke="#ff4d4f" stroke-width="2">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="class-location">연남</p>
+                        <p class="class-price">46,000원</p>
+                    </div>
+                </div>
+
+                <!-- 카드 6 -->
+                <div class="class-card">
+                    <div class="card-thumb thumb-bg-6">
+                        <img th:if="${false}" src="" alt="네일 아트 원데이">
+                    </div>
+                    <div class="card-body">
+                        <div class="card-title-row">
+                            <h3 class="class-title">네일 아트 원데이</h3>
+                            <button type="button" class="btn-heart active" aria-label="관심 해제">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="#ff4d4f" stroke="#ff4d4f" stroke-width="2">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="class-location">합정</p>
+                        <p class="class-price">39,000원</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+</div>
+
+<!-- 푸터 영역 -->
+<footer class="footer">
+    <div class="footer-inner">
+        <div class="footer-info">
+            <h4 class="company-name">엔에이치엔링크 주식회사</h4>
+            <p class="company-detail">
+                주소:06043 서울특별시 강남구 강남대로 586, 제이빌딩 | 대표이사:홍길동 | 사업자 등록번호:1441-811254<br>
+                1588-7822 | classreservation.co.kr | 통신판매업 신고번호: 제 23656-서울 강남 04656호 | <a href="#">사업자 정보확인</a> | 개인정보보호 책임자 : 서상훈
+            </p>
+        </div>
+        <div class="footer-social">
+            <a href="#" aria-label="Facebook">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#666666">
+                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+                </svg>
+            </a>
+            <a href="#" aria-label="LinkedIn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#666666">
+                    <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+                    <rect x="2" y="9" width="4" height="12"></rect>
+                    <circle cx="4" cy="4" r="2"></circle>
+                </svg>
+            </a>
+            <a href="#" aria-label="YouTube">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="#666666">
+                    <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"></path>
+                    <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" fill="#ffffff"></polygon>
+                </svg>
+            </a>
+            <a href="#" aria-label="Instagram">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666666" stroke-width="2">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                </svg>
+            </a>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

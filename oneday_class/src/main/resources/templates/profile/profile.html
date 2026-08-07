@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프로필 수정 | 숨쉬당</title>
+    <!-- 프로필 페이지 기본 CSS 및 사이드바/모달 CSS -->
+    <link rel="stylesheet" th:href="@{/profile/css/profile.css}">
+    <link rel="stylesheet" th:href="@{/fragments/css/sidebar.css}">
+</head>
+<body>
+
+<div class="profile-wrapper">
+    <div class="profile-container">
+
+        <!-- 1. 좌측 사이드바 Fragment 불러오기 (현재 메뉴 'profile' 전달) -->
+        <aside th:replace="~{fragments/sidebar :: sidebar('profile')}"></aside>
+
+        <!-- 2. 우측 메인 프로필 수정 영역 -->
+        <main class="profile-main">
+            
+            <div class="page-header">
+                <h1 class="page-title">프로필 수정</h1>
+                <p class="page-subtitle">회원 정보를 관리하고 수정할 수 있습니다.</p>
+            </div>
+
+            <!-- [섹션 1] 프로필 이미지 변경 박스 -->
+            <div class="card-section">
+                <div class="img-change-box">
+                    <div class="img-preview-wrapper">
+                        <!-- 프로필 이미지 프리뷰 (@{...} 표기법 적용) -->
+                        <img th:if="${member != null and member.profileImg != null}" 
+                             th:src="@{${member.profileImg}}" alt="프로필 이미지">
+                        <svg th:unless="${member != null and member.profileImg != null}" 
+                             viewBox="0 0 100 100" class="default-avatar">
+                            <circle cx="50" cy="50" r="50" fill="#E2EFCB"/>
+                            <circle cx="50" cy="40" r="18" fill="#526848"/>
+                            <path d="M20 82c0-16.5 13.5-30 30-30s30 13.5 30 30" fill="#526848"/>
+                        </svg>
+                    </div>
+                    <div class="img-info-text">
+                        <h3>프로필 이미지</h3>
+                        <p>권장 크기 400×400px · JPG, PNG · 최대 5MB</p>
+                    </div>
+                    <!-- Controller의 /profile/changeProfileImg GET 요청을 보내 모달을 로드 -->
+                    <button type="button" class="btn-primary" onclick="loadModal('/profile/changeProfileImg')">이미지 변경</button>
+                </div>
+            </div>
+
+            <!-- [섹션 2] 계정 정보 수정 Form -->
+            <form th:action="@{/profile/updateProfile}" method="post" id="profileUpdateForm">
+                <input type="hidden" name="memberCode" th:value="${member != null ? member.memberCode : 0}">
+
+                <div class="card-section">
+                    <h2 class="section-title">계정 정보</h2>
+
+                    <!-- 예약자 이름 -->
+                    <div class="form-group">
+                        <label for="name" class="form-label">예약자 이름</label>
+                        <input type="text" id="name" name="name" class="form-input" 
+                               th:value="${member != null ? member.name : ''}" required>
+                    </div>
+
+                    <!-- 휴대폰 번호 -->
+                    <div class="form-group">
+                        <label for="phone" class="form-label">휴대폰 번호</label>
+                        <input type="tel" id="phone" name="phone" class="form-input" 
+                               th:value="${member != null ? member.phone : ''}" placeholder="010-0000-0000">
+                    </div>
+
+                    <!-- 이메일 -->
+                    <div class="form-group">
+                        <label for="email" class="form-label">이메일</label>
+                        <input type="email" id="email" name="email" class="form-input" 
+                               th:value="${member != null ? member.email : ''}" required>
+                    </div>
+
+                    <!-- 비밀번호 (일반 회원일 때만 비번 변경 모달 호출 가능) -->
+                    <div class="form-group" th:if="${member == null or member.loginType != 'GOOGLE'}">
+                        <label class="form-label">비밀번호</label>
+                        <div class="password-row">
+                            <input type="password" class="form-input" value="••••••••" readonly disabled>
+                            <!-- Controller의 /profile/changePassword GET 요청을 보내 모달을 로드 -->
+                            <button type="button" class="btn-outline" onclick="loadModal('/profile/changePassword')">비밀번호 변경</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 하단 버튼 영역 -->
+                <div class="form-actions">
+                    <a th:href="@{/mypage}" class="btn-text">취소</a>
+                    <button type="submit" class="btn-primary btn-submit">변경</button>
+                </div>
+            </form>
+
+        </main>
+
+    </div>
+</div>
+
+<!-- 동적으로 로드된 모달 HTML이 들어가는 컨테이너 -->
+<div id="modalContainer"></div>
+
+<!-- 공통 결과 안내 알림 모달 Fragment 불러오기 -->
+<div th:replace="~{profile/fragments/alertModal :: alertModal}"></div>
+
+<!-- 모달 동적 로드 스크립트 -->
+<script>
+    // [중요] 브라우저 전체에 파일 드래그 시 파일이 새 창으로 열리는 기본 동작 차단
+    window.addEventListener('dragover', function(e) { e.preventDefault(); }, false);
+    window.addEventListener('drop', function(e) { e.preventDefault(); }, false);
+
+    // Controller에서 모달 HTML을 받아와 화면에 띄우는 함수
+    function loadModal(url) {
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("모달 로드에 실패했습니다.");
+                }
+                return response.text();
+            })
+            .then(html => {
+                const container = document.getElementById('modalContainer');
+                container.innerHTML = html;
+                document.body.style.overflow = 'hidden'; // 배경 스크롤 차단
+
+                // [핵심] innerHTML로 주입된 <script> 태그를 찾아서 강제로 실행시킵니다.
+                const scripts = container.querySelectorAll('script');
+                scripts.forEach(oldScript => {
+                    const newScript = document.createElement('script');
+                    Array.from(oldScript.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value));
+                    newScript.appendChild(document.createTextNode(oldScript.innerHTML));
+                    oldScript.parentNode.replaceChild(newScript, oldScript);
+                });
+            })
+            .catch(error => console.error(error));
+    }
+
+    // 모달 닫기 함수
+    function closeModal() {
+        document.getElementById('modalContainer').innerHTML = '';
+        document.body.style.overflow = 'auto';
+    }
+
+    // 모달 어두운 배경 클릭 시 닫기
+    function closeModalOnBackdrop(event) {
+        if (event.target.classList.contains('modal-backdrop')) {
+            closeModal();
+        }
+    }
+</script>
+
+</body>
+</html>

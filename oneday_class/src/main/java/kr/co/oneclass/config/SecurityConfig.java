@@ -1,6 +1,6 @@
 package kr.co.oneclass.config;
 
-import kr.co.oneclass.member.service.CustomOAuth2UserService;
+import kr.co.oneclass.member.CustomOAuth2UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
