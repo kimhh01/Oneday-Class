@@ -1,0 +1,109 @@
+@charset "UTF-8";
+
+/* =============================================================
+   header.css - 상단 공통 헤더 (includes/header.html 전용)
+   ============================================================= */
+
+.app-header {
+	position: fixed;
+	top: 0;
+	left: var(--sidebar-w);
+	right: 0;
+	z-index: 100;
+	height: var(--header-h);
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	/* 본문(.content)과 같은 좌우 여백을 써야 브레드크럼·유저칩이 아래 카드와 한 줄에 맞는다 */
+	padding: 0 var(--gutter-x);
+	background: var(--bg-card);
+	border-bottom: 1px solid var(--border);
+}
+.app-header__left,
+.app-header__right { display: flex; align-items: center; gap: 8px; }
+
+/* 모바일에서만 헤더에 보이는 축약 로고 */
+.mobile-brand {
+	display: none;
+	align-items: center;
+	gap: 7px;
+	font-family: var(--font-display);
+	font-size: 17px;
+	font-weight: 700;
+}
+.mobile-brand svg { width: 21px; height: 21px; color: var(--green-700); }
+
+/* 브레드크럼 (페이지별 위치 표시) */
+.breadcrumb {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 13px;
+	color: var(--text-muted);
+}
+.breadcrumb svg { width: 14px; height: 14px; }
+.breadcrumb .is-current { color: var(--text-body); font-weight: 600; }
+.breadcrumb.is-home svg,
+.breadcrumb.is-home .is-current { display: none; }
+
+/* 아이콘 버튼(알림/쪽지) */
+.icon-btn {
+	position: relative;
+	width: 42px; height: 42px;
+	display: grid;
+	place-items: center;
+	border-radius: 50%;
+	color: var(--text-body);
+}
+.icon-btn:hover { background: var(--bg-soft); }
+.icon-btn svg { width: 20px; height: 20px; }
+.icon-btn__count {
+	position: absolute;
+	top: 4px; right: 4px;
+	min-width: 16px; height: 16px;
+	padding: 0 4px;
+	display: grid;
+	place-items: center;
+	font-size: 10px;
+	font-weight: 700;
+	color: #fff;
+	background: var(--green-600);
+	border: 2px solid var(--bg-card);
+	border-radius: 999px;
+}
+
+/* 로그인 사용자 */
+.user-chip {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	height: 40px;
+	padding: 0 10px 0 6px;
+	border-radius: 999px;
+	font-size: 13px;
+	font-weight: 600;
+}
+.user-chip:hover { background: var(--bg-soft); }
+.user-chip svg { width: 16px; height: 16px; color: var(--text-muted); }
+.user-chip .avatar img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* 데스크톱에서는 사이드바 접기, 모바일에서는 드로어 열기 버튼으로 사용
+   42px 버튼 안의 20px 아이콘이 본문 좌측선에 오도록 (42-20)/2 = 11px 당겨 놓는다 */
+.sidebar-toggle { display: grid; margin-left: -11px; }
+
+@media (max-width: 1024px) {
+	.app-header { left: 0; }
+	.mobile-brand { display: flex; }
+}
+@media (max-width: 640px) {
+	.app-header { height: var(--header-h); }
+	.breadcrumb,
+	.user-chip__name { display: none; }
+	.app-header__right { gap: 2px; }
+	.icon-btn { width: 40px; height: 40px; }
+}

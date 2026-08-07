@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>반려 사유 | 숨비당 원데이 클래스</title>
+<link rel="stylesheet" th:href="@{/author/css/common.css}">
+<link rel="stylesheet" th:href="@{/author/css/header.css}">
+<link rel="stylesheet" th:href="@{/author/css/sidebar.css}">
+<link rel="stylesheet" th:href="@{/author/css/class-approval.css}">
+<script th:src="@{/author/js/layout.js}" defer></script>
+</head>
+<body class="author-page approval-page" data-menu="class-approval" data-page="반려 사유">
+<div class="app">
+	<div th:replace="~{author/fragments/icons :: icons}"></div>
+	<div th:replace="~{author/fragments/header :: header}"></div>
+	<div class="app-body">
+		<div th:replace="~{author/fragments/sidebar :: sidebar}"></div>
+		<main class="content"><div class="content__inner">
+			<header><h1 class="page-title">반려 사유</h1><p class="page-desc">관리자 의견을 확인한 뒤 내용을 수정해서 다시 제출해주세요.</p></header>
+			<section class="card rejection-card">
+				<h2>관리자 검수 의견</h2>
+				<p th:text="${rejectionReason}">반려 사유</p>
+				<div class="rejection-card__actions"><a class="btn btn--ghost" th:href="@{/author/class-approval}">목록으로</a><form method="post" th:action="@{/author/class-approval/{code}/resubmit(code=${classCode})}"><button class="btn btn--primary" type="submit">재작성 시작</button></form></div>
+			</section>
+			<div th:replace="~{author/fragments/footer :: footer}"></div>
+		</div></main>
+	</div>
+</div>
+</body>
+</html>

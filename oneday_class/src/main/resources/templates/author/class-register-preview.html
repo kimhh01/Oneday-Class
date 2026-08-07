@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>클래스 등록 · 미리보기 | 숨비당 원데이 클래스</title>
+<link rel="stylesheet" href="/author/css/common.css" th:href="@{/author/css/common.css}">
+<link rel="stylesheet" href="/author/css/header.css" th:href="@{/author/css/header.css}">
+<link rel="stylesheet" href="/author/css/sidebar.css" th:href="@{/author/css/sidebar.css}">
+<link rel="stylesheet" href="/author/css/class-register.css" th:href="@{/author/css/class-register.css}">
+<link rel="stylesheet" href="/author/css/class-register-preview.css?v=20260804-2" th:href="@{/author/css/class-register-preview.css(v='20260804-2')}">
+<script src="/author/js/layout.js" th:src="@{/author/js/layout.js}" defer></script>
+</head>
+<body class="author-page register-form-page register-preview-page" data-menu="class-register" data-page="클래스 등록">
+
+<div class="app">
+	<div th:replace="~{author/fragments/icons :: icons}"></div>
+	<div th:replace="~{author/fragments/header :: header}"></div>
+
+	<div class="app-body">
+		<div th:replace="~{author/fragments/sidebar :: sidebar}"></div>
+
+		<main class="content">
+			<div class="content__inner">
+				<header class="register-page-head register-page-head--compact">
+					<h1 class="page-title">클래스 등록하기</h1>
+					<p class="page-desc">등록 전 입력한 정보와 수강생에게 보일 화면을 최종 확인해주세요.</p>
+				</header>
+
+				<nav class="step-nav-wrap" aria-label="클래스 등록 단계">
+					<ol class="step-nav">
+						<li class="step is-done"><span class="step__num">01</span><span class="step__label">등록 시작</span></li>
+						<li class="step is-done"><span class="step__num">02</span><span class="step__label">기본 정보</span></li>
+						<li class="step is-done"><span class="step__num">03</span><span class="step__label">일정 및 가격</span></li>
+						<li class="step is-done"><span class="step__num">04</span><span class="step__label">상세 정보</span></li>
+						<li class="step is-done"><span class="step__num">05</span><span class="step__label">커리큘럼</span></li>
+						<li class="step is-active" aria-current="step"><span class="step__num">06</span><span class="step__label">미리보기</span></li>
+						<li class="step"><span class="step__num">07</span><span class="step__label">등록 완료</span></li>
+					</ol>
+				</nav>
+				<p class="form-error" th:if="${registerError}" th:text="${registerError}" role="alert">등록 오류</p>
+
+				<form class="preview-review-layout" method="post" th:action="@{/author/classes/register/submit}">
+					<input type="hidden" name="classCode" th:value="${preview.classBasic.classCode}">
+					<section class="preview-review-card" aria-labelledby="previewReviewTitle">
+						<header class="preview-review-card__head">
+							<div><h2 id="previewReviewTitle">등록 정보 최종 확인</h2><p>아래 화면은 수강생이 실제 클래스 상세 페이지에서 보게 될 모습이에요.</p></div>
+							<span><svg aria-hidden="true"><use href="#icon-eye"></use></svg>수강생 화면</span>
+						</header>
+
+						<!-- 고객용 클래스 상세 페이지를 별도 팝업 없이 현재 화면에 직접 노출한다. -->
+						<article class="customer-preview" aria-label="수강생용 클래스 상세 화면 미리보기">
+							<div class="customer-preview__bar">
+								<strong>숨비당 클래스</strong>
+								<span>미리보기 화면</span>
+							</div>
+
+							<section class="customer-gallery" aria-label="클래스 작품 사진">
+								<img class="customer-gallery__main" src="/author/images/photo/class-upload-placeholder.png" th:src="${#lists.isEmpty(preview.mainImageList)} ? @{/author/images/photo/class-upload-placeholder.png} : ${#lists.isEmpty(preview.mainImageList) ? null : preview.mainImageList[0].imagePath}" alt="클래스 대표 이미지">
+								<img class="customer-gallery__step customer-gallery__step--one" alt="클래스 상세 이미지"
+									 th:src="${#lists.isEmpty(preview.resultImageList)} ? @{/author/images/photo/class-upload-placeholder.png} : ${preview.resultImageList[0].imagePath}">
+								<img class="customer-gallery__step customer-gallery__step--two" alt="커리큘럼 이미지"
+									 th:src="${#lists.isEmpty(preview.curriculum.stepList)} ? @{/author/images/photo/class-upload-placeholder.png} : ${preview.curriculum.stepList[0].imagePath}">
+								<span class="customer-gallery__count"><svg aria-hidden="true"><use href="#icon-image"></use></svg><th:block th:text="${#lists.size(preview.mainImageList) + #lists.size(preview.resultImageList) + #lists.size(preview.curriculum.stepList)}">0</th:block></span>
+							</section>
+
+							<div class="customer-detail-layout">
+								<div class="customer-detail">
+									<section class="customer-intro">
+										<div class="customer-intro__badges"><span th:text="${preview.classBasic.categoryName}">카테고리</span><span>원데이 클래스</span></div>
+										<h3 th:text="${preview.classBasic.classTitle}">클래스명</h3>
+										<p th:text="${preview.classBasic.shortIntroduction}">한 줄 소개</p>
+										<div class="customer-intro__meta">
+											<span><svg aria-hidden="true"><use href="#icon-map-pin"></use></svg><th:block th:text="${preview.classLocation.address}">주소</th:block></span>
+											<span><svg aria-hidden="true"><use href="#icon-clock"></use></svg>약 2시간</span>
+											<span><svg aria-hidden="true"><use href="#icon-users"></use></svg>최대 <th:block th:text="${preview.classSchedule.maxPeople}">0</th:block>명</span>
+										</div>
+										<div class="customer-intro__tags"><span th:each="tag : ${preview.classDetail.tagList}" th:text="${'#' + tag}">#태그</span></div>
+									</section>
+
+									<section class="customer-studio">
+										<img src="/author/images/photo/studio-profile.png" th:src="@{/author/images/photo/studio-profile.png}" alt="포근공방 작업실">
+										<div><strong>포근공방</strong><span>손끝의 온기를 오래 간직하는 공예 클래스</span></div>
+										<em>작가 소개</em>
+									</section>
+
+									<section class="customer-section">
+										<h4>클래스 소개</h4>
+										<p th:text="${preview.classBasic.classIntroduction}">클래스 소개</p>
+										<ul class="customer-benefits">
+											<li th:each="advantage : ${preview.classDetail.advantageList}"><svg aria-hidden="true"><use href="#icon-check-circle"></use></svg><span><b th:text="${advantage}">클래스 장점</b></span></li>
+										</ul>
+									</section>
+
+									<section class="customer-section customer-curriculum">
+										<div><h4>커리큘럼</h4><span th:text="${'총 ' + #lists.size(preview.curriculum.stepList) + '단계'}">총 0단계</span></div>
+										<ol>
+											<li th:each="curriculum, stat : ${preview.curriculum.stepList}"><b th:text="${#numbers.formatInteger(stat.count, 2)}">01</b><span><strong th:text="${curriculum.title}">단계명</strong><small th:text="${curriculum.content}">단계 설명</small></span></li>
+										</ol>
+									</section>
+								</div>
+
+								<aside class="customer-booking" aria-label="수강생 예약 영역">
+									<span>1인 클래스 가격</span>
+									<strong><th:block th:text="${#numbers.formatInteger(preview.classSchedule.desiredPrice, 1, 'COMMA')}">58,000</th:block><small>원</small></strong>
+									<del th:text="${#numbers.formatInteger(preview.classSchedule.regularPrice, 1, 'COMMA') + '원'}">80,000원</del>
+									<div class="customer-booking__schedule">
+										<h4><svg aria-hidden="true"><use href="#icon-calendar"></use></svg>일정 선택</h4>
+										<label th:each="schedule, stat : ${preview.classSchedule.scheduleList}"><input type="radio" name="customerSchedule" th:checked="${stat.first}"><span><b th:text="${(schedule.scheduleDate == null ? '-' : #dates.format(schedule.scheduleDate,'yyyy.MM.dd')) + ' ' + schedule.startTime}">일정</b><small th:text="${'잔여 ' + schedule.maxPeople + '자리'}">잔여 자리</small></span></label>
+									</div>
+									<div class="customer-booking__place"><svg aria-hidden="true"><use href="#icon-map-pin"></use></svg><span><b>클래스 장소</b><small th:text="${preview.classLocation.address + ' ' + preview.classLocation.detailAddress}">주소</small></span></div>
+									<button type="button" disabled>미리보기에서는 예약할 수 없어요</button>
+								</aside>
+							</div>
+						</article>
+
+						<section class="preview-agreement" aria-labelledby="agreementTitle">
+							<div class="preview-agreement__head"><h3 id="agreementTitle">클래스 등록 전 약관 동의</h3><p>필수 약관에 모두 동의해야 등록 신청이 가능해요.</p></div>
+							<label><span><b>[필수] 서비스 이용약관 동의</b><small>클래스 운영과 노출에 관한 기본 약관입니다.</small></span><input class="required-agreement" type="checkbox" name="serviceTermsAgreed" value="true"></label>
+							<label><span><b>[필수] 운영 및 개인정보 안내 동의</b><small>검수와 운영 알림을 위한 정보 활용에 동의합니다.</small></span><input class="required-agreement" type="checkbox" name="operationPrivacyAgreed" value="true"></label>
+							<p class="preview-agreement__error" id="agreementError" role="status" aria-live="polite"></p>
+						</section>
+					</section>
+
+					<aside class="preview-check-card" aria-labelledby="previewCheckTitle">
+						<div class="preview-check-card__head"><span><svg aria-hidden="true"><use href="#icon-info"></use></svg></span><h2 id="previewCheckTitle">확인해주세요</h2></div>
+						<section><span><svg aria-hidden="true"><use href="#icon-users"></use></svg></span><div><h3>모집 인원 미달 시 취소될 수 있어요</h3><p>최소 모집 인원 미달 시 클래스가 취소될 수 있으며, 사전 안내드려요.</p></div></section>
+						<section><span><svg aria-hidden="true"><use href="#icon-pencil"></use></svg></span><div><h3>등록 후 일부 정보 수정이 제한돼요</h3><p>공개 후에는 가격과 일정 등 일부 정보의 수정이 제한될 수 있습니다.</p></div></section>
+						<section><span><svg aria-hidden="true"><use href="#icon-eye"></use></svg></span><div><h3>수강생 화면을 최종 확인해주세요</h3><p>사진, 클래스 설명, 가격, 장소가 정확한지 한 번 더 확인해주세요.</p></div></section>
+						<section><span><svg aria-hidden="true"><use href="#icon-bell"></use></svg></span><div><h3>일정 및 내용 안내에 유의해주세요</h3><p>변경 사항은 신청자에게 정확하고 빠르게 안내해주세요.</p></div></section>
+						<div class="preview-check-card__tip"><svg aria-hidden="true"><use href="#icon-check-circle"></use></svg><p>현재 화면은 등록 전 초안이며 아직 수강생에게 공개되지 않습니다.</p></div>
+					</aside>
+
+					<div class="preview-actions">
+						<a href="class-register-curriculum.html" th:href="@{/author/classes/register/curriculum(classCode=${preview.classBasic.classCode})}" class="btn btn--ghost btn--lg">이전</a>
+						<button type="submit" class="btn btn--primary btn--lg" id="registerRequest"
+								data-href="class-register-complete.html" th:attr="data-href=@{/author/classes/register/submit}">등록 신청</button>
+					</div>
+				</form>
+
+				<footer class="site-footer" th:replace="~{author/fragments/footer :: footer}">
+					<div class="site-footer__links"><a href="guide.html" th:href="@{/author/guide}">작가 가이드</a><a href="notice.html" th:href="@{/author/notices}">공지사항</a><a href="qna.html" th:href="@{/author/qna}">사업자 문의</a></div>
+					<p class="site-footer__copy"><b>숨비당 원데이 클래스</b> 작가센터<br>© 2026 숨비당. All rights reserved.</p>
+				</footer>
+			</div>
+		</main>
+	</div>
+</div>
+
+<script>
+(function () {
+	'use strict';
+	var checks = Array.from(document.querySelectorAll('.required-agreement'));
+	var request = document.getElementById('registerRequest');
+	var error = document.getElementById('agreementError');
+
+	function agreed() {
+		return checks.every(function (checkbox) { return checkbox.checked; });
+	}
+
+	function update() {
+		var ready = agreed();
+		request.dataset.ready = String(ready);
+		request.classList.toggle('is-disabled', !ready);
+		if (ready) error.textContent = '';
+	}
+
+	checks.forEach(function (checkbox) { checkbox.addEventListener('change', update); });
+	request.addEventListener('click', function (event) {
+		if (!agreed()) {
+			event.preventDefault();
+			error.textContent = '등록 신청을 계속하려면 필수 약관에 모두 동의해주세요.';
+			checks.find(function (checkbox) { return !checkbox.checked; }).focus();
+			return;
+		}
+	});
+	update();
+})();
+</script>
+</body>
+</html>

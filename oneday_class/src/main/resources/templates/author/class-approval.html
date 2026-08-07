@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>클래스 검수 현황 | 숨비당 원데이 클래스</title>
+<link rel="stylesheet" th:href="@{/author/css/common.css}">
+<link rel="stylesheet" th:href="@{/author/css/header.css}">
+<link rel="stylesheet" th:href="@{/author/css/sidebar.css}">
+<link rel="stylesheet" th:href="@{/author/css/management.css}">
+<link rel="stylesheet" th:href="@{/author/css/class-approval.css}">
+<script th:src="@{/author/js/layout.js}" defer></script>
+</head>
+<body class="author-page management-page approval-page" data-menu="class-approval" data-page="클래스 검수 현황">
+<div class="app">
+	<div th:replace="~{author/fragments/icons :: icons}"></div>
+	<div th:replace="~{author/fragments/header :: header}"></div>
+	<div class="app-body">
+		<div th:replace="~{author/fragments/sidebar :: sidebar}"></div>
+		<main class="content">
+			<div class="content__inner">
+				<header class="mgmt-head">
+					<div>
+						<h1 class="page-title">클래스 검수 현황</h1>
+						<p class="page-desc mgmt-head__desc">제출한 클래스의 승인 상태를 확인하고, 반려된 클래스는 수정해서 다시 제출할 수 있어요.</p>
+					</div>
+					<a class="btn btn--primary" th:href="@{/author/classes/register-guide}">새 클래스 등록</a>
+				</header>
+
+				<p class="approval-alert approval-alert--error" th:if="${approvalError}" th:text="${approvalError}" role="alert">처리할 수 없습니다.</p>
+
+				<form class="mgmt-filter approval-filter" method="get" th:action="@{/author/class-approval}">
+					<div class="mgmt-filter__field">
+						<label class="mgmt-filter__label" for="classStatus">승인 상태</label>
+						<div class="select">
+							<select id="classStatus" name="classStatus">
+								<option value="all" th:selected="${classStatus == null or classStatus == '' or classStatus == 'all'}">전체</option>
+								<option value="대기" th:selected="${classStatus == '대기'}">검수 대기</option>
+								<option value="반려" th:selected="${classStatus == '반려'}">반려</option>
+								<option value="승인" th:selected="${classStatus == '승인'}">승인</option>
+							</select>
+							<svg class="select__arrow"><use href="#icon-chevron-down"></use></svg>
+						</div>
+					</div>
+					<div class="mgmt-filter__field">
+						<label class="mgmt-filter__label" for="keyword">클래스명</label>
+						<div class="mgmt-search">
+							<input class="input" id="keyword" name="keyword" th:value="${keyword}" placeholder="클래스명을 입력해주세요">
+							<svg class="mgmt-search__icon"><use href="#icon-search"></use></svg>
+						</div>
+					</div>
+					<button class="btn btn--primary" type="submit">조회</button>
+				</form>
+
+				<section class="mgmt-panel" aria-label="클래스 검수 목록">
+					<div class="mgmt-panel__scroll" th:unless="${#lists.isEmpty(approvals)}">
+						<table class="mgmt-table approval-table">
+							<thead><tr><th>클래스</th><th>카테고리</th><th>희망 가격</th><th>제출일</th><th class="col-center">상태</th><th>반려 사유 / 관리</th></tr></thead>
+							<tbody>
+								<tr th:each="item : ${approvals}">
+									<td class="table__name"><span th:text="${item.classTitle}">클래스명</span><small th:text="|CL${item.classCode}|">CL0</small></td>
+									<td th:text="${item.categoryName}">카테고리</td>
+									<td th:text="|${#numbers.formatInteger(item.desiredPrice, 1, 'COMMA')}원|">0원</td>
+									<td th:text="${item.registeredDate == null ? '-' : #dates.format(item.registeredDate, 'yyyy.MM.dd')}">-</td>
+									<td class="col-center"><span class="badge" th:classappend="${item.classStatus == '승인' ? 'badge--green' : (item.classStatus == '반려' ? 'badge--red' : 'badge--amber')}" th:text="${item.classStatus}">대기</span></td>
+									<td class="approval-table__action">
+										<div th:if="${item.classStatus == '반려'}">
+											<p th:text="${#strings.isEmpty(item.rejectionReason) ? '반려 사유가 등록되지 않았습니다.' : item.rejectionReason}">반려 사유</p>
+											<form method="post" th:action="@{/author/class-approval/{code}/resubmit(code=${item.classCode})}"><button class="btn btn--outline btn--sm" type="submit">재작성</button></form>
+										</div>
+										<span class="text-muted" th:unless="${item.classStatus == '반려'}" th:text="${item.classStatus == '승인' ? '승인이 완료되었습니다.' : '관리자 검수 중입니다.'}">검수 중</span>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<p class="mgmt-empty" th:if="${#lists.isEmpty(approvals)}">조건에 맞는 클래스가 없습니다.</p>
+				</section>
+
+				<div th:replace="~{author/fragments/footer :: footer}"></div>
+			</div>
+		</main>
+	</div>
+</div>
+</body>
+</html>
