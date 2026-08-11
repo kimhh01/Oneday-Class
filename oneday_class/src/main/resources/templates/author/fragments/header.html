@@ -36,9 +36,11 @@
 
 		<button type="button" class="user-chip" aria-haspopup="menu" aria-expanded="false">
 			<span class="avatar">
-				<img src="/author/images/photo/studio-profile.png" th:src="@{/author/images/photo/studio-profile.png}" alt="">
+				<img src="/author/images/photo/studio-profile.png"
+					 th:src="${#strings.isEmpty(session.loginAuthorProfileImage)} ? @{/author/images/photo/studio-profile.png} : ${session.loginAuthorProfileImage}"
+					 alt="">
 			</span>
-			<span class="user-chip__name">포근공방 작가님</span>
+			<span class="user-chip__name" th:text="|${session.loginAuthorName} 작가님|">작가님</span>
 			<svg><use href="#icon-chevron-down"></use></svg>
 		</button>
 	</div>

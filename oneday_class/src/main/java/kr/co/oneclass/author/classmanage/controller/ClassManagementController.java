@@ -10,15 +10,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.servlet.http.HttpSession;
+import kr.co.oneclass.author.common.util.AuthorSessionUtils;
 import kr.co.oneclass.author.classmanage.dto.ClassManagementDTO;
 import kr.co.oneclass.author.classmanage.service.ClassManagementService;
 
 @Controller
 public class ClassManagementController {
-
-    // TODO: 로그인 세션 연결 후 제거 - 세션에서 작가 코드를 꺼내도록 교체
-    // CREATOR.OPERATOR_CODE 실제값. 1 은 존재하지 않는 작가라 조회 결과가 비어버린다
-    private static final long SAMPLE_AUTHOR_CODE = 1010101010L;
 
     private final ClassManagementService cmService;
 
@@ -36,8 +33,9 @@ public class ClassManagementController {
             Model model,
             HttpSession session) {
 
+        long authorCode = AuthorSessionUtils.getAuthorCode(session);
         List<ClassManagementDTO> classes =
-                cmService.getClassManagementList(SAMPLE_AUTHOR_CODE, classStatus, scheduleType, keyword);
+                cmService.getClassManagementList(authorCode, classStatus, scheduleType, keyword);
 
         model.addAttribute("classes", classes);
         model.addAttribute("classStatus", classStatus);
@@ -65,7 +63,7 @@ public class ClassManagementController {
             HttpSession session) {
 
         model.addAttribute("classDetail",
-                cmService.getClassManagementDetail(SAMPLE_AUTHOR_CODE, classCode));
+                cmService.getClassManagementDetail(AuthorSessionUtils.getAuthorCode(session), classCode));
         return "author/class-manage-detail";
     }
 
@@ -75,7 +73,7 @@ public class ClassManagementController {
             @PathVariable("classCode") int classCode,
             HttpSession session) {
 
-        cmService.openClass(SAMPLE_AUTHOR_CODE, classCode);
+        cmService.openClass(AuthorSessionUtils.getAuthorCode(session), classCode);
         return "redirect:/author/classes/" + classCode;
     }
 
@@ -85,7 +83,7 @@ public class ClassManagementController {
             @PathVariable("classCode") int classCode,
             HttpSession session) {
 
-        cmService.hideClass(SAMPLE_AUTHOR_CODE, classCode);
+        cmService.hideClass(AuthorSessionUtils.getAuthorCode(session), classCode);
         return "redirect:/author/classes/" + classCode;
     }
 
@@ -96,7 +94,7 @@ public class ClassManagementController {
             @RequestParam("remainingPeople") int remainingPeople,
             HttpSession session) {
 
-        cmService.modifySchedulePeople(SAMPLE_AUTHOR_CODE, scheduleCode, remainingPeople);
+        cmService.modifySchedulePeople(AuthorSessionUtils.getAuthorCode(session), scheduleCode, remainingPeople);
         return "redirect:/author/classes";
     }
 
@@ -107,7 +105,7 @@ public class ClassManagementController {
             @RequestParam("password") String password,
             HttpSession session) {
 
-        cmService.closeClass(SAMPLE_AUTHOR_CODE, classCode, password);
+        cmService.closeClass(AuthorSessionUtils.getAuthorCode(session), classCode, password);
         return "redirect:/author/classes/" + classCode;
     }
 }

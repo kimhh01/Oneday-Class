@@ -20,6 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import kr.co.oneclass.author.common.util.AuthorSessionUtils;
 import kr.co.oneclass.author.settlement.dto.SalesListDTO;
 import kr.co.oneclass.author.settlement.dto.SalesSearchDTO;
 import kr.co.oneclass.author.settlement.dto.SettlementAccountDTO;
@@ -33,8 +34,6 @@ import kr.co.oneclass.author.settlement.service.SettlementService;
 @Controller
 public class SettlementController {
 
-    // TODO: 로그인 세션 연결 후 제거 - 세션에서 작가 코드를 꺼내도록 교체
-    private static final long SAMPLE_AUTHOR_CODE = 1010101010L;
     private static final int PAGE_SIZE = 20;
 
     private final SettlementService sService;
@@ -51,10 +50,11 @@ public class SettlementController {
             @RequestParam(value = "keyword", required = false) String keyword,
             Model model, HttpSession session) {
 
-        configureSalesSearch(searchDTO, period, status, keyword);
+        long authorCode = AuthorSessionUtils.getAuthorCode(session);
+        configureSalesSearch(searchDTO, period, status, keyword, authorCode);
         int salesCount = sService.getSalesCount(searchDTO);
 
-        model.addAttribute("salesSummary", sService.getSalesSummary(SAMPLE_AUTHOR_CODE));
+        model.addAttribute("salesSummary", sService.getSalesSummary(authorCode));
         model.addAttribute("sales", sService.getSalesList(searchDTO));
         model.addAttribute("salesCount", salesCount);
         model.addAttribute("period", period);
@@ -72,7 +72,7 @@ public class SettlementController {
             Model model,
             HttpSession session) {
 
-        var payment = sService.getSalesDetail(SAMPLE_AUTHOR_CODE, paymentCode);
+        var payment = sService.getSalesDetail(AuthorSessionUtils.getAuthorCode(session), paymentCode);
         if (payment == null) {
             return "redirect:/author/sales";
         }
@@ -83,20 +83,21 @@ public class SettlementController {
     // 정산 가능금액, 정산 대기금액, 정산계좌와 신청 가능한 매출 목록을 보여준다
     @GetMapping("/author/settlements/new")
     public String settlementApplyForm(Model model, HttpSession session) {
-        addSettlementRequestModel(model);
+        addSettlementRequestModel(model, AuthorSessionUtils.getAuthorCode(session));
         return "author/settlement-request";
     }
 
     // 선택한 매출의 정산금액을 DB 값으로 다시 계산한다
     @PostMapping("/author/settlements/confirm")
     public String settlementConfirm(SettlementApplyDTO applyDTO, Model model, HttpSession session) {
-        applyDTO.setAuthorCode(SAMPLE_AUTHOR_CODE);
+        long authorCode = AuthorSessionUtils.getAuthorCode(session);
+        applyDTO.setAuthorCode(authorCode);
         try {
             model.addAttribute("calculation", sService.calculateSettlement(applyDTO));
         } catch (IllegalArgumentException exception) {
             model.addAttribute("settlementError", exception.getMessage());
         }
-        addSettlementRequestModel(model);
+        addSettlementRequestModel(model, authorCode);
         return "author/settlement-request";
     }
 
@@ -108,7 +109,7 @@ public class SettlementController {
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        accountDTO.setAuthorCode(SAMPLE_AUTHOR_CODE);
+        accountDTO.setAuthorCode(AuthorSessionUtils.getAuthorCode(session));
         try {
             boolean modified = sService.modifySettlementAccount(accountDTO, bankbookFile);
             redirectAttributes.addFlashAttribute("message",
@@ -123,7 +124,7 @@ public class SettlementController {
     @PostMapping("/author/settlements")
     public String submitSettlement(SettlementApplyDTO applyDTO, HttpSession session,
             RedirectAttributes redirectAttributes) {
-        applyDTO.setAuthorCode(SAMPLE_AUTHOR_CODE);
+        applyDTO.setAuthorCode(AuthorSessionUtils.getAuthorCode(session));
         try {
             int settlementCode = sService.submitSettlement(applyDTO);
             return "redirect:/author/settlements/complete?settlementCode=" + settlementCode;
@@ -140,7 +141,8 @@ public class SettlementController {
             Model model,
             HttpSession session) {
 
-        SettlementDetailDTO detail = sService.getSettlementDetail(SAMPLE_AUTHOR_CODE, settlementCode);
+        SettlementDetailDTO detail = sService.getSettlementDetail(
+                AuthorSessionUtils.getAuthorCode(session), settlementCode);
         if (detail == null) {
             return "redirect:/author/settlements";
         }
@@ -156,12 +158,13 @@ public class SettlementController {
             @RequestParam(value = "keyword", required = false) String keyword,
             Model model, HttpSession session) {
 
-        configureSettlementSearch(searchDTO, period, status, keyword);
+        long authorCode = AuthorSessionUtils.getAuthorCode(session);
+        configureSettlementSearch(searchDTO, period, status, keyword, authorCode);
         int settlementCount = sService.getSettlementCount(searchDTO);
         List<SettlementListDTO> settlements = sService.getSettlementList(searchDTO);
         int visibleAmount = settlements.stream().mapToInt(SettlementListDTO::getSettlementAmount).sum();
 
-        model.addAttribute("settlementDashboard", sService.getSettlementDashboard(SAMPLE_AUTHOR_CODE));
+        model.addAttribute("settlementDashboard", sService.getSettlementDashboard(authorCode));
         model.addAttribute("settlements", settlements);
         model.addAttribute("settlementCount", settlementCount);
         model.addAttribute("visibleAmount", visibleAmount);
@@ -180,7 +183,8 @@ public class SettlementController {
             Model model,
             HttpSession session) {
 
-        SettlementDetailDTO detail = sService.getSettlementDetail(SAMPLE_AUTHOR_CODE, settlementCode);
+        SettlementDetailDTO detail = sService.getSettlementDetail(
+                AuthorSessionUtils.getAuthorCode(session), settlementCode);
         if (detail == null) {
             return "redirect:/author/settlements";
         }
@@ -196,7 +200,8 @@ public class SettlementController {
             @RequestParam(value = "keyword", required = false) String keyword,
             HttpSession session, HttpServletResponse response) throws IOException {
 
-        configureSalesSearch(searchDTO, period, status, keyword);
+        configureSalesSearch(searchDTO, period, status, keyword,
+                AuthorSessionUtils.getAuthorCode(session));
         searchDTO.setStartRow(1);
         searchDTO.setEndRow(Integer.MAX_VALUE);
         List<SalesListDTO> sales = sService.getSalesList(searchDTO);
@@ -226,7 +231,8 @@ public class SettlementController {
             @RequestParam(value = "keyword", required = false) String keyword,
             HttpSession session, HttpServletResponse response) throws IOException {
 
-        configureSettlementSearch(searchDTO, period, status, keyword);
+        configureSettlementSearch(searchDTO, period, status, keyword,
+                AuthorSessionUtils.getAuthorCode(session));
         searchDTO.setStartRow(1);
         searchDTO.setEndRow(Integer.MAX_VALUE);
         List<SettlementListDTO> settlements = sService.getSettlementList(searchDTO);
@@ -250,16 +256,17 @@ public class SettlementController {
     }
 
     // 정산 신청 화면이 요구하는 Model 값을 담는다
-    private void addSettlementRequestModel(Model model) {
-        SettlementDashboardDTO dashboard = sService.getSettlementDashboard(SAMPLE_AUTHOR_CODE);
-        model.addAttribute("account", sService.getSettlementAccount(SAMPLE_AUTHOR_CODE));
-        model.addAttribute("availablePayments", sService.getSettlementTargetList(SAMPLE_AUTHOR_CODE));
+    private void addSettlementRequestModel(Model model, long authorCode) {
+        SettlementDashboardDTO dashboard = sService.getSettlementDashboard(authorCode);
+        model.addAttribute("account", sService.getSettlementAccount(authorCode));
+        model.addAttribute("availablePayments", sService.getSettlementTargetList(authorCode));
         model.addAttribute("availableAmount", dashboard.getAvailableAmount());
         model.addAttribute("pendingAmount", dashboard.getWaitingAmount());
     }
 
-    private void configureSalesSearch(SalesSearchDTO searchDTO, String period, String status, String keyword) {
-        searchDTO.setAuthorCode(SAMPLE_AUTHOR_CODE);
+    private void configureSalesSearch(SalesSearchDTO searchDTO, String period, String status, String keyword,
+            long authorCode) {
+        searchDTO.setAuthorCode(authorCode);
         searchDTO.setStartDate(startDate(period));
         searchDTO.setEndDate(new Date());
         searchDTO.setPaymentStatus(salesStatus(status));
@@ -268,8 +275,8 @@ public class SettlementController {
     }
 
     private void configureSettlementSearch(SettlementSearchDTO searchDTO,
-            String period, String status, String keyword) {
-        searchDTO.setAuthorCode(SAMPLE_AUTHOR_CODE);
+            String period, String status, String keyword, long authorCode) {
+        searchDTO.setAuthorCode(authorCode);
         searchDTO.setStartDate(startDate(period));
         searchDTO.setEndDate(new Date());
         searchDTO.setSettlementStatus(settlementStatus(status));

@@ -10,15 +10,13 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
+import kr.co.oneclass.author.common.util.AuthorSessionUtils;
 import kr.co.oneclass.author.inquiry.dto.InquiryFormDTO;
 import kr.co.oneclass.author.inquiry.dto.InquirySearchDTO;
 import kr.co.oneclass.author.inquiry.service.InquiryService;
 
 @Controller
 public class InquiryController {
-
-    // TODO: 로그인 세션 연결 후 제거 - 세션에서 작가 코드를 꺼내도록 교체
-    private static final long SAMPLE_AUTHOR_CODE = 1010101010L;
 
     private final InquiryService inquiryService;
 
@@ -28,13 +26,14 @@ public class InquiryController {
 
     @GetMapping("/author/qna")
     public String inquiryList(InquirySearchDTO searchDTO, Model model, HttpSession session) {
-        searchDTO.setAuthorCode(SAMPLE_AUTHOR_CODE);
+        long authorCode = AuthorSessionUtils.getAuthorCode(session);
+        searchDTO.setAuthorCode(authorCode);
         searchDTO.setKeyword(trimToNull(searchDTO.getKeyword()));
         if (searchDTO.getAnswerStatus() == null) {
             searchDTO.setAnswerStatus("all");
         }
 
-        model.addAttribute("summary", inquiryService.getInquirySummary(SAMPLE_AUTHOR_CODE));
+        model.addAttribute("summary", inquiryService.getInquirySummary(authorCode));
         model.addAttribute("types", inquiryService.getInquiryTypeList());
         model.addAttribute("inquiries", inquiryService.getInquiryList(searchDTO));
         model.addAttribute("search", searchDTO);
@@ -58,7 +57,7 @@ public class InquiryController {
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        formDTO.setAuthorCode(SAMPLE_AUTHOR_CODE);
+        formDTO.setAuthorCode(AuthorSessionUtils.getAuthorCode(session));
         try {
             int inquiryCode = inquiryService.addInquiry(formDTO, inquiryFile);
             redirectAttributes.addFlashAttribute("message", "1:1 문의가 접수되었습니다.");
@@ -74,7 +73,7 @@ public class InquiryController {
     @GetMapping("/author/qna/{inquiryCode}")
     public String inquiryDetail(@PathVariable("inquiryCode") int inquiryCode,
             Model model, HttpSession session) {
-        var inquiry = inquiryService.getInquiryDetail(SAMPLE_AUTHOR_CODE, inquiryCode);
+        var inquiry = inquiryService.getInquiryDetail(AuthorSessionUtils.getAuthorCode(session), inquiryCode);
         if (inquiry == null) {
             return "redirect:/author/qna";
         }

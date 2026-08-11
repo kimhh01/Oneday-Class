@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.oneclass.author.common.dao.AuthorSessionDAO">
+
+	<select id="selectByMemberCode" parameterType="int"
+		resultType="kr.co.oneclass.author.common.dto.AuthorSessionDTO">
+		SELECT
+			cr.OPERATOR_CODE AS AUTHOR_CODE,
+			cr.MEMBER_CODE,
+			cr.ACTIVITY_NAME,
+			cr.APPROVAL_STATUS,
+			cr.PROFILE_IMAGE AS PROFILE_IMAGE_PATH
+		FROM CREATOR cr
+		WHERE cr.MEMBER_CODE = #{memberCode}
+	</select>
+
+</mapper>

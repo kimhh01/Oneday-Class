@@ -9,13 +9,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
+import kr.co.oneclass.author.common.util.AuthorSessionUtils;
 import kr.co.oneclass.author.classapproval.service.ClassApprovalService;
 
 @Controller
 public class ClassApprovalController {
-
-    // TODO: 로그인 세션 연결 후 제거 - 세션에서 작가 코드를 꺼내도록 교체
-    private static final long SAMPLE_AUTHOR_CODE = 1010101010L;
 
     private final ClassApprovalService caService;
 
@@ -32,7 +30,7 @@ public class ClassApprovalController {
             HttpSession session) {
 
         model.addAttribute("approvals",
-                caService.getClassApprovalList(SAMPLE_AUTHOR_CODE, classStatus, keyword));
+                caService.getClassApprovalList(AuthorSessionUtils.getAuthorCode(session), classStatus, keyword));
         model.addAttribute("classStatus", classStatus);
         model.addAttribute("keyword", keyword);
         return "author/class-approval";
@@ -45,7 +43,7 @@ public class ClassApprovalController {
             Model model,
             HttpSession session) {
 
-        String reason = caService.getRejectionReason(SAMPLE_AUTHOR_CODE, classCode);
+        String reason = caService.getRejectionReason(AuthorSessionUtils.getAuthorCode(session), classCode);
         if (reason == null) {
             return "redirect:/author/class-approval";
         }
@@ -60,7 +58,7 @@ public class ClassApprovalController {
             @PathVariable("classCode") int classCode,
             HttpSession session) {
 
-        String reason = caService.getRejectionReason(SAMPLE_AUTHOR_CODE, classCode);
+        String reason = caService.getRejectionReason(AuthorSessionUtils.getAuthorCode(session), classCode);
         if (reason == null) {
             return "redirect:/author/class-approval";
         }
@@ -74,8 +72,9 @@ public class ClassApprovalController {
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        String reason = caService.getRejectionReason(SAMPLE_AUTHOR_CODE, classCode);
-        if (reason == null || !caService.reopenRejectedClass(SAMPLE_AUTHOR_CODE, classCode)) {
+        long authorCode = AuthorSessionUtils.getAuthorCode(session);
+        String reason = caService.getRejectionReason(authorCode, classCode);
+        if (reason == null || !caService.reopenRejectedClass(authorCode, classCode)) {
             redirectAttributes.addFlashAttribute("approvalError", "재작성할 수 있는 반려 클래스가 아닙니다.");
             return "redirect:/author/class-approval";
         }

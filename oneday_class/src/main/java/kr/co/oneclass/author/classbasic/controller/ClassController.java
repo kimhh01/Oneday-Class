@@ -12,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
+import kr.co.oneclass.author.common.util.AuthorSessionUtils;
 import kr.co.oneclass.author.classbasic.dto.ClassBasicDTO;
 import kr.co.oneclass.author.classbasic.dto.ClassDetailDTO;
 import kr.co.oneclass.author.classbasic.dto.ClassLocationDTO;
@@ -25,10 +26,6 @@ import kr.co.oneclass.author.classbasic.service.ClassService;
 @Controller
 public class ClassController {
 
-    // TODO: 로그인 세션 연결 후 제거 - 세션에서 작가 코드를 꺼내도록 교체
-    // CREATOR.OPERATOR_CODE 실제값. CLASS.OPERATOR_CODE 가 CREATOR 를 참조하므로 실제 코드여야 한다
-    private static final long SAMPLE_AUTHOR_CODE = 1010101010L;
-
     private final ClassService cService;
     private final String kakaoMapAppKey;
 
@@ -40,12 +37,13 @@ public class ClassController {
 
     // 클래스 등록 시작 안내
     @GetMapping("/author/classes/register-guide")
-    public String classRegisterGuide(Model model) {
-        ClassBasicDTO draft = cService.getLatestDraftClass(SAMPLE_AUTHOR_CODE);
+    public String classRegisterGuide(Model model, HttpSession session) {
+        long authorCode = AuthorSessionUtils.getAuthorCode(session);
+        ClassBasicDTO draft = cService.getLatestDraftClass(authorCode);
         if (draft != null) {
             model.addAttribute("latestDraft", draft);
             model.addAttribute("draftResumeUrl",
-                    cService.getDraftResumePath(SAMPLE_AUTHOR_CODE, draft.getClassCode()));
+                    cService.getDraftResumePath(authorCode, draft.getClassCode()));
         }
         return "author/class-register";
     }
@@ -53,7 +51,7 @@ public class ClassController {
     // 클래스 등록 시작 버튼
     @PostMapping("/author/classes/register/start")
     public String startClassRegister(HttpSession session) {
-        int classCode = cService.addDraftClass(SAMPLE_AUTHOR_CODE);
+        int classCode = cService.addDraftClass(AuthorSessionUtils.getAuthorCode(session));
         return "redirect:/author/classes/register/basic?classCode=" + classCode;
     }
 
@@ -67,11 +65,12 @@ public class ClassController {
             return "redirect:/author/classes/register-guide";
         }
         int code = classCode;
-        ClassBasicDTO basic = cService.getClassBasic(SAMPLE_AUTHOR_CODE, code);
+        long authorCode = AuthorSessionUtils.getAuthorCode(session);
+        ClassBasicDTO basic = cService.getClassBasic(authorCode, code);
         if (basic == null) {
             return "redirect:/author/classes/register-guide";
         }
-        cService.markDraftStep(SAMPLE_AUTHOR_CODE, code, "basic");
+        cService.markDraftStep(authorCode, code, "basic");
         model.addAttribute("basicForm", basic);
         model.addAttribute("categories", cService.getCategories());
         model.addAttribute("editClassCode", null);
@@ -87,7 +86,7 @@ public class ClassController {
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        cbDTO.setAuthorCode(SAMPLE_AUTHOR_CODE);
+        cbDTO.setAuthorCode(AuthorSessionUtils.getAuthorCode(session));
         try {
             cService.modifyClassBasic(cbDTO, mainFiles);
             if (isStay(saveMode)) {
@@ -108,11 +107,12 @@ public class ClassController {
             Model model,
             HttpSession session) {
 
-        ClassLocationDTO location = cService.getClassLocation(SAMPLE_AUTHOR_CODE, classCode);
+        long authorCode = AuthorSessionUtils.getAuthorCode(session);
+        ClassLocationDTO location = cService.getClassLocation(authorCode, classCode);
         if (location == null) {
             return "redirect:/author/classes/register-guide";
         }
-        cService.markDraftStep(SAMPLE_AUTHOR_CODE, classCode, "location");
+        cService.markDraftStep(authorCode, classCode, "location");
         model.addAttribute("locationForm", location);
         model.addAttribute("kakaoMapAppKey", kakaoMapAppKey);
         return "author/class-register-location";
@@ -126,7 +126,7 @@ public class ClassController {
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        clDTO.setAuthorCode(SAMPLE_AUTHOR_CODE);
+        clDTO.setAuthorCode(AuthorSessionUtils.getAuthorCode(session));
         try {
             cService.modifyClassLocation(clDTO);
             if (isStay(saveMode)) {
@@ -147,11 +147,12 @@ public class ClassController {
             Model model,
             HttpSession session) {
 
-        ClassScheduleDTO schedule = cService.getClassSchedule(SAMPLE_AUTHOR_CODE, classCode);
+        long authorCode = AuthorSessionUtils.getAuthorCode(session);
+        ClassScheduleDTO schedule = cService.getClassSchedule(authorCode, classCode);
         if (schedule == null) {
             return "redirect:/author/classes/register-guide";
         }
-        cService.markDraftStep(SAMPLE_AUTHOR_CODE, classCode, "schedule");
+        cService.markDraftStep(authorCode, classCode, "schedule");
         model.addAttribute("scheduleForm", schedule);
         return "author/class-register-schedule";
     }
@@ -164,7 +165,7 @@ public class ClassController {
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        csDTO.setAuthorCode(SAMPLE_AUTHOR_CODE);
+        csDTO.setAuthorCode(AuthorSessionUtils.getAuthorCode(session));
         try {
             cService.modifyClassSchedule(csDTO);
             if (isStay(saveMode)) {
@@ -185,11 +186,12 @@ public class ClassController {
             Model model,
             HttpSession session) {
 
-        ClassDetailDTO detail = cService.getClassDetail(SAMPLE_AUTHOR_CODE, classCode);
+        long authorCode = AuthorSessionUtils.getAuthorCode(session);
+        ClassDetailDTO detail = cService.getClassDetail(authorCode, classCode);
         if (detail == null) {
             return "redirect:/author/classes/register-guide";
         }
-        cService.markDraftStep(SAMPLE_AUTHOR_CODE, classCode, "detail");
+        cService.markDraftStep(authorCode, classCode, "detail");
         model.addAttribute("detailForm", detail);
         model.addAttribute("offerings", cService.getOfferings());
         return "author/class-register-detail";
@@ -205,7 +207,7 @@ public class ClassController {
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        cdDTO.setAuthorCode(SAMPLE_AUTHOR_CODE);
+        cdDTO.setAuthorCode(AuthorSessionUtils.getAuthorCode(session));
         try {
             cService.modifyClassDetail(cdDTO, resultFiles, galleryFiles);
             if (isStay(saveMode)) {
@@ -226,11 +228,12 @@ public class ClassController {
             Model model,
             HttpSession session) {
 
-        if (cService.getClassBasic(SAMPLE_AUTHOR_CODE, classCode) == null) {
+        long authorCode = AuthorSessionUtils.getAuthorCode(session);
+        if (cService.getClassBasic(authorCode, classCode) == null) {
             return "redirect:/author/classes/register-guide";
         }
-        cService.markDraftStep(SAMPLE_AUTHOR_CODE, classCode, "curriculum");
-        model.addAttribute("curriculumForm", cService.getClassCurriculum(SAMPLE_AUTHOR_CODE, classCode));
+        cService.markDraftStep(authorCode, classCode, "curriculum");
+        model.addAttribute("curriculumForm", cService.getClassCurriculum(authorCode, classCode));
         return "author/class-register-curriculum";
     }
 
@@ -242,7 +245,7 @@ public class ClassController {
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        crDTO.setAuthorCode(SAMPLE_AUTHOR_CODE);
+        crDTO.setAuthorCode(AuthorSessionUtils.getAuthorCode(session));
         try {
             cService.modifyClassCurriculum(crDTO);
             if (isStay(saveMode)) {
@@ -263,11 +266,12 @@ public class ClassController {
             Model model,
             HttpSession session) {
 
-        ClassPreviewDTO preview = cService.getClassPreview(SAMPLE_AUTHOR_CODE, classCode);
+        long authorCode = AuthorSessionUtils.getAuthorCode(session);
+        ClassPreviewDTO preview = cService.getClassPreview(authorCode, classCode);
         if (preview == null) {
             return "redirect:/author/classes/register-guide";
         }
-        cService.markDraftStep(SAMPLE_AUTHOR_CODE, classCode, "preview");
+        cService.markDraftStep(authorCode, classCode, "preview");
         model.addAttribute("preview", preview);
         return "author/class-register-preview";
     }
@@ -279,7 +283,7 @@ public class ClassController {
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        csDTO.setAuthorCode(SAMPLE_AUTHOR_CODE);
+        csDTO.setAuthorCode(AuthorSessionUtils.getAuthorCode(session));
         try {
             cService.submitClass(csDTO);
             return "redirect:/author/classes/register/complete?classCode=" + csDTO.getClassCode();
@@ -296,7 +300,8 @@ public class ClassController {
             Model model,
             HttpSession session) {
 
-        ClassRegisterResultDTO result = cService.getRegisterResult(SAMPLE_AUTHOR_CODE, classCode);
+        ClassRegisterResultDTO result = cService.getRegisterResult(
+                AuthorSessionUtils.getAuthorCode(session), classCode);
         if (result == null) {
             return "redirect:/author/classes/register-guide";
         }

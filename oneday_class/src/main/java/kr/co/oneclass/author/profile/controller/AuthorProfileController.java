@@ -8,16 +8,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.servlet.http.HttpSession;
+import kr.co.oneclass.author.common.util.AuthorSessionUtils;
 import kr.co.oneclass.author.profile.dto.AuthorProfileDTO;
 import kr.co.oneclass.author.profile.service.AuthorService;
 import kr.co.oneclass.author.settlement.service.SettlementService;
 
 @Controller
 public class AuthorProfileController {
-
-    // TODO: 로그인 세션 연결 후 제거 - 세션에서 작가 코드를 꺼내도록 교체
-    // CREATOR.OPERATOR_CODE 실제값. int 범위를 넘는 코드가 있어 long 이다
-    private static final long SAMPLE_AUTHOR_CODE = 1010101010L;
 
     private final AuthorService aService;
     private final SettlementService sService;
@@ -30,8 +27,9 @@ public class AuthorProfileController {
     // 작가 프로필 조회 및 수정 화면
     @GetMapping("/author/profile")
     public String authorProfile(Model model, HttpSession session) {
-        model.addAttribute("profile", aService.getAuthorProfile(SAMPLE_AUTHOR_CODE));
-        model.addAttribute("account", sService.getSettlementAccount(SAMPLE_AUTHOR_CODE));
+        long authorCode = AuthorSessionUtils.getAuthorCode(session);
+        model.addAttribute("profile", aService.getAuthorProfile(authorCode));
+        model.addAttribute("account", sService.getSettlementAccount(authorCode));
         return "author/profile";
     }
 
@@ -42,8 +40,7 @@ public class AuthorProfileController {
             @RequestParam(value = "profileFile", required = false) MultipartFile profileFile,
             HttpSession session) {
 
-        // TODO: 로그인 세션 연결 후 제거 - 세션에서 작가 코드를 꺼내도록 교체
-        apDTO.setAuthorCode(SAMPLE_AUTHOR_CODE);
+        apDTO.setAuthorCode(AuthorSessionUtils.getAuthorCode(session));
         aService.modifyAuthorProfile(apDTO, profileFile);
         return "redirect:/author/profile";
     }

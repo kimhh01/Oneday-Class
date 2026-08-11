@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.servlet.http.HttpSession;
+import kr.co.oneclass.author.common.util.AuthorSessionUtils;
 import kr.co.oneclass.author.review.dto.ReviewDetailDTO;
 import kr.co.oneclass.author.review.dto.ReviewReplyDTO;
 import kr.co.oneclass.author.review.dto.ReviewSearchDTO;
@@ -15,10 +16,6 @@ import kr.co.oneclass.author.review.service.ReviewService;
 
 @Controller
 public class ReviewController {
-
-    // TODO: 로그인 세션 연결 후 제거 - 세션에서 작가 코드를 꺼내도록 교체
-    // CREATOR.OPERATOR_CODE 실제값. int 범위를 넘는 코드가 있어 long 이다
-    private static final long SAMPLE_AUTHOR_CODE = 1010101010L;
 
     private final ReviewService rService;
 
@@ -29,8 +26,7 @@ public class ReviewController {
     // 리뷰 요약, 클래스 필터, 리뷰 목록을 조회하여 리뷰 관리 화면을 보여준다
     @GetMapping("/author/reviews")
     public String reviewList(ReviewSearchDTO searchDTO, Model model, HttpSession session) {
-        // TODO: 로그인 세션 연결 후 제거 - 세션에서 작가 코드를 꺼내도록 교체
-        long authorCode = SAMPLE_AUTHOR_CODE;
+        long authorCode = AuthorSessionUtils.getAuthorCode(session);
         searchDTO.setAuthorCode(authorCode);
         if (searchDTO.getReplyStatus() == null) {
             searchDTO.setReplyStatus("all");
@@ -55,8 +51,7 @@ public class ReviewController {
             Model model,
             HttpSession session) {
 
-        // TODO: 로그인 세션 연결 후 제거 - 세션에서 작가 코드를 꺼내도록 교체
-        long authorCode = SAMPLE_AUTHOR_CODE;
+        long authorCode = AuthorSessionUtils.getAuthorCode(session);
 
         ReviewDetailDTO review = rService.getReviewDetail(authorCode, reviewCode);
         // 없는 리뷰이거나 다른 작가의 리뷰면 상세를 보여주지 않고 목록으로 되돌린다
@@ -72,8 +67,7 @@ public class ReviewController {
     // 답글이 없는 리뷰에 작가 답글을 등록한다
     @PostMapping("/author/reviews/reply")
     public String addReviewReply(ReviewReplyDTO replyDTO, HttpSession session) {
-        // TODO: Mapper 연결 후 제거 - 로그인 세션에서 작가 코드를 꺼내도록 교체
-        replyDTO.setAuthorCode(SAMPLE_AUTHOR_CODE);
+        replyDTO.setAuthorCode(AuthorSessionUtils.getAuthorCode(session));
         rService.addReviewReply(replyDTO);
         return "redirect:/author/reviews/" + replyDTO.getReviewCode();
     }
@@ -81,8 +75,7 @@ public class ReviewController {
     // 이미 등록된 작가 답글의 내용을 수정한다
     @PostMapping("/author/reviews/reply/edit")
     public String modifyReviewReply(ReviewReplyDTO replyDTO, HttpSession session) {
-        // TODO: Mapper 연결 후 제거 - 로그인 세션에서 작가 코드를 꺼내도록 교체
-        replyDTO.setAuthorCode(SAMPLE_AUTHOR_CODE);
+        replyDTO.setAuthorCode(AuthorSessionUtils.getAuthorCode(session));
         rService.modifyReviewReply(replyDTO);
         return "redirect:/author/reviews/" + replyDTO.getReviewCode();
     }
@@ -93,7 +86,7 @@ public class ReviewController {
             @PathVariable("reviewCode") int reviewCode,
             HttpSession session) {
 
-        rService.removeReviewReply(SAMPLE_AUTHOR_CODE, reviewCode);
+        rService.removeReviewReply(AuthorSessionUtils.getAuthorCode(session), reviewCode);
         return "redirect:/author/reviews/" + reviewCode;
     }
 
