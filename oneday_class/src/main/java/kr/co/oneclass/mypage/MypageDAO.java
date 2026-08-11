@@ -2,7 +2,7 @@ package kr.co.oneclass.mypage;
 
 import org.apache.ibatis.annotations.*;
 
-import kr.co.oneclass.notice.NoticeDoamin;
+import kr.co.oneclass.notice.NoticeDTO;
 
 @Mapper
 public interface MypageDAO {
@@ -19,5 +19,5 @@ public interface MypageDAO {
         @Result(property = "noticeDate", column = "input_date"),
         @Result(property = "noticeType", column = "notice_type")
     })
-    NoticeDoamin selectRecentNotice();
+    NoticeDTO selectRecentNotice();
 }

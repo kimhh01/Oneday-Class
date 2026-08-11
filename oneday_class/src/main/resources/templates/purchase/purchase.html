@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>구매 내역 | 숨쉬당</title>
+    <!-- CSS 연결 -->
+    <link rel="stylesheet" th:href="@{/profile/css/profile.css}">
+    <link rel="stylesheet" th:href="@{/fragments/css/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/purchase/css/purchase.css}">
+</head>
+<body>
+
+<!-- 메인 컨테이너 -->
+<div class="purchase-wrapper">
+    <div class="purchase-container">
+
+        <!-- 1. 좌측 사이드바 Fragment 불러오기 (현재 활성화 메뉴: 'purchase') -->
+        <aside th:replace="~{fragments/sidebar :: sidebar('purchase')}"></aside>
+
+        <!-- 2. 우측 메인 구매 내역 콘텐츠 영역 -->
+        <main class="purchase-main">
+            
+            <!-- 페이지 헤더 -->
+            <div class="page-header">
+                <h1 class="page-title">구매 내역</h1>
+                <p class="page-subtitle">예약한 클래스와 결제 상태를 한눈에 확인하세요.</p>
+            </div>
+
+            <!-- 카테고리 필터 탭 -->
+            <div class="filter-tabs">
+                <a th:href="@{/mypage/purchase(status='ALL')}" 
+                   class="tab-btn" th:classappend="${selectedStatus == 'ALL' or selectedStatus == null or selectedStatus == ''} ? 'active'">전체</a>
+                <a th:href="@{/mypage/purchase(status='이용 예정')}" 
+                   class="tab-btn" th:classappend="${selectedStatus == '이용 예정'} ? 'active'">이용 예정</a>
+                <a th:href="@{/mypage/purchase(status='이용 완료')}" 
+                   class="tab-btn" th:classappend="${selectedStatus == '이용 완료' or selectedStatus == '수강완료'} ? 'active'">이용 완료</a>
+                <a th:href="@{/mypage/purchase(status='취소/환불')}" 
+                   class="tab-btn" th:classappend="${selectedStatus == '취소/환불'} ? 'active'">취소/환불</a>
+            </div>
+
+            <!-- 구매 내역 목록 (데이터가 있을 경우) -->
+            <div class="purchase-list" th:if="${purchaseList != null and !#lists.isEmpty(purchaseList)}">
+                <div class="purchase-card" th:each="item : ${purchaseList}">
+                    
+                    <!-- 클래스 썸네일 이미지 -->
+                    <div class="card-thumb">
+                        <img th:src="${item.classImg != null and item.classImg != '' ? item.classImg : '/images/default_class.png'}" 
+                             alt="클래스 이미지" onError="this.src='/images/default_class.png';">
+                    </div>
+
+                    <!-- 클래스 정보 -->
+                    <div class="card-info">
+                        <h2 class="class-title" th:text="${item.className}">도자기 머그컵 만들기</h2>
+                        <p class="class-date" th:text="${item.reservationDate}">2026.07.25(토) 14:00</p>
+                        <p class="class-studio" th:text="${item.studioName}">성수 공방</p>
+                    </div>
+
+                    <!-- 우측 상태 및 버튼 영역 -->
+                    <div class="card-action">
+                        <!-- 핵심 조건: 수강완료 또는 이용 완료 상태인 경우에만 리뷰 작성 버튼 표시 -->
+                        <a th:if="${item.status == '수강완료' or item.status == '이용 완료'}"
+                           th:href="@{/mypage/review/write(reservationCode=${item.reservationCode})}" 
+                           class="btn-review">리뷰 작성</a>
+
+                        <!-- 상태 배지 -->
+                        <span class="badge-status" 
+                              th:classappend="${item.status == '수강완료' or item.status == '이용 완료'} ? 'status-completed' : (${item.status == '취소완료' or item.status == '환불완료'} ? 'status-canceled' : 'status-upcoming')"
+                              th:text="${item.status}">수강완료</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 구매 내역이 없을 경우 -->
+            <div class="empty-purchase" th:if="${purchaseList == null or #lists.isEmpty(purchaseList)}">
+                <p class="empty-text">구매한 클래스 내역이 없습니다.</p>
+            </div>
+
+            <!-- 하단 페이지네이션 -->
+            <div class="purchase-bottom-section" th:if="${pagination != null}">
+                <div class="pagination-container" th:utext="${pagination}"></div>
+            </div>
+
+        </main>
+
+    </div>
+</div>
+
+</body>
+</html>

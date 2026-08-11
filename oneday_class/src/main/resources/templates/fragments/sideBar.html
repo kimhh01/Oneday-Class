@@ -28,13 +28,13 @@
         <a th:href="@{/profile}" class="nav-item" 
            th:classappend="${activeMenu == 'profile'} ? 'active' : ''">프로필 수정</a>
         
-        <a th:href="@{/mypage/orders}" class="nav-item" 
-           th:classappend="${activeMenu == 'orders'} ? 'active' : ''">구매 내역</a>
+        <a th:href="@{/mypage/purchase}" class="nav-item" 
+           th:classappend="${activeMenu == 'purchase'} ? 'active' : ''">구매 내역</a>
         
         <a th:href="@{/mypage/bookmark}" class="nav-item" 
            th:classappend="${activeMenu == 'bookmark'} ? 'active' : ''">관심 클래스</a>
         
-        <a th:href="@{/support/inquiry}" class="nav-item" 
+        <a th:href="@{/mypage/inquiry}" class="nav-item" 
            th:classappend="${activeMenu == 'inquiry'} ? 'active' : ''">문의하기</a>
         
         <a th:href="@{/notice}" class="nav-item" 

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${notice != null ? notice.title + ' | 숨쉬당' : '공지사항 상세 | 숨쉬당'}">공지사항 상세 | 숨쉬당</title>
+    <!-- CSS 연결 -->
+    <link rel="stylesheet" th:href="@{/profile/css/profile.css}">
+    <link rel="stylesheet" th:href="@{/fragments/css/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/notice/css/notice_detail.css}">
+</head>
+<body>
+
+<!-- 메인 컨테이너 -->
+<div class="notice-wrapper">
+    <div class="notice-container">
+
+        <!-- 1. 좌측 사이드바 Fragment 불러오기 (현재 활성화 메뉴: 'notice') -->
+        <aside th:replace="~{fragments/sidebar :: sidebar('notice')}"></aside>
+
+        <!-- 2. 우측 메인 공지사항 상세 콘텐츠 영역 -->
+        <main class="notice-main">
+            
+            <!-- 상단: 목록으로 돌아가기 버튼 -->
+            <div class="header-action">
+                <a th:href="@{/notice}" class="btn-back">
+                    <span class="arrow">←</span> 목록으로 돌아가기
+                </a>
+            </div>
+
+            <!-- 공지사항 헤더 (제목 및 메타 정보) -->
+            <div class="notice-detail-header">
+                <h1 class="notice-title" th:text="${notice.title}">개인정보처리방침 개정 안내 (2026.08.01 적용)</h1>
+                
+                <div class="notice-meta">
+                    <div class="meta-item">
+                        <span class="meta-label">구분</span>
+                        <span class="badge-type" 
+                              th:classappend="${notice.category == '서비스'} ? 'badge-service' : 'badge-guide'"
+                              th:text="${notice.category != null ? notice.category : notice.noticeType}">안내</span>
+                    </div>
+                    <span class="divider">|</span>
+                    <div class="meta-item">
+                        <span class="meta-label">등록일</span>
+                        <span class="meta-value" th:text="${notice.noticeDate}">2026.07.18</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 공지사항 본문 내용 -->
+            <div class="notice-detail-content" th:text="${notice.content}">
+                안녕하세요, 숨쉬당입니다.
+                보다 나은 서비스 제공과 고객님의 개인정보 보호 강화를 위해 개인정보처리방침이 아래와 같이 개정됩니다.
+                개정 내용 및 적용 일자를 확인하시어 서비스 이용에 참고해 주시기 바랍니다.
+
+                1. 개정 사유
+                개인정보 보호 관련 법령 및 지침 개정에 따른 사항 반영
+
+                2. 주요 개정 내용
+                • 개인정보 수집 항목 일부 변경
+                • 개인정보 보유 및 이용 기간 조정
+                • 이용자 권리 안내 강화
+
+                3. 적용 일자
+                2026년 08월 01일
+
+                앞으로도 안전하고 신뢰할 수 있는 서비스 제공을 위해 최선을 다하겠습니다.
+                감사합니다.
+            </div>
+
+			<!-- 하단 영역: 이전 글 / 다음 글 이동 버튼 -->
+			<div class="notice-detail-bottom">
+			    <div class="nav-btn-group">
+			        <!-- 이전 글 버튼 -->
+			        <a th:if="${notice.prevNoticeCode != null and notice.prevNoticeCode != 0}" 
+			           th:href="@{/notice/detail(noticeCode=${notice.prevNoticeCode})}" 
+			           class="btn-nav">‹ 이전 글</a>
+			        <button th:if="${notice.prevNoticeCode == null or notice.prevNoticeCode == 0}" 
+			                type="button" class="btn-nav disabled" disabled>‹ 이전 글</button>
+			
+			        <!-- 다음 글 버튼 -->
+			        <a th:if="${notice.nextNoticeCode != null and notice.nextNoticeCode != 0}" 
+			           th:href="@{/notice/detail(noticeCode=${notice.nextNoticeCode})}" 
+			           class="btn-nav">다음 글 ›</a>
+			        <button th:if="${notice.nextNoticeCode == null or notice.nextNoticeCode == 0}" 
+			                type="button" class="btn-nav disabled" disabled>다음 글 ›</button>
+			    </div>
+			</div>
+
+        </main>
+
+    </div>
+</div>
+
+</body>
+</html>

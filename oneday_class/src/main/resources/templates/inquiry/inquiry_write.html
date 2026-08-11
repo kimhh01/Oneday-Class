@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문의하기 | 숨쉬당</title>
+    <link rel="stylesheet" th:href="@{/profile/css/profile.css}">
+    <link rel="stylesheet" th:href="@{/fragments/css/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/inquiry/css/inquiry_write.css}">
+    <link rel="stylesheet" th:href="@{/fragments/css/modal.css}">
+</head>
+<body>
+
+<div class="inquiry-wrapper">
+    <div class="inquiry-container">
+
+        <!-- 1. 사이드바 -->
+        <aside th:replace="~{fragments/sidebar :: sidebar('inquiry')}"></aside>
+
+        <!-- 2. 문의 등록 메인 폼 -->
+        <main class="inquiry-main">
+            <div class="page-header">
+                <h1 class="page-title">문의하기</h1>
+                <p class="page-subtitle">궁금한 내용을 남겨주시면 확인 후 답변드리겠습니다.</p>
+            </div>
+
+            <form id="inquiryForm" class="inquiry-form" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label class="form-label">문의 유형</label>
+                    <div class="category-radio-group">
+                        <label class="category-radio-btn" th:each="type, stat : ${typeList}">
+                            <input type="radio" name="inquiryTypeCode" th:value="${type.inquiryTypeCode}" th:checked="${stat.first}">
+                            <span th:text="${type.inquiryTypeName}">서비스 문의</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="title" class="form-label">제목</label>
+                    <input type="text" id="title" name="title" class="form-input" placeholder="문의 제목을 입력해주세요." required>
+                </div>
+
+                <div class="form-group">
+                    <label for="content" class="form-label">문의 내용</label>
+                    <textarea id="content" name="content" class="form-textarea" placeholder="문의 내용을 자세히 입력해주세요." required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <div class="file-upload-box">
+                        <input type="file" id="file" name="file" class="file-input" accept=".jpg,.png,.pdf" onchange="updateFileName(this)">
+                        <label for="file" class="file-upload-label">
+                            <span class="plus-icon">+</span>
+                            <span class="upload-text" id="fileText">첨부파일 추가 · JPG, PNG, PDF (최대 5MB)</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-btn-group">
+                    <a th:href="@{/mypage/inquiry}" class="btn-cancel">취소</a>
+                    <button type="submit" class="btn-submit">문의 등록</button>
+                </div>
+            </form>
+        </main>
+
+    </div>
+</div>
+
+<!-- 3. [분리한 공통 모달 불러오기] -->
+<div th:replace="~{fragments/success_modal :: successModal('inquiryModal')}"></div>
+
+<script>
+    function updateFileName(input) {
+        const fileText = document.getElementById('fileText');
+        if (input.files && input.files[0]) {
+            fileText.textContent = input.files[0].name;
+            fileText.style.color = '#356846';
+            fileText.style.fontWeight = '600';
+        } else {
+            fileText.textContent = '첨부파일 추가 · JPG, PNG, PDF (최대 5MB)';
+            fileText.style.color = '#888888';
+            fileText.style.fontWeight = '400';
+        }
+    }
+
+    // 폼 전송 및 모달 제어
+    document.getElementById('inquiryForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+
+        fetch('/mypage/inquiry/write', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'SUCCESS') {
+                const modal = document.getElementById('inquiryModal');
+                modal.style.display = 'flex';
+
+                // '확인' 클릭 시 문의 목록으로 이동
+                document.getElementById('btnModalConfirm').onclick = function() {
+                    location.href = '/mypage/inquiry';
+                };
+
+                // '문의 내역 보기' 클릭 시 상세 페이지로 이동
+                document.getElementById('btnModalDetail').onclick = function() {
+                    location.href = '/mypage/inquiry/detail?inquiryCode=' + data.inquiryCode;
+                };
+            } else {
+                alert('문의 등록 중 오류가 발생했습니다.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('서버 통신 중 오류가 발생했습니다.');
+        });
+    });
+</script>
+
+</body>
+</html>

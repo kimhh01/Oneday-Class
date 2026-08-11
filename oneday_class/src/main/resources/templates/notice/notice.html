@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>공지사항 | 숨쉬당</title>
+    <!-- CSS 연결 -->
+    <link rel="stylesheet" th:href="@{/profile/css/profile.css}">
+    <link rel="stylesheet" th:href="@{/fragments/css/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/notice/css/notice.css}">
+</head>
+<body>
+
+<!-- 메인 컨테이너 -->
+<div class="notice-wrapper">
+    <div class="notice-container">
+
+        <!-- 1. 좌측 사이드바 Fragment 불러오기 (현재 활성화 메뉴: 'notice') -->
+        <aside th:replace="~{fragments/sidebar :: sidebar('notice')}"></aside>
+
+        <!-- 2. 우측 메인 공지사항 콘텐츠 영역 -->
+        <main class="notice-main">
+            
+            <!-- 페이지 헤더 -->
+            <div class="page-header">
+                <h1 class="page-title">공지사항</h1>
+                <p class="page-subtitle">숨쉬당의 새로운 소식과 중요한 안내사항을 확인하세요.</p>
+            </div>
+
+            <!-- 카테고리 필터 탭 -->
+            <div class="filter-tabs">
+                <a th:href="@{/notice(category='ALL')}" 
+                   class="tab-btn" th:classappend="${selectedCategory == 'ALL' or selectedCategory == null or selectedCategory == ''} ? 'active'">전체</a>
+                <a th:href="@{/notice(category='서비스')}" 
+                   class="tab-btn" th:classappend="${selectedCategory == '서비스'} ? 'active'">서비스</a>
+                <a th:href="@{/notice(category='이용 안내')}" 
+                   class="tab-btn" th:classappend="${selectedCategory == '이용 안내'} ? 'active'">이용 안내</a>
+            </div>
+
+            <!-- 공지사항 목록 테이블 (데이터가 존재할 경우) -->
+            <div class="table-responsive" th:if="${noticeList != null and !#lists.isEmpty(noticeList)}">
+                <table class="notice-table">
+                    <thead>
+                        <tr>
+                            <th class="col-num">번호</th>
+                            <th class="col-title">제목</th>
+                            <th class="col-type">구분</th>
+                            <th class="col-date">등록일</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="item : ${noticeList}" 
+                            th:onclick="|location.href='@{/notice/detail(noticeCode=${item.noticeCode})}'|"
+                            class="clickable-row">
+                            <td class="col-num" th:text="${item.noticeCode}">32</td>
+                            <td class="col-title">
+                                <a th:href="@{/notice/detail(noticeCode=${item.noticeCode})}" 
+                                   th:text="${item.title}" class="title-link">공지사항 제목입니다.</a>
+                            </td>
+                            <td class="col-type">
+                                <span class="badge-type" 
+                                      th:classappend="${item.category == '서비스'} ? 'badge-service' : 'badge-guide'"
+                                      th:text="${item.category != null ? item.category : '안내'}">안내</span>
+                            </td>
+                            <td class="col-date" th:text="${item.noticeDate}">2026.07.18</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 공지사항이 존재하지 않을 경우 표시 -->
+            <div class="empty-notice" th:if="${noticeList == null or #lists.isEmpty(noticeList)}">
+                <p class="empty-text">등록된 공지사항이 없습니다.</p>
+            </div>
+
+            <!-- 하단 페이지네이션 영역 -->
+            <div class="notice-bottom-section">
+                <div class="pagination-container" th:utext="${pagination}"></div>
+            </div>
+
+        </main>
+
+    </div>
+</div>
+
+</body>
+</html>

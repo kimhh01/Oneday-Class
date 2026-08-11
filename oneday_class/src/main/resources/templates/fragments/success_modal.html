@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- 공통 성공 안내 모달 프래그먼트 -->
+<div th:fragment="successModal(modalId)" 
+     th:id="${modalId}" 
+     class="modal-overlay" 
+     style="display: none;">
+    
+    <div class="modal-card">
+        <!-- 상단 체크 아이콘 -->
+        <div class="modal-icon-circle">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#356846" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+        </div>
+
+        <!-- 텍스트 내용 -->
+        <h2 class="modal-title" id="modalTitle">문의가 등록되었습니다.</h2>
+        <p class="modal-desc" id="modalDesc">
+            작성하신 문의가 정상적으로 접수되었습니다.<br>
+            답변은 문의 내역에서 확인하실 수 있습니다.
+        </p>
+        <p class="modal-subdesc" id="modalSubDesc">빠른 시일 내에 답변드리겠습니다.</p>
+
+        <!-- 하단 버튼 그룹 -->
+        <div class="modal-btn-group">
+            <button type="button" id="btnModalConfirm" class="btn-modal-confirm">확인</button>
+            <button type="button" id="btnModalDetail" class="btn-modal-detail">문의 내역 보기</button>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

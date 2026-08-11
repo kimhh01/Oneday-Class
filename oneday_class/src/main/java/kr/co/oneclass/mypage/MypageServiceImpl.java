@@ -1,7 +1,7 @@
 package kr.co.oneclass.mypage;
 
 import kr.co.oneclass.mypage.MypageDAO;
-import kr.co.oneclass.notice.NoticeDoamin;
+import kr.co.oneclass.notice.NoticeDTO;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +13,7 @@ public class MypageServiceImpl implements MypageService {
     private MypageDAO mypageDAO;
 
     @Override
-    public NoticeDoamin getRecentNotice() {
+    public NoticeDTO getRecentNotice() {
         return mypageDAO.selectRecentNotice();
     }
 }

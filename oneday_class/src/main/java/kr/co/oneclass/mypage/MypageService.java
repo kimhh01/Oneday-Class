@@ -1,7 +1,7 @@
 package kr.co.oneclass.mypage;
 
-import kr.co.oneclass.notice.NoticeDoamin;
+import kr.co.oneclass.notice.NoticeDTO;
 
 public interface MypageService {
-    NoticeDoamin getRecentNotice();
+    NoticeDTO getRecentNotice();
 }

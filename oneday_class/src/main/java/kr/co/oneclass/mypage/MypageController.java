@@ -1,7 +1,7 @@
 package kr.co.oneclass.mypage;
 
 import kr.co.oneclass.member.Member;
-import kr.co.oneclass.notice.NoticeDoamin;
+import kr.co.oneclass.notice.NoticeDTO;
 import kr.co.oneclass.profile.ProfileService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ public class MypageController {
         Member member = pfs.getProfile(String.valueOf(loginMember.getMemberCode()));
 
         // 3. 가장 최근 공지사항 1건 DB 조회
-        NoticeDoamin recentNotice = mps.getRecentNotice();
+        NoticeDTO recentNotice = mps.getRecentNotice();
 
         // 4. View로 데이터 전송 (DB 조회가 성공하면 member, 실패 시 loginMember 전송)
         model.addAttribute("member", member != null ? member : loginMember);

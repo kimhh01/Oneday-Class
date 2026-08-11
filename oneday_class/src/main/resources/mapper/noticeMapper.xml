@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.oneclass.notice.NoticeDAO">
+
+    <!-- 1. 공지사항 전체 건수 조회 -->
+    <select id="selectTotalCnt" parameterType="map" resultType="int">
+        SELECT COUNT(*)
+        FROM NOTICE
+        <where>
+            <if test="category != null and category != '' and category != 'ALL'">
+                NOTICE_TYPE = #{category}
+            </if>
+        </where>
+    </select>
+
+    <!-- 2. 공지사항 목록 조회 (페이지네이션 적용) -->
+    <select id="selectList" parameterType="map" resultType="kr.co.oneclass.notice.NoticeDTO">
+        SELECT * FROM (
+            SELECT 
+                ROWNUM AS rnum,
+                n.*
+            FROM (
+                SELECT 
+                    NOTICE_CODE AS noticeCode,
+                    TITLE AS title,
+                    CONTENT AS content,
+                    NOTICE_TYPE AS noticeType,
+                    TO_CHAR(INPUT_DATE, 'YYYY.MM.DD') AS noticeDate
+                FROM NOTICE
+                <where>
+                    <if test="category != null and category != '' and category != 'ALL'">
+                        NOTICE_TYPE = #{category}
+                    </if>
+                </where>
+                ORDER BY NOTICE_CODE DESC
+            ) n
+            WHERE ROWNUM &lt;= #{endNum}
+        )
+        WHERE rnum &gt;= #{startNum}
+    </select>
+
+	<!-- 3. 공지사항 상세 조회 (이전글/다음글 번호 포함) -->
+	<select id="selectDetail" parameterType="String" resultType="kr.co.oneclass.notice.NoticeDTO">
+	    SELECT *
+	    FROM (
+	        SELECT 
+	            NOTICE_CODE AS noticeCode,
+	            TITLE AS title,
+	            CONTENT AS content,
+	            NOTICE_TYPE AS noticeType,
+	            TO_CHAR(INPUT_DATE, 'YYYY.MM.DD HH24:MI') AS noticeDate,
+	            LAG(NOTICE_CODE, 1) OVER (ORDER BY NOTICE_CODE DESC) AS prevNoticeCode,
+	            LEAD(NOTICE_CODE, 1) OVER (ORDER BY NOTICE_CODE DESC) AS nextNoticeCode
+	        FROM NOTICE
+	    )
+	    WHERE noticeCode = TO_NUMBER(#{noticeCode})
+	</select>
+
+</mapper>
