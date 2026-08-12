@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title
+	th:text="${detail?.classDetail != null ? detail.classDetail.name : '원데이클래스'}">원데이클래스</title>
+<link rel="stylesheet" th:href="@{/classDetail/css/classDetail.css}">
+</head>
+<body class="map-page-body">
+
+	<!-- 1. 최상단 카테고리 헤더 -->
+	<header class="main-header">
+		<div class="header-top-bar">
+			<div class="logo">CLASS 101</div>
+			<div class="header-right-menu">
+				<a href="#">로그인</a> <a href="#">회원가입</a> <a href="#">고객센터</a> <a
+					href="#">장바구니</a>
+			</div>
+		</div>
+		<div class="category-bar-wrapper">
+			<div class="category-inner">
+				<h1 class="page-title">원데이클래스</h1>
+				<div class="category-tabs">
+					<a href="#" class="cat-item active">전체</a> <a href="#"
+						class="cat-item">요리</a> <a href="#" class="cat-item">수공예</a> <a
+						href="#" class="cat-item">미술</a> <a href="#" class="cat-item">베이킹</a>
+					<a href="#" class="cat-item">플라워·조경</a> <a href="#"
+						class="cat-item">음악</a>
+				</div>
+				<div class="header-search-input">
+					<input type="text" placeholder="원하는 원데이클래스를 찾아보세요!">
+					<button type="button">🔍</button>
+				</div>
+			</div>
+		</div>
+	</header>
+
+	<!-- 2. 메인 2컬럼 본문 영역 -->
+	<main class="main-container">
+
+		<!-- [좌측 영역] -->
+		<div class="left-content-area">
+
+			<!-- (1) 메인 이미지 + 중앙 텍스트 배너 -->
+			<div class="main-banner-wrapper">
+				<img
+					th:if="${detail?.classDetail?.imageList != null and !#lists.isEmpty(detail.classDetail.imageList)}"
+					th:src="${detail.classDetail.imageList[0]?.image}"
+					class="main-banner-img" alt="클래스 메인 이미지">
+			</div>
+
+			<!-- (2) 탭 메뉴 -->
+			<div class="sticky-tab-menu">
+				<a href="#intro" class="tab-link active">클래스 소개</a> <a
+					href="#curriculum" class="tab-link">커리큘럼</a> <a href="#reviews"
+					class="tab-link">리뷰</a> <a href="#tutor" class="tab-link">튜터 소개</a>
+			</div>
+
+			<!-- (3) 클래스 소개 -->
+			<section id="intro" class="content-section">
+				<div class="green-check-badge">✔클래스 30초 요약</div>
+				<div class="db-text-content"
+					th:text="${detail.classDetail.singleIntroduce}"></div>
+				<div th:text="${detail.classDetail.introduce}"></div>
+				<div th:text="${detail.classDetail.finishIntroduce}"></div>
+			</section>
+
+			<!-- (4) 커리큘럼 -->
+			<section id="curriculum" class="content-section"
+				th:if="${detail?.curriculumList != null and !#lists.isEmpty(detail.curriculumList)}">
+				<h3 class="section-heading">커리큘럼</h3>
+				<div class="curriculum-list">
+					<th:block th:each="curr, stat : ${detail.curriculumList}">
+
+						<div class="curriculum-item" th:if="${curr != null}">
+							<div class="curr-step" th:text="|STEP ${stat.count}|">STEP
+								1</div>
+							<div class="curr-body">
+								<h5 class="curr-title"
+									th:text="${curr.curriculumTitle != null ? curr.curriculumTitle : ''}">단계별
+									제목</h5>
+								<p class="curr-desc"
+									th:text="${curr.curriculumContent != null ? curr.curriculumContent : ''}">상세
+									설명 내용이 여기에 들어갑니다.</p>
+							</div>
+						</div>
+					</th:block>
+				</div>
+			</section>
+
+			<!-- (5) 완성 작품 갤러리 -->
+			<section class="content-section">
+				<h3 class="section-heading">완성 작품 갤러리</h3>
+				<div class="gallery-grid-4x4">
+					<th:block th:if="${detail?.classDetail?.imageList != null}">
+						<th:block th:each="img : ${detail.classDetail.imageList}">
+							<img th:if="${img?.image != null}" th:src="${img.image}" alt="작품">
+						</th:block>
+					</th:block>
+				</div>
+			</section>
+
+			<!-- (6) 리뷰 및 리뷰 답변 -->
+			<section id="reviews" class="content-section">
+				<!-- 1. 리뷰 헤더 -->
+				<div class="review-header">
+					<h3 class="section-heading">
+						리뷰 <span class="count-pink"
+							th:text="${detail.reviewSummary?.totalReviewCount ?: 0}">7</span>
+					</h3>
+				</div>
+
+				<!-- 2. 평점 요약 박스 -->
+				<div class="rating-summary-box">
+					<!-- 중앙: 점수 + 별점 -->
+					<div class="score-large">
+						<span class="num"
+							th:text="${#numbers.formatDecimal(detail.reviewSummary?.averageRating ?: 0.0, 1, 1)}">5.0</span>
+						<div class="star-rating">
+							<th:block th:each="i : ${#numbers.sequence(1, 5)}">
+								<span th:if="${i <= (detail.reviewSummary?.averageRating ?: 0)}">★</span>
+								<span
+									th:unless="${i <= (detail.reviewSummary?.averageRating ?: 0)}"
+									class="star-empty">★</span>
+							</th:block>
+						</div>
+					</div>
+
+					<!-- 우측: 막대 그래프 -->
+					<div class="rating-bar-container">
+						<div class="rating-row">
+							<span class="rating-label">5점</span>
+							<div class="progress-bar-bg">
+								<div class="progress-bar-fill"
+									th:style="'width: ' + (${detail.reviewSummary?.totalReviewCount > 0} ? (${detail.reviewSummary?.fiveStarCount} * 100.0 / ${detail.reviewSummary?.totalReviewCount}) : 0) + '%;'"></div>
+							</div>
+						</div>
+						<div class="rating-row">
+							<span class="rating-label">4점</span>
+							<div class="progress-bar-bg">
+								<div class="progress-bar-fill"
+									th:style="'width: ' + (${detail.reviewSummary?.totalReviewCount > 0} ? (${detail.reviewSummary?.fourStarCount} * 100.0 / ${detail.reviewSummary?.totalReviewCount}) : 0) + '%;'"></div>
+							</div>
+						</div>
+						<div class="rating-row">
+							<span class="rating-label">3점</span>
+							<div class="progress-bar-bg">
+								<div class="progress-bar-fill"
+									th:style="'width: ' + (${detail.reviewSummary?.totalReviewCount > 0} ? (${detail.reviewSummary?.threeStarCount} * 100.0 / ${detail.reviewSummary?.totalReviewCount}) : 0) + '%;'"></div>
+							</div>
+						</div>
+						<div class="rating-row">
+							<span class="rating-label">2점</span>
+							<div class="progress-bar-bg">
+								<div class="progress-bar-fill"
+									th:style="'width: ' + (${detail.reviewSummary?.totalReviewCount > 0} ? (${detail.reviewSummary?.twoStarCount} * 100.0 / ${detail.reviewSummary?.totalReviewCount}) : 0) + '%;'"></div>
+							</div>
+						</div>
+						<div class="rating-row">
+							<span class="rating-label">1점</span>
+							<div class="progress-bar-bg">
+								<div class="progress-bar-fill"
+									th:style="'width: ' + (${detail.reviewSummary?.totalReviewCount > 0} ? (${detail.reviewSummary?.oneStarCount} * 100.0 / ${detail.reviewSummary?.totalReviewCount}) : 0) + '%;'"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- 3. 필터 버튼 (추천순 / 최신순) -->
+				<div class="review-filter-btns">
+					<button class="filter-btn active">추천순</button>
+					<button class="filter-btn">최신순</button>
+				</div>
+
+				<!-- 개별 리뷰 목록 -->
+				<div class="review-list-wrapper"
+					th:if="${detail?.reviewList != null and !#lists.isEmpty(detail.reviewList)}">
+					<th:block th:each="review : ${detail.reviewList}">
+						<div class="review-card" th:if="${review != null}">
+
+							<!-- 1. 리뷰 상단 (프로필, 이름 / 별점) -->
+							<div class="review-card-header">
+								<div class="review-user-info">
+									<img
+										th:src="${review.userImg != null ? review.userImg : 'https://cdn-icons-png.flaticon.com/512/847/847969.png'}"
+										class="user-avatar" alt="사용자"> <span class="user-name"
+										th:text="${review.userName != null ? review.userName : '익명'}">율</span>
+								</div>
+
+								<div class="card-star-rating">
+									<span class="stars"> <th:block
+											th:each="i : ${#numbers.sequence(1, 5)}">
+											<span
+												th:if="${i <= (review.starRating != null ? review.starRating : 0)}">★</span>
+											<span
+												th:unless="${i <= (review.starRating != null ? review.starRating : 0)}"
+												class="star-empty">★</span>
+										</th:block>
+									</span> <span class="rating-num"
+										th:text="${#numbers.formatDecimal(review.starRating != null ? review.starRating : 0.0, 1, 1)}">5.0</span>
+								</div>
+							</div>
+
+							<!-- 2. 리뷰 본문 -->
+							<p class="review-text"
+								th:text="${review.content != null ? review.content : ''}">
+								원하는 시간대에 맞춰주신 덕에 편하게 잘 배우고 왔습니다! 유화는 처음이라 걱정했지만 쉽고 즐겁게 할 수 있도록
+								많이 도와주셔서 유화의 재미를 제대로 느꼈습니다...!!!</p>
+							<div class="review-img-box"
+								th:if="${review.reviewImg != null and !#strings.isEmpty(review.reviewImg)}">
+								<img th:src="${review.reviewImg}" class="review-attached-img"
+									alt="리뷰 사진">
+							</div>
+							<!-- 3. 리뷰 하단 (날짜 / 신고 버튼) -->
+							<div class="review-card-footer">
+								<span class="review-date"
+									th:text="${review.inputDate != null ? review.inputDate : ''}">2022.03.03</span>
+								<button type="button" class="report-btn">신고</button>
+							</div>
+
+							<!-- 4. 튜터 답글 박스 (답글이 존재할 때만 출력) -->
+							<div class="tutor-reply-box"
+								th:if="${review.replyContent != null and !#strings.isEmpty(review.replyContent)}">
+								<div class="tutor-reply-header">
+									<img
+										th:src="${review.operatorImg != null ? review.operatorImg : 'https://cdn-icons-png.flaticon.com/512/847/847969.png'}"
+										class="reply-tutor-avatar" alt="튜터"> <span
+										class="reply-tutor-name"
+										th:text="${review.operatorName != null ? review.operatorName : '튜터'}">아라쌤</span>
+
+									<!-- 이미지와 동일한 초록색 원형 체크 아이콘 -->
+									<span class="check-badge"> <svg viewBox="0 0 24 24"
+											width="14" height="14" fill="none" stroke="currentColor"
+											stroke-width="3">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+									</span>
+								</div>
+								<p class="reply-content" th:text="${review.replyContent}">챗
+									두분덕분에 제가 더 너무 신나서 수업했는걸요❤️ 다음에 또 뵈어요, 너무 잘해주셨어요>,<</p>
+								<div class="reply-date"
+									th:text="${review.replyDate != null ? #dates.format(review.replyDate, 'yyyy.MM.dd') : ''}">2022.03.04</div>
+							</div>
+
+						</div>
+					</th:block>
+				</div>
+			</section>
+
+			<!-- (7) 튜터 정보 -->
+			<section id="tutor" class="content-section">
+				<div class="tutor-profile-card" th:if="${detail?.creator != null}">
+					<h4 class="tutor-activity-name"
+						th:text="${detail.creator.activityName}"></h4>
+					<div class="tutor-avatar-circle">
+						<img th:src="${detail.creator.profileImage}" alt="튜터 프로필">
+					</div>
+					<span class="tutor-region-badge"
+						th:text="${detail.creator.activityRegion}"></span>
+					<p class="tutor-bio-text"
+						th:text="${detail.creator.creatorIntroduction}"></p>
+					<p class="tutor-bio-text" th:text="${detail.creator.snsUrl}"></p>
+
+				</div>
+
+			</section>
+
+			<!-- 상품 정보 고시 -->
+			<section>
+				<h2 class="product-information-disclosure">상품정보고시</h2>
+				<div>
+					<div>
+						<span>서비스 제공자</span>
+					</div>
+					<div>
+						<span>아라쌤</span><button type="button">상세 정보 확인</button>
+					</div>
+					<div>
+						<span>취소/환불 규정</span>
+					</div>
+					<div>
+						<button type="button">상세 규정 확인</button>
+					</div>
+				</div>
+			</section>
+			
+			<!-- (8) 비슷한 클래스 섹션 -->
+			<section class="content-section">
+				<h3 class="section-heading">이런 클래스는 어때요?</h3>
+				<div class="similar-class-grid"
+					th:if="${detail?.sameCategoryList != null and !#lists.isEmpty(detail.sameCategoryList)}">
+					<th:block th:each="item : ${detail.sameCategoryList}">
+						<div class="similar-card" th:if="${item != null}">
+							<div class="thumb-box">
+								<img
+									th:src="${item.finishImg != null ? item.finishImg : 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=300'}"
+									alt="비슷한 클래스">
+							</div>
+							<div class="card-info">
+								<h5 class="class-name"
+									th:text="${item.name != null ? item.name : '제목 없음'}">비슷한
+									클래스 제목</h5>
+								<div class="class-price"
+									th:text="${item.price != null and item.price > 0} ? |${#numbers.formatInteger(item.price, 0, 'COMMA')}원| : '가격 문의'">45,000원</div>
+							</div>
+						</div>
+					</th:block>
+				</div>
+				<a th:href="@{#}" class="btn-more-similar"> <span>비슷한 클래스
+						더보기</span> <svg class="arrow-icon" viewBox="0 0 24 24" width="16"
+						height="16">
+        <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"
+							fill="currentColor" />
+    </svg>
+				</a>
+			</section>
+
+		</div>
+
+		<!-- [우측 영역] -->
+		<div class="right-sidebar-area">
+			<div class="sticky-booking-widget">
+
+				<!-- 1. 클래스 제목 -->
+				<h2 class="widget-class-title"
+					th:text="${detail?.classDetail?.name}"></h2>
+
+				<!-- 2. 평점 & 리뷰 -->
+				<div class="widget-sub-info">
+					<span class="star-icon">★</span> <span class="rating-val"
+						th:text="${#numbers.formatDecimal(detail?.reviewSummary?.averageRating ?: 5.0, 1, 1)}">5.0</span>
+					<span class="divider">|</span> <a href="#reviews"
+						class="review-cnt"
+						th:text="|리뷰 ${detail?.reviewSummary?.totalReviewCount ?: 0}건|">리뷰
+						7건</a>
+				</div>
+
+				<!-- 3. 가격 영역 -->
+				<div class="widget-price-box">
+					<div class="price-sub"
+						th:if="${detail?.classDetail?.price != null and detail.classDetail.price > 0}"
+						th:text="|${detail.scheduleList[0].diffHours != null && detail.scheduleList[0].diffHours > 0 ? #numbers.formatInteger(detail.classDetail.price / detail.scheduleList[0].diffHours, 0, 'COMMA') : 0}원/시간|"></div>
+					<div class="price-main">
+						<span class="time-highlight"
+							th:text="${detail.scheduleList[0].diffHours + '시간'}"></span> <span
+							class="price-num"
+							th:text="${detail?.classDetail?.price != null and detail.classDetail.price > 0} ? |${#numbers.formatInteger(detail.classDetail.price, 0, 'COMMA')} 원| : '가격 문의'">55,000
+							원</span>
+					</div>
+				</div>
+
+				<!-- 4. 클래스 정보 (인원 / 시간) -->
+				<div class="widget-meta-info">
+					<div class="meta-item">
+						<span class="meta-icon">👥</span> <span
+							th:text="${detail?.scheduleList != null and !#lists.isEmpty(detail.scheduleList) and detail.scheduleList[0] != null} ? 
+                               |그룹 클래스 · ${detail.scheduleList[0].minPeople}-${detail.scheduleList[0].maxPeople}인| : 
+                               '그룹 클래스 · 2-6인'">그룹
+							클래스 · 2-6인</span>
+					</div>
+				</div>
+
+				<!-- 5. 수강 일정 선택 -->
+				<div class="schedule-selector-box">
+					<div class="box-title">수강 일정 선택</div>
+
+					<!-- 요일/날짜 선택 바 -->
+					<div id="calendarDaysBar" class="calendar-days-bar"></div>
+
+					<!-- 시간 슬롯 카드 영역 -->
+					<div id="timeSlotsContainer" class="time-slots-grid"></div>
+				</div>
+
+				<!-- 6. 버튼 영역 (1:1 문의 + 초록색 결제하기) -->
+				<div class="widget-btn-group">
+					<button type="button" class="btn-outline" onclick="goToInquiry()">1:1
+						문의 💬</button>
+					<!-- 💡 onclick 이벤트 바인딩 추가 -->
+					<button type="button" class="btn-submit-green"
+						onclick="goToPayment()">클래스 결제하기</button>
+				</div>
+
+				<!-- 찜하기 버튼 영역 -->
+				<div class="widget-bookmark">
+					<button type="button" class="btn-bookmark" id="btnBookmark"
+						onclick="toggleBookmark()">
+						<span class="bookmark-text">찜하기</span>
+						<svg class="heart-icon" viewBox="0 0 24 24" width="20" height="20">
+            <path class="heart-path"
+								d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+        </svg>
+					</button>
+				</div>
+			</div>
+		</div>
+
+	</main>
+
+	<!-- 3. 푸터 -->
+	<footer class="main-footer">
+		<div class="footer-inner">
+			<p class="company-name">CLASS 101</p>
+			<p class="info">서울특별시 강남구 테헤란로 | 고객센터: 1800-0000</p>
+			<p class="copy">Copyright © CLASS101. All rights reserved.</p>
+		</div>
+	</footer>
+
+</body>
+
+<script th:inline="javascript">
+    // 백엔드에서 넘어온 전체 scheduleList 객체 배열
+    const scheduleDataList = /*[[${detail?.scheduleList}]]*/ [];
+    
+    // 선택한 스케줄 ID를 저장할 변수
+    let selectedScheduleId = null;
+    
+    document.addEventListener("DOMContentLoaded", function () {
+        if (!scheduleDataList || scheduleDataList.length === 0) {
+            document.getElementById('calendarDaysBar').innerHTML = '';
+            document.getElementById('timeSlotsContainer').innerHTML = 
+                '<div style="grid-column: 1/-1; text-align: center; color: #868e96; padding: 20px 0;">등록된 수강 일정이 없습니다.</div>';
+            return;
+        }
+
+        // 날짜 선택 바(Bar) 동적 생성
+        renderCalendarDaysBar();
+    });
+
+    // 날짜 선택 바 생성 함수
+    function renderCalendarDaysBar() {
+        const daysBar = document.getElementById('calendarDaysBar');
+        daysBar.innerHTML = '';
+
+        const dateStrings = scheduleDataList.map(item => formatDateString(item.classDate));
+        
+        dateStrings.sort();
+        const minDate = new Date(dateStrings[0]);
+        const maxDate = new Date(dateStrings[dateStrings.length - 1]);
+
+        const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
+        let firstActiveElement = null;
+
+        let currentDate = new Date(minDate);
+        while (currentDate <= maxDate) {
+            const dateStr = formatDateString(currentDate);
+            const dayNum = currentDate.getDate();
+            const dayStr = daysOfWeek[currentDate.getDay()];
+
+            const hasSchedule = scheduleDataList.some(item => formatDateString(item.classDate) === dateStr);
+            const isAllSoldOut = hasSchedule && scheduleDataList
+                .filter(item => formatDateString(item.classDate) === dateStr)
+                .every(item => item.soldOutYn === 'Y');
+
+            const dayItem = document.createElement('div');
+            dayItem.className = `day-item ${!hasSchedule ? 'disabled-day' : ''}`;
+            dayItem.setAttribute('data-date', dateStr);
+
+            dayItem.innerHTML = `
+                <span class="day-str">${dayStr}</span>
+                ${isAllSoldOut ? '<span class="sold-out-badge">매진</span>' : ''}
+                <span class="day-num">${dayNum}</span>
+            `;
+
+            if (hasSchedule) {
+                dayItem.onclick = function() { selectScheduleDate(this); };
+                if (!firstActiveElement) {
+                    firstActiveElement = dayItem;
+                }
+            } else {
+                dayItem.style.opacity = "0.35";
+                dayItem.style.cursor = "not-allowed";
+            }
+
+            daysBar.appendChild(dayItem);
+
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        if (firstActiveElement) {
+            selectScheduleDate(firstActiveElement);
+        }
+    }
+
+ // 날짜 클릭 이벤트 함수
+    function selectScheduleDate(element) {
+        document.querySelectorAll('.day-item').forEach(item => item.classList.remove('active'));
+        element.classList.add('active');
+
+        // 날짜 변경 시 선택된 시간 초기화
+        selectedScheduleId = null;
+
+        const selectedDate = element.getAttribute('data-date');
+
+        const matchedSchedules = scheduleDataList.filter(item => {
+            if (!item || !item.classDate) return false;
+            return formatDateString(item.classDate) === selectedDate;
+        });
+
+        const container = document.getElementById('timeSlotsContainer');
+        container.innerHTML = '';
+
+        if (matchedSchedules.length === 0) {
+            container.innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: #868e96; padding: 15px 0;">해당 날짜에 가능한 시간이 없습니다.</div>';
+            return;
+        }
+
+        matchedSchedules.forEach(sched => {
+            const isSoldOut = sched.soldOutYn === 'Y';
+            // DB의 SCHEDULE_CODE에 맞춰 값을 가져옵니다.
+            const scheduleId = sched.scheduleCode ?? ''; 
+            
+            const cardHtml = `
+                <div class="time-card ${isSoldOut ? 'disabled' : ''}" 
+                     data-id="${scheduleId}"
+                     onclick="selectTimeCard(this, ${isSoldOut})">
+                    <span class="status-top">${isSoldOut ? '마감됨' : '예약가능'}</span>
+                    <span class="status-main">${isSoldOut ? '매진' : '잔여 ' + (sched.remainingPeople ?? 0) + '석'}</span>
+                    <span class="time-range">${sched.startTime ?? ''} ~ ${sched.endTime ?? ''}</span>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', cardHtml);
+        });
+    }
+
+    // 💡 1. 시간 선택 카드 클릭 이벤트 함수
+   function selectTimeCard(cardElement, isSoldOut) {
+    if (isSoldOut) {
+        alert('해당 시간은 마감(매진)되어 선택할 수 없습니다.');
+        return;
+    }
+
+    // 기존 선택된 카드 클래스 제거
+    document.querySelectorAll('.time-card').forEach(card => card.classList.remove('selected'));
+
+    // 현재 카드 선택 클래스 추가
+    cardElement.classList.add('selected');
+
+    // 💡 선택한 scheduleCode 저장
+    selectedScheduleId = cardElement.getAttribute('data-id');
+    console.log("선택된 스케줄 코드:", selectedScheduleId); // 브라우저 콘솔에서 확인 가능
+}
+
+    // 💡 2. 클래스 결제하기 버튼 클릭 이벤트 함수
+    function goToPayment() {
+    if (!selectedScheduleId) {
+        alert('원하시는 수강 날짜와 시간을 먼저 선택해 주세요.');
+        return;
+    }
+
+    const paymentUrl = `/payment?scheduleCode=${encodeURIComponent(selectedScheduleId)}`;
+    
+    // 결제 페이지로 이동
+    window.location.href = paymentUrl;
+}
+
+    // 날짜 포맷 유틸리티
+    function formatDateString(dateVal) {
+        if (!dateVal) return '';
+        const d = new Date(dateVal);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+    
+    function goToInquiry(){
+    	window.location.href="";
+    }
+    
+ // 찜하기 토글 함수
+    async function toggleBookmark() {
+        // 1. 로그인 여부 확인
+        const isLogin = /*[[${session.loginMember != null}]]*/ false; 
+
+        if (!isLogin) {
+            if (confirm("로그인이 필요한 서비스입니다.\n로그인 페이지로 이동하시겠습니까?")) {
+                const currentUrl = encodeURIComponent(window.location.href);
+                window.location.href = "/member/login/general?redirect=" + currentUrl;
+            }
+            return; // 비회원이면 진행 중단
+        }
+
+        // 2. 클래스 코드 및 버튼 요소 준비
+        const bookmarkBtn = document.getElementById('btnBookmark');
+        const classCode = /*[[${detail?.classDetail?.classCode}]]*/ 3; 
+
+        try {
+            // 💡 @RequestParam("classCode") 규격에 맞게 폼 데이터 형태로 변환
+            const formData = new URLSearchParams();
+            formData.append('classCode', classCode);
+
+            // 3. 서버로 POST 요청
+            const response = await fetch('/classDetail/bookmark/toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData
+            });
+
+            // 💡 컨트롤러가 String("ADDED", "REMOVED" 등)을 반환하므로 text()로 다룹니다.
+            const resultText = await response.text(); 
+
+            if (resultText === "ADDED") {
+                bookmarkBtn.classList.add('active'); // CSS에서 하트 빨간색 채우기
+                alert("찜 목록에 추가되었습니다. ❤️");
+            } else if (resultText === "REMOVED") {
+                bookmarkBtn.classList.remove('active'); // CSS에서 빈 하트로 변경
+                alert("찜하기가 취소되었습니다.");
+            } else if (resultText === "LOGIN_REQUIRED") {
+                alert("세션이 만료되었습니다. 다시 로그인해 주세요.");
+                window.location.href = "/member/login/general";
+            } else {
+                alert("처리 중 오류가 발생했습니다.");
+            }
+
+        } catch (error) {
+            console.error("Error:", error);
+            alert("서버 통신 중 오류가 발생했습니다.");
+        }
+    }
+</script>
+</html>
