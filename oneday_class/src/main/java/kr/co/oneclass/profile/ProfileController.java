@@ -135,6 +135,12 @@ public class ProfileController {
             loginMember.setName(pdto.getName());
             loginMember.setPhone(pdto.getPhone());
             loginMember.setEmail(pdto.getEmail());
+            loginMember.setZipCode(pdto.getZipCode());
+            loginMember.setAddress(pdto.getAddress());
+            loginMember.setAddress2(pdto.getAddress2());
+            loginMember.setSmsReceiveYN(pdto.getSmsReceiveYN());
+            loginMember.setEmailReceiveYN(pdto.getEmailReceiveYN());
+            
             session.setAttribute("loginMember", loginMember);
             rttr.addFlashAttribute("msg", "프로필 정보가 성공적으로 수정되었습니다.");
         } else {

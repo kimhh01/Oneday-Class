@@ -90,7 +90,7 @@
             #{addressDetail}, 
             #{smsReceiveYN, jdbcType=VARCHAR}, 
             #{emailReceiveYN, jdbcType=VARCHAR}, 
-            'ACTIVE', 
+            '정상', 
             SYSDATE, 
             0
         )
@@ -114,7 +114,7 @@
             #{memberCode}, 
             #{email}, 
             #{name}, 
-            'ACTIVE', 
+            '정상', 
             SYSDATE, 
             0, 
             'N', 

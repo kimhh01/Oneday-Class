@@ -7,7 +7,7 @@ public class MemberBuilder {
     int memberCode;
     String phone;
     String email;
-    int zipCode;
+    String zipCode;
     String address;
     String address2;
     String name;
@@ -23,7 +23,7 @@ public class MemberBuilder {
     public MemberBuilder memberCode(int memberCode) { this.memberCode = memberCode; return this; }
     public MemberBuilder phone(String phone) { this.phone = phone; return this; }
     public MemberBuilder email(String email) { this.email = email; return this; }
-    public MemberBuilder zipCode(int zipCode) { this.zipCode = zipCode; return this; }
+    public MemberBuilder zipCode(String zipCode) { this.zipCode = zipCode; return this; }
     public MemberBuilder address(String address) { this.address = address; return this; }
     public MemberBuilder address2(String address2) { this.address2 = address2; return this; }
     public MemberBuilder name(String name) { this.name = name; return this; }

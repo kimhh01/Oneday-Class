@@ -64,11 +64,29 @@
     font-weight: 500;
 }
 
-/* 네비게이션 메뉴 목록 */
+/* 네비게이션 메뉴 전체 래퍼 */
 .sidebar-nav {
     display: flex;
     flex-direction: column;
+}
+
+/* 메뉴 그룹 공통 */
+.nav-group {
+    display: flex;
+    flex-direction: column;
     gap: 6px;
+}
+
+/* 프로필 수정 그룹 (최상단, 강조용 구분선) */
+.nav-group-profile {
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px dashed #e0e5e0;
+}
+
+/* 일반 메뉴 그룹 */
+.nav-group-main {
+    /* 기본 gap만 적용 */
 }
 
 .nav-item {
@@ -96,12 +114,27 @@
     font-weight: 700;
 }
 
+/* 프로필 수정 메뉴 강조 스타일 */
+.nav-item.nav-profile-edit {
+    font-weight: 700;
+    color: #356846;
+}
+
+.nav-item.nav-profile-edit:hover {
+    background-color: #eaf2eb;
+}
+
+.nav-item.nav-profile-edit.active {
+    background-color: #eaf2eb;
+    color: #356846;
+}
+
 /* 회원탈퇴 메뉴 스타일 */
 .nav-item.nav-withdraw {
     margin-top: 12px;
     color: #888888;
     border-top: 1px solid #f5f5f5;
-    padding-top: 12px;
+    padding-top: 18px;
 }
 
 .nav-item.nav-withdraw:hover {

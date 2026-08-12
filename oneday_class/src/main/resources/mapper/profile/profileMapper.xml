@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.oneclass.profile.ProfileDAO">
+
+    <!-- 1. 회원 프로필 정보 상세 조회 -->
+    <select id="selectMember" resultType="kr.co.oneclass.member.Member">
+        SELECT m.member_code AS memberCode, 
+               m.email, 
+               m.name, 
+               m.phone, 
+               m.zipcode AS zipCode, 
+               m.address, 
+               m.address2, 
+               m.status, 
+               m.sms_receive AS smsReceiveYN, 
+               m.email_receive AS emailReceiveYN, 
+               m.image AS profileImg, 
+               m.input_date AS inputDate, 
+               a.login_type AS loginType, 
+               a.local_login_id AS localLoginId, 
+               a.oauth_provider_id AS oauthProviderId 
+        FROM member m 
+        LEFT JOIN member_auth a ON m.member_code = a.member_code 
+        WHERE m.member_code = TO_NUMBER(#{memberCode})
+    </select>
+
+    <!-- 2. 프로필 정보 수정 -->
+    <update id="updateProfile" parameterType="kr.co.oneclass.profile.ProfileDTO">
+        UPDATE member 
+        SET name = #{name}, 
+            phone = #{phone}, 
+            email = #{email}, 
+            zipcode = #{zipCode}, 
+            address = #{address}, 
+            address2 = #{address2}, 
+            sms_receive = #{smsReceiveYN}, 
+            email_receive = #{emailReceiveYN} 
+        WHERE member_code = #{memberCode}
+    </update>
+
+    <!-- 3. 프로필 이미지 경로 변경 -->
+    <update id="updateImg">
+        UPDATE member 
+        SET image = #{img} 
+        WHERE member_code = TO_NUMBER(#{memberCode})
+    </update>
+
+    <!-- 4. 기존 비밀번호 조회 -->
+    <select id="selectPasswordByMemberId" resultType="string">
+        SELECT a.local_password 
+        FROM member_auth a 
+        WHERE a.member_code = TO_NUMBER(#{memberCode}) AND a.login_type = 'LOCAL'
+    </select>
+
+    <!-- 5. 비밀번호 변경 -->
+    <update id="updatePass" parameterType="kr.co.oneclass.profile.PassChangeDTO">
+        UPDATE member_auth 
+        SET local_password = #{newPass} 
+        WHERE member_code = #{memberCode} AND login_type = 'LOCAL'
+    </update>
+
+    <!-- 6. 회원 탈퇴 상태값 변경 -->
+    <update id="updateStatusToWithdraw">
+        UPDATE member 
+        SET status = 'WITHDRAW' 
+        WHERE member_code = TO_NUMBER(#{memberCode})
+    </update>
+
+</mapper>

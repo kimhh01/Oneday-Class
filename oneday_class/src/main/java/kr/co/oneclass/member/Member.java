@@ -14,7 +14,7 @@ public class Member {
     private int memberCode;
     private String phone;
     private String email;
-    private int zipCode;
+    private String zipCode;
     private String address;
     private String address2;
     private String name;
@@ -62,8 +62,8 @@ public class Member {
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 
-    public int getZipCode() { return zipCode; }
-    public void setZipCode(int zipCode) { this.zipCode = zipCode; }
+    public String getZipCode() { return zipCode; }
+    public void setZipCode(String zipCode) { this.zipCode = zipCode; }
 
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
