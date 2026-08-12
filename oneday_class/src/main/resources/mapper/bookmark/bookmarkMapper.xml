@@ -67,4 +67,11 @@
           AND class_code = TO_NUMBER(#{classCode})
     </delete>
 
+	<!-- 5. 관심 클래스 확인-->
+	<select id="checkBookmark" resultType="kr.co.oneclass.bookmark.Bookmark">
+	select count(*)
+	from bookmark
+	where member_code=#{memberCode} and
+			class_code=#{classCode}
+	</select>
 </mapper>
