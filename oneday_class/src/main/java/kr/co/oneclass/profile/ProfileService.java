@@ -12,7 +12,7 @@ public interface ProfileService {
     Member getProfile(String memberCode);
 
     /**
-     * 프로필 정보 수정 (이름, 핸드폰 번호, 이메일)
+     * 프로필 정보 수정 (이름, 핸드폰 번호, 이메일, 주소, 마케팅 동의)
      */
     boolean updateProfile(ProfileDTO pdto);
 

@@ -28,7 +28,7 @@
             <div class="card-section">
                 <div class="img-change-box">
                     <div class="img-preview-wrapper">
-                        <!-- 프로필 이미지 프리뷰 (@{...} 표기법 적용) -->
+                        <!-- 프로필 이미지 프리뷰 -->
                         <img th:if="${member != null and member.profileImg != null}" 
                              th:src="@{${member.profileImg}}" alt="프로필 이미지">
                         <svg th:unless="${member != null and member.profileImg != null}" 
@@ -42,7 +42,6 @@
                         <h3>프로필 이미지</h3>
                         <p>권장 크기 400×400px · JPG, PNG · 최대 5MB</p>
                     </div>
-                    <!-- Controller의 /profile/changeProfileImg GET 요청을 보내 모달을 로드 -->
                     <button type="button" class="btn-primary" onclick="loadModal('/profile/changeProfileImg')">이미지 변경</button>
                 </div>
             </div>
@@ -54,11 +53,14 @@
                 <div class="card-section">
                     <h2 class="section-title">계정 정보</h2>
 
-                    <!-- 예약자 이름 -->
+                    <!-- 예약자 이름 (구글 계정인 경우 수정 불가 readonly) -->
                     <div class="form-group">
                         <label for="name" class="form-label">예약자 이름</label>
                         <input type="text" id="name" name="name" class="form-input" 
-                               th:value="${member != null ? member.name : ''}" required>
+                               th:value="${member != null ? member.name : ''}" 
+                               th:readonly="${member != null and member.loginType == 'GOOGLE'}" 
+                               th:style="${member != null and member.loginType == 'GOOGLE'} ? 'background-color: #f9f9f9; color: #888;' : ''"
+                               required>
                     </div>
 
                     <!-- 휴대폰 번호 -->
@@ -68,11 +70,30 @@
                                th:value="${member != null ? member.phone : ''}" placeholder="010-0000-0000">
                     </div>
 
-                    <!-- 이메일 -->
+                    <!-- 이메일 (구글 계정인 경우 수정 불가 readonly) -->
                     <div class="form-group">
                         <label for="email" class="form-label">이메일</label>
                         <input type="email" id="email" name="email" class="form-input" 
-                               th:value="${member != null ? member.email : ''}" required>
+                               th:value="${member != null ? member.email : ''}" 
+                               th:readonly="${member != null and member.loginType == 'GOOGLE'}" 
+                               th:style="${member != null and member.loginType == 'GOOGLE'} ? 'background-color: #f9f9f9; color: #888;' : ''"
+                               required>
+                    </div>
+
+                    <!-- 주소 입력 그룹 (우편번호, 기본주소, 상세주소) -->
+                    <div class="form-group">
+                        <label class="form-label">주소</label>
+                        <div class="password-row" style="margin-bottom: 8px;">
+                            <input type="text" id="zipCode" name="zipCode" class="form-input" 
+                                   th:value="${member != null ? member.zipCode : ''}" placeholder="우편번호" readonly style="max-width: 160px;">
+                            <button type="button" class="btn-outline" onclick="execDaumPostcode()">우편번호 찾기</button>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <input type="text" id="address" name="address" class="form-input" 
+                                   th:value="${member != null ? member.address : ''}" placeholder="기본 주소" readonly style="max-width: 100%;">
+                            <input type="text" id="address2" name="address2" class="form-input" 
+                                   th:value="${member != null ? member.address2 : ''}" placeholder="상세 주소를 입력해주세요" style="max-width: 100%;">
+                        </div>
                     </div>
 
                     <!-- 비밀번호 (일반 회원일 때만 비번 변경 모달 호출 가능) -->
@@ -80,8 +101,26 @@
                         <label class="form-label">비밀번호</label>
                         <div class="password-row">
                             <input type="password" class="form-input" value="••••••••" readonly disabled>
-                            <!-- Controller의 /profile/changePassword GET 요청을 보내 모달을 로드 -->
                             <button type="button" class="btn-outline" onclick="loadModal('/profile/changePassword')">비밀번호 변경</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 💡 신규 추가: SMS 및 이메일 수신 여부 설정 -->
+                    <div class="form-group">
+                        <label class="form-label">알림 수신 동의</label>
+                        <div style="display: flex; gap: 24px; align-items: center; margin-top: 10px;">
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #333; cursor: pointer;">
+                                <input type="checkbox" name="smsReceiveYN" value="Y" 
+                                       th:checked="${member != null and member.smsReceiveYN == 'Y'}"
+                                       style="width: 18px; height: 18px; accent-color: #356846;">
+                                SMS 수신 동의
+                            </label>
+                            <label style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #333; cursor: pointer;">
+                                <input type="checkbox" name="emailReceiveYN" value="Y" 
+                                       th:checked="${member != null and member.emailReceiveYN == 'Y'}"
+                                       style="width: 18px; height: 18px; accent-color: #356846;">
+                                이메일 수신 동의
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -104,11 +143,44 @@
 <!-- 공통 결과 안내 알림 모달 Fragment 불러오기 -->
 <div th:replace="~{profile/fragments/alertModal :: alertModal}"></div>
 
-<!-- 모달 동적 로드 스크립트 -->
+<!-- 카카오 우편번호 서비스 CDN 스크립트 추가 -->
+<script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+
+<!-- 모달 동적 로드 및 주소 검색 스크립트 -->
 <script>
     // [중요] 브라우저 전체에 파일 드래그 시 파일이 새 창으로 열리는 기본 동작 차단
     window.addEventListener('dragover', function(e) { e.preventDefault(); }, false);
     window.addEventListener('drop', function(e) { e.preventDefault(); }, false);
+
+    // 카카오 우편번호 API 연동 함수
+    function execDaumPostcode() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                let addr = ''; // 주소 변수
+                let extraAddr = ''; // 참고항목 변수
+
+                if (data.userSelectedType === 'R') { // 도로명 주소
+                    addr = data.roadAddress;
+                } else { // 지번 주소
+                    addr = data.jibunAddress;
+                }
+
+                if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
+                    extraAddr += data.bname;
+                }
+                if(data.buildingName !== '' && data.apartment === 'Y'){
+                    extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                }
+                if(extraAddr !== ''){
+                    extraAddr = ' (' + extraAddr + ')';
+                }
+
+                document.getElementById('zipCode').value = data.zonecode;
+                document.getElementById('address').value = addr;
+                document.getElementById('address2').focus();
+            }
+        }).open();
+    }
 
     // Controller에서 모달 HTML을 받아와 화면에 띄우는 함수
     function loadModal(url) {
@@ -124,7 +196,6 @@
                 container.innerHTML = html;
                 document.body.style.overflow = 'hidden'; // 배경 스크롤 차단
 
-                // [핵심] innerHTML로 주입된 <script> 태그를 찾아서 강제로 실행시킵니다.
                 const scripts = container.querySelectorAll('script');
                 scripts.forEach(oldScript => {
                     const newScript = document.createElement('script');
@@ -138,7 +209,7 @@
 
     // 모달 닫기 함수
     function closeModal() {
-        document.getElementById('modalContainer').innerHTML = '';
+        document.getElementById('modalContainer').innerHTML = ' ';
         document.body.style.overflow = 'auto';
     }
 
