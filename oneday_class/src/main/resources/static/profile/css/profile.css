@@ -19,7 +19,7 @@ body {
     padding: 40px 16px;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start; 
 }
 
 .profile-container {
@@ -31,22 +31,29 @@ body {
     align-items: start;
 }
 
-/* 메인 콘텐츠 영역 */
+/* 하나의 큰 하얀색 카드 */
 .profile-main {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 36px 36px 40px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 28px;
 }
 
+/* 💡 수정: 제목 밑에 구분선(border-bottom)과 여백 추가 */
 .page-header {
-    margin-bottom: 4px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #f0f0f0; /* 제목 밑 구분선 */
+    margin-bottom: 0;
 }
 
 .page-title {
     font-size: 24px;
     font-weight: 700;
     color: #111111;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
 }
 
 .page-subtitle {
@@ -54,12 +61,21 @@ body {
     color: #777777;
 }
 
-/* 카드 섹션 공통 스타일 */
+/* 내부 개별 카드는 하얀 배경을 풀고 하나의 카드로 어우러지게 만듭니다. */
 .card-section {
-    background-color: #ffffff;
-    border-radius: 16px;
-    padding: 28px 24px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    background-color: transparent;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+    /* 프로필 이미지 박스와 폼 사이의 구분선 */
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 28px;
+}
+
+/* 폼 안에 있는 card-section은 밑줄을 제거합니다. (대신 버튼 위에 줄 생성) */
+form .card-section {
+    border-bottom: none;
+    padding-bottom: 0;
 }
 
 .section-title {
@@ -196,12 +212,15 @@ body {
     background-color: #f5f5f5;
 }
 
+/* 💡 수정: 하단 버튼 위에 구분선(border-top)과 여백 추가 */
 .form-actions {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 16px;
-    margin-top: 10px;
+    margin-top: 36px;       /* 폼과의 위쪽 간격 */
+    padding-top: 24px;      /* 선과 버튼 사이의 간격 */
+    border-top: 1px solid #f0f0f0; /* 하단 버튼 위 구분선 */
 }
 
 .btn-text {
@@ -225,6 +244,10 @@ body {
 @media (max-width: 768px) {
     .profile-container {
         grid-template-columns: 1fr;
+    }
+    
+    .profile-main {
+        padding: 24px 20px;
     }
 
     .form-input,

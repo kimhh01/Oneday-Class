@@ -8,7 +8,6 @@ import kr.co.oneclass.member.OAuthLoginDTO;
 import kr.co.oneclass.member.PassFindDTO;
 import kr.co.oneclass.member.SignUpDTO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -92,27 +91,22 @@ public class MemberServiceImpl implements MemberService {
         return result1 > 0 && result2 > 0;
     }
 
-    // OAuth 로그인 및 최초 로그인 시 자동 회원가입 통합 처리
     @Override
     @Transactional
     public Member processOAuthLogin(OAuthLoginDTO oauthdto) {
-        // 1. 기존 OAuth 가입 여부 확인
         Member member = memberDAO.selectByOAuthId(oauthdto);
         if (member != null) {
-            return member; // 이미 가입된 회원이면 객체 반환
+            return member;
         }
 
-        // 2. 신규 회원이면 회원가입 진행
         boolean isSignedUp = oAuthSignUp(oauthdto);
         if (isSignedUp) {
-            // 새로 생성된 memberCode로 회원 정보 재조회
             return memberDAO.selectMember(oauthdto.getMemberCode());
         }
 
         return null;
     }
 
-    // [아이디 찾기] Null 안전검사 추가
     @Override
     public String findId(IdFindDTO idFindDTO) {
         if (idFindDTO == null || idFindDTO.getName() == null || idFindDTO.getEmail() == null) {
@@ -124,20 +118,16 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public boolean findPass(PassFindDTO passFindDTO) {
-        // 1. 회원 존재 여부 확인
         Member member = memberDAO.selectMemberForPassword(passFindDTO);
         if (member == null) {
             return false;
         }
 
-        // 2. 10자리 임시 비밀번호 생성 및 BCrypt 암호화
         String tempPassword = createTempPassword();
         String encodedTempPassword = passwordEncoder.encode(tempPassword);
 
-        // 3. MEMBER_AUTH 테이블 비밀번호 업데이트
         int result = memberDAO.updateTempPassword(member.getMemberCode(), encodedTempPassword);
 
-        // 4. DB 수정 성공 시 EmailAuthService를 통해 임시 비밀번호 이메일 전송
         if (result > 0) {
             return emailAuthService.sendTempPassword(passFindDTO.getEmail(), tempPassword);
         }
@@ -148,6 +138,45 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public boolean existsMemberForPassword(PassFindDTO dto) {
         return memberDAO.selectMemberForPassword(dto) != null;
+    }
+
+    // ==========================================
+    // 신규 구현: 비밀번호 검증 및 회원탈퇴
+    // ==========================================
+
+    @Override
+    public boolean checkPassword(int memberCode, String rawPassword) {
+        Member member = memberDAO.selectMember(memberCode);
+        if (member == null || member.getPassword() == null) {
+            return false;
+        }
+
+        String dbPassword = member.getPassword();
+
+        // BCrypt 암호화 형태 확인 후 일치 여부 비교
+        if (dbPassword.startsWith("$2a$") || dbPassword.startsWith("$2b$") || dbPassword.startsWith("$2y$")) {
+            return passwordEncoder.matches(rawPassword, dbPassword);
+        } else {
+            return rawPassword.equals(dbPassword);
+        }
+    }
+
+    @Override
+    @Transactional
+    public boolean withdrawMember(String memberCode) {
+        if (memberCode == null || memberCode.trim().isEmpty()) {
+            return false;
+        }
+
+        int code = Integer.parseInt(memberCode);
+
+        // 1) MEMBER_AUTH 관련 데이터 삭제/업데이트
+        int result1 = memberDAO.deleteMemberAuth(code);
+        
+        // 2) MEMBER 테이블 회원 삭제/상태 변경(탈퇴)
+        int result2 = memberDAO.deleteMember(code);
+
+        return result1 > 0 || result2 > 0;
     }
 
     private String createTempPassword() {

@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.oneclass.member.MemberDAO">
+
+    <!-- 공통 resultMap 정의 -->
+    <resultMap id="memberResultMap" type="kr.co.oneclass.member.Member">
+        <id property="memberCode" column="member_code" />
+        <result property="email" column="email" />
+        <result property="password" column="local_password" />
+        <result property="name" column="name" />
+        <result property="phone" column="phone" />
+        <result property="zipCode" column="zip_code" />
+        <result property="address" column="address" />
+        <result property="address2" column="address2" />
+        <result property="loginType" column="login_type" />
+        <result property="oauthProviderId" column="oauth_provider_id" />
+        <result property="status" column="status" />
+        <result property="profileImg" column="profile_img" />
+        <result property="inputDate" column="input_date" />
+        <result property="smsReceiveYN" column="sms_receive_yn" />
+        <result property="emailReceiveYN" column="email_receive_yn" />
+    </resultMap>
+
+    <!-- 1. 회원 코드로 회원 조회 -->
+    <select id="selectMember" resultMap="memberResultMap">
+        SELECT 
+            m.*, 
+            a.login_type, 
+            a.local_login_id, 
+            a.local_password,
+            a.oauth_provider_id
+        FROM member m
+        JOIN member_auth a ON m.member_code = a.member_code
+        WHERE m.member_code = #{memberCode}
+    </select>
+
+    <!-- 2. 일반 로그인 -->
+    <select id="selectByLoginId" parameterType="kr.co.oneclass.member.LoginDTO" resultMap="memberResultMap">
+        SELECT 
+            m.*, 
+            a.login_type, 
+            a.local_login_id, 
+            a.local_password, 
+            a.oauth_provider_id
+        FROM member m
+        JOIN member_auth a ON m.member_code = a.member_code
+        WHERE a.local_login_id = #{id} 
+          AND a.login_type = 'LOCAL'
+    </select>
+
+    <!-- 3. OAuth 로그인 -->
+    <select id="selectByOAuthId" parameterType="kr.co.oneclass.member.OAuthLoginDTO" resultMap="memberResultMap">
+        SELECT 
+            m.*, 
+            a.login_type, 
+            a.oauth_provider_id
+        FROM member m
+        JOIN member_auth a ON m.member_code = a.member_code
+        WHERE a.oauth_provider_id = #{oauthProviderId} 
+          AND a.login_type = #{provider}
+    </select>
+
+    <!-- 4. 일반 회원 기본 정보 저장 (시퀀스 채번) -->
+    <insert id="insertMember" parameterType="kr.co.oneclass.member.SignUpDTO">
+        <selectKey keyProperty="memberCode" resultType="int" order="BEFORE">
+            SELECT seq_member_code.NEXTVAL FROM dual
+        </selectKey>
+        INSERT INTO member (
+            member_code, 
+            email, 
+            name, 
+            phone, 
+            zipcode, 
+            address, 
+            address2, 
+            sms_receive, 
+            email_receive, 
+            status, 
+            input_date, 
+            reservation_num
+        ) VALUES (
+            #{memberCode}, 
+            #{email}, 
+            #{name}, 
+            #{phone}, 
+            #{zipcode}, 
+            #{address}, 
+            #{addressDetail}, 
+            #{smsReceiveYN, jdbcType=VARCHAR}, 
+            #{emailReceiveYN, jdbcType=VARCHAR}, 
+            'ACTIVE', 
+            SYSDATE, 
+            0
+        )
+    </insert>
+
+    <!-- 5. OAuth 전용 회원 기본 정보 저장 -->
+    <insert id="insertOAuthMember" parameterType="kr.co.oneclass.member.OAuthLoginDTO">
+        <selectKey keyProperty="memberCode" resultType="int" order="BEFORE">
+            SELECT seq_member_code.NEXTVAL FROM dual
+        </selectKey>
+        INSERT INTO member (
+            member_code, 
+            email, 
+            name, 
+            status, 
+            input_date, 
+            reservation_num, 
+            sms_receive, 
+            email_receive
+        ) VALUES (
+            #{memberCode}, 
+            #{email}, 
+            #{name}, 
+            'ACTIVE', 
+            SYSDATE, 
+            0, 
+            'N', 
+            'N'
+        )
+    </insert>
+
+    <!-- 6. 일반 로그인 인증 정보 저장 -->
+    <insert id="insertMemberAuth" parameterType="kr.co.oneclass.member.SignUpDTO">
+        INSERT INTO member_auth (
+            member_auth_code, 
+            member_code, 
+            login_type, 
+            local_login_id, 
+            local_password
+        ) VALUES (
+            seq_member_auth_code.NEXTVAL, 
+            #{memberCode}, 
+            'LOCAL', 
+            #{id}, 
+            #{pass}
+        )
+    </insert>
+
+    <!-- 7. OAuth 로그인 인증 정보 저장 -->
+    <insert id="insertMemberAuthByOAuth" parameterType="kr.co.oneclass.member.OAuthLoginDTO">
+        INSERT INTO member_auth (
+            member_auth_code, 
+            member_code, 
+            login_type, 
+            oauth_provider_id
+        ) VALUES (
+            seq_member_auth_code.NEXTVAL, 
+            #{memberCode}, 
+            #{provider}, 
+            #{oauthProviderId}
+        )
+    </insert>
+
+    <!-- 8. 아이디 중복 확인 -->
+    <select id="countByLocalLoginId" resultType="int">
+        SELECT COUNT(*) 
+        FROM member_auth 
+        WHERE local_login_id = #{id} 
+          AND login_type = 'LOCAL'
+    </select>
+
+    <!-- 9. 아이디 찾기 -->
+    <select id="selectId" parameterType="kr.co.oneclass.member.IdFindDTO" resultType="String">
+        SELECT a.local_login_id 
+        FROM member m
+        JOIN member_auth a ON m.member_code = a.member_code
+        WHERE m.name = #{name} 
+          AND m.email = #{email} 
+          AND a.login_type = 'LOCAL' 
+          AND ROWNUM = 1
+    </select>
+
+    <!-- 10. 비밀번호 찾기 전 회원 검증 -->
+    <select id="selectMemberForPassword" parameterType="kr.co.oneclass.member.PassFindDTO" resultMap="memberResultMap">
+        SELECT m.*, a.local_login_id 
+        FROM member m
+        JOIN member_auth a ON m.member_code = a.member_code
+        WHERE a.local_login_id = #{id} 
+          AND m.name = #{name} 
+          AND m.email = #{email} 
+          AND a.login_type = 'LOCAL'
+    </select>
+
+    <!-- 11. 임시 비밀번호 업데이트 -->
+    <update id="updateTempPassword">
+        UPDATE member_auth 
+        SET local_password = #{password}
+        WHERE member_code = #{memberCode} 
+          AND login_type = 'LOCAL'
+    </update>
+
+    <!-- 12. 회원 탈퇴 - 인증 정보 삭제 -->
+    <delete id="deleteMemberAuth">
+        DELETE FROM member_auth 
+        WHERE member_code = #{memberCode}
+    </delete>
+
+    <!-- 13. 회원 탈퇴 - 회원 기본 정보 삭제 -->
+    <delete id="deleteMember">
+        DELETE FROM member 
+        WHERE member_code = #{memberCode}
+    </delete>
+
+</mapper>

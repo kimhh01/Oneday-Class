@@ -8,6 +8,7 @@ import kr.co.oneclass.member.PassFindDTO;
 import kr.co.oneclass.member.SignUpDTO;
 import kr.co.oneclass.member.EmailAuthService;
 import kr.co.oneclass.member.MemberService;
+import kr.co.oneclass.profile.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,13 +18,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-// Spring Boot 3.x 기준 jakarta.servlet 사용. Boot 2.x라면 javax.servlet.http.HttpSession 으로 변경하세요.
 import jakarta.servlet.http.HttpSession;
 
-/**
- * Thymeleaf 뷰 리졸버를 사용한다고 가정합니다.
- * 뷰 이름 "member/login" -> src/main/resources/templates/member/login.html 로 매핑됩니다.
- */
 @Controller
 public class MemberController {
 
@@ -32,6 +28,9 @@ public class MemberController {
 
     @Autowired
     private EmailAuthService eas;
+
+    @Autowired
+    private ProfileService ps;
 
     @GetMapping("/member/login")
     public String choiceLoginForm() {
@@ -48,13 +47,11 @@ public class MemberController {
     public String login(LoginDTO ldto, HttpSession session, RedirectAttributes ra) {
         Member member = ms.login(ldto);
         
-        // 1. 아이디가 없거나 비밀번호가 틀린 경우
         if (member == null) {
             ra.addFlashAttribute("errorMsg", "아이디 또는 비밀번호가 올바르지 않습니다.");
-            return "redirect:/member/login/general"; // 실패 시 로그인 페이지로 다시 이동
+            return "redirect:/member/login/general";
         }
         
-        // 2. 로그인 성공 시 세션 저장 후 메인 페이지로 이동
         session.setAttribute("loginMember", member);
         return "redirect:/";
     }
@@ -63,7 +60,6 @@ public class MemberController {
     public String oauthLogin(OAuthLoginDTO oauthDTO, HttpSession session) {
         Member member = ms.oAuthLogin(oauthDTO);
         if (member == null) {
-            // 최초 로그인 -> 자동 회원가입 후 재조회
             ms.oAuthSignUp(oauthDTO);
             member = ms.oAuthLogin(oauthDTO);
         }
@@ -73,7 +69,7 @@ public class MemberController {
 
     @GetMapping("/member/signUp")
     public String signUpForm(Model model) {
-        model.addAttribute("signUpDTO", new SignUpDTO()); // th:object 바인딩용
+        model.addAttribute("signUpDTO", new SignUpDTO());
         return "member/signUp";
     }
 
@@ -82,10 +78,8 @@ public class MemberController {
         boolean result = ms.signUp(signUpDTO);
         
         if (result) {
-            // 회원가입 성공 시 완료 화면으로 리다이렉트
             return "redirect:/member/signUpSuccess";
         } else {
-            // 실패 시 기존 가입 페이지로 이동
             ra.addFlashAttribute("errorMsg", "회원가입 처리에 실패했습니다. 다시 시도해 주세요.");
             return "redirect:/member/signUp";
         }
@@ -97,7 +91,6 @@ public class MemberController {
         return "member/idDupCheckResult";
     }
 
-    // 다이어그램상 이름이 같은 오버로드는 Ajax(중복확인) 전용으로 분리했습니다.
     @ResponseBody
     @PostMapping("/member/idDupCheck")
     public String idDupCheckAjax(@RequestParam("id") String id) {
@@ -111,30 +104,25 @@ public class MemberController {
     
     @GetMapping("/member/signUpSuccess")
     public String signUpSuccess() {
-        return "member/signUpSuccess"; // templates/member/signUpSuccess.html
+        return "member/signUpSuccess";
     }
 
- // 2. 인증번호 발송 AJAX (/member/sendAuthCode)
     @ResponseBody
     @PostMapping("/member/sendAuthCode")
     public String sendAuthCode(@RequestParam("name") String name, @RequestParam("email") String email) {
-        // 이름과 이메일로 회원 정보 확인
         IdFindDTO checkDto = new IdFindDTO();
         checkDto.setName(name);
         checkDto.setEmail(email);
 
         String foundId = ms.findId(checkDto);
         if (foundId == null) {
-            return "NOT_FOUND"; // 일치하는 회원이 없음
+            return "NOT_FOUND";
         }
 
-        // 인증번호 생성 + DB 저장 + 이메일 전송 (Type = "id")
         boolean isSent = eas.sendCode(email, "id");
-        
         return isSent ? "OK" : "FAIL";
     }
     
- // 2. 인증번호 발송 AJAX (type = "pass" 로 email_auth 테이블 저장 및 메일 전송)
     @ResponseBody
     @PostMapping("/member/sendPasswordAuthCode")
     public String sendPasswordAuthCode(@RequestParam("id") String id,
@@ -145,15 +133,12 @@ public class MemberController {
         checkDto.setName(name);
         checkDto.setEmail(email);
 
-        // 회원 정보 일치 여부 검증
         boolean exists = ms.existsMemberForPassword(checkDto);
         if (!exists) {
             return "NOT_FOUND";
         }
 
-        // EmailAuthService로 type="pass" 저장 및 인증번호 메일 발송
         boolean isSent = eas.sendCode(email, "pass");
-
         return isSent ? "OK" : "FAIL";
     }
 
@@ -170,10 +155,8 @@ public class MemberController {
         return "member/findId";
     }
 
- // 3. 아이디 찾기 제출 (인증번호 검증 후 아이디 출력)
     @PostMapping("/member/findId")
     public String findId(IdFindDTO idFindDTO, Model model, RedirectAttributes ra) {
-        // 1. 이메일 인증번호 검증 (DB 조회 및 5분 유효시간 체크)
         boolean isVerified = eas.verifyCode(idFindDTO.getEmail(), idFindDTO.getAuthCode());
 
         if (!isVerified) {
@@ -181,7 +164,6 @@ public class MemberController {
             return "redirect:/member/findId";
         }
 
-        // 2. 아이디 조회
         String foundId = ms.findId(idFindDTO);
 
         if (foundId != null) {
@@ -199,10 +181,8 @@ public class MemberController {
         return "member/findPassword";
     }
 
- // 3. 비밀번호 찾기 제출
     @PostMapping("/member/findPassword")
     public String findPassword(PassFindDTO passFindDTO, Model model, RedirectAttributes ra) {
-        // 1. EmailAuthService를 이용한 5분 유효성 & 인증코드 검증
         boolean isVerified = eas.verifyCode(passFindDTO.getEmail(), passFindDTO.getAuthCode());
 
         if (!isVerified) {
@@ -210,14 +190,83 @@ public class MemberController {
             return "redirect:/member/findPassword";
         }
 
-        // 2. DB 임시 비밀번호 업데이트 & EmailAuthService를 통한 메일 발송
         boolean isUpdated = ms.findPass(passFindDTO);
 
         if (isUpdated) {
-            return "member/findPasswordResult"; // 성공 결과 페이지
+            return "member/findPasswordResult";
         } else {
             ra.addFlashAttribute("errorMsg", "임시 비밀번호 발급 처리 중 오류가 발생했습니다.");
             return "redirect:/member/findPassword";
         }
+    }
+
+ // ==========================================
+    // 회원탈퇴 관련 처리
+    // ==========================================
+
+    /**
+     * 1. 회원탈퇴 안내 페이지 이동
+     */
+    @GetMapping("/mypage/withdraw")
+    public String withdrawForm(Model model, HttpSession session) {
+        Member loginMember = (Member) session.getAttribute("loginMember");
+        if (loginMember == null) {
+            return "redirect:/member/login";
+        }
+
+        Member member = ps.getProfile(String.valueOf(loginMember.getMemberCode()));
+        model.addAttribute("member", member != null ? member : loginMember);
+
+        return "withdraw/withdraw"; // src/main/resources/templates/withdraw/withdraw.html 뷰 반환
+    }
+
+    /**
+     * 2. 회원탈퇴 실행 처리 (소셜 로그인 분기 포함)
+     */
+    @PostMapping("/mypage/withdraw")
+    public String withdraw(@RequestParam(value = "password", required = false) String password,
+                           HttpSession session, 
+                           RedirectAttributes ra) {
+                           
+        Member loginMember = (Member) session.getAttribute("loginMember");
+        if (loginMember == null) {
+            return "redirect:/member/login";
+        }
+
+        // 💡 핵심: 일반 회원('LOCAL')일 때만 비밀번호 검증 수행
+        if ("LOCAL".equals(loginMember.getLoginType())) {
+            if (password == null || password.trim().isEmpty()) {
+                ra.addFlashAttribute("errorMsg", "비밀번호를 입력해 주세요.");
+                ra.addFlashAttribute("openModal", true);
+                return "redirect:/mypage/withdraw";
+            }
+
+            boolean isPasswordValid = ms.checkPassword(loginMember.getMemberCode(), password);
+            if (!isPasswordValid) {
+                ra.addFlashAttribute("errorMsg", "비밀번호가 일치하지 않습니다.");
+                ra.addFlashAttribute("openModal", true);
+                return "redirect:/mypage/withdraw";
+            }
+        }
+        // 소셜 로그인 회원은 password 검증 과정을 스킵하고 바로 아래 DB 탈퇴로 진행됩니다.
+
+        // DB 탈퇴 처리 (member + member_auth 삭제/상태변경)
+        boolean result = ms.withdrawMember(String.valueOf(loginMember.getMemberCode()));
+
+        if (result) {
+            session.invalidate(); // 세션 무효화
+            return "redirect:/member/withdrawSuccess";
+        } else {
+            ra.addFlashAttribute("errorMsg", "회원 탈퇴 처리 중 오류가 발생했습니다.");
+            return "redirect:/mypage/withdraw";
+        }
+    }
+
+    /**
+     * 3. 회원탈퇴 완료 페이지
+     */
+    @GetMapping("/member/withdrawSuccess")
+    public String withdrawSuccess() {
+        return "withdraw/withdraw_success"; // src/main/resources/templates/withdraw/withdraw_success.html 뷰 반환
     }
 }

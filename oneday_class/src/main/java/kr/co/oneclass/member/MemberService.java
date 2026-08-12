@@ -26,4 +26,21 @@ public interface MemberService {
     boolean findPass(PassFindDTO passFindDTO);
 
     boolean existsMemberForPassword(PassFindDTO dto);
+
+    // ==========================================
+    // 신규 추가: 비밀번호 검증 및 회원탈퇴
+    // ==========================================
+
+    /**
+     * 비밀번호 검증 (회원탈퇴 전 확인용)
+     * @param memberCode 회원 코드
+     * @param rawPassword 입력한 비밀번호 (평문)
+     */
+    boolean checkPassword(int memberCode, String rawPassword);
+
+    /**
+     * 회원 탈퇴 처리
+     * @param memberCode 회원 코드
+     */
+    boolean withdrawMember(String memberCode);
 }
