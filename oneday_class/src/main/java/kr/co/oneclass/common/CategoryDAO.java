@@ -1,11 +1,8 @@
-package kr.co.oneclass.classDetail;
+package kr.co.oneclass.common;
 
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
-
-import kr.co.oneclass.common.CategoryDTO;
-import kr.co.oneclass.common.ClassImageDTO;
 
 @Mapper
 public interface CategoryDAO {

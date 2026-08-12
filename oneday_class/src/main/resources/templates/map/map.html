@@ -16,7 +16,7 @@
 				<a href="#">로그아웃</a> <a href="#">고객센터</a> <a href="#">마이페이지</a> <a
 					href="#">예약내역</a> <a href="#">관심목록</a>
 			</nav>
-			<button class="hamburger-btn">
+			<button class="hamburger-btn" aria-label="메뉴 열기">
 				<span></span><span></span><span></span>
 			</button>
 		</div>
@@ -31,146 +31,188 @@
 			</div>
 			<!-- 검색바 -->
 			<div class="search-box">
-				<input type="text" placeholder="원하는 지역, 클래스명을 검색해보세요."
+				<span class="search-icon">🔍</span> <input type="text"
+					id="keyword-search-input" placeholder="원하는 지역, 클래스명을 검색해보세요."
 					class="search-input">
-				<button class="search-btn">검색</button>
+				<button id="btn-keyword-search" class="search-btn">검색</button>
 			</div>
 		</div>
 
-		<!-- 필터 선택줄 1 -->
+		<!-- 필터 선택줄 1 (드롭다운 & 내 위치) -->
 		<div class="region-filter-wrapper">
-			<!-- 1) 지역 선택 버튼 & 드롭다운 모달 -->
-			<button id="btn-region-toggle" class="filter-select">지역 ▼</button>
 
-			<div id="region-modal" class="region-modal-container hidden">
-				<div class="region-columns-header">
-					<div>시·도</div>
-					<div>구·군</div>
-					<div>동·읍·면</div>
+			<!-- 1) 지역 선택 드롭다운 -->
+			<div class="filter-dropdown-container">
+				<button id="btn-region-toggle" class="filter-select">
+					<span class="icon">📍</span> <span class="select-text">서울특별시
+						전체</span> <span class="arrow">∨</span>
+				</button>
+
+				<!-- 지역 선택 모달 -->
+				<div id="region-modal" class="region-modal-container hidden">
+					<div class="region-columns-header">
+						<div>시·도</div>
+						<div>구·군</div>
+						<div>동·읍·면</div>
+					</div>
+
+					<div class="region-columns-body">
+						<!-- 1컬럼: 시·도 (시/도 기본값만 유지) -->
+						<ul id="list-sido" class="region-list">
+							<li class="active" data-sido="서울">서울</li>
+							<li data-sido="경기">경기</li>
+							<li data-sido="인천">인천</li>
+							<li data-sido="대전">대전</li>
+							<li data-sido="대구">대구</li>
+							<li data-sido="부산">부산</li>
+							<li data-sido="광주">광주</li>
+							<li data-sido="울산">울산</li>
+						</ul>
+
+						<!-- 2컬럼: 구·군 (JS가 동적 생성하므로 초기화) -->
+						<ul id="list-sigungu" class="region-list">
+							<li class="active" data-sigungu="선택안함">선택안함</li>
+						</ul>
+
+						<!-- 3컬럼: 동·읍·면 (JS가 동적 생성하므로 초기화) -->
+						<ul id="list-dong" class="region-list">
+							<li class="active" data-dong="선택안함">선택안함</li>
+						</ul>
+					</div>
+
+					<div class="region-modal-footer">
+						<button id="btn-region-cancel" class="btn-cancel">취소</button>
+						<button id="btn-region-search" class="btn-search">검색</button>
+					</div>
 				</div>
+			</div>
 
-				<div class="region-columns-body">
-					<!-- 1컬럼: 시·도 -->
-					<ul id="list-sido" class="region-list">
-						<li class="active" data-sido="서울">서울</li>
-						<li data-sido="경기">경기</li>
-						<li data-sido="인천">인천</li>
-						<li data-sido="대전">대전</li>
-						<li data-sido="대구">대구</li>
-					</ul>
+			<!-- 2) 카테고리 선택 드롭다운 -->
+			<div class="filter-dropdown-container">
+				<button id="btn-category-toggle" class="filter-select">
+					<span class="select-text">카테고리 전체</span> <span class="arrow">∨</span>
+				</button>
 
-					<!-- 2컬럼: 구·군 -->
-					<ul id="list-sigungu" class="region-list">
-						<li class="active" data-sigungu="선택안함">선택안함</li>
-						<li data-sigungu="강남구">강남구</li>
-						<li data-sigungu="강동구">강동구</li>
-						<li data-sigungu="강북구">강북구</li>
-					</ul>
+				<!-- 카테고리 선택 모달 -->
+				<div id="category-modal" class="region-modal-container hidden">
+					<div class="region-columns-header">
+						<div>카테고리 전체</div>
+					</div>
 
-					<!-- 3컬럼: 동·읍·면 -->
-					<ul id="list-dong" class="region-list">
-						<li class="active" data-dong="선택안함">선택안함</li>
-						<li data-dong="강일동">강일동</li>
-						<li data-dong="고덕1동">고덕1동</li>
-						<li data-dong="고덕2동">고덕2동</li>
-					</ul>
-				</div>
+					<div class="region-columns-body">
+						<ul id="list-category" class="region-list">
+							<li class="active" data-category="">전체</li>
+							<th:block
+								th:if="${categoryList != null and !#lists.isEmpty(categoryList)}">
+								<li th:each="cat, stat : ${categoryList}"
+									th:data-category="${cat.categoryName}"
+									th:text="${cat.categoryName}">카테고리명</li>
+							</th:block>
+						</ul>
+					</div>
 
-				<div class="region-modal-footer">
-					<button id="btn-region-cancel" class="btn-cancel">취소</button>
-					<button id="btn-region-search" class="btn-search">검색</button>
+					<div class="region-modal-footer">
+						<button id="btn-category-cancel" class="btn-cancel">취소</button>
+						<button id="btn-category-search" class="btn-search">검색</button>
+					</div>
 				</div>
 			</div>
 
-			<!-- 카테고리 선택 버튼 & 드롭다운 모달 -->
-			<button id="btn-category-toggle" class="filter-select">카테고리
-				▼</button>
-
-			<div id="category-modal" class="region-modal-container hidden">
-				<div class="region-columns-header">
-					<div>카테고리 전체</div>
-				</div>
-
-				<div class="region-columns-body">
-					<ul id="list-category" class="region-list">
-						<!-- 💡 전체 선택 옵션 (기본) -->
-						<li class="active" data-category="">전체</li>
-
-						<!-- 💡 DB에서 넘어온 categoryList 반복 출력 -->
-						<th:block
-							th:if="${categoryList != null and !#lists.isEmpty(categoryList)}">
-							<li th:each="cat, stat : ${categoryList}"
-								th:data-category="${cat.categoryName}"
-								th:text="${cat.categoryName}">카테고리명</li>
-						</th:block>
-					</ul>
-				</div>
-
-				<div class="region-modal-footer">
-					<button id="btn-category-cancel" class="btn-cancel">취소</button>
-					<button id="btn-category-search" class="btn-search">검색</button>
-				</div>
+			<!-- 3) 날짜 선택 드롭다운 -->
+			<div class="filter-dropdown-container">
+				<button id="btn-date-toggle" class="filter-select">
+					<span class="select-text">날짜 선택</span> <span class="arrow">∨</span>
+				</button>
 			</div>
+
+			<!-- 4) 시간 선택 드롭다운 -->
+			<div class="filter-dropdown-container">
+				<button id="btn-time-toggle" class="filter-select">
+					<span class="select-text">시간 선택</span> <span class="arrow">∨</span>
+				</button>
+			</div>
+
+			<!-- 5) 내 위치 중심 버튼 -->
+			<button id="btn-my-location" class="location-btn">
+				<span class="icon">🎯</span> 내 위치 중심
+			</button>
+
 		</div>
-		<!-- 필터 선택줄 2 (태그 & 정렬) -->
+
+		<!-- 필터 선택줄 2 (태그 칩 data-tag 속성 보완 & 정렬) -->
 		<div class="filter-bottom">
 			<div class="tag-group">
-				<button class="tag-pill active">전체</button>
-				<button class="tag-pill">베이킹</button>
-				<button class="tag-pill">공예</button>
-				<button class="tag-pill">플라워</button>
-				<button class="tag-pill">캔들</button>
-				<button class="tag-pill">음료</button>
-				<button class="tag-pill">기타</button>
+				<button class="tag-pill active" data-tag="">전체</button>
+				<button class="tag-pill" data-tag="베이킹">베이킹</button>
+				<button class="tag-pill" data-tag="공예">공예</button>
+				<button class="tag-pill" data-tag="플라워">플라워</button>
+				<button class="tag-pill" data-tag="캔들">캔들</button>
+				<button class="tag-pill" data-tag="음료">음료</button>
+				<button class="tag-pill" data-tag="기타">기타</button>
 			</div>
-			<select class="sort-select">
-				<option>추천순</option>
-				<option>거리순</option>
-				<option>가격 낮은 순</option>
-			</select>
+
+			<div class="sort-wrapper">
+				<select id="sort-select" class="sort-select">
+					<option value="recommend">추천순</option>
+					<option value="distance">거리순</option>
+					<option value="price_asc">가격 낮은 순</option>
+					<option value="price_desc">가격 높은 순</option>
+				</select>
+			</div>
 		</div>
 	</section>
 
-	<!-- 3. 메인 컨텐츠 영역 (지도가 있는 곳) -->
+	<!-- 3. 메인 컨텐츠 영역 (사이드바 & 지도) -->
 	<div class="main-container">
 
 		<!-- 좌측 사이드바: 클래스 목록 -->
 		<div class="sidebar">
 			<div class="sidebar-header">
 				<div class="class-count">
-					총 <span th:text="${classList.size()}">0</span>개의 클래스
+					총 <span id="class-count-num"
+						th:text="${classList != null ? classList.size() : 0}">0</span>개의
+					클래스
 				</div>
-				<button class="filter-icon-btn">⚙️</button>
+				<button class="filter-icon-btn" title="필터 상세 설정">⚙️</button>
 			</div>
 
-			<!-- 클래스 카드 리스트 반복문 -->
-			<div class="card-list-container">
-				<div th:each="item : ${classList}" class="class-card"
-					th:data-lat="${item.lat}" th:data-lng="${item.lng}"
-					th:data-title="${item.name}">
+			<!-- 클래스 카드 리스트 컨테이너 -->
+			<div id="card-list-container" class="card-list-container">
+				<!-- 데이터가 있는 경우 반복 출력 -->
+				<th:block
+					th:if="${classList != null and !#lists.isEmpty(classList)}">
+					<div th:each="item : ${classList}" class="class-card"
+						th:data-lat="${item.lat}" th:data-lng="${item.lng}"
+						th:data-title="${item.name}">
 
-					<div class="img-wrapper">
-						<img
-							th:src="${item.imageList != null and !item.imageList.isEmpty() ? item.imageList[0].image : '/images/default.jpg'}"
-							class="class-img" alt="클래스 이미지">
-						<button class="wish-btn">🤍</button>
-					</div>
+						<div class="img-wrapper">
+							<img
+								th:src="${item.imageList != null and !item.imageList.isEmpty() ? item.imageList[0].image : '/images/default.jpg'}"
+								class="class-img" alt="클래스 이미지">
+							<button class="wish-btn" aria-label="관심목록 추가">♡</button>
+						</div>
 
-					<div class="card-info">
-						<div>
-							<h3 class="class-title" th:text="${item.name}">클래스 제목</h3>
-							<span class="category-badge" th:text="${item.categoryCode}">카테고리</span>
-							<p class="class-address" th:text="${item.address}">주소</p>
-							<p class="class-date"
-								th:text="${#dates.format(item.writeDate, 'yyyy.MM.dd')}">일정</p>
-						</div>
-						<div class="price-row">
-							<span class="class-price"
-								th:text="${#numbers.formatInteger(item.price, 3, 'COMMA') + '원'}">0원</span>
-							<span class="class-distance">800m</span>
+						<div class="card-info">
+							<div>
+								<h3 class="class-title" th:text="${item.name}">토끼 빵 만들기</h3>
+								<span class="category-badge" th:text="${item.categoryCode}">베이킹</span>
+								<p class="class-address" th:text="${item.address}">서울 마포구</p>
+								<p class="class-date"
+									th:text="${#dates.format(item.writeDate, 'yyyy.MM.dd (E) HH:mm')}">2026.07.25
+									(토) 14:00</p>
+							</div>
+							<div class="price-row">
+								<span class="class-price"
+									th:text="${#numbers.formatInteger(item.price, 3, 'COMMA') + '원'}">45,000원</span>
+								<span class="class-distance">📍 800m</span>
+							</div>
 						</div>
 					</div>
-				</div>
+				</th:block>
+
+				<!-- 데이터가 없을 때 표시할 예외 문구 -->
+				<div th:if="${classList == null or #lists.isEmpty(classList)}"
+					class="no-data-msg">조건에 맞는 클래스가 없습니다.</div>
 			</div>
 
 			<button class="more-class-btn">더 많은 클래스 보기 +</button>
@@ -182,87 +224,61 @@
 		</div>
 	</div>
 
-	<!-- 4. 하단 추천 영역 -->
+	<!-- 4. 하단 안내 & 신뢰 배너 영역 -->
 	<section class="recommend-section">
-		<h2 class="recommend-title">이런 분들께 추천해요!</h2>
-		<div class="recommend-grid">
-			<div class="recommend-item">
-				<div class="rec-icon">💚</div>
-				<p>
-					주말 데이트를<br>찾고 계신 분
-				</p>
-			</div>
-			<div class="recommend-item">
-				<div class="rec-icon">👥</div>
-				<p>
-					아이와 특별한 시간을<br>보내고 싶은 분
-				</p>
-			</div>
-			<div class="recommend-item">
-				<div class="rec-icon">🎁</div>
-				<p>
-					새로운 취미를<br>시작하고 싶은 분
-				</p>
-			</div>
-			<div class="recommend-item">
-				<div class="rec-icon">🎂</div>
-				<p>
-					기념일에 특별한<br>선물을 만들고 싶은 분
-				</p>
-			</div>
-		</div>
-	</section>
-
-	<!-- 5. 신뢰 마크 & 푸터 배너 -->
-	<section class="trust-banners">
-		<div class="banner-inner">
-			<div class="banner-item">
-				<span class="banner-icon">⏳</span>
-				<div>
-					<h4>최대 7일 전 취소 가능</h4>
-					<p>유연한 취소 정책</p>
+		<div class="trust-banners">
+			<div class="banner-inner">
+				<div class="banner-item">
+					<span class="banner-icon">⏱️</span>
+					<div>
+						<h4>최대 7일 전 취소 가능</h4>
+						<p>유연한 취소 정책</p>
+					</div>
 				</div>
-			</div>
-			<div class="banner-item">
-				<span class="banner-icon">🛡️</span>
-				<div>
-					<h4>클래스 100% 보장</h4>
-					<p>클래스 불만족 시 환불</p>
+				<div class="banner-item">
+					<span class="banner-icon">🛡️</span>
+					<div>
+						<h4>클래스 100% 보장</h4>
+						<p>클래스 불만족 시 환불</p>
+					</div>
 				</div>
-			</div>
-			<div class="banner-item">
-				<span class="banner-icon">💳</span>
-				<div>
-					<h4>안전한 결제 시스템</h4>
-					<p>SSL 보안으로 안전하게</p>
+				<div class="banner-item">
+					<span class="banner-icon">💳</span>
+					<div>
+						<h4>안전한 결제 시스템</h4>
+						<p>SSL 보안으로 안전하게</p>
+					</div>
 				</div>
-			</div>
-			<div class="banner-item">
-				<span class="banner-icon">📞</span>
-				<div>
-					<h4>고객센터 1:1 문의</h4>
-					<p>평일 09:00 - 18:00</p>
+				<div class="banner-item">
+					<span class="banner-icon">🎧</span>
+					<div>
+						<h4>고객센터 1:1 문의</h4>
+						<p>평일 09:00 - 18:00</p>
+					</div>
 				</div>
 			</div>
 		</div>
 	</section>
 
-	<!-- 6. 하단 정보 영역 (푸터) -->
+	<!-- 5. 하단 정보 영역 (푸터) -->
 	<footer class="footer">
 		<div class="footer-inner">
-			<p class="company-name">원데이클래스 주식회사</p>
-			<p class="company-info">
-				주소: 06043 서울특별시 강남구 테헤란로 123, 클래스101 빌딩 5층 | 사업자등록번호: 141-81-81254<br>
-				통신판매업 신고번호: 제 2026-서울강남-1010호 | 대표: 김클래스 | 개인정보보호 책임자: 서클래스<br>
-				이메일: cs@class101.co.kr | 전화: 1588-7822
-			</p>
+			<div class="footer-left">
+				<p class="company-name">원데이클래스 주식회사</p>
+				<p class="company-info">
+					주소: 06043 서울특별시 강남구 테헤란로 123, 클래스101 빌딩 5층 | 사업자등록번호: 141-81-81254<br>
+					통신판매업 신고번호: 제 2026-서울강남-1010호 | 대표: 김클래스 | 개인정보보호 책임자: 서클래스<br>
+					이메일: cs@class101.co.kr | 전화: 1588-7822
+				</p>
+			</div>
 			<div class="social-links">
-				<a href="#">🌐</a> <a href="#">📸</a> <a href="#">🎥</a> <a href="#">💬</a>
+				<a href="#">Facebook</a> <a href="#">Instagram</a> <a href="#">YouTube</a>
+				<a href="#">Blog</a>
 			</div>
 		</div>
 	</footer>
 
-	<!-- 카카오 지도 API 로드 -->
+	<!-- 카카오 지도 API 로드 (libraries=services 포함) -->
 	<script type="text/javascript"
 		src="//dapi.kakao.com/v2/maps/sdk.js?appkey=26fc77ce3cbd848f1a576a8dcbe68fc5&libraries=services"></script>
 

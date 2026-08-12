@@ -1,208 +1,348 @@
 /**
- * 맵 자바스크립트 통합본
+ * 맵 자바스크립트 (동그라미 커스텀 오버레이 마커 + 지도 영역 연동)
  */
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function() {
+	
+	// 💡 전역 데이터가 잘 들어왔는지 먼저 출력!
+	    console.log("전체 데이터 목록:", classListData);
+	    
 
     // -------------------------------------------------------------
-    // 1. 카카오 지도 생성 및 마커 표시
+    // 1. 카카오 지도 생성 및 전역 변수
     // -------------------------------------------------------------
-    var mapContainer = document.getElementById('map'); 
-    
-    console.log("전달받은 클래스 목록:", typeof classListData !== 'undefined' ? classListData : []);
+    const mapContainer = document.getElementById('map');
+    let allClassData = typeof classListData !== 'undefined' ? classListData : [];
+	    console.log("allClassData 개수:", allClassData.length);
+    let markers = []; // 생성된 커스텀 오버레이 객체 저장 배열
 
-    // 기본 중심 좌표 (서울시청)
-    var defaultLat = 37.5381;
-    var defaultLng = 127.11609;
+    let defaultLat = 37.5381;
+    let defaultLng = 127.11609;
 
-    if (typeof classListData !== 'undefined' && classListData.length > 0 && classListData[0].lat && classListData[0].lng) {
-        defaultLat = classListData[0].lat;
-        defaultLng = classListData[0].lng;
+    if (allClassData.length > 0 && allClassData[0].lat && allClassData[0].lng) {
+        defaultLat = allClassData[0].lat;
+        defaultLng = allClassData[0].lng;
     }
 
-    var mapOption = {
+    const mapOption = {
         center: new kakao.maps.LatLng(defaultLat, defaultLng),
-        level: 3
+        level: 4
     };
 
-    // 💡 전역 지도 객체 생성
-    var map = new kakao.maps.Map(mapContainer, mapOption);
-
-    // 마커 이미지 설정
-    var imageSrc = "https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/markerStar.png";
-    var imageSize = new kakao.maps.Size(24, 35);
-    var markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize);
-
-    // 동적 마커 생성
-    if (typeof classListData !== 'undefined' && classListData.length > 0) {
-        var bounds = new kakao.maps.LatLngBounds();
-        var hasValidMarker = false;
-
-        classListData.forEach(function (item) {
-            if (item.lat && item.lng) {
-                var latlng = new kakao.maps.LatLng(item.lat, item.lng);
-
-                var marker = new kakao.maps.Marker({
-                    map: map,
-                    position: latlng,
-                    title: item.name,
-                    image: markerImage 
-                });
-
-                bounds.extend(latlng);
-                hasValidMarker = true;
-            }
-        });
-
-        if (hasValidMarker) {
-            map.setBounds(bounds);
-        }
-    }
-
+    const map = new kakao.maps.Map(mapContainer, mapOption);
+    const geocoder = new kakao.maps.services.Geocoder();
+    const ps = new kakao.maps.services.Places();
 
     // -------------------------------------------------------------
-    // 2. [지역 모달] 제어 및 지도 이동
+    // 2. 🔥 카테고리별 물방울 마커 스타일 & 생성 함수 (이미지 스타일 적용)
+    // -------------------------------------------------------------
+	const CATEGORY_STYLE = {
+	    '1': { icon: '/map/images/cook.png', name: '요리/베이킹' },
+	    '2': { icon: '/map/images/craft.png',   name: '공예' },
+	    '3': { icon: '/images/category/flower.png',  name: '플라워' },
+	    '4': { icon: '/images/category/candle.png',  name: '캔들' },
+	    '5': { icon: '/images/category/beverage.png', name: '음료' },
+	    'DEFAULT': { icon: '/map/images/cook-marker.png', name: '클래스' }
+	};
+
+	/**
+	     * 카테고리별 물방울(Pin) CustomOverlay 생성 함수
+	     */
+	function createCustomMarker(item) {
+	        let parentCategoryCode = 'DEFAULT';
+	        if (item.categoryCode !== undefined && item.categoryCode !== null) {
+	            parentCategoryCode = String(item.categoryCode).charAt(0);
+	        }
+
+	        const style = CATEGORY_STYLE[parentCategoryCode] || CATEGORY_STYLE['DEFAULT'];
+
+	        const contentHtml = `
+	            <div class="custom-pin-wrapper" title="${item.name || ''}" style="
+	                position: relative;
+	                width: 25px;
+	                height: 25px;
+	                background-color: #1B5E20;
+	                border-radius: 50% 50% 50% 0;
+	                transform: rotate(-45deg);
+	                box-shadow: -2px 3px 6px rgba(0, 0, 0, 0.25);
+	                display: flex;
+	                align-items: center;
+	                justify-content: center;
+	                cursor: pointer;
+	                transition: transform 0.2s ease;
+	                overflow: hidden; /* 🔥 이미지가 핀 바깥으로 삐져나가지 않게 처리 */
+	            ">
+	                <!-- 🔥 이미지 태그 적용 (Pin 이 회전되어 있으므로 역회전 rotate(45deg) 필수) -->
+	                <img src="${style.icon}" alt="${style.name}" style="
+	                    transform: rotate(45deg);
+	                    width: 15px;
+	                    height: 15px;
+	                    object-fit: contain;
+	                    display: block;
+	                    position: absolute; /* 🔥 중앙 정렬을 위한 추가 */
+	                "/>
+	            </div>
+	        `;
+
+	        const container = document.createElement('div');
+	        container.innerHTML = contentHtml;
+	        const markerElement = container.firstElementChild;
+
+	        // 마커 호버 애니메이션
+	        markerElement.addEventListener('mouseenter', function() {
+	            this.style.transform = 'rotate(-45deg) scale(1.15)';
+	        });
+	        markerElement.addEventListener('mouseleave', function() {
+	            this.style.transform = 'rotate(-45deg) scale(1.0)';
+	        });
+
+	        markerElement.addEventListener('click', function() {
+	            map.panTo(new kakao.maps.LatLng(item.lat, item.lng));
+	        });
+
+	        return new kakao.maps.CustomOverlay({
+	            position: new kakao.maps.LatLng(item.lat, item.lng),
+	            content: markerElement,
+	            xAnchor: 0.5,
+	            yAnchor: 1.0
+	        });
+	    }
+
+    // -------------------------------------------------------------
+    // 3. 지도의 현재 범위(Bounds) 필터링 & 마커/사이드바 렌더링
+    // -------------------------------------------------------------
+    function filterClassesByMapBounds() {
+        const bounds = map.getBounds();
+        const swLatLng = bounds.getSouthWest();
+        const neLatLng = bounds.getNorthEast();
+
+        const minLat = swLatLng.getLat();
+        const maxLat = neLatLng.getLat();
+        const minLng = swLatLng.getLng();
+        const maxLng = neLatLng.getLng();
+
+        const visibleClasses = allClassData.filter(item => {
+            if (!item.lat || !item.lng) return false;
+            return (item.lat >= minLat && item.lat <= maxLat && item.lng >= minLng && item.lng <= maxLng);
+        });
+
+        renderMarkersAndSidebar(visibleClasses);
+    }
+
+    function renderMarkersAndSidebar(classList) {
+        // 기존 마커(커스텀 오버레이) 전체 삭제
+        markers.forEach(overlay => overlay.setMap(null));
+        markers = [];
+
+        const cardContainer = document.getElementById('card-list-container');
+        const countNumSpan = document.getElementById('class-count-num');
+
+        if (countNumSpan) countNumSpan.innerText = classList ? classList.length : 0;
+
+        if (!classList || classList.length === 0) {
+            if (cardContainer) {
+                cardContainer.innerHTML = '<div class="no-data-msg">현재 지도 화면 내에 등록된 클래스가 없습니다.</div>';
+            }
+            return;
+        }
+
+        // 좌측 사이드바 카드 HTML 생성
+        if (cardContainer) {
+            let cardHtml = '';
+            classList.forEach(item => {
+                const imgPath = (item.imageList && item.imageList.length > 0) ? item.imageList[0].image : '/images/default.jpg';
+                const formattedPrice = item.price ? Number(item.price).toLocaleString() + '원' : '0원';
+
+                cardHtml += `
+                    <div class="class-card" data-lat="${item.lat}" data-lng="${item.lng}" data-title="${item.name}">
+                        <div class="img-wrapper">
+                            <img src="${imgPath}" class="class-img" alt="클래스 이미지">
+                            <button class="wish-btn" aria-label="관심목록 추가">♡</button>
+                        </div>
+                        <div class="card-info">
+                            <div>
+                                <h3 class="class-title">${item.name}</h3>
+                                <span class="category-badge">${item.categoryCode || '클래스'}</span>
+                                <p class="class-address">${item.address || ''}</p>
+                            </div>
+                            <div class="price-row">
+                                <span class="class-price">${formattedPrice}</span>
+                                <span class="class-distance">📍 지도 내 위치</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            cardContainer.innerHTML = cardHtml;
+        }
+
+        // 🔥 각 클래스 위치에 동그라미 커스텀 오버레이 마커 꽂기
+        classList.forEach(item => {
+            if (item.lat && item.lng) {
+                const customOverlay = createCustomMarker(item);
+                customOverlay.setMap(map); // 지도 위에 오버레이 렌더링
+                markers.push(customOverlay);
+            }
+        });
+    }
+
+    // 지도 움직임(드래그, 줌) 완료 시 화면 범위 기반 필터링 재실행
+    kakao.maps.event.addListener(map, 'idle', function() {
+        filterClassesByMapBounds();
+    });
+
+    // -------------------------------------------------------------
+    // 4. 모달 및 기타 필터 이벤트
     // -------------------------------------------------------------
     const btnRegionToggle = document.getElementById('btn-region-toggle');
     const regionModal = document.getElementById('region-modal');
     const btnRegionCancel = document.getElementById('btn-region-cancel');
     const btnRegionSearch = document.getElementById('btn-region-search');
+    const listSido = document.getElementById('list-sido');
+    const listSigungu = document.getElementById('list-sigungu');
+    const listDong = document.getElementById('list-dong');
+
+    const btnCategoryToggle = document.getElementById('btn-category-toggle');
+    const categoryModal = document.getElementById('category-modal');
 
     let selectedSido = "서울";
     let selectedSigungu = "";
     let selectedDong = "";
 
-    // 지역 모달 열기
-    btnRegionToggle?.addEventListener('click', () => {
-        regionModal.classList.toggle('hidden');
-        categoryModal.classList.add('hidden'); // 카테고리 모달은 닫음
+    // 지역 모달 열기/닫기
+    btnRegionToggle?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        categoryModal?.classList.add('hidden');
+        regionModal?.classList.toggle('hidden');
     });
 
-    // 지역 모달 닫기
-    btnRegionCancel?.addEventListener('click', () => {
-        regionModal.classList.add('hidden');
+    btnRegionCancel?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        regionModal?.classList.add('hidden');
     });
 
-    // 시/도 선택 이벤트
-    document.querySelectorAll('#list-sido li').forEach(item => {
-        item.addEventListener('click', function() {
-            document.querySelectorAll('#list-sido li').forEach(el => el.classList.remove('active'));
-            this.classList.add('active');
-            selectedSido = this.getAttribute('data-sido') || "서울";
-        });
-    });
+    // 시/도 -> 구/군 동적 생성
+    listSido?.addEventListener('click', function(e) {
+        const target = e.target.closest('li');
+        if (!target) return;
 
-    // 구/군 선택 이벤트
-    document.querySelectorAll('#list-sigungu li').forEach(item => {
-        item.addEventListener('click', function() {
-            document.querySelectorAll('#list-sigungu li').forEach(el => el.classList.remove('active'));
-            this.classList.add('active');
-            
-            selectedSigungu = this.getAttribute('data-sigungu');
-            if (selectedSigungu === '선택안함') selectedSigungu = '';
-        });
-    });
+        listSido.querySelectorAll('li').forEach(el => el.classList.remove('active'));
+        target.classList.add('active');
 
-    // 동/읍/면 선택 이벤트
-    document.querySelectorAll('#list-dong li').forEach(item => {
-        item.addEventListener('click', function() {
-            document.querySelectorAll('#list-dong li').forEach(el => el.classList.remove('active'));
-            this.classList.add('active');
-            
-            selectedDong = this.getAttribute('data-dong');
-            if (selectedDong === '선택안함') selectedDong = '';
-        });
-    });
+        selectedSido = target.getAttribute('data-sido') || target.innerText.trim();
+        selectedSigungu = "";
+        selectedDong = "";
 
-    // 지역 '검색' 버튼 클릭 시 지도 이동
-    var geocoder = new kakao.maps.services.Geocoder();
+        listDong.innerHTML = '<li class="active" data-dong="선택안함">선택안함</li>';
 
-    btnRegionSearch?.addEventListener('click', function () {
-        let fullAddress = `${selectedSido} ${selectedSigungu} ${selectedDong}`.trim();
-
-        if (!fullAddress) {
-            alert("지역을 선택해주세요.");
-            return;
-        }
-
-        geocoder.addressSearch(fullAddress, function (result, status) {
+        ps.keywordSearch(`${selectedSido}`, function(data, status) {
+            listSigungu.innerHTML = '<li class="active" data-sigungu="선택안함">선택안함</li>';
             if (status === kakao.maps.services.Status.OK) {
-                var coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-
-                map.setCenter(coords);
-                
-                if (selectedDong) {
-                    map.setLevel(4);
-                } else if (selectedSigungu) {
-                    map.setLevel(6);
-                } else {
-                    map.setLevel(8);
-                }
-
-                regionModal.classList.add('hidden');
-                btnRegionToggle.innerText = `${selectedSigungu || selectedSido} ▼`;
-
-            } else {
-                alert("해당 지역의 위치 정보를 찾을 수 없습니다.");
+                const sigunguSet = new Set();
+                data.forEach(place => {
+                    const parts = place.address_name.split(' ');
+                    if (parts.length > 1 && (parts[1].endsWith('구') || parts[1].endsWith('군') || parts[1].endsWith('시'))) {
+                        sigunguSet.add(parts[1]);
+                    }
+                });
+                sigunguSet.forEach(sigungu => {
+                    const li = document.createElement('li');
+                    li.setAttribute('data-sigungu', sigungu);
+                    li.textContent = sigungu;
+                    listSigungu.appendChild(li);
+                });
             }
         });
     });
 
+    // 구/군 -> 동 목록 생성
+    listSigungu?.addEventListener('click', function(e) {
+        const target = e.target.closest('li');
+        if (!target) return;
 
-    // -------------------------------------------------------------
-    // 3. [카테고리 모달] 제어 및 필터링
-    // -------------------------------------------------------------
-    const btnCategoryToggle = document.getElementById('btn-category-toggle');
-    const categoryModal = document.getElementById('category-modal');
-    const btnCategoryCancel = document.getElementById('btn-category-cancel');
-    const btnCategorySearch = document.getElementById('btn-category-search');
+        listSigungu.querySelectorAll('li').forEach(el => el.classList.remove('active'));
+        target.classList.add('active');
 
-    let selectedCategory = "";
+        selectedSigungu = target.getAttribute('data-sigungu') || "";
+        if (selectedSigungu === '선택안함') selectedSigungu = '';
 
-    // 카테고리 모달 열기
-    btnCategoryToggle?.addEventListener('click', () => {
-        categoryModal.classList.toggle('hidden');
-        regionModal.classList.add('hidden'); // 지역 모달은 닫음
+        if (!selectedSigungu) {
+            listDong.innerHTML = '<li class="active" data-dong="선택안함">선택안함</li>';
+            return;
+        }
+
+        ps.keywordSearch(`${selectedSido} ${selectedSigungu}`, function(data, status) {
+            listDong.innerHTML = '<li class="active" data-dong="선택안함">선택안함</li>';
+            if (status === kakao.maps.services.Status.OK) {
+                const dongSet = new Set();
+                data.forEach(place => {
+                    const parts = place.address_name.split(' ');
+                    if (parts.length > 2 && (parts[2].endsWith('동') || parts[2].endsWith('읍') || parts[2].endsWith('면'))) {
+                        dongSet.add(parts[2]);
+                    }
+                });
+                dongSet.forEach(dong => {
+                    const li = document.createElement('li');
+                    li.setAttribute('data-dong', dong);
+                    li.textContent = dong;
+                    listDong.appendChild(li);
+                });
+            }
+        });
     });
 
-    // 카테고리 모달 닫기
-    btnCategoryCancel?.addEventListener('click', () => {
-        categoryModal.classList.add('hidden');
+    // 동 선택
+    listDong?.addEventListener('click', function(e) {
+        const target = e.target.closest('li');
+        if (!target) return;
+
+        listDong.querySelectorAll('li').forEach(el => el.classList.remove('active'));
+        target.classList.add('active');
+
+        selectedDong = target.getAttribute('data-dong') || "";
+        if (selectedDong === '선택안함') selectedDong = '';
     });
 
-	// 카테고리 항목 클릭 선택 (기존과 동일하게 정상 동작!)
-	document.querySelectorAll('#list-category li').forEach(item => {
-	    item.addEventListener('click', function() {
-	        // 모든 li의 active 클래스 제거 후 클릭한 항목에만 추가
-	        document.querySelectorAll('#list-category li').forEach(el => el.classList.remove('active'));
-	        this.classList.add('active');
-	        
-	        // 클릭한 카테고리 값 저장
-	        selectedCategory = this.getAttribute('data-category');
-	    });
-	});
+    // 모달 검색 클릭
+    btnRegionSearch?.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const fullAddress = `${selectedSido} ${selectedSigungu} ${selectedDong}`.trim();
 
-	// 카테고리 '검색' 버튼 클릭 시
-	const btnCategorySearch = document.getElementById('btn-category-search');
-	btnCategorySearch?.addEventListener('click', function () {
-	    
-	    // 버튼 텍스트 변경 (비어있으면 '카테고리', 있으면 선택한 카테고리명)
-	    btnCategoryToggle.innerText = `${selectedCategory || '카테고리'} ▼`;
-	    categoryModal.classList.add('hidden');
+        geocoder.addressSearch(fullAddress, function(result, status) {
+            if (status === kakao.maps.services.Status.OK) {
+                const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                map.setCenter(coords);
+                map.setLevel(4);
+                regionModal?.classList.add('hidden');
 
-	    console.log("선택된 카테고리:", selectedCategory);
+                const textSpan = btnRegionToggle.querySelector('.select-text');
+                if (textSpan) {
+                    textSpan.innerText = `${selectedSigungu || selectedSido} ${selectedDong}`.trim();
+                }
+            } else {
+                alert("해당 지역의 위치를 찾을 수 없습니다.");
+            }
+        });
+    });
 
-	    // 💡 선택된 카테고리로 백엔드에 검색 요청을 보내는 방법 2가지:
-	    // 방법 A. URL 이동 (쿼리 파라미터)
-	    // window.location.href = `/map?category=${encodeURIComponent(selectedCategory)}`;
+    // 내 위치 중심 버튼
+    const btnMyLocation = document.getElementById('btn-my-location');
+    btnMyLocation?.addEventListener('click', function() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                const locPosition = new kakao.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                map.setCenter(locPosition);
+                map.setLevel(4);
+            });
+        }
+    });
 
-	    // 방법 B. AJAX(fetch)로 데이터만 갱신 후 지도/마커 새로고침
-	    
-	    fetch(`/api/map/classes?category=${encodeURIComponent(selectedCategory)}`)
-	        .then(res => res.json())
-	        .then(data => {
-	            // 받아온 데이터로 마커 및 사이드바 카드 목록 갱신
-	        });
-	   
-	});
+    // 외부 영역 클릭 시 모달 닫기
+    document.addEventListener('click', function(e) {
+        if (regionModal && !regionModal.contains(e.target) && !btnRegionToggle.contains(e.target)) {
+            regionModal.classList.add('hidden');
+        }
+    });
 
+    // 초기 실행
+    filterClassesByMapBounds();
 });

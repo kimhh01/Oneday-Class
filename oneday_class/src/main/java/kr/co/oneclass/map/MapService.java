@@ -1,11 +1,10 @@
 package kr.co.oneclass.map;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import kr.co.oneclass.classDetail.CategoryDAO;
+import kr.co.oneclass.common.CategoryDAO;
 import kr.co.oneclass.common.CategoryDTO;
 import kr.co.oneclass.common.ClassDTO;
 import lombok.RequiredArgsConstructor;
