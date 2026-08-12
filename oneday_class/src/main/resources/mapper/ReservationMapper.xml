@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.oneclass.payment.ReservationDAO">
+
+    <!-- 예약 정보 조회 -->
+    <select id="selectReservation" parameterType="int" resultType="kr.co.oneclass.payment.ReservationDTO">
+        SELECT 
+            reservation_code AS reservationCode,
+            class_code       AS classCode,
+            member_code      AS memberCode,
+            schedule_code    AS scheduleCode,
+            reservation_date AS reservationDate,
+            people_number    AS peopleNumber,
+            status,
+            total_price      AS totalPrice
+        FROM reservation
+        WHERE reservation_code = #{reservationCode}
+    </select>
+
+    <!-- 예약 인원수 수정 -->
+    <update id="updatePersonCount">
+        UPDATE reservation
+        SET people_number = #{count}
+        WHERE reservation_code = #{reservationCode}
+    </update>
+
+    <!-- 총 금액 수정 -->
+    <update id="updateTotalPrice">
+        UPDATE reservation
+        SET total_price = #{totalPrice}
+        WHERE reservation_code = #{reservationCode}
+    </update>
+
+<select id="selectClassDetailByScheduleCode" parameterType="int" resultType="kr.co.oneclass.common.ClassDTO">
+    SELECT c.name as name,
+        address,
+         address2,
+         price
+FROM class c
+JOIN class_repeat_rule crr
+  ON c.class_code = crr.class_code
+JOIN schedule s
+  ON s.repeat_rule_code = crr.repeat_rule_code
+WHERE s.schedule_code = #{scheduleCode}
+</select>
+<select id="selectClassDetailByScheduleCode2" parameterType="int" resultType="kr.co.oneclass.common.ScheduleDTO">
+select    class_date as classDate,
+      start_time as startTime,
+       end_time as endTime,
+       remaining_people as remainingPeople
+FROM class c
+JOIN class_repeat_rule crr
+  ON c.class_code = crr.class_code
+JOIN schedule s
+  ON s.repeat_rule_code = crr.repeat_rule_code
+WHERE s.schedule_code = #{scheduleCode}
+</select>
+<select id="selectCategory" parameterType="int" resultType="kr.co.oneclass.common.CategoryDTO">
+select cate.name as categoryName
+from category cate
+join class c
+on c.category_code = cate.category_code
+JOIN class_repeat_rule crr
+  ON c.class_code = crr.class_code
+JOIN schedule s
+  ON s.repeat_rule_code = crr.repeat_rule_code
+WHERE s.schedule_code = #{scheduleCode}
+</select>
+</mapper>

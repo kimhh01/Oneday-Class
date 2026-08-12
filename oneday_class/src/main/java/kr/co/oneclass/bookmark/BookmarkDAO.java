@@ -59,7 +59,7 @@ public interface BookmarkDAO {
      * 3. 관심 클래스 추가
      */
     @Insert("INSERT INTO bookmark (bookmark_code, member_code, class_code, bookmark_date) " +
-            "VALUES (seq_bookmark.NEXTVAL, TO_NUMBER(#{memberCode}), TO_NUMBER(#{classCode}), SYSDATE)")
+            "VALUES (seq_bookmark_code.NEXTVAL, TO_NUMBER(#{memberCode}), TO_NUMBER(#{classCode}), SYSDATE)")
     int insertBookmark(@Param("memberCode") String memberCode, @Param("classCode") String classCode);
 
     /**
@@ -69,4 +69,14 @@ public interface BookmarkDAO {
             "WHERE member_code = TO_NUMBER(#{memberCode}) " +
             "  AND class_code = TO_NUMBER(#{classCode})")
     int deleteBookmark(@Param("memberCode") String memberCode, @Param("classCode") String classCode);
+    
+    
+    
+    /**
+     * 5. 관심 존재 여부 확인
+     */
+    @Select("SELECT COUNT(*)"
+    		+ "    FROM bookmark"
+    		+ "    WHERE member_code = #{memberCode} AND class_code = #{classCode}")
+    int checkBookmark(@Param("memberCode") String memberCode, @Param("classCode") String classCode);
 }

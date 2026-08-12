@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.oneclass.classDetail.ClassDetailDAO">
+
+<!-- 1. 클래스 정보 조회 -->
+<select id="selectClass" parameterType="int" resultType="kr.co.oneclass.common.ClassDTO">
+    SELECT 
+        CLASS_CODE          AS classCode,
+        OPERATOR_CODE       AS operatorCode,
+        CATEGORY_CODE       AS categoryCode,
+        NAME,
+        PRICE,
+        DESIRED_PRICE       AS desiredPrice,
+        ZIPCODE,
+        ADDRESS,
+        OLD_ADDRESS         AS oldAddress,
+        STATUS,
+        REVIEW_SUM          AS reviewSum,
+        STAR_RATING_AVG     AS starRatingAvg,
+        VIEWS_CNT           AS viewsCnt,
+        SINGLE_INTRODUCE    AS singleIntroduce,
+        INTRODUCE,
+        FINISH_INTRODUCE    AS finishIntroduce,
+        LAT,
+        LNG
+    FROM class
+    WHERE class_code = #{classCode}
+</select>
+<!-- 2. 비슷한 클래스 리스트 조회 -->
+<select id="selectSameCategoryList" resultType="kr.co.oneclass.common.ClassDTO">
+    SELECT 
+        CLASS_CODE          AS classCode,
+        OPERATOR_CODE       AS operatorCode,
+        CATEGORY_CODE       AS categoryCode,
+        NAME,
+        PRICE,
+        DESIRED_PRICE       AS desiredPrice,
+        ZIPCODE,
+        ADDRESS,
+        OLD_ADDRESS         AS oldAddress,
+        STATUS,
+        REVIEW_SUM          AS reviewSum,
+        STAR_RATING_AVG     AS starRatingAvg,
+        VIEWS_CNT           AS viewsCnt,
+        SINGLE_INTRODUCE    AS singleIntroduce,
+        INTRODUCE,
+        FINISH_INTRODUCE    AS finishIntroduce,
+        LAT,
+        LNG
+    FROM class
+    WHERE category_code = #{categoryCode}
+      AND class_code != #{classCode}
+</select>
+
+<!-- 3. 작가 조회 -->
+<select id="selectCreator" parameterType="long" resultType="kr.co.oneclass.classDetail.OperatorDTO">
+    SELECT 
+        OPERATOR_CODE         AS operatorCode,
+        PROFILE_IMAGE         AS profileImage,         
+        ACTIVITY_NAME         AS activityName,          
+        ACTIVITY_REGION       AS activityRegion,    
+        CREATOR_INTRODUCTION  AS creatorIntroduction,
+        sns_url as snsUrl  
+    FROM creator
+    WHERE operator_code = #{operatorCode}
+</select>
+
+<!-- 4. 스케쥴 조회 -->
+    <select id="selectSchedule" parameterType="int" resultType="kr.co.oneclass.common.ScheduleDTO">
+    SELECT 
+        s.SCHEDULE_CODE     AS scheduleCode,
+        s.REPEAT_RULE_CODE  AS repeatRuleCode,
+        s.START_TIME        AS startTime,
+        s.END_TIME          AS endTime,
+        s.MIN_PEOPLE        AS minPeople,
+        s.MAX_PEOPLE        AS maxPeople
+    FROM schedule s
+    JOIN class_repeat_rule crr ON s.repeat_rule_code = crr.repeat_rule_code
+    WHERE crr.class_code = #{classCode}
+</select>
+
+<!-- 5. 스케쥴 리스트 전체 조회 -->
+<select id="selectScheduleList" parameterType="int" resultType="kr.co.oneclass.common.ScheduleDTO">
+    SELECT 
+        s.SCHEDULE_CODE       AS scheduleCode,
+        s.REPEAT_RULE_CODE    AS repeatRuleCode,
+        crr.CLASS_CODE        AS classCode,
+        s.CLASS_DATE          AS classDate,
+        s.START_TIME          AS startTime,
+        s.END_TIME            AS endTime,
+        s.MIN_PEOPLE          AS minPeople,
+        s.MAX_PEOPLE          AS maxPeople,
+        s.REMAINING_PEOPLE    AS remainingPeople,
+        s.SOLD_OUT_YN         AS soldOutYn,
+        crr.OPERATION_START_DATE AS startDate,
+        crr.OPERATION_END_DATE   AS endDate
+    FROM schedule s
+    JOIN class_repeat_rule crr ON s.repeat_rule_code = crr.repeat_rule_code
+    WHERE crr.class_code = #{classCode}
+    ORDER BY s.CLASS_DATE ASC, s.START_TIME ASC
+</select>
+
+<!-- 6. 커리큘럼 조회 -->
+<select id="selectCurriculum" parameterType="int" resultType="kr.co.oneclass.classDetail.CurriculumDTO">
+    SELECT 
+        CURRICULUM_CODE     AS curriculumCode,
+        CLASS_CODE          AS classCode,
+        CURRICULUM_TYPE     AS curriculumType,
+        CURRICULUM_TITLE    AS curriculumTitle,
+        CURRICULUM_CONTENT  AS curriculumContent,
+        CURRICULUM_IMG      AS curriculumImg
+    FROM class_curriculum
+    WHERE class_code = #{classCode}
+    ORDER BY CURRICULUM_CODE ASC  <!-- 필요 시 순서 정렬 -->
+</select>
+
+<!-- 7. 리뷰 리스트 조회 -->
+<select id="selectReviewList" parameterType="int" resultType="kr.co.oneclass.classDetail.ReviewDTO">
+    SELECT
+    m.name          AS userName,
+    m.image         AS userImg,
+    c.activity_name AS operatorName,
+    c.profile_image AS operatorImg,
+    r.star_rating   AS starRating,
+    r.content       AS content,
+    r.input_date    AS inputDate,
+    r.reply_content AS replyContent,
+    r.reply_date    AS replyDate,
+    ri.revjew_img   AS reviewImg
+FROM review r
+JOIN member m ON r.member_code = m.member_code
+JOIN class cl ON r.class_code = cl.class_code
+JOIN creator c ON cl.operator_code = c.operator_code
+LEFT JOIN review_img ri ON r.review_code = ri.review_code
+WHERE r.class_code = #{classCode}
+</select>
+
+<!-- 10. 리뷰 별점 요약 -->
+<select id="selectReviewSummary" parameterType="int" resultType="kr.co.oneclass.classDetail.ReviewSummaryDTO">
+    SELECT
+        COUNT(CASE WHEN STAR_RATING = 5 THEN 1 END) AS fiveStarCount,
+        COUNT(CASE WHEN STAR_RATING = 4 THEN 1 END) AS fourStarCount,
+        COUNT(CASE WHEN STAR_RATING = 3 THEN 1 END) AS threeStarCount,
+        COUNT(CASE WHEN STAR_RATING = 2 THEN 1 END) AS twoStarCount,
+        COUNT(CASE WHEN STAR_RATING = 1 THEN 1 END) AS oneStarCount,
+        COUNT(*) AS totalReviewCount,
+        AVG(STAR_RATING) AS averageRating
+    FROM REVIEW
+    WHERE CLASS_CODE = #{classCode}
+</select>
+
+</mapper>
