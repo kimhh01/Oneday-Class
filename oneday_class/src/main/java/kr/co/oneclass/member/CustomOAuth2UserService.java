@@ -39,12 +39,20 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         oauthdto.setEmail(email);
         oauthdto.setName(name);
 
+        // 💡 [핵심 추가] userRequest 객체에서 발급된 Access Token을 추출합니다.
+        String accessToken = userRequest.getAccessToken().getTokenValue();
+
         // 회원가입 또는 기존 회원 로그인 처리
         Member member = memberService.processOAuthLogin(oauthdto);
 
         // 세션에 로그인 회원 정보 저장
         if (member != null) {
             session.setAttribute("loginMember", member);
+            
+            // 💡 [핵심 추가] 나중에 '회원탈퇴(Revoke)' 시 사용하기 위해 세션에 토큰을 저장합니다.
+            if ("GOOGLE".equals(provider)) {
+                session.setAttribute("googleAccessToken", accessToken);
+            }
         }
 
         return oAuth2User;

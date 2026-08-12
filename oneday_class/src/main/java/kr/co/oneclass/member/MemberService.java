@@ -43,4 +43,9 @@ public interface MemberService {
      * @param memberCode 회원 코드
      */
     boolean withdrawMember(String memberCode);
+
+    // ==========================================
+    // 신규 추가: 소셜(구글) 연동 해제용 토큰 폐기
+    // ==========================================
+    boolean revokeGoogleToken(String accessToken);
 }

@@ -12,6 +12,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+// 💡 RestTemplate 및 Http 통신용 import 추가
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
+
 import java.util.UUID;
 
 @Service
@@ -177,6 +184,41 @@ public class MemberServiceImpl implements MemberService {
         int result2 = memberDAO.deleteMember(code);
 
         return result1 > 0 || result2 > 0;
+    }
+
+    // ==========================================
+    // 💡 신규 구현: 소셜(구글) 연동 해제용 토큰 폐기 로직
+    // ==========================================
+    @Override
+    public boolean revokeGoogleToken(String accessToken) {
+        if (accessToken == null || accessToken.trim().isEmpty()) {
+            return false;
+        }
+
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            
+            // 구글 Token Revoke Endpoint
+            String revokeUrl = "https://oauth2.googleapis.com/revoke?token=" + accessToken;
+
+            // 구글 권장 방식: POST, application/x-www-form-urlencoded
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            
+            HttpEntity<String> entity = new HttpEntity<>(headers);
+
+            // POST 요청 발송
+            ResponseEntity<String> response = restTemplate.postForEntity(revokeUrl, entity, String.class);
+
+            // 상태 코드가 200번대(200 OK 등)이면 폐기 성공
+            return response.getStatusCode().is2xxSuccessful();
+            
+        } catch (Exception e) {
+            // 토큰이 이미 만료되었거나 올바르지 않으면 Exception이 발생할 수 있으므로
+            // 탈퇴 흐름이 중단되지 않도록 로그만 남기고 false 리턴 처리
+            System.err.println("구글 토큰 폐기 중 오류 발생: " + e.getMessage());
+            return false;
+        }
     }
 
     private String createTempPassword() {

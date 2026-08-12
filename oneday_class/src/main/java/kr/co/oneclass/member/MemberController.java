@@ -200,7 +200,7 @@ public class MemberController {
         }
     }
 
- // ==========================================
+    // ==========================================
     // 회원탈퇴 관련 처리
     // ==========================================
 
@@ -221,7 +221,7 @@ public class MemberController {
     }
 
     /**
-     * 2. 회원탈퇴 실행 처리 (소셜 로그인 분기 포함)
+     * 2. 회원탈퇴 실행 처리 (구글 연동 해제 및 DB 탈퇴)
      */
     @PostMapping("/mypage/withdraw")
     public String withdraw(@RequestParam(value = "password", required = false) String password,
@@ -233,7 +233,7 @@ public class MemberController {
             return "redirect:/member/login";
         }
 
-        // 💡 핵심: 일반 회원('LOCAL')일 때만 비밀번호 검증 수행
+        // 💡 1. 일반 회원('LOCAL')일 때만 비밀번호 검증 수행
         if ("LOCAL".equals(loginMember.getLoginType())) {
             if (password == null || password.trim().isEmpty()) {
                 ra.addFlashAttribute("errorMsg", "비밀번호를 입력해 주세요.");
@@ -248,9 +248,15 @@ public class MemberController {
                 return "redirect:/mypage/withdraw";
             }
         }
-        // 소셜 로그인 회원은 password 검증 과정을 스킵하고 바로 아래 DB 탈퇴로 진행됩니다.
+        // 💡 2. 구글 회원일 경우 구글 서버의 토큰(연동) 먼저 폐기
+        else if ("GOOGLE".equals(loginMember.getLoginType())) {
+            String googleAccessToken = (String) session.getAttribute("googleAccessToken");
+            if (googleAccessToken != null) {
+                ms.revokeGoogleToken(googleAccessToken);
+            }
+        }
 
-        // DB 탈퇴 처리 (member + member_auth 삭제/상태변경)
+        // 💡 3. 공통 DB 탈퇴 처리 (member + member_auth 삭제/상태변경)
         boolean result = ms.withdrawMember(String.valueOf(loginMember.getMemberCode()));
 
         if (result) {
