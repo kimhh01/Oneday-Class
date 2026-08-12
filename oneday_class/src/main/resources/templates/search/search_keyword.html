@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>검색 결과 - Class 101 스타일</title>
+    
+    <link rel="stylesheet" th:href="@{/css/search.css}">
+    
+</head>
+<body>
+
+      <div th:replace="~{common/header :: headerFragment}"></div>
+
+    <main class="main-container">
+    
+      <!-- 상단 검색바 영역 -->
+        <div class="search-area">
+            <div class="search-input-wrap">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                
+                <!-- 검색어 초기값 설정 (value 속성) 및 id 부여 -->
+                <input type="search" id="searchInput" class="search-input" value="메이크업" placeholder="원하는 키워드를 검색해보세요.">
+                
+                <!-- onclick 이벤트로 입력값 지우기 기능 추가 -->
+                <div class="clear-btn" onclick="clearSearchText()">✖</div>
+                
+            </div>
+        </div>
+        
+        <hr class="main-divider">
+
+        <!-- 1. 작가 섹션 -->
+        <section class="result-section">
+            <h2 class="section-title"><span>작가</span></h2>
+            <div class="artist-grid">
+                <div class="artist-item">
+                    <img src="../images/tutor/tutor_1.svg" alt="메이크업 설리샘" class="artist-img">
+                    <div class="artist-info">
+                        <div class="artist-name">메이크업 설리샘</div>
+                        <div class="artist-status">진행중 클래스 1개</div>
+                    </div>
+                </div>
+                <div class="artist-item">
+                    <img src="../images/tutor/tutor_2.svg" alt="메이크업 설지영" class="artist-img">
+                    <div class="artist-info">
+                        <div class="artist-name">메이크업 설지영</div>
+                        <div class="artist-status">클래스 준비중</div>
+                    </div>
+                </div>
+                <div class="artist-item">
+                    <img src="../images/tutor/tutor_3.svg" alt="메이크업 해문" class="artist-img">
+                    <div class="artist-info">
+                        <div class="artist-name">메이크업 해문</div>
+                        <div class="artist-status">클래스 준비중</div>
+                    </div>
+                </div>
+                <div class="artist-item">
+                    <img src="../images/tutor/tutor_4.svg" alt="메이크업아티스트김현지" class="artist-img">
+                    <div class="artist-info">
+                        <div class="artist-name">메이크업아티스트김현지</div>
+                        <div class="artist-status">진행중 클래스 1개</div>
+                    </div>
+                </div>
+                <div class="artist-item">
+                    <img src="../images/tutor/tutor_5.svg" alt="메이크업아티스트 서아" class="artist-img">
+                    <div class="artist-info">
+                        <div class="artist-name">메이크업아티스트 서아</div>
+                        <div class="artist-status">진행중 클래스 1개</div>
+                    </div>
+                </div>
+                <div class="artist-item">
+                    <img src="../images/tutor/tutor_6.svg" alt="메이크업 아티스트 이지" class="artist-img">
+                    <div class="artist-info">
+                        <div class="artist-name">메이크업 아티스트 이지</div>
+                        <div class="artist-status">진행중 클래스 3개</div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn-more"><a href="search_keyword_more.html"><strong>작가</strong> 검색결과 더보기 &gt;</a></button>
+        </section>
+
+        <!-- 2. 클래스 섹션 -->
+        <section class="result-section">
+            <h2 class="section-title"><span>클래스</span></h2>
+            <div class="class-list">
+                <div class="class-item">
+                    <img src="../images/class/search_makeup_1.svg" alt="클래스 썸네일" class="class-img">
+                    <div class="class-info">
+                        <div class="class-location">강남구 신사동</div>
+                        <div class="class-title">[강남] 만족도 100 얼굴형 헤어 스타일링 메이크업 클래스</div>
+                        <div class="class-price-info">
+                            <span class="discount-rate">8%</span>
+                            <span class="original-price">51,000</span>
+                            <span class="final-price">48,600</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="class-item">
+                    <img src="../images/class/search_makeup_2.svg" alt="클래스 썸네일" class="class-img">
+                    <div class="class-info">
+                        <div class="class-location">성동구 성수동 2가</div>
+                        <div class="class-title">[성수] 시원하다 공식 메이크업샵, 네이버리뷰 2천+, 메이크업 클래스/퍼스널 진단</div>
+                        <div class="class-price-info">
+                            <span class="discount-rate">8%</span>
+                            <span class="original-price">51,000</span>
+                            <span class="final-price">48,600</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="class-item">
+                    <img src="../images/class/search_makeup_3.svg" alt="클래스 썸네일" class="class-img">
+                    <div class="class-info">
+                        <div class="class-location">강남구 삼성동</div>
+                        <div class="class-title">[강남/청담] 민서실장 내 손으로 배우는 1:1 데일리 메이크업클래스</div>
+                        <div class="class-price-info">
+                            <span class="discount-rate">8%</span>
+                            <span class="original-price">51,000</span>
+                            <span class="final-price">48,600</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="btn-more"><a href="search_keyword_more.html"><strong>클래스</strong> 검색결과 더보기 &gt;</a></button>
+        </section>
+    </main>
+
+
+    
+<div th:replace="~{common/footer :: footerFragment}"></div>
+    
+   
+
+  <script>
+        // 1. 검색창 텍스트 지우기 함수
+        function clearSearchText() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = ''; // 텍스트 초기화
+            searchInput.focus();    // 지운 후 바로 타이핑할 수 있게 포커스 이동
+        }
+        
+        </script>
+</body>
+</html>

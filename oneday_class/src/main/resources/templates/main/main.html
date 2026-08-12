@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>클래스101 메인</title>
+    <link rel="stylesheet" th:href="@{/css/main/main.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+
+    <div th:replace="~{common/header :: headerFragment}"></div>
+    
+    <main class="main-container">
+        <div class="search-wrap">
+            <div class="search-box">
+                <div class="search-icon">
+                    <img src="/images/icon/search_icon.svg" alt="아이콘" style="width: 20px; height: 20px;">
+                </div>
+                <input class="search-input" type="text" placeholder="원하는 키워드를 검색해보세요.">
+                <button class="search-btn">검색</button>
+            </div>
+        </div>
+
+        <section class="hero-section">
+            <div class="hero-text">
+                <h1><span>솜씨당</span>에서<br>당신의 취미를 찾아보세요</h1>
+                <p>소통을 갈망하고, 입시와 취업에 지친 일상 속에서 나를 찾는 시간.<br>솜씨당에서 특별한 클래스를 만나보세요.</p>
+            </div>
+            
+            <div class="hero-banner">
+                <img src="/images/banner/main_banner.jpg" alt="메인배너">
+                
+                <form action="/search" method="get" class="hero-floating-search">
+                    <div class="float-input-group hover-dropdown-container">
+                        <div class="category-flex-wrapper">
+                            <div class="search-icon">
+                                <img src="/images/icon/search_icon.svg" alt="아이콘" style="width: 20px; height: 20px;">
+                            </div>
+                            <span class="group-label">카테고리 |</span>
+                            <span class="selected-text">요리.수공예.미술</span>
+                            
+                            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </div>
+
+                        <div class="dropdown-menu-box">
+                            <div class="dropdown-inner">
+                                <a href="#" class="dropdown-item">요리</a>
+                                <a href="#" class="dropdown-item">수공예</a>
+                                <a href="#" class="dropdown-item">미술</a>
+                                <a href="#" class="dropdown-item">뷰티</a>
+                                <a href="#" class="dropdown-item">액티비티</a>
+                                <a href="#" class="dropdown-item">음악</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="float-input-group schedule-group">
+                        <span class="calendar-icon">
+                            <img src="/images/icon/calendar_icon.svg" alt="아이콘" style="width: 20px; height: 20px;">
+                        </span>
+                        <span class="group-label">일정 |</span>
+                        <input type="date" name="schedule" class="search-date-input" required>
+                    </div>
+
+                    <button type="submit">검색</button>
+                </form>
+            </div>
+        </section>
+   
+        <section class="category-nav">
+            <a th:href="@{/category}" class="category-item">
+                <div class="category-icon">
+                    <img src="/images/icon/category_icon.svg" alt="아이콘" style="width: 36px; height: 36px;">
+                </div>
+                <span class="category-name">카테고리 전체</span>
+            </a>
+            
+            <a href="#" class="category-item">
+                <div class="category-icon">
+                    <img src="/images/icon/map_icon.svg" alt="아이콘" style="width: 36px; height: 36px;">
+                </div>
+                <span class="category-name">지역별 찾기</span>
+            </a>
+
+            <a th:href="@{/top_category/beauty}" class="category-item">
+                <div class="category-icon">
+                    <img src="/images/icon/beauty_icon.svg" alt="아이콘" style="width: 36px; height: 36px;">
+                </div>
+                <span class="category-name">인기 뷰티</span>
+            </a>
+
+            <a th:href="@{/top_category/baking}" class="category-item">
+                <div class="category-icon">
+                    <img src="/images/icon/baking_icon.svg" alt="아이콘" style="width: 36px; height: 36px;">
+                </div>
+                <span class="category-name">인기 베이킹</span>
+            </a>
+            
+            <a th:href="@{/top_category/activity}" class="category-item">
+                <div class="category-icon">
+                    <img src="/images/icon/activity_icon.svg" alt="아이콘" style="width: 36px; height: 36px;">
+                </div>
+                <span class="category-name">인기 액티비티</span>
+            </a>
+            
+            <a href="#" class="category-item">
+                <div class="category-icon">
+                    <img src="/images/icon/today_icon.svg" alt="아이콘" style="width: 42px; height: 42px;">
+                </div>
+                <span class="category-name">당일 예약</span>
+            </a>
+            
+            <a href="#" class="category-item">
+                <div class="category-icon">
+                    <img src="/images/icon/weekend_icon.svg" alt="아이콘" style="width: 36px; height: 36px;">      
+                </div>
+                <span class="category-name">주말 예약</span>
+            </a>
+        </section>
+
+        <section class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">솜씨당이 검증한 이달의 인기클래스!</h2>
+                <span class="view-all">
+                    <a th:href="@{/category}" class="category-item">전체보기 &gt;</a>
+                </span>
+            </div>
+            
+            <div class="grid-3">
+                <div class="class-card">
+                    <img src="/images/class/dessert1.jpg" alt="클래스">
+                    <div class="class-info">
+                        <div class="class-loc">송파구 성수2가</div>
+                        <div class="class-name">[성수][나이프] 감성 듬뿍 액션 페인팅 룸에 드로잉 캔버스</div>
+                        <div class="class-price-row">
+                            <span class="discount">8%</span>
+                            <span class="original">51,000</span>
+                            <span class="final">48,600</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="class-card">
+                    <img src="/images/class/dessert2.jpg" alt="클래스">
+                    <div class="class-info">
+                        <div class="class-loc">성동구 성수동</div>
+                        <div class="class-name">[숲속의 차] 감각적인 이달의 추천 원데이클래스 모음전</div>
+                        <div class="class-price-row">
+                            <span class="discount">8%</span>
+                            <span class="original">51,000</span>
+                            <span class="final">48,600</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="class-card">
+                    <img src="/images/class/dessert3.jpg" alt="클래스">
+                    <div class="class-info">
+                        <div class="class-loc">마포구 서교동</div>
+                        <div class="class-name">[홍대/합정] 나만의 도자기 트레이 홈 카페 감성 완성 원데이 믹스</div>
+                        <div class="class-price-row">
+                            <span class="discount">8%</span>
+                            <span class="original">51,000</span>
+                            <span class="final">48,600</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">어디에서 놀까요?</h2>
+            </div>
+            <div class="location-circles">
+                <div class="loc-circle" style="background-image: url('/images/mokup_1.jpg');"><span>홍대</span></div>
+                <div class="loc-circle" style="background-image: url('/images/mokup_2.jpg');"><span>강남</span></div>
+                <div class="loc-circle"></div>
+                <div class="loc-circle"></div>
+                <div class="loc-circle"></div>
+                <div class="loc-circle"></div>
+                <div class="loc-circle"></div>
+                <div class="loc-circle"></div>
+                <div class="loc-circle"></div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">인기 디저트 클래스 🍰</h2>
+                <span class="view-all">
+                    <a th:href="@{/category}" class="category-item">전체보기 &gt;</a>
+                </span>
+            </div>
+            
+            <div class="grid-5">
+                <script>
+                    for(let i=0; i<5; i++) {
+                        document.write(`
+                        <div class="class-card">
+                            <img src="https://via.placeholder.com/200" alt="디저트 클래스">
+                            <div class="class-info">
+                                <div class="class-loc">송파구 송파동</div>
+                                <div class="class-name">[송파] 꼬북~~ 귀여운 토마토 거북이 쿠키 만들기</div>
+                                <div class="class-price-row">
+                                    <span class="discount">8%</span>
+                                    <span class="original">51,000</span>
+                                    <span class="final">48,600</span>
+                                </div>
+                            </div>
+                        </div>
+                        `);
+                    }
+                </script>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">휴가 전 이미지 변신!<br>나에게 어울리는 메이크업 찾기 💄✨</h2>
+                <span class="view-all">
+                    <a th:href="@{/category}" class="category-item">전체보기 &gt;</a>
+                </span>
+            </div>
+            <div class="grid-3">
+                <script>
+                    for(let i=0; i<3; i++) {
+                        document.write(`
+                        <div class="class-card">
+                            <img src="https://via.placeholder.com/300" alt="메이크업 클래스">
+                            <div class="class-info">
+                                <div class="class-loc">강남구 신사동</div>
+                                <div class="class-name">[강남] 숨겨진 분위기를 찾아주는 무드 메이크업 클래스</div>
+                                <div class="class-price-row">
+                                    <span class="discount">8%</span>
+                                    <span class="original">51,000</span>
+                                    <span class="final">48,600</span>
+                                </div>
+                            </div>
+                        </div>
+                        `);
+                    }
+                </script>
+            </div>
+        </section>
+
+    </main>
+  
+    <div th:replace="~{common/footer :: footerFragment}"></div>
+
+</body>
+</html>

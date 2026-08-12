@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>검색 결과 - 전체 보기 및 페이징</title>
+<link rel="stylesheet" th:href="@{/css/search/search.css}">
+</head>
+<body>
+
+     <div th:replace="~{common/header :: headerFragment}"></div>
+
+    <main class="main-container">
+        <!-- 상단 검색바 영역 -->
+        <div class="search-area">
+            <div class="search-input-wrap">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                
+                <!-- 검색어 초기값 설정 (value 속성) 및 id 부여 -->
+                <input type="search" id="searchInput" class="search-input" value="메이크업" placeholder="원하는 키워드를 검색해보세요.">
+                
+                <!-- onclick 이벤트로 입력값 지우기 기능 추가 -->
+                <div class="clear-btn" onclick="clearSearchText()">✖</div>
+                
+            </div>
+        </div>
+
+        <!-- 탭 메뉴 -->
+        <div class="tab-nav">
+            <button class="tab-btn active" data-target="tab-artist" onclick="switchTab('tab-artist')">작가</button>
+            <button class="tab-btn" data-target="tab-class" onclick="switchTab('tab-class')">클래스</button>
+        </div>
+
+        <!-- ================= [1] 작가 탭 컨텐츠 ================= -->
+        <div id="tab-artist" class="tab-content active">
+            
+            <!-- 작가 1 -->
+            <div class="artist-group">
+                <div class="artist-profile">
+                    <img src="../images/tutor/tutor_1.svg" alt="설리샘" class="artist-img">
+                    <div>
+                        <div class="artist-name">메이크업 설리샘</div>
+                        <div class="artist-status">진행중 클래스 2개</div>
+                    </div>
+                </div>
+                <div class="artist-classes-grid">
+                    <div class="sub-class-card">
+                        <img src="../images/class/makeup_1.svg" alt="클래스" class="sub-class-img">
+                        <div class="sub-class-title">[송파] 키티 스노우볼 케이크 꾸미기 기념일데이트 추천</div>
+                        <div class="sub-class-price">
+                            <span class="discount-rate">8%</span>
+                            <span class="original-price">51,000</span>
+                            <span class="final-price">48,600</span>
+                        </div>
+                    </div>
+                    <div class="sub-class-card">
+                        <img src="../images/class/makeup_2.svg" alt="클래스" class="sub-class-img">
+                        <div class="sub-class-title">[송파] 키티 스노우볼 케이크 꾸미기 기념일데이트 추천</div>
+                        <div class="sub-class-price">
+                            <span class="discount-rate">8%</span>
+                            <span class="original-price">51,000</span>
+                            <span class="final-price">48,600</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 작가 2 -->
+            <div class="artist-group">
+                <div class="artist-profile">
+                    <img src="../images/tutor/tutor_2.svg" alt="설지영" class="artist-img">
+                    <div>
+                        <div class="artist-name">메이크업 설지영</div>
+                        <div class="artist-status">클래스 준비중</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 작가 3 -->
+            <div class="artist-group">
+                <div class="artist-profile">
+                    <img src="../images/tutor/tutor_3.svg" alt="해문" class="artist-img">
+                    <div>
+                        <div class="artist-name">메이크업 해문</div>
+                        <div class="artist-status">클래스 준비중</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 작가 4 -->
+            <div class="artist-group">
+                <div class="artist-profile">
+                    <img src="../images/tutor/tutor_4.svg" alt="김현지" class="artist-img">
+                    <div>
+                        <div class="artist-name">메이크업아티스트김현지</div>
+                        <div class="artist-status">진행중 클래스 3개</div>
+                    </div>
+                </div>
+                <div class="artist-classes-grid">
+                    <div class="sub-class-card">
+                        <img src="../images/class/makeup_3.svg" alt="클래스" class="sub-class-img">
+                        <div class="sub-class-title">[강남] NO 밀가루 버터떡! 하트 버터떡 클래스</div>
+                        <div class="sub-class-price">
+                            <span class="discount-rate">8%</span>
+                            <span class="final-price">48,600</span>
+                        </div>
+                    </div>
+                    <div class="sub-class-card">
+                        <img src="../images/class/makeup_4.svg" alt="클래스" class="sub-class-img">
+                        <div class="sub-class-title">[송파] 키티 스노우볼 케이크 꾸미기</div>
+                        <div class="sub-class-price">
+                            <span class="discount-rate">8%</span>
+                            <span class="final-price">48,600</span>
+                        </div>
+                    </div>
+                    <div class="sub-class-card">
+                        <img src="../images/class/makeup_5.svg" alt="클래스" class="sub-class-img">
+                        <div class="sub-class-title">[송파] 키티 스노우볼 케이크 꾸미기</div>
+                        <div class="sub-class-price">
+                            <span class="discount-rate">8%</span>
+                            <span class="final-price">48,600</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 작가 5 -->
+            <div class="artist-group">
+                <div class="artist-profile">
+                    <img src="../images/tutor/tutor_5.svg" alt="서아" class="artist-img">
+                    <div>
+                        <div class="artist-name">메이크업아티스트 서아</div>
+                        <div class="artist-status">진행중 클래스 2개</div>
+                    </div>
+                </div>
+                <div class="artist-classes-grid">
+                    <div class="sub-class-card">
+                        <img src="https://via.placeholder.com/200" alt="클래스" class="sub-class-img">
+                        <div class="sub-class-title">[강남] 데일리 메이크업 클래스</div>
+                        <div class="sub-class-price">
+                            <span class="discount-rate">8%</span>
+                            <span class="final-price">48,600</span>
+                        </div>
+                    </div>
+                    <div class="sub-class-card">
+                        <img src="https://via.placeholder.com/200" alt="클래스" class="sub-class-img">
+                        <div class="sub-class-title">[송파] 스페셜 메이크업 클래스</div>
+                        <div class="sub-class-price">
+                            <span class="discount-rate">8%</span>
+                            <span class="final-price">48,600</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 작가 페이징 -->
+            <div class="pagination">
+                <button class="page-btn page-arrow">&lt;</button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn">4</button>
+                <button class="page-btn">5</button>
+                <button class="page-btn page-arrow">&gt;</button>
+            </div>
+        </div>
+
+
+        <!-- ================= [2] 클래스 탭 컨텐츠 ================= -->
+        <div id="tab-class" class="tab-content">
+            <div class="class-list">
+                <!-- 자바스크립트로 샘플 클래스 5개 생성 -->
+                <script>
+                    for(let i=1; i<=5; i++) {
+                        document.write(`
+                        <div class="class-item">
+                            <img src="../images/class/search_makeup_1.svg" alt="클래스 썸네일" class="class-img">
+                            <div class="class-info">
+                                <div class="class-location">강남구 신사동</div>
+                                <div class="class-title">[강남] 만족도 100 얼굴형 헤어 스타일링 메이크업 클래스</div>
+                                <div class="class-price-info">
+                                    <span class="discount-rate">8%</span>
+                                    <span class="original-price">51,000</span>
+                                    <span class="final-price">48,600</span>
+                                </div>
+                            </div>
+                        </div>
+                        `);
+                    }
+                </script>
+            </div>
+
+            <!-- 클래스 페이징 -->
+            <div class="pagination">
+                <button class="page-btn page-arrow">&lt;</button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn">4</button>
+                <button class="page-btn">5</button>
+                <button class="page-btn page-arrow">&gt;</button>
+            </div>
+        </div>
+
+    </main>
+
+<div th:replace="~{common/footer :: footerFragment}"></div>
+
+    <!-- 자바스크립트 영역 -->
+    <script>
+        // 1. 검색창 텍스트 지우기 함수
+        function clearSearchText() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = ''; // 텍스트 초기화
+            searchInput.focus();    // 지운 후 바로 타이핑할 수 있게 포커스 이동
+        }
+
+        // 2. 탭 전환 스크립트
+        function switchTab(tabId) {
+            // 모든 탭 버튼 및 컨텐츠 비활성화
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            // 선택된 탭 활성화
+            document.querySelector(`[data-target="${tabId}"]`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+    </script>
+</body>
+</html>
