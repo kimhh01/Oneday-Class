@@ -55,4 +55,10 @@ public class ClassDetailController {
         // 추가되었으면 ADDED, 삭제되었으면 REMOVED 반환
         return isAdded ? "ADDED" : "REMOVED";
     }
+    
+    //환불규정
+    @GetMapping("/refundPolicy")
+    public String refundPolicy() {
+    	return "/refundPolicy/refundPolicy";
+    }
 }
