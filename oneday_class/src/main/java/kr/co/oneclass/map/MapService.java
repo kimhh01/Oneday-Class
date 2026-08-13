@@ -2,9 +2,9 @@ package kr.co.oneclass.map;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import kr.co.oneclass.common.CategoryDAO;
 import kr.co.oneclass.common.CategoryDTO;
 import kr.co.oneclass.common.ClassDTO;
 import lombok.RequiredArgsConstructor;
@@ -13,8 +13,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MapService {
 	
+	@Autowired
 	private final MapDAO mDAO;
-	private final CategoryDAO cDAO;
 	
 	public List<ClassDTO> getClassList(MapSearchDTO mDTO) {
 		return mDAO.selectClassList(mDTO); 
@@ -22,7 +22,7 @@ public class MapService {
 	
 	
 	public List<CategoryDTO> getCategoryList() {
-		return cDAO.selectCategoryList();
+		return mDAO.selectCategoryList();
 	}
 	
 }

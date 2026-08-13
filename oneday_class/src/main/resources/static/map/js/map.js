@@ -1,18 +1,21 @@
 /**
- * 맵 자바스크립트 (동그라미 커스텀 오버레이 마커 + 지도 영역 연동)
+ * 맵 자바스크립트 (동그라미 커스텀 오버레이 마커 + 지도 영역 & 카테고리 필터 연동)
  */
 document.addEventListener("DOMContentLoaded", function() {
-	
-	// 💡 전역 데이터 출력
-    console.log("전체 데이터 목록:", classListData);
     
     // -------------------------------------------------------------
-    // 1. 카카오 지도 생성 및 전역 변수
+    // 1. 카카오 지도 생성 및 전역 변수 선언
     // -------------------------------------------------------------
     const mapContainer = document.getElementById('map');
     let allClassData = typeof classListData !== 'undefined' ? classListData : [];
+    let allCategories = typeof categoryListData !== 'undefined' ? categoryListData : [];
     console.log("allClassData 개수:", allClassData.length);
+    
     let markers = []; // 생성된 커스텀 오버레이 객체 저장 배열
+
+    // 🔥 필터용 전역 변수를 최상단으로 이동 (스코프 문제 해결)
+    let selectedCategoryCode = "";
+    let selectedCategoryName = "카테고리 전체";
 
     let defaultLat = 37.5381;
     let defaultLng = 127.11609;
@@ -34,77 +37,78 @@ document.addEventListener("DOMContentLoaded", function() {
     // -------------------------------------------------------------
     // 2. 카테고리별 물방울 마커 스타일 & 생성 함수
     // -------------------------------------------------------------
-	const CATEGORY_STYLE = {
-	    '1': { icon: '/map/images/free.png', name: '요리/베이킹' },
-	    '2': { icon: '/map/images/craft.png',   name: '공예' },
-	    '3': { icon: '/images/category/flower.png',  name: '플라워' },
-	    '4': { icon: '/images/category/candle.png',  name: '캔들' },
-	    '5': { icon: '/images/category/beverage.png', name: '음료' },
-	    'DEFAULT': { icon: '/map/images/cook-marker.png', name: '클래스' }
-	};
+    const CATEGORY_STYLE = {
+        '1': { icon: '/map/images/free.png', name: '요리/베이킹' },
+        '2': { icon: '/map/images/craft.png',   name: '공예' },
+        '3': { icon: '/images/category/flower.png',  name: '플라워' },
+        '4': { icon: '/images/category/candle.png',  name: '캔들' },
+        '5': { icon: '/images/category/beverage.png', name: '음료' },
+        'DEFAULT': { icon: '/map/images/cook-marker.png', name: '클래스' }
+    };
 
-	function createCustomMarker(item) {
-	        let parentCategoryCode = 'DEFAULT';
-	        if (item.categoryCode !== undefined && item.categoryCode !== null) {
-	            parentCategoryCode = String(item.categoryCode).charAt(0);
-	        }
+    function createCustomMarker(item) {
+        let parentCategoryCode = 'DEFAULT';
+        if (item.categoryCode !== undefined && item.categoryCode !== null) {
+            parentCategoryCode = String(item.categoryCode).charAt(0);
+        }
 
-	        const style = CATEGORY_STYLE[parentCategoryCode] || CATEGORY_STYLE['DEFAULT'];
+        const style = CATEGORY_STYLE[parentCategoryCode] || CATEGORY_STYLE['DEFAULT'];
 
-	        const contentHtml = `
-	            <div class="custom-pin-wrapper" title="${item.name || ''}" style="
-	                position: relative;
-	                width: 25px;
-	                height: 25px;
-	                background-color: #1B5E20;
-	                border-radius: 50% 50% 50% 0;
-	                transform: rotate(-45deg);
-	                box-shadow: -2px 3px 6px rgba(0, 0, 0, 0.25);
-	                display: flex;
-	                align-items: center;
-	                justify-content: center;
-	                cursor: pointer;
-	                transition: transform 0.2s ease;
-	                overflow: hidden;
-	            ">
-	                <img src="${style.icon}" alt="${style.name}" style="
-	                    transform: rotate(45deg);
-	                    width: 15px;
-	                    height: 15px;
-	                    object-fit: contain;
-	                    display: block;
-	                    position: absolute;
-	                "/>
-	            </div>
-	        `;
+        const contentHtml = `
+            <div class="custom-pin-wrapper" title="${item.name || ''}" style="
+                position: relative;
+                width: 25px;
+                height: 25px;
+                background-color: #1B5E20;
+                border-radius: 50% 50% 50% 0;
+                transform: rotate(-45deg);
+                box-shadow: -2px 3px 6px rgba(0, 0, 0, 0.25);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: transform 0.2s ease;
+                overflow: hidden;
+            ">
+                <img src="${style.icon}" alt="${style.name}" style="
+                    transform: rotate(45deg);
+                    width: 15px;
+                    height: 15px;
+                    object-fit: contain;
+                    display: block;
+                    position: absolute;
+                "/>
+            </div>
+        `;
 
-	        const container = document.createElement('div');
-	        container.innerHTML = contentHtml;
-	        const markerElement = container.firstElementChild;
+        const container = document.createElement('div');
+        container.innerHTML = contentHtml;
+        const markerElement = container.firstElementChild;
 
-	        markerElement.addEventListener('mouseenter', function() {
-	            this.style.transform = 'rotate(-45deg) scale(1.15)';
-	        });
-	        markerElement.addEventListener('mouseleave', function() {
-	            this.style.transform = 'rotate(-45deg) scale(1.0)';
-	        });
+        markerElement.addEventListener('mouseenter', function() {
+            this.style.transform = 'rotate(-45deg) scale(1.15)';
+        });
+        markerElement.addEventListener('mouseleave', function() {
+            this.style.transform = 'rotate(-45deg) scale(1.0)';
+        });
 
-	        markerElement.addEventListener('click', function() {
-	            map.panTo(new kakao.maps.LatLng(item.lat, item.lng));
-	        });
+        markerElement.addEventListener('click', function() {
+            map.panTo(new kakao.maps.LatLng(item.lat, item.lng));
+        });
 
-	        return new kakao.maps.CustomOverlay({
-	            position: new kakao.maps.LatLng(item.lat, item.lng),
-	            content: markerElement,
-	            xAnchor: 0.5,
-	            yAnchor: 1.0
-	        });
-	}
+        return new kakao.maps.CustomOverlay({
+            position: new kakao.maps.LatLng(item.lat, item.lng),
+            content: markerElement,
+            xAnchor: 0.5,
+            yAnchor: 1.0
+        });
+    }
 
     // -------------------------------------------------------------
-    // 3. 지도의 현재 범위(Bounds) 필터링 & 마커/사이드바 렌더링
+    // 3. 지도의 현재 범위(Bounds) + 카테고리 조건 동시 필터링
     // -------------------------------------------------------------
     function filterClassesByMapBounds() {
+        // 1) 지도의 현재 영역(좌하단, 우상단 좌표) 구하기
         const bounds = map.getBounds();
         const swLatLng = bounds.getSouthWest();
         const neLatLng = bounds.getNorthEast();
@@ -114,12 +118,23 @@ document.addEventListener("DOMContentLoaded", function() {
         const minLng = swLatLng.getLng();
         const maxLng = neLatLng.getLng();
 
-        const visibleClasses = allClassData.filter(item => {
+        // 2) [지도 화면 범위 이내] AND [선택된 카테고리 조건] 동시 만족 항목만 필터링
+        const filteredClasses = allClassData.filter(item => {
             if (!item.lat || !item.lng) return false;
-            return (item.lat >= minLat && item.lat <= maxLat && item.lng >= minLng && item.lng <= maxLng);
+
+            // 조건 A: 현재 지도 화면 바운더리 내에 있는지 확인
+            const isInMapBounds = (item.lat >= minLat && item.lat <= maxLat && item.lng >= minLng && item.lng <= maxLng);
+            
+            // 조건 B: 선택된 카테고리가 없거나(전체), 해당 카테고리/부모카테고리와 일치하는지 확인
+            const isMatchingCategory = !selectedCategoryCode || 
+                (String(item.categoryCode) === String(selectedCategoryCode) || 
+                 String(item.parentCategoryCode) === String(selectedCategoryCode));
+
+            return isInMapBounds && isMatchingCategory;
         });
 
-        renderMarkersAndSidebar(visibleClasses);
+        // 3) 필터링된 데이터로 화면 렌더링
+        renderMarkersAndSidebar(filteredClasses);
     }
 
     function renderMarkersAndSidebar(classList) {
@@ -144,11 +159,8 @@ document.addEventListener("DOMContentLoaded", function() {
             classList.forEach(item => {
                 const imgPath = (item.imageList && item.imageList.length > 0) ? item.imageList[0].image : '/images/default.jpg';
                 const formattedPrice = item.price ? Number(item.price).toLocaleString() + '원' : '0원';
-                
-                // 🔥 [해결 1] 타임리프와 동일하게 item.classCode (또는 대소문자 고려)를 추출
                 const targetId = item.classCode || item.classcode || item.classNo || item.id;
 
-                // 🔥 [해결 2] data-id="${targetId}" 부여
                 cardHtml += `
                     <div class="class-card" data-id="${targetId}" data-lat="${item.lat}" data-lng="${item.lng}" data-title="${item.name}">
                         <div class="img-wrapper">
@@ -182,12 +194,13 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
+    // 지도 움직임(이동, 확대, 축소)이 끝날 때 재필터링
     kakao.maps.event.addListener(map, 'idle', function() {
         filterClassesByMapBounds();
     });
 
     // -------------------------------------------------------------
-    // 4. 모달 및 기타 필터 이벤트
+    // 4. 지역 선택 모달 이벤트
     // -------------------------------------------------------------
     const btnRegionToggle = document.getElementById('btn-region-toggle');
     const regionModal = document.getElementById('region-modal');
@@ -196,9 +209,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const listSido = document.getElementById('list-sido');
     const listSigungu = document.getElementById('list-sigungu');
     const listDong = document.getElementById('list-dong');
-
-    const btnCategoryToggle = document.getElementById('btn-category-toggle');
-    const categoryModal = document.getElementById('category-modal');
 
     let selectedSido = "서울";
     let selectedSigungu = "";
@@ -326,42 +336,120 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
+    // -------------------------------------------------------------
+    // 5. 카테고리 선택 모달 이벤트 (2단계 연동)
+    // -------------------------------------------------------------
+    const btnCategoryToggle = document.getElementById('btn-category-toggle');
+    const categoryModal = document.getElementById('category-modal');
+    const btnCategoryCancel = document.getElementById('btn-category-cancel');
+    const btnCategorySearch = document.getElementById('btn-category-search');
+    
+    const listParentCategory = document.getElementById('list-parent-category');
+    const listChildCategory = document.getElementById('list-child-category');
+
+    // 1) 모달 열기/닫기
+    btnCategoryToggle?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        regionModal?.classList.add('hidden');
+        categoryModal?.classList.toggle('hidden');
+    });
+
+    btnCategoryCancel?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        categoryModal?.classList.add('hidden');
+    });
+
+    // 2) 대분류 클릭 시 -> 소분류 목록 바인딩
+    listParentCategory?.addEventListener('click', function(e) {
+        const target = e.target.closest('li');
+        if (!target) return;
+
+        listParentCategory.querySelectorAll('li').forEach(el => el.classList.remove('active'));
+        target.classList.add('active');
+
+        const parentCode = target.getAttribute('data-code'); // 예: "1" (공예), "2" (요리)
+        const parentName = target.innerText.trim();
+        
+        listChildCategory.innerHTML = `<li class="active" data-code="${parentCode || ''}" data-name="${parentName}">전체</li>`;
+
+        selectedCategoryCode = parentCode || "";
+        selectedCategoryName = parentCode ? parentName : "카테고리 전체";
+
+        if (!parentCode) return;
+
+        const subCategories = allCategories.filter(cat => String(cat.parentCategoryCode) === String(parentCode));
+
+        subCategories.forEach(sub => {
+            const li = document.createElement('li');
+            li.setAttribute('data-code', sub.categoryCode);
+            li.setAttribute('data-name', sub.categoryName);
+            li.textContent = sub.categoryName;
+            listChildCategory.appendChild(li);
+        });
+    });
+
+    // 3) 소분류 클릭 시 선택값 저장
+    listChildCategory?.addEventListener('click', function(e) {
+        const target = e.target.closest('li');
+        if (!target) return;
+
+        listChildCategory.querySelectorAll('li').forEach(el => el.classList.remove('active'));
+        target.classList.add('active');
+
+        selectedCategoryCode = target.getAttribute('data-code') || "";
+        selectedCategoryName = target.getAttribute('data-name') || target.innerText.trim();
+    });
+
+    // 4) 검색(확인) 버튼 클릭 시 적용
+    btnCategorySearch?.addEventListener('click', function(e) {
+        e.stopPropagation();
+        categoryModal?.classList.add('hidden');
+
+        const textSpan = btnCategoryToggle.querySelector('.select-text');
+        if (textSpan) {
+            textSpan.innerText = selectedCategoryCode ? selectedCategoryName : "카테고리 전체";
+        }
+
+        // 🔥 지도 범위 + 선택한 카테고리로 필터링 실행!
+        filterClassesByMapBounds();
+    });
+
+    // 바깥 영역 클릭 시 모달 닫기
     document.addEventListener('click', function(e) {
         if (regionModal && !regionModal.contains(e.target) && !btnRegionToggle.contains(e.target)) {
             regionModal.classList.add('hidden');
         }
+        if (categoryModal && !categoryModal.contains(e.target) && !btnCategoryToggle.contains(e.target)) {
+            categoryModal.classList.add('hidden');
+        }
     });
 
-    // 초기 실행
+    // 초기 지도 범위 필터링 실행
     filterClassesByMapBounds();
-	
+
     // -------------------------------------------------------------
-    // 5. 🔥 카드 클릭 시 상세 페이지 이동 이벤트
+    // 6. 카드 클릭 시 상세 페이지 이동 이벤트
     // -------------------------------------------------------------
-	const cardContainer = document.getElementById('card-list-container');
+    const cardContainer = document.getElementById('card-list-container');
 
-	if (cardContainer) {
-	    cardContainer.addEventListener('click', (e) => {
-	        // 1. 관심목록(♡) 클릭 시 페이지 이동 방지
-	        if (e.target.closest('.wish-btn')) {
-	            e.stopPropagation();
-	            return;
-	        }
+    if (cardContainer) {
+        cardContainer.addEventListener('click', (e) => {
+            if (e.target.closest('.wish-btn')) {
+                e.stopPropagation();
+                return;
+            }
 
-	        // 2. 가장 가까운 .class-card 요소 탐색
-	        const card = e.target.closest('.class-card');
-	        if (!card) return;
+            const card = e.target.closest('.class-card');
+            if (!card) return;
 
-	        // 3. 카드에 할당된 data-id 읽기
-	        const selectedId = card.dataset.id;
-	        console.log("선택한 클래스 ID:", selectedId);
+            const selectedId = card.dataset.id;
+            console.log("선택한 클래스 ID:", selectedId);
 
-	        // 4. 유효성 체크 후 페이지 이동
-	        if (selectedId && selectedId !== 'undefined' && selectedId !== 'null') {
-	            window.location.href = `/classDetail?classCode=${selectedId}`;
-	        } else {
-	            console.error("클래스 ID를 읽어오지 못했습니다. 데이터 필드명을 확인하세요.");
-	        }
-	    });
-	}
+            if (selectedId && selectedId !== 'undefined' && selectedId !== 'null') {
+                window.location.href = `/classDetail?classCode=${selectedId}`;
+            } else {
+                console.error("클래스 ID를 읽어오지 못했습니다.");
+            }
+        });
+    }
 });

@@ -93,21 +93,31 @@
 					<span class="select-text">카테고리 전체</span> <span class="arrow">∨</span>
 				</button>
 
-				<!-- 카테고리 선택 모달 -->
+				<!-- 카테고리 선택 모달 (2칸 구성) -->
 				<div id="category-modal" class="region-modal-container hidden">
-					<div class="region-columns-header">
-						<div>카테고리 전체</div>
+					<div class="region-columns-header"
+						style="grid-template-columns: 1fr 1fr;">
+						<div>대분류</div>
+						<div>소분류</div>
 					</div>
 
-					<div class="region-columns-body">
-						<ul id="list-category" class="region-list">
-							<li class="active" data-category="">전체</li>
-							<th:block
-								th:if="${categoryList != null and !#lists.isEmpty(categoryList)}">
-								<li th:each="cat, stat : ${categoryList}"
-									th:data-category="${cat.categoryName}"
-									th:text="${cat.categoryName}">카테고리명</li>
+					<div class="region-columns-body"
+						style="grid-template-columns: 1fr 1fr;">
+						<!-- 1번째 칸: 대분류 (parentCategoryCode가 null인 항목) -->
+						<ul id="list-parent-category" class="region-list">
+							<li class="active" data-code="">전체</li>
+							<th:block th:if="${categoryList != null}">
+								<th:block th:each="cat : ${categoryList}"
+									th:if="${cat.parentCategoryCode == null}">
+									<li th:data-code="${cat.categoryCode}"
+										th:text="${cat.categoryName}">공예</li>
+								</th:block>
 							</th:block>
+						</ul>
+
+						<!-- 2번째 칸: 소분류 (대분류 선택 시 오른쪽 칸에 뿌려짐) -->
+						<ul id="list-child-category" class="region-list">
+							<li class="active" data-code="" data-name="전체">전체</li>
 						</ul>
 					</div>
 
@@ -139,27 +149,6 @@
 
 		</div>
 
-		<!-- 필터 선택줄 2 (태그 칩 data-tag 속성 보완 & 정렬) -->
-		<div class="filter-bottom">
-			<div class="tag-group">
-				<button class="tag-pill active" data-tag="">전체</button>
-				<button class="tag-pill" data-tag="베이킹">베이킹</button>
-				<button class="tag-pill" data-tag="공예">공예</button>
-				<button class="tag-pill" data-tag="플라워">플라워</button>
-				<button class="tag-pill" data-tag="캔들">캔들</button>
-				<button class="tag-pill" data-tag="음료">음료</button>
-				<button class="tag-pill" data-tag="기타">기타</button>
-			</div>
-
-			<div class="sort-wrapper">
-				<select id="sort-select" class="sort-select">
-					<option value="recommend">추천순</option>
-					<option value="distance">거리순</option>
-					<option value="price_asc">가격 낮은 순</option>
-					<option value="price_desc">가격 높은 순</option>
-				</select>
-			</div>
-		</div>
 	</section>
 
 	<!-- 3. 메인 컨텐츠 영역 (사이드바 & 지도) -->
@@ -286,6 +275,7 @@
 	<script th:inline="javascript">
 		/*<![CDATA[*/
 		const classListData = /*[[${classList}]]*/[];
+		const categoryListData = /*[[${categoryList}]]*/[];
 		/*]]>*/
 	</script>
 

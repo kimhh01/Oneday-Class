@@ -2,6 +2,8 @@ package kr.co.oneclass.map;
 
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
+
+import kr.co.oneclass.common.CategoryDTO;
 import kr.co.oneclass.common.ClassDTO;
 
 @Mapper
@@ -10,4 +12,6 @@ public interface MapDAO {
     List<ClassDTO> selectClassList(MapSearchDTO searchDTO);
     
     ClassDTO selectClassDetail(int classCode);
+    
+    public List<CategoryDTO> selectCategoryList();
 }

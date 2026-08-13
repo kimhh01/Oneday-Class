@@ -62,7 +62,7 @@
 								src="https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=300&auto=format&fit=crop"
 								th:src="${classImage}" alt="클래스 이미지">
 							<div class="class-details">
-								<h3 class="class-title" th:text="${class.name}">토끼 빵 만들기</h3>
+								<h3 class="class-title" th:text="${classInfo.name}">토끼 빵 만들기</h3>
 								<span class="class-badge" th:text="${category.categoryName}">베이킹</span>
 
 								<div class="class-meta-item">
@@ -71,14 +71,14 @@
 								</div>
 								<div class="class-meta-item">
 									<span class="meta-icon">📍</span> <span
-										th:text="${class.address}">서울 마포구 원데이클래스 스튜디오</span>
+										th:text="${classInfo.address}">서울 마포구 원데이클래스 스튜디오</span>
 								</div>
 								<div class="class-meta-item">
 									<span class="meta-icon">👤</span> <span>성인 1명</span>
 								</div>
 							</div>
 							<div class="price-tag"
-								th:text="${#numbers.formatInteger(class.price != null ? class.price : 45000, 0, 'COMMA') + '원'}">45,000원</div>
+								th:text="${#numbers.formatInteger(classInfo.price != null ? classInfo.price : 45000, 0, 'COMMA') + '원'}">45,000원</div>
 						</div>
 					</div>
 
@@ -93,7 +93,7 @@
 								<button type="button" class="btn-qty" onclick="changeQty(1)">+</button>
 							</div>
 							<span class="people-row-price" id="peopleTotalPrice"
-								th:text="${#numbers.formatInteger(class.price != null ? class.price : 45000, 0, 'COMMA') + '원'}">45,000원</span>
+								th:text="${#numbers.formatInteger(classInfo.price != null ? classInfo.price : 45000, 0, 'COMMA') + '원'}">45,000원</span>
 						</div>
 
 						<div class="people-summary-footer">
@@ -105,7 +105,7 @@
 								</div>
 								<div class="result-line green-text">
 									<span>금액 합계</span> <strong id="summaryTotalPrice"
-										th:text="${#numbers.formatInteger(class.price != null ? class.price : 45000, 0, 'COMMA') + '원'}">45,000원</strong>
+										th:text="${#numbers.formatInteger(classInfo.price != null ? classInfo.price : 45000, 0, 'COMMA') + '원'}">45,000원</strong>
 								</div>
 							</div>
 						</div>
@@ -137,20 +137,14 @@
 							</label>
 						</div>
 
-						<!-- 결제 정보 저장 체크박스 -->
-						<label class="save-payment-check"> <input type="checkbox"
-							name="savePaymentInfo" value="true" checked>
-							<div class="check-text-group">
-								<strong>결제 정보 저장</strong> <span>다음 결제 시 사용을 위해 정보를 저장합니다.</span>
-							</div>
-						</label>
+						
 					</div>
 
 					<!-- 결제 버튼 -->
 					<div class="submit-block">
 						<button type="submit" class="btn-submit">
 							<span class="lock-icon">🔒</span> <span id="btnSubmitPrice"
-								th:text="${#numbers.formatInteger(class.price != null ? class.price : 45000, 0, 'COMMA') + '원 결제하기'}">45,000원
+								th:text="${#numbers.formatInteger(classInfo.price != null ? classInfo.price : 45000, 0, 'COMMA') + '원 결제하기'}">45,000원
 								결제하기</span>
 						</button>
 						<p class="submit-info-text">결제 버튼을 클릭하면 결제에 동의한 것으로 간주됩니다.</p>
@@ -170,7 +164,7 @@
 								src="https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=150&auto=format&fit=crop"
 								th:src="${classImage}" alt="미니 썸네일">
 							<div class="mini-class-info">
-								<h4 class="mini-class-title" th:text="${class.name}">토끼 빵 만들기</h4>
+								<h4 class="mini-class-title" th:text="${classInfo.name}">토끼 빵 만들기</h4>
 								<span class="mini-class-badge"
 									th:text="${category.categoryName}">베이킹</span> <span
 									class="mini-class-date" th:text="${schedule.classDate}">2026.07.25
@@ -178,7 +172,7 @@
 								<div class="mini-class-bottom">
 									<span class="mini-attendees">성인 1명</span> <span
 										class="mini-price"
-										th:text="${#numbers.formatInteger(class.price != null ? class.price : 45000, 0, 'COMMA') + '원'}">45,000원</span>
+										th:text="${#numbers.formatInteger(classInfo.price != null ? classInfo.price : 45000, 0, 'COMMA') + '원'}">45,000원</span>
 								</div>
 							</div>
 						</div>
@@ -186,7 +180,7 @@
 						<div class="summary-lines">
 							<div class="summary-line">
 								<span>클래스 금액</span> <span
-									th:text="${#numbers.formatInteger(class.price != null ? class.price : 45000, 0, 'COMMA') + '원'}">45,000원</span>
+									th:text="${#numbers.formatInteger(classInfo.price != null ? classInfo.price : 45000, 0, 'COMMA') + '원'}">45,000원</span>
 							</div>
 
 							<div class="summary-line highlight-people">
@@ -196,7 +190,7 @@
 							<div class="summary-line total">
 								<span>최종 결제 금액</span> <span class="total-price"
 									id="sidebarTotalPrice"
-									th:text="${#numbers.formatInteger(class.price != null ? class.price : 45000, 0, 'COMMA') + '원'}">45,000원</span>
+									th:text="${#numbers.formatInteger(classInfo.price != null ? classInfo.price : 45000, 0, 'COMMA') + '원'}">45,000원</span>
 							</div>
 						</div>
 					</div>
@@ -257,9 +251,9 @@
 
 	<script th:inline="javascript">
 		// 1. 기본 데이터 초기화 (Thymeleaf 인라인 주석 문법 적용)
-		const unitPrice = /*[[${class.price}]]*/ 45000;          // 숫자
+		const unitPrice = /*[[${classInfo.price}]]*/ 45000;          // 숫자
 		const remainingPeople = /*[[${schedule.remainingPeople}]]*/ 10; // 숫자
-		const className = /*[[${class.name}]]*/ '클래스명';       // 문자열
+		const className = /*[[${classInfo.name}]]*/ '클래스명';       // 문자열
 		const scheduleCode = /*[[${schedule.scheduleCode}]]*/ '';  // 문자열/숫자
 
 		let currentCount = 1;

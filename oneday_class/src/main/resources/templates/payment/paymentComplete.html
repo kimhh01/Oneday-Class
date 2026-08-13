@@ -59,7 +59,7 @@
       <div class="order-info-block" style="position: static; border: none; padding: 0;">
         <img class="class-image" src="https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=300&auto=format&fit=crop" th:src="${classImage}" alt="클래스 이미지">
         <div class="class-details">
-          <h3 class="class-title" th:text="${class.name}">토끼 빵 만들기</h3>
+          <h3 class="class-title" th:text="${classInfo.name}">토끼 빵 만들기</h3>
           <span class="class-badge" th:text="${category?.categoryName} ?: '클래스'">베이킹</span>
           
           <div class="class-meta-item">
@@ -68,7 +68,7 @@
           </div>
           <div class="class-meta-item">
             <span class="meta-icon">📍</span>
-            <span th:text="${class.address}">서울 마포구 스튜디오</span>
+            <span th:text="${classInfo.address}">서울 마포구 스튜디오</span>
           </div>
           <div class="class-meta-item">
             <span class="meta-icon">👤</span>
@@ -100,7 +100,7 @@
     <!-- Buttons -->
     <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 50px;">
       <a href="/reservation/list" class="btn-filled">예약 내역 확인하기</a>
-      <a href="/" class="btn-outlined">홈으로 이동</a>
+      <a href="/main" class="btn-outlined">홈으로 이동</a>
     </div>
 
     <!-- Footer -->

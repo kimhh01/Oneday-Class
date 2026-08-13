@@ -86,5 +86,13 @@
     <select id="selectClassDetail" parameterType="int" resultType="kr.co.oneclass.common.ClassDTO">
         SELECT * FROM class WHERE class_code = #{classCode}
     </select>
-
+<!-- 카테고리 전체 목록 조회 -->
+    <select id="selectCategoryList" resultType="kr.co.oneclass.common.CategoryDTO">
+        SELECT 
+            category_code AS categoryCode,
+            name AS categoryName,        <!-- CategoryDTO의 categoryName 필드와 매핑 -->
+            parents_category AS parentCategoryCode
+        FROM category
+        ORDER BY category_code ASC
+    </select>
 </mapper>

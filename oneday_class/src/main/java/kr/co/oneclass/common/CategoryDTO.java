@@ -12,7 +12,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @ToString
 public class CategoryDTO {
-	private int categoryCode;
-	private int parentCategoryCode;
-	private String categoryName;
+    private int categoryCode;
+    private Integer parentCategoryCode; // 👈 int -> Integer 로 수정 (null 보존 목적)
+    private String categoryName;
 }

@@ -68,4 +68,11 @@ JOIN schedule s
   ON s.repeat_rule_code = crr.repeat_rule_code
 WHERE s.schedule_code = #{scheduleCode}
 </select>
+<!--예약 정보 추가-->
+<insert id="insertReservation" parameterType="kr.co.oneclass.payment.ReservationDTO">
+insert into reservation(reservation_code, class_code, member_code,
+			 schedule_code, reservation_date, people_number, status, price)
+value(seq_reservation_code.nextval, #{classCode}, #{memberCode}, #{scheduleCode},
+		 sysdate, #{peopleNumber}, || '예약' ||, #{price})
+</insert>
 </mapper>
