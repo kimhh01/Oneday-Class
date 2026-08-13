@@ -306,10 +306,51 @@
 	height: 14px;
 }
 
+.detail-form-step {
+	display: inline-flex;
+	align-items: center;
+	height: 24px;
+	margin-left: 7px;
+	padding: 0 9px;
+	border-radius: 999px;
+	background: #EEF7F0;
+	font-size: 11px;
+	font-weight: 700;
+	vertical-align: 2px;
+	color: #398153;
+}
+
+.gallery-heading__actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.gallery-clear-button {
+	height: 32px;
+	padding: 0 11px;
+	border: 1px solid #D9DCD7;
+	border-radius: 6px;
+	background: #FFF;
+	font-size: 11px;
+	font-weight: 650;
+	color: #70756E;
+}
+
+.gallery-clear-button:hover {
+	border-color: #C7CCC5;
+	background: #F7F8F6;
+	color: #4A5049;
+}
+
 .work-grid {
 	display: grid;
 	grid-template-columns: repeat(4, minmax(0, 1fr));
 	gap: 10px;
+}
+
+.work-grid--gallery {
+	grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .work-card {
@@ -391,6 +432,20 @@
 	border-style: dashed;
 	cursor: pointer;
 	color: #888E87;
+}
+
+.work-card--empty[hidden] {
+	display: none;
+}
+
+.work-card--compact {
+	min-height: 0;
+}
+
+.work-card--compact .work-card__media,
+.work-card--compact .work-card__placeholder {
+	height: 112px;
+	min-height: 112px;
 }
 
 .work-card--empty:hover {
@@ -670,6 +725,14 @@
 
 	.gallery-upload-button {
 		width: 100%;
+	}
+
+	.gallery-heading__actions {
+		width: 100%;
+	}
+
+	.gallery-heading__actions .gallery-upload-button {
+		flex: 1;
 	}
 
 	.work-card__media,

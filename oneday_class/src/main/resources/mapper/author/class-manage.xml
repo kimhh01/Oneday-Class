@@ -5,9 +5,9 @@
 <!--
 	작가센터 클래스 관리 조회 Mapper.
 	승인 완료(APPROVAL_STATUS = '승인') 클래스만 운영 대상으로 본다.
-	CLASS.STATUS 실측값은 모집중 / 준비중 이다.
+	CLASS.STATUS 는 모집중 / 준비중 / 폐강을 사용한다.
 -->
-<mapper namespace="kr.co.oneclass.author.classmanage.dao.ClassManagementDAO">
+<mapper namespace="kr.co.oneclass.author.classmanage.ClassManagementDAO">
 
 	<!--
 		목록과 상세 상단이 공유하는 컬럼.
@@ -29,7 +29,7 @@
 			FROM CATEGORY ct
 			WHERE ct.CATEGORY_CODE = c.CATEGORY_CODE
 		) AS CATEGORY_NAME,
-		'개별일정' AS SCHEDULE_TYPE,
+		'등록 일정' AS SCHEDULE_TYPE,
 		c.DESIRED_PRICE,
 		c.WRITE_DATE AS REGISTERED_DATE,
 		(
@@ -60,7 +60,7 @@
 
 	<!-- 운영 클래스 목록을 상태·일정 유형·클래스명으로 검색한다 -->
 	<select id="selectClassManagementList" parameterType="map"
-		resultType="kr.co.oneclass.author.classmanage.dto.ClassManagementDTO">
+		resultType="kr.co.oneclass.author.classmanage.ClassManagementDTO">
 		SELECT
 			<include refid="classManagementColumns"/>
 		FROM CLASS c
@@ -69,23 +69,220 @@
 		<if test="classStatus != null and classStatus != '' and classStatus != 'all'">
 			AND c.STATUS = #{classStatus}
 		</if>
-		<if test="scheduleType != null and scheduleType != ''">
-			AND #{scheduleType} = '개별일정'
-		</if>
 		<if test="keyword != null and keyword != ''">
-			AND c.NAME LIKE '%' || #{keyword} || '%'
+			AND (
+				c.NAME LIKE '%' || #{keyword} || '%'
+				OR TO_CHAR(c.CLASS_CODE) LIKE '%' || #{keyword} || '%'
+			)
+		</if>
+		<if test="fromDate != null and fromDate != ''">
+			AND EXISTS (
+				SELECT 1
+				FROM CLASS_REPEAT_RULE rf
+				WHERE rf.CLASS_CODE = c.CLASS_CODE
+				  AND rf.OPERATION_END_DATE &gt;= TO_DATE(#{fromDate}, 'YYYY-MM-DD')
+			)
+		</if>
+		<if test="toDate != null and toDate != ''">
+			AND EXISTS (
+				SELECT 1
+				FROM CLASS_REPEAT_RULE rt
+				WHERE rt.CLASS_CODE = c.CLASS_CODE
+				  AND rt.OPERATION_START_DATE &lt; TO_DATE(#{toDate}, 'YYYY-MM-DD') + 1
+			)
 		</if>
 		ORDER BY c.WRITE_DATE DESC, c.CLASS_CODE DESC
 	</select>
 
+	<!-- 검색 조건과 무관하게 작가의 전체 클래스 운영 지표를 계산한다 -->
+	<select id="selectClassManagementSummary" parameterType="long"
+		resultType="kr.co.oneclass.author.classmanage.ClassManagementSummaryDTO">
+		SELECT
+			(
+				SELECT COUNT(*)
+				FROM CLASS c
+				WHERE c.OPERATOR_CODE = #{authorCode}
+				  AND c.APPROVAL_STATUS = '승인'
+				  AND c.STATUS = '모집중'
+			) AS OPEN_CLASS_COUNT,
+			(
+				SELECT COUNT(*)
+				FROM CLASS c
+				WHERE c.OPERATOR_CODE = #{authorCode}
+				  AND c.APPROVAL_STATUS = '승인'
+				  AND c.STATUS = '준비중'
+			) AS HIDDEN_CLASS_COUNT,
+			(
+				SELECT COUNT(*)
+				FROM CLASS c
+				WHERE c.OPERATOR_CODE = #{authorCode}
+				  AND c.APPROVAL_STATUS = '승인'
+				  AND c.STATUS = '폐강'
+			) AS CLOSED_CLASS_COUNT,
+			(
+				SELECT COUNT(*)
+				FROM SCHEDULE s
+				JOIN CLASS_REPEAT_RULE r ON r.REPEAT_RULE_CODE = s.REPEAT_RULE_CODE
+				JOIN CLASS c ON c.CLASS_CODE = r.CLASS_CODE
+				WHERE c.OPERATOR_CODE = #{authorCode}
+				  AND c.APPROVAL_STATUS = '승인'
+				  AND s.CLASS_DATE &gt;= TRUNC(SYSDATE)
+				  AND s.CLASS_DATE &lt; ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1)
+			) AS MONTHLY_SCHEDULE_COUNT,
+			(
+				SELECT NVL(SUM(rv.PEOPLE_NUMBER), 0)
+				FROM RESERVATION rv
+				JOIN CLASS c ON c.CLASS_CODE = rv.CLASS_CODE
+				WHERE c.OPERATOR_CODE = #{authorCode}
+				  AND c.APPROVAL_STATUS = '승인'
+				  AND rv.STATUS = '예약'
+			) AS TOTAL_APPLICANT_COUNT,
+			(
+				SELECT NVL(SUM(p.AMOUNT), 0)
+				FROM PAYMENT p
+				JOIN RESERVATION rv ON rv.RESERVATION_CODE = p.RESERVATION_CODE
+				JOIN CLASS c ON c.CLASS_CODE = rv.CLASS_CODE
+				WHERE c.OPERATOR_CODE = #{authorCode}
+				  AND c.APPROVAL_STATUS = '승인'
+				  AND p.STATUS = '결제완료'
+				  AND NVL(p.REFUND, 0) = 0
+				  AND p.PAYMENT_DATE &gt;= TRUNC(SYSDATE, 'MM')
+				  AND p.PAYMENT_DATE &lt; ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1)
+			) AS MONTHLY_SALES_AMOUNT
+		FROM DUAL
+	</select>
+
+	<!-- 승인된 내 클래스의 모든 일정을 날짜·상태·클래스명으로 검색한다 -->
+	<select id="selectAuthorScheduleList" parameterType="map"
+		resultType="kr.co.oneclass.author.classmanage.ScheduleManageDTO">
+		SELECT
+			s.SCHEDULE_CODE,
+			c.CLASS_CODE,
+			c.NAME AS CLASS_TITLE,
+			c.STATUS AS CLASS_STATUS,
+			s.CLASS_DATE AS SCHEDULE_DATE,
+			s.START_TIME,
+			s.END_TIME,
+			s.MIN_PEOPLE,
+			s.MAX_PEOPLE,
+			NVL((
+				SELECT SUM(rv.PEOPLE_NUMBER)
+				FROM RESERVATION rv
+				WHERE rv.SCHEDULE_CODE = s.SCHEDULE_CODE
+				  AND rv.STATUS = '예약'
+			), 0) AS RESERVED_COUNT,
+			s.REMAINING_PEOPLE,
+			CASE
+				WHEN TRUNC(s.CLASS_DATE) &lt; TRUNC(SYSDATE) THEN '진행 완료'
+				WHEN s.SOLD_OUT_YN = 'Y' OR s.REMAINING_PEOPLE = 0 THEN '모집 마감'
+				ELSE '모집중'
+			END AS SCHEDULE_STATUS
+		FROM SCHEDULE s
+		JOIN CLASS_REPEAT_RULE r ON r.REPEAT_RULE_CODE = s.REPEAT_RULE_CODE
+		JOIN CLASS c ON c.CLASS_CODE = r.CLASS_CODE
+		WHERE c.OPERATOR_CODE = #{authorCode}
+		  AND c.APPROVAL_STATUS = '승인'
+		<if test="scheduleStatus == '모집중'">
+			AND TRUNC(s.CLASS_DATE) &gt;= TRUNC(SYSDATE)
+			AND s.SOLD_OUT_YN != 'Y'
+			AND s.REMAINING_PEOPLE &gt; 0
+		</if>
+		<if test="scheduleStatus == '모집 마감'">
+			AND TRUNC(s.CLASS_DATE) &gt;= TRUNC(SYSDATE)
+			AND (s.SOLD_OUT_YN = 'Y' OR s.REMAINING_PEOPLE = 0)
+		</if>
+		<if test="scheduleStatus == '진행 완료'">
+			AND TRUNC(s.CLASS_DATE) &lt; TRUNC(SYSDATE)
+		</if>
+		<if test="keyword != null and keyword != ''">
+			AND (
+				c.NAME LIKE '%' || #{keyword} || '%'
+				OR TO_CHAR(c.CLASS_CODE) LIKE '%' || #{keyword} || '%'
+				OR TO_CHAR(s.SCHEDULE_CODE) LIKE '%' || #{keyword} || '%'
+			)
+		</if>
+		<if test="fromDate != null and fromDate != ''">
+			AND s.CLASS_DATE &gt;= TO_DATE(#{fromDate}, 'YYYY-MM-DD')
+		</if>
+		<if test="toDate != null and toDate != ''">
+			AND s.CLASS_DATE &lt; TO_DATE(#{toDate}, 'YYYY-MM-DD') + 1
+		</if>
+		ORDER BY
+			CASE WHEN TRUNC(s.CLASS_DATE) &gt;= TRUNC(SYSDATE) THEN 0 ELSE 1 END,
+			CASE WHEN TRUNC(s.CLASS_DATE) &gt;= TRUNC(SYSDATE) THEN s.CLASS_DATE END,
+			CASE WHEN TRUNC(s.CLASS_DATE) &lt; TRUNC(SYSDATE) THEN s.CLASS_DATE END DESC,
+			s.START_TIME,
+			s.SCHEDULE_CODE
+	</select>
+
 	<!-- 클래스 관리 상세 상단에 필요한 상태와 요약정보를 조회한다 -->
 	<select id="selectClassManagementInfo" parameterType="map"
-		resultType="kr.co.oneclass.author.classmanage.dto.ClassManagementDTO">
+		resultType="kr.co.oneclass.author.classmanage.ClassManagementDTO">
 		SELECT
 			<include refid="classManagementColumns"/>
 		FROM CLASS c
 		WHERE c.OPERATOR_CODE = #{authorCode}
 		  AND c.CLASS_CODE = #{classCode}
+		  AND c.APPROVAL_STATUS = '승인'
+	</select>
+
+	<!-- 승인된 클래스의 공개/비공개 상태만 정해진 흐름으로 변경한다 -->
+	<update id="updateClassOperationalStatus" parameterType="map">
+		UPDATE CLASS
+		SET STATUS = #{nextStatus}
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND APPROVAL_STATUS = '승인'
+		  AND STATUS = #{currentStatus}
+	</update>
+
+	<!-- 모집 일정과 활성 예약이 모두 정리된 승인 클래스만 폐강한다 -->
+	<update id="updateClassClosed" parameterType="map">
+		UPDATE CLASS c
+		SET STATUS = '폐강'
+		WHERE c.CLASS_CODE = #{classCode}
+		  AND c.OPERATOR_CODE = #{authorCode}
+		  AND c.APPROVAL_STATUS = '승인'
+		  AND c.STATUS IN ('모집중', '준비중')
+		  AND NOT EXISTS (
+			SELECT 1
+			FROM SCHEDULE s
+			JOIN CLASS_REPEAT_RULE r ON r.REPEAT_RULE_CODE = s.REPEAT_RULE_CODE
+			WHERE r.CLASS_CODE = c.CLASS_CODE
+			  AND TRUNC(s.CLASS_DATE) &gt;= TRUNC(SYSDATE)
+			  AND (s.SOLD_OUT_YN != 'Y' OR s.REMAINING_PEOPLE &gt; 0)
+		  )
+		  AND NOT EXISTS (
+			SELECT 1
+			FROM RESERVATION rv
+			JOIN SCHEDULE s ON s.SCHEDULE_CODE = rv.SCHEDULE_CODE
+			WHERE rv.CLASS_CODE = c.CLASS_CODE
+			  AND rv.STATUS = '예약'
+			  AND TRUNC(s.CLASS_DATE) &gt;= TRUNC(SYSDATE)
+		  )
+	</update>
+
+	<!-- 작가 회원의 일반 로그인 비밀번호 해시를 폐강 본인 확인에 사용한다 -->
+	<select id="selectAuthorPassword" parameterType="long" resultType="string">
+		SELECT ma.LOCAL_PASSWORD
+		FROM CREATOR cr
+		JOIN MEMBER_AUTH ma ON ma.MEMBER_CODE = cr.MEMBER_CODE
+		WHERE cr.OPERATOR_CODE = #{authorCode}
+		  AND ma.LOGIN_TYPE = 'LOCAL'
+		  AND ROWNUM = 1
+	</select>
+
+	<!-- 선택한 클래스의 실제 결제 완료·미환불 금액을 합산한다 -->
+	<select id="selectClassSalesAmount" parameterType="map" resultType="long">
+		SELECT NVL(SUM(p.AMOUNT), 0)
+		FROM PAYMENT p
+		JOIN RESERVATION rv ON rv.RESERVATION_CODE = p.RESERVATION_CODE
+		JOIN CLASS c ON c.CLASS_CODE = rv.CLASS_CODE
+		WHERE c.OPERATOR_CODE = #{authorCode}
+		  AND c.CLASS_CODE = #{classCode}
+		  AND c.APPROVAL_STATUS = '승인'
+		  AND p.STATUS = '결제완료'
+		  AND NVL(p.REFUND, 0) = 0
 	</select>
 
 	<!-- 해당 클래스의 전체 신청 인원을 조회한다 (취소 제외) -->
@@ -96,7 +293,7 @@
 		  AND rv.STATUS = '예약'
 	</select>
 
-	<!-- 클래스 폐쇄 전 취소되지 않은 향후 예약 수를 조회한다 -->
+	<!-- 클래스 폐강 전 취소되지 않은 향후 예약 수를 조회한다 -->
 	<select id="countActiveReservation" parameterType="int" resultType="int">
 		SELECT COUNT(*)
 		FROM RESERVATION rv
@@ -106,13 +303,88 @@
 		  AND s.CLASS_DATE &gt;= TRUNC(SYSDATE)
 	</select>
 
-	<!-- 클래스 폐쇄 전 아직 종료되지 않은 일정 수를 조회한다 -->
-	<select id="countActiveSchedule" parameterType="int" resultType="int">
+	<!-- 클래스 폐강 전 아직 모집 가능한 향후 일정 수를 조회한다 -->
+	<select id="countRecruitingSchedule" parameterType="int" resultType="int">
 		SELECT COUNT(*)
 		FROM SCHEDULE s
 		JOIN CLASS_REPEAT_RULE r ON s.REPEAT_RULE_CODE = r.REPEAT_RULE_CODE
 		WHERE r.CLASS_CODE = #{classCode}
 		  AND s.CLASS_DATE &gt;= TRUNC(SYSDATE)
+		  AND (s.SOLD_OUT_YN != 'Y' OR s.REMAINING_PEOPLE &gt; 0)
 	</select>
+
+	<!-- 이미 정산에 묶인 결제는 작가 일정 취소에서 환불 상태로 바꾸지 않는다 -->
+	<select id="countCalculatedSchedulePayment" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+		FROM CALCULATE ca
+		JOIN PAYMENT p ON p.PAYMENT_CODE = ca.PAYMENT_CODE
+		JOIN RESERVATION rv ON rv.RESERVATION_CODE = p.RESERVATION_CODE
+		JOIN CLASS c ON c.CLASS_CODE = rv.CLASS_CODE
+		WHERE c.OPERATOR_CODE = #{authorCode}
+		  AND c.APPROVAL_STATUS = '승인'
+		  AND rv.SCHEDULE_CODE = #{scheduleCode}
+		  AND rv.STATUS = '예약'
+		  AND p.STATUS = '결제완료'
+	</select>
+
+	<!-- 일정 취소에서 전액 환불완료로 변경할 결제 건수 -->
+	<select id="countRefundableSchedulePayment" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+		FROM PAYMENT p
+		JOIN RESERVATION rv ON rv.RESERVATION_CODE = p.RESERVATION_CODE
+		JOIN CLASS c ON c.CLASS_CODE = rv.CLASS_CODE
+		WHERE c.OPERATOR_CODE = #{authorCode}
+		  AND c.APPROVAL_STATUS = '승인'
+		  AND c.STATUS IN ('모집중', '준비중')
+		  AND rv.SCHEDULE_CODE = #{scheduleCode}
+		  AND rv.STATUS = '예약'
+		  AND p.STATUS = '결제완료'
+		  AND NVL(p.REFUND, 0) &lt; p.AMOUNT
+		  AND NOT EXISTS (
+			SELECT 1 FROM CALCULATE ca WHERE ca.PAYMENT_CODE = p.PAYMENT_CODE
+		  )
+	</select>
+
+	<!-- 결제 완료 상태인 활성 예약을 전액 환불 완료로 반영한다 -->
+	<update id="refundSchedulePayments" parameterType="map">
+		UPDATE PAYMENT p
+		SET STATUS = '환불완료',
+			REFUND = p.AMOUNT,
+			REFUND_DATE = SYSDATE
+		WHERE p.STATUS = '결제완료'
+		  AND NVL(p.REFUND, 0) &lt; p.AMOUNT
+		  AND NOT EXISTS (
+			SELECT 1
+			FROM CALCULATE ca
+			WHERE ca.PAYMENT_CODE = p.PAYMENT_CODE
+		  )
+		  AND EXISTS (
+			SELECT 1
+			FROM RESERVATION rv
+			JOIN CLASS c ON c.CLASS_CODE = rv.CLASS_CODE
+			WHERE rv.RESERVATION_CODE = p.RESERVATION_CODE
+			  AND rv.SCHEDULE_CODE = #{scheduleCode}
+			  AND rv.STATUS = '예약'
+			  AND c.OPERATOR_CODE = #{authorCode}
+			  AND c.APPROVAL_STATUS = '승인'
+			  AND c.STATUS IN ('모집중', '준비중')
+		  )
+	</update>
+
+	<!-- 결제 환불 반영 뒤 일정의 활성 예약을 취소로 변경한다 -->
+	<update id="cancelScheduleReservations" parameterType="map">
+		UPDATE RESERVATION rv
+		SET STATUS = '취소'
+		WHERE rv.SCHEDULE_CODE = #{scheduleCode}
+		  AND rv.STATUS = '예약'
+		  AND EXISTS (
+			SELECT 1
+			FROM CLASS c
+			WHERE c.CLASS_CODE = rv.CLASS_CODE
+			  AND c.OPERATOR_CODE = #{authorCode}
+			  AND c.APPROVAL_STATUS = '승인'
+			  AND c.STATUS IN ('모집중', '준비중')
+		  )
+	</update>
 
 </mapper>

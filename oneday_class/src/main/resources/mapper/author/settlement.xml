@@ -7,7 +7,7 @@
 	CALCULATE 는 정산 헤더/상세가 분리된 구조가 아니라 결제 한 건당 한 행이다.
 	한 번의 신청에 포함된 행들은 CALCULATE_GROUP_CODE 로 묶는다.
 -->
-<mapper namespace="kr.co.oneclass.author.settlement.dao.SettlementDAO">
+<mapper namespace="kr.co.oneclass.author.settlement.SettlementDAO">
 
 	<sql id="salesJoin">
 		FROM PAYMENT p
@@ -49,7 +49,7 @@
 	</sql>
 
 	<select id="selectSalesSummary" parameterType="long"
-		resultType="kr.co.oneclass.author.settlement.dto.SalesSummaryDTO">
+		resultType="kr.co.oneclass.author.settlement.SalesSummaryDTO">
 		SELECT
 			NVL(SUM(p.AMOUNT), 0) AS TOTAL_PAYMENT_AMOUNT,
 			NVL(SUM(NVL(p.REFUND, 0)), 0) AS TOTAL_CANCEL_AMOUNT,
@@ -59,8 +59,8 @@
 	</select>
 
 	<select id="selectSalesList"
-		parameterType="kr.co.oneclass.author.settlement.dto.SalesSearchDTO"
-		resultType="kr.co.oneclass.author.settlement.dto.SalesListDTO">
+		parameterType="kr.co.oneclass.author.settlement.SalesSearchDTO"
+		resultType="kr.co.oneclass.author.settlement.SalesListDTO">
 		SELECT *
 		FROM (
 			SELECT sales_page.*, ROWNUM AS RN
@@ -87,7 +87,7 @@
 	</select>
 
 	<select id="selectSalesCount"
-		parameterType="kr.co.oneclass.author.settlement.dto.SalesSearchDTO"
+		parameterType="kr.co.oneclass.author.settlement.SalesSearchDTO"
 		resultType="int">
 		SELECT COUNT(*)
 		<include refid="salesJoin"/>
@@ -95,7 +95,7 @@
 	</select>
 
 	<select id="selectSalesDetail" parameterType="map"
-		resultType="kr.co.oneclass.author.settlement.dto.SalesDetailDTO">
+		resultType="kr.co.oneclass.author.settlement.SalesDetailDTO">
 		SELECT
 			p.PAYMENT_CODE,
 			p.RESERVATION_CODE,
@@ -134,7 +134,7 @@
 	</select>
 
 	<select id="selectSettlementDashboard" parameterType="long"
-		resultType="kr.co.oneclass.author.settlement.dto.SettlementDashboardDTO">
+		resultType="kr.co.oneclass.author.settlement.SettlementDashboardDTO">
 		SELECT
 			NVL((
 				SELECT SUM((p.AMOUNT - NVL(p.REFUND, 0))
@@ -192,7 +192,7 @@
 	</select>
 
 	<select id="selectSettlementAccount" parameterType="long"
-		resultType="kr.co.oneclass.author.settlement.dto.SettlementAccountDTO">
+		resultType="kr.co.oneclass.author.settlement.SettlementAccountDTO">
 		SELECT
 			cr.OPERATOR_CODE AS AUTHOR_CODE,
 			cr.ACTIVITY_NAME AS BUSINESS_NAME,
@@ -208,7 +208,7 @@
 
 	<!-- 실제 DB에는 계좌 테이블이 없으므로 최초 등록도 CREATOR UPDATE 다 -->
 	<update id="insertSettlementAccount"
-		parameterType="kr.co.oneclass.author.settlement.dto.SettlementAccountDTO">
+		parameterType="kr.co.oneclass.author.settlement.SettlementAccountDTO">
 		UPDATE CREATOR
 		<set>
 			SETTLEMENT_ACCOUNT = #{accountNumber},
@@ -221,7 +221,7 @@
 	</update>
 
 	<update id="updateSettlementAccount"
-		parameterType="kr.co.oneclass.author.settlement.dto.SettlementAccountDTO">
+		parameterType="kr.co.oneclass.author.settlement.SettlementAccountDTO">
 		UPDATE CREATOR
 		<set>
 			SETTLEMENT_ACCOUNT = #{accountNumber},
@@ -257,13 +257,13 @@
 	</sql>
 
 	<select id="selectSettlementTargetList" parameterType="long"
-		resultType="kr.co.oneclass.author.settlement.dto.SettlementTargetDTO">
+		resultType="kr.co.oneclass.author.settlement.SettlementTargetDTO">
 		<include refid="settlementTargetSelect"/>
 		ORDER BY p.PAYMENT_DATE, p.PAYMENT_CODE
 	</select>
 
 	<select id="selectSelectedSettlementTargetList" parameterType="map"
-		resultType="kr.co.oneclass.author.settlement.dto.SettlementTargetDTO">
+		resultType="kr.co.oneclass.author.settlement.SettlementTargetDTO">
 		<include refid="settlementTargetSelect"/>
 		AND p.PAYMENT_CODE IN
 		<foreach collection="paymentCodeList" item="paymentCode" open="(" separator="," close=")">
@@ -277,7 +277,7 @@
 		시퀀스 값은 세션 간 유일하므로 동시 신청에서도 서로 다른 코드가 발급된다.
 	-->
 	<insert id="insertSettlementTargetList"
-		parameterType="kr.co.oneclass.author.settlement.dto.SettlementApplyDTO">
+		parameterType="kr.co.oneclass.author.settlement.SettlementApplyDTO">
 		<selectKey keyProperty="settlementCode" resultType="int" order="BEFORE">
 			SELECT
 				(SELECT NVL(MAX(NVL(CALCULATE_GROUP_CODE, CALCULATE_CODE)), 0) FROM CALCULATE)
@@ -365,8 +365,8 @@
 	</sql>
 
 	<select id="selectSettlementList"
-		parameterType="kr.co.oneclass.author.settlement.dto.SettlementSearchDTO"
-		resultType="kr.co.oneclass.author.settlement.dto.SettlementListDTO">
+		parameterType="kr.co.oneclass.author.settlement.SettlementSearchDTO"
+		resultType="kr.co.oneclass.author.settlement.SettlementListDTO">
 		SELECT *
 		FROM (
 			SELECT settlement_page.*, ROWNUM AS RN
@@ -384,7 +384,7 @@
 	</select>
 
 	<select id="selectSettlementCount"
-		parameterType="kr.co.oneclass.author.settlement.dto.SettlementSearchDTO"
+		parameterType="kr.co.oneclass.author.settlement.SettlementSearchDTO"
 		resultType="int">
 		SELECT COUNT(*)
 		FROM (<include refid="settlementGroupSource"/>) settlement_group
@@ -392,7 +392,7 @@
 	</select>
 
 	<select id="selectSettlementDetail" parameterType="map"
-		resultType="kr.co.oneclass.author.settlement.dto.SettlementDetailDTO">
+		resultType="kr.co.oneclass.author.settlement.SettlementDetailDTO">
 		SELECT
 			settlement_group.SETTLEMENT_CODE,
 			settlement_group.APPLIED_AT,
@@ -412,7 +412,7 @@
 	</select>
 
 	<select id="selectSettlementDetailTargetList" parameterType="int"
-		resultType="kr.co.oneclass.author.settlement.dto.SettlementTargetDTO">
+		resultType="kr.co.oneclass.author.settlement.SettlementTargetDTO">
 		SELECT
 			p.PAYMENT_CODE,
 			p.RESERVATION_CODE,

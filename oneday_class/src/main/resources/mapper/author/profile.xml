@@ -12,7 +12,7 @@
 	MEMBER 는 member 팀 테이블이고 프로필 폼도 실명·이메일을 th:field 로 묶지 않는다.
 	그래서 UPDATE 는 CREATOR 만 건드린다. APPROVAL_STATUS 도 관리자 소관이라 제외한다.
 -->
-<mapper namespace="kr.co.oneclass.author.profile.dao.AuthorDAO">
+<mapper namespace="kr.co.oneclass.author.profile.AuthorDAO">
 
 	<!--
 		작가 프로필 조회.
@@ -20,7 +20,7 @@
 		작가 공개 여부 전용 컬럼이 없고 화면 배지도 approval-badge 다.
 	-->
 	<select id="selectAuthorProfile" parameterType="long"
-		resultType="kr.co.oneclass.author.profile.dto.AuthorProfileDTO">
+		resultType="kr.co.oneclass.author.profile.AuthorProfileDTO">
 		SELECT
 			cr.OPERATOR_CODE AS AUTHOR_CODE,
 			m.NAME AS AUTHOR_NAME,
@@ -42,7 +42,7 @@
 		실명·이메일·승인상태는 SET 절에 넣지 말 것 (위 주석 참고).
 	-->
 	<update id="updateAuthorProfile"
-		parameterType="kr.co.oneclass.author.profile.dto.AuthorProfileDTO">
+		parameterType="kr.co.oneclass.author.profile.AuthorProfileDTO">
 		UPDATE CREATOR
 		<set>
 			ACTIVITY_NAME = #{authorNickname},

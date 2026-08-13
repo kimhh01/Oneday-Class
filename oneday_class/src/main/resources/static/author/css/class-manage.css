@@ -393,6 +393,11 @@
 	font-size: var(--fs-meta);
 	color: var(--on-red);
 }
+.form-success {
+	margin-top: 7px;
+	font-size: var(--fs-meta);
+	color: var(--green-600);
+}
 
 /* =============================================================
    반응형 — 1200 / 1024 / 768 / 560

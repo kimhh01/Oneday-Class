@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="editNav(classCode, currentStep)" class="class-edit-nav" aria-label="클래스 수정 항목">
+	<a th:href="@{/author/classes/{classCode}/edit/basic(classCode=${classCode})}" th:classappend="${currentStep == 'basic'} ? ' is-active'" th:attr="aria-current=${currentStep == 'basic'} ? 'step' : null">기본 정보</a>
+	<a th:href="@{/author/classes/{classCode}/edit/pricing(classCode=${classCode})}" th:classappend="${currentStep == 'pricing'} ? ' is-active'" th:attr="aria-current=${currentStep == 'pricing'} ? 'step' : null">가격</a>
+	<a th:href="@{/author/classes/{classCode}/edit/location(classCode=${classCode})}" th:classappend="${currentStep == 'location'} ? ' is-active'" th:attr="aria-current=${currentStep == 'location'} ? 'step' : null">장소</a>
+	<a th:href="@{/author/classes/{classCode}/edit/detail(classCode=${classCode})}" th:classappend="${currentStep == 'detail'} ? ' is-active'" th:attr="aria-current=${currentStep == 'detail'} ? 'step' : null">상세 1/2</a>
+	<a th:href="@{/author/classes/{classCode}/edit/detail-extra(classCode=${classCode})}" th:classappend="${currentStep == 'detail-extra'} ? ' is-active'" th:attr="aria-current=${currentStep == 'detail-extra'} ? 'step' : null">상세 2/2</a>
+	<a th:href="@{/author/classes/{classCode}/edit/curriculum(classCode=${classCode})}" th:classappend="${currentStep == 'curriculum'} ? ' is-active'" th:attr="aria-current=${currentStep == 'curriculum'} ? 'step' : null">커리큘럼</a>
+</nav>
+</body>
+</html>

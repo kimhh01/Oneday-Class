@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>클래스 등록 · 기본 정보 | 숨비당 원데이 클래스</title>
+<title th:text="${editMode == true ? '클래스 수정 · 기본 정보 | 숨비당 원데이 클래스' : '클래스 등록 · 기본 정보 | 숨비당 원데이 클래스'}">클래스 등록 · 기본 정보 | 숨비당 원데이 클래스</title>
 <link rel="stylesheet" href="/author/css/common.css" th:href="@{/author/css/common.css}">
 <link rel="stylesheet" href="/author/css/header.css" th:href="@{/author/css/header.css}">
 <link rel="stylesheet" href="/author/css/sidebar.css" th:href="@{/author/css/sidebar.css}">
 <link rel="stylesheet" href="/author/css/class-register.css" th:href="@{/author/css/class-register.css}">
+<link rel="stylesheet" href="/author/css/class-edit.css" th:href="@{/author/css/class-edit.css}">
 <script src="/author/js/layout.js" th:src="@{/author/js/layout.js}" defer></script>
 <script src="/author/js/class-register-draft.js" th:src="@{/author/js/class-register-draft.js}" defer></script>
 </head>
@@ -16,7 +17,8 @@
 	단계별 임시 저장을 서비스와 연결할 때는 CLASS.STATUS="준비중"을 사용한다.
 	DB에 없는 DRAFT 상태를 새로 만들지 않는다.
 -->
-<body class="author-page register-form-page" data-menu="class-register" data-page="클래스 등록">
+<body class="author-page register-form-page" data-menu="class-register" data-page="클래스 등록"
+	  th:attr="data-menu=${editMode == true ? 'class-manage' : 'class-register'},data-page=${editMode == true ? '클래스 수정' : '클래스 등록'}">
 
 <div class="app">
 	<div th:replace="~{author/fragments/icons :: icons}"></div>
@@ -28,14 +30,16 @@
 		<main class="content">
 			<div class="content__inner">
 				<header class="register-page-head register-page-head--compact">
-					<h1 class="page-title">클래스 등록하기 <svg class="title-leaf" aria-hidden="true"><use href="#icon-title-leaf"></use></svg></h1>
-					<p class="page-desc">원데이 클래스 등록을 위한 기본 정보를 입력해주세요.</p>
+					<h1 class="page-title"><span th:text="${editMode == true ? '클래스 수정' : '클래스 등록하기'}">클래스 등록하기</span> <svg class="title-leaf" aria-hidden="true"><use href="#icon-title-leaf"></use></svg></h1>
+					<p class="page-desc" th:text="${editMode == true ? '운영 중인 클래스의 기본 정보를 수정합니다.' : '원데이 클래스 등록을 위한 기본 정보를 입력해주세요.'}">원데이 클래스 등록을 위한 기본 정보를 입력해주세요.</p>
 					<p class="reply-error" th:if="${registerError}" th:text="${registerError}">입력값을 확인해주세요.</p>
 					<p class="reply-error" th:if="${rejectionNotice}" th:text="${rejectionNotice}">반려 사유를 확인해주세요.</p>
 					<p class="form-success" th:if="${draftSaved}" th:text="${draftSaved}" role="status">임시 저장했습니다.</p>
 				</header>
+				<p class="class-edit-notice" th:if="${editMode == true}">수정 내용은 별도 관리자 검수 없이 저장 즉시 반영됩니다. 클래스의 승인 상태는 그대로 유지됩니다.</p>
+				<div th:if="${editMode == true}" th:replace="~{author/fragments/class-edit-nav :: editNav(${editClassCode}, ${editStep})}"></div>
 
-				<nav class="step-nav-wrap" aria-label="클래스 등록 단계">
+				<nav class="step-nav-wrap" aria-label="클래스 등록 단계" th:unless="${editMode == true}">
 					<ol class="step-nav">
 						<li class="step is-done">
 							<span class="step__num">01</span>
@@ -70,7 +74,7 @@
 
 				<form class="register-grid" id="basicInfoForm" enctype="multipart/form-data" method="post" novalidate data-draft-form
 					  th:object="${basicForm}"
-					  th:action="@{/author/classes/register/basic}">
+					  th:action="${editMode == true ? editFormAction : '/author/classes/register/basic'}">
 					<input type="hidden" name="classCode" th:value="${basicForm.classCode}">
 					<section class="card register-info-card" aria-labelledby="basicInfoTitle">
 						<div class="card-head-icon">
@@ -127,32 +131,6 @@
 								</div>
 							</div>
 
-							<div class="field">
-								<label class="field__label" for="address">장소 / 주소</label>
-								<div class="field__control">
-									<div class="address-control">
-										<input class="input" type="text" id="address" readonly
-											   placeholder="다음 장소 정보 단계에서 입력합니다.">
-										<button type="button" class="address-control__button" disabled>
-											주소 검색
-											<svg aria-hidden="true"><use href="#icon-search"></use></svg>
-										</button>
-									</div>
-									<p class="field__help">기본 정보를 저장하면 다음 단계에서 주소와 지도 위치를 설정합니다.</p>
-								</div>
-							</div>
-
-							<div class="field">
-								<label class="field__label" for="tags">키워드 / 태그</label>
-								<div class="field__control">
-									<input class="input" type="text" id="tags" readonly
-										   maxlength="80" placeholder="상세 정보 단계에서 입력합니다.">
-									<div class="field__foot">
-										<p class="field__help">쉼표(,)로 구분하여 입력해주세요. (최대 8개)</p>
-										<p class="field__count" id="tagCount">0 / 8</p>
-									</div>
-								</div>
-							</div>
 						</div>
 					</section>
 
@@ -203,10 +181,10 @@
 					<div class="step-actions">
 						<button type="submit" name="saveMode" value="stay" class="btn btn--ghost btn--lg step-actions__save">
 							<svg aria-hidden="true"><use href="#icon-bookmark"></use></svg>
-							임시 저장
+							<span th:text="${editMode == true ? '저장' : '임시 저장'}">임시 저장</span>
 						</button>
 						<div class="step-actions__nav">
-							<a href="class-register.html" th:href="@{/author/classes/register-guide}" class="btn btn--ghost btn--lg step-actions__previous">이전 단계</a>
+							<a href="class-register.html" th:href="${editMode == true ? '/author/classes/' + editClassCode : '/author/classes/register-guide'}" class="btn btn--ghost btn--lg step-actions__previous" th:text="${editMode == true ? '상세로 돌아가기' : '이전 단계'}">이전 단계</a>
 							<button type="submit" name="saveMode" value="next" class="btn btn--primary btn--lg step-actions__next">
 								<span>다음 단계</span>
 								<span class="step-actions__next-icon"><svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg></span>

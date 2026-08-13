@@ -15,7 +15,7 @@
 	소유자 검증은 별도 조회 없이 WHERE 의 OPERATOR_CODE 조건이 겸한다.
 	남의 리뷰를 건드리면 변경 행수가 0 으로 돌아온다.
 -->
-<mapper namespace="kr.co.oneclass.author.review.dao.ReviewDAO">
+<mapper namespace="kr.co.oneclass.author.review.ReviewDAO">
 
 	<!-- 목록·건수가 공유하는 검색 조건 -->
 	<sql id="reviewSearchWhere">
@@ -75,7 +75,7 @@
 
 	<!-- 전체 리뷰 수, 답글 완료 수, 답글 미작성 수를 집계한다 -->
 	<select id="selectReviewSummary" parameterType="long"
-		resultType="kr.co.oneclass.author.review.dto.ReviewSummaryDTO">
+		resultType="kr.co.oneclass.author.review.ReviewSummaryDTO">
 		SELECT
 			COUNT(*) AS TOTAL_REVIEW_COUNT,
 			COUNT(r.REPLY_CONTENT) AS REPLIED_REVIEW_COUNT,
@@ -87,7 +87,7 @@
 
 	<!-- 클래스별 필터용 목록. 리뷰가 없는 클래스도 0건으로 함께 내려보낸다 -->
 	<select id="selectReviewClassList" parameterType="long"
-		resultType="kr.co.oneclass.author.review.dto.ReviewClassDTO">
+		resultType="kr.co.oneclass.author.review.ReviewClassDTO">
 		SELECT
 			c.CLASS_CODE,
 			c.NAME AS CLASS_TITLE,
@@ -104,8 +104,8 @@
 		endRow 가 0 이면(컨트롤러가 페이지를 넘기지 않는 현재 상태) 전체를 반환한다.
 	-->
 	<select id="selectReviewList"
-		parameterType="kr.co.oneclass.author.review.dto.ReviewSearchDTO"
-		resultType="kr.co.oneclass.author.review.dto.ReviewListDTO">
+		parameterType="kr.co.oneclass.author.review.ReviewSearchDTO"
+		resultType="kr.co.oneclass.author.review.ReviewListDTO">
 		<choose>
 			<when test="endRow > 0">
 				SELECT * FROM (
@@ -124,7 +124,7 @@
 
 	<!-- 현재 필터 조건의 전체 리뷰 수 -->
 	<select id="selectReviewCount"
-		parameterType="kr.co.oneclass.author.review.dto.ReviewSearchDTO"
+		parameterType="kr.co.oneclass.author.review.ReviewSearchDTO"
 		resultType="int">
 		SELECT COUNT(*)
 		FROM REVIEW r
@@ -134,7 +134,7 @@
 
 	<!-- 작가 소유 클래스의 리뷰인지 확인하면서 상세정보를 조회한다 -->
 	<select id="selectReviewDetail" parameterType="map"
-		resultType="kr.co.oneclass.author.review.dto.ReviewDetailDTO">
+		resultType="kr.co.oneclass.author.review.ReviewDetailDTO">
 		SELECT
 			r.REVIEW_CODE,
 			r.CLASS_CODE,
@@ -160,7 +160,7 @@
 		컬럼명 REVJEW_IMG 는 오타지만 실제 컬럼명이므로 그대로 둔다.
 	-->
 	<select id="selectReviewImageList" parameterType="int"
-		resultType="kr.co.oneclass.author.review.dto.ReviewImageDTO">
+		resultType="kr.co.oneclass.author.review.ReviewImageDTO">
 		SELECT
 			REVIEW_IMG_CODE AS REVIEW_IMAGE_CODE,
 			REVIEW_CODE,
@@ -176,7 +176,7 @@
 		REPLY_CONTENT IS NULL 조건이 "이미 답글이 있으면 등록 불가" 검증을 겸한다.
 	-->
 	<update id="insertReviewReply"
-		parameterType="kr.co.oneclass.author.review.dto.ReviewReplyDTO">
+		parameterType="kr.co.oneclass.author.review.ReviewReplyDTO">
 		UPDATE REVIEW
 		SET REPLY_CONTENT = #{replyContent},
 			REPLY_DATE = SYSDATE
@@ -191,7 +191,7 @@
 
 	<!-- 답글 수정. REPLY_CONTENT IS NOT NULL 조건이 "답글이 있어야 수정 가능" 검증을 겸한다 -->
 	<update id="updateReviewReply"
-		parameterType="kr.co.oneclass.author.review.dto.ReviewReplyDTO">
+		parameterType="kr.co.oneclass.author.review.ReviewReplyDTO">
 		UPDATE REVIEW
 		SET REPLY_CONTENT = #{replyContent},
 			REPLY_DATE = SYSDATE

@@ -3,7 +3,7 @@
 	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!-- 작가가 관리자에게 보내는 1:1 문의 Mapper -->
-<mapper namespace="kr.co.oneclass.author.inquiry.dao.InquiryDAO">
+<mapper namespace="kr.co.oneclass.author.inquiry.InquiryDAO">
 
 	<sql id="authorInquiryWhere">
 		WHERE i.OPERATOR_CODE = #{authorCode}
@@ -11,7 +11,7 @@
 	</sql>
 
 	<select id="selectInquirySummary" parameterType="long"
-		resultType="kr.co.oneclass.author.inquiry.dto.InquirySummaryDTO">
+		resultType="kr.co.oneclass.author.inquiry.InquirySummaryDTO">
 		SELECT
 			COUNT(*) AS TOTAL_COUNT,
 			NVL(SUM(CASE WHEN i.ANSWER IS NULL THEN 1 ELSE 0 END), 0) AS WAITING_COUNT,
@@ -21,15 +21,15 @@
 	</select>
 
 	<select id="selectInquiryTypeList"
-		resultType="kr.co.oneclass.author.inquiry.dto.InquiryTypeDTO">
+		resultType="kr.co.oneclass.author.inquiry.InquiryTypeDTO">
 		SELECT INQUIRY_TYPE_CODE, INQUIRY_TYPE_NAME
 		FROM INQUIRY_TYPE
 		ORDER BY INQUIRY_TYPE_CODE
 	</select>
 
 	<select id="selectInquiryList"
-		parameterType="kr.co.oneclass.author.inquiry.dto.InquirySearchDTO"
-		resultType="kr.co.oneclass.author.inquiry.dto.InquiryListDTO">
+		parameterType="kr.co.oneclass.author.inquiry.InquirySearchDTO"
+		resultType="kr.co.oneclass.author.inquiry.InquiryListDTO">
 		SELECT
 			i.INQUIRY_CODE,
 			i.INQUIRY_TYPE_CODE,
@@ -57,7 +57,7 @@
 
 	<!-- 문의 코드와 작가 코드가 모두 맞아야 상세를 반환한다 -->
 	<select id="selectInquiryDetail" parameterType="map"
-		resultType="kr.co.oneclass.author.inquiry.dto.InquiryDetailDTO">
+		resultType="kr.co.oneclass.author.inquiry.InquiryDetailDTO">
 		SELECT
 			i.INQUIRY_CODE,
 			i.INQUIRY_TYPE_CODE,
@@ -83,7 +83,7 @@
 		현재 최대 코드에 세션 간 유일한 NEXTVAL을 더해 신규 코드를 발급한다.
 	-->
 	<insert id="insertInquiry"
-		parameterType="kr.co.oneclass.author.inquiry.dto.InquiryFormDTO">
+		parameterType="kr.co.oneclass.author.inquiry.InquiryFormDTO">
 		<selectKey keyProperty="inquiryCode" resultType="int" order="BEFORE">
 			SELECT
 				(SELECT NVL(MAX(INQUIRY_CODE), 0) FROM INQUIRY)

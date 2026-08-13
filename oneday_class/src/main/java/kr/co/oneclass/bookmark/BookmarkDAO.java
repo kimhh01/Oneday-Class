@@ -43,7 +43,7 @@ public interface BookmarkDAO {
             "        JOIN category cat ON c.category_code = cat.category_code " +
             "        LEFT JOIN category pcat ON cat.parents_category = pcat.category_code " +
             "        LEFT JOIN class_img ci ON c.class_code = ci.class_code " +
-            "                              AND ci.type = '상세' " +
+            "                              AND ci.type = '대표' " +
             "                              AND ci.sort_order = 1 " +
             "        WHERE b.member_code = TO_NUMBER(#{memberCode}) " +
             "        <if test='rDTO != null and rDTO.filed != null and rDTO.filed != \"\" and rDTO.filed != \"ALL\"'>" +

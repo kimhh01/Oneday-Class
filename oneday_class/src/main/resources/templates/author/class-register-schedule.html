@@ -29,7 +29,6 @@
 	[아직 안 정해진 것 - 서버 붙일 때 확인]
 	  · SCHEDULE.REPEAT_RULE_CODE 가 NOT NULL 이라 개별 일정도 규칙 행이 필요한지
 	  · START_TIME / END_TIME 이 VARCHAR2(50) 이라 저장 형식을 무엇으로 고정할지 (여기선 "HH:MM")
-	  화면 값은 전부 mock 이다. 서버 검증을 대신하지 않는다.
 -->
 <body class="author-page register-form-page register-schedule-page" data-menu="class-register" data-page="클래스 등록">
 
@@ -846,22 +845,6 @@
 	}
 
 	/* ---------------- 시작 ---------------- */
-
-	/* 화면 확인용 mock. 오늘 기준으로 다가오는 토요일 3번을 넣어 둔다.
-	   서비스 연결 후에는 이 함수를 지우고 Model 값으로 채운다. */
-	function seedMock() {
-		var people = currentPeople();
-		var cursor = new Date();
-		cursor.setHours(0, 0, 0, 0);
-		while (cursor.getDay() !== 6) { cursor.setDate(cursor.getDate() + 1); }
-
-		var times = ['14:00', '11:00', '16:00'];
-		var maxes = [6, 5, 6];
-		for (var i = 0; i < 3; i += 1) {
-			addSchedule(toKey(cursor), times[i], 120, { min: people.min, max: maxes[i] });
-			cursor.setDate(cursor.getDate() + 7);
-		}
-	}
 
 	function init() {
 		var today = new Date();

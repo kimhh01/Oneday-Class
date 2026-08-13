@@ -2,10 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="kr.co.oneclass.author.classbasic.dao.CurriculumDAO">
+<mapper namespace="kr.co.oneclass.author.classbasic.CurriculumDAO">
 
 	<select id="selectCurriculumStepList" parameterType="map"
-		resultType="kr.co.oneclass.author.classbasic.dto.CurriculumStepDTO">
+		resultType="kr.co.oneclass.author.classbasic.CurriculumStepDTO">
 		SELECT
 			cc.CURRICULUM_CODE,
 			cc.CLASS_CODE,
@@ -26,7 +26,7 @@
 	</delete>
 
 	<insert id="insertCurriculumStep"
-		parameterType="kr.co.oneclass.author.classbasic.dto.CurriculumStepDTO">
+		parameterType="kr.co.oneclass.author.classbasic.CurriculumStepDTO">
 		<selectKey keyProperty="curriculumCode" resultType="int" order="BEFORE">
 			SELECT (SELECT NVL(MAX(CURRICULUM_CODE), 0) FROM CLASS_CURRICULUM)
 				+ SEQ_CLASS_CURRICULUM_CODE.NEXTVAL

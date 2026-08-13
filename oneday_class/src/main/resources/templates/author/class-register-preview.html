@@ -57,11 +57,11 @@
 
 							<section class="customer-gallery" aria-label="클래스 작품 사진">
 								<img class="customer-gallery__main" src="/author/images/photo/class-upload-placeholder.png" th:src="${#lists.isEmpty(preview.mainImageList)} ? @{/author/images/photo/class-upload-placeholder.png} : ${#lists.isEmpty(preview.mainImageList) ? null : preview.mainImageList[0].imagePath}" alt="클래스 대표 이미지">
-								<img class="customer-gallery__step customer-gallery__step--one" alt="클래스 상세 이미지"
+								<img class="customer-gallery__step customer-gallery__step--one" alt="클래스 완성작 이미지"
 									 th:src="${#lists.isEmpty(preview.resultImageList)} ? @{/author/images/photo/class-upload-placeholder.png} : ${preview.resultImageList[0].imagePath}">
-								<img class="customer-gallery__step customer-gallery__step--two" alt="커리큘럼 이미지"
-									 th:src="${#lists.isEmpty(preview.curriculum.stepList)} ? @{/author/images/photo/class-upload-placeholder.png} : ${preview.curriculum.stepList[0].imagePath}">
-								<span class="customer-gallery__count"><svg aria-hidden="true"><use href="#icon-image"></use></svg><th:block th:text="${#lists.size(preview.mainImageList) + #lists.size(preview.resultImageList) + #lists.size(preview.curriculum.stepList)}">0</th:block></span>
+								<img class="customer-gallery__step customer-gallery__step--two" alt="작품 갤러리 이미지"
+									 th:src="${#lists.isEmpty(preview.galleryImageList)} ? @{/author/images/photo/class-upload-placeholder.png} : ${preview.galleryImageList[0].imagePath}">
+								<span class="customer-gallery__count"><svg aria-hidden="true"><use href="#icon-image"></use></svg><th:block th:text="${#lists.size(preview.mainImageList) + #lists.size(preview.resultImageList) + #lists.size(preview.galleryImageList)}">0</th:block></span>
 							</section>
 
 							<div class="customer-detail-layout">
@@ -72,16 +72,10 @@
 										<p th:text="${preview.classBasic.shortIntroduction}">한 줄 소개</p>
 										<div class="customer-intro__meta">
 											<span><svg aria-hidden="true"><use href="#icon-map-pin"></use></svg><th:block th:text="${preview.classLocation.address}">주소</th:block></span>
-											<span><svg aria-hidden="true"><use href="#icon-clock"></use></svg>약 2시간</span>
+											<span><svg aria-hidden="true"><use href="#icon-clock"></use></svg>일정별 시간 확인</span>
 											<span><svg aria-hidden="true"><use href="#icon-users"></use></svg>최대 <th:block th:text="${preview.classSchedule.maxPeople}">0</th:block>명</span>
 										</div>
 										<div class="customer-intro__tags"><span th:each="tag : ${preview.classDetail.tagList}" th:text="${'#' + tag}">#태그</span></div>
-									</section>
-
-									<section class="customer-studio">
-										<img src="/author/images/photo/studio-profile.png" th:src="@{/author/images/photo/studio-profile.png}" alt="포근공방 작업실">
-										<div><strong>포근공방</strong><span>손끝의 온기를 오래 간직하는 공예 클래스</span></div>
-										<em>작가 소개</em>
 									</section>
 
 									<section class="customer-section">
@@ -106,7 +100,7 @@
 									<del th:text="${#numbers.formatInteger(preview.classSchedule.regularPrice, 1, 'COMMA') + '원'}">80,000원</del>
 									<div class="customer-booking__schedule">
 										<h4><svg aria-hidden="true"><use href="#icon-calendar"></use></svg>일정 선택</h4>
-										<label th:each="schedule, stat : ${preview.classSchedule.scheduleList}"><input type="radio" name="customerSchedule" th:checked="${stat.first}"><span><b th:text="${(schedule.scheduleDate == null ? '-' : #dates.format(schedule.scheduleDate,'yyyy.MM.dd')) + ' ' + schedule.startTime}">일정</b><small th:text="${'잔여 ' + schedule.maxPeople + '자리'}">잔여 자리</small></span></label>
+										<label th:each="schedule, stat : ${preview.classSchedule.scheduleList}"><input type="radio" name="customerSchedule" th:checked="${stat.first}"><span><b th:text="${(schedule.scheduleDate == null ? '-' : #dates.format(schedule.scheduleDate,'yyyy.MM.dd')) + ' ' + schedule.startTime}">일정</b><small th:text="${'정원 ' + schedule.maxPeople + '명'}">정원</small></span></label>
 									</div>
 									<div class="customer-booking__place"><svg aria-hidden="true"><use href="#icon-map-pin"></use></svg><span><b>클래스 장소</b><small th:text="${preview.classLocation.address + ' ' + preview.classLocation.detailAddress}">주소</small></span></div>
 									<button type="button" disabled>미리보기에서는 예약할 수 없어요</button>

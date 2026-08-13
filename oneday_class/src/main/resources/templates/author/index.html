@@ -12,7 +12,6 @@
 </head>
 <!--
 	작가페이지 홈 : 따뜻한 아이보리 톤 + 여백 중심 + 액센트 절제
-	화면의 숫자와 이름은 전부 레이아웃 확인용 mock 입니다.
 
 	[예약 정책] 예약은 결제 시점에 확정된다. 작가 승인 단계는 없다.
 	           화면 문구 -> DB(RESERVATION.STATUS) : 예약 완료 = "예약", 예약 취소 = "취소"
@@ -56,52 +55,40 @@
 						<span class="stat__icon"><svg aria-hidden="true"><use href="#icon-users"></use></svg></span>
 						<p class="stat__label">모집 중 클래스</p>
 						<p class="stat__value"><span th:text="${dashboardSummary.recruitingClassCount}">0</span><small>개</small></p>
-						<p class="stat__delta stat__delta--up">
-							<svg><use href="#icon-arrow-up"></use></svg> 2개 · 지난주 대비
-						</p>
+						<p class="stat__delta">전체 운영 <span th:text="${dashboardSummary.totalClassCount}">0</span>개</p>
 					</div>
 					<div class="stat">
 						<span class="stat__icon"><svg aria-hidden="true"><use href="#icon-chat"></use></svg></span>
-						<p class="stat__label">답변 대기</p>
+						<p class="stat__label">문의 답변 대기</p>
 						<p class="stat__value"><span th:text="${dashboardSummary.unansweredInquiryCount}">0</span><small>건</small></p>
-						<p class="stat__delta">평균 응답시간 2일</p>
+						<p class="stat__delta" th:if="${dashboardSummary.averageResponseDays > 0}">평균 응답시간 <span th:text="${#numbers.formatDecimal(dashboardSummary.averageResponseDays, 1, 1)}">0.0</span>일</p>
+						<p class="stat__delta" th:unless="${dashboardSummary.averageResponseDays > 0}">답변 완료 이력 없음</p>
 					</div>
 					<div class="stat">
 						<span class="stat__icon stat__icon--green"><svg aria-hidden="true"><use href="#icon-calendar"></use></svg></span>
 						<p class="stat__label">오늘 예약</p>
 						<p class="stat__value"><span th:text="${dashboardSummary.todayReservationCount}">0</span><small>명</small></p>
-						<p class="stat__delta stat__delta--up">
-							<svg><use href="#icon-arrow-up"></use></svg> 1건 · 어제 대비
-						</p>
+						<p class="stat__delta">어제 예약 <span th:text="${dashboardSummary.yesterdayReservationCount}">0</span>명</p>
 					</div>
 					<div class="stat">
 						<span class="stat__icon stat__icon--green"><svg aria-hidden="true"><use href="#icon-wallet"></use></svg></span>
 						<p class="stat__label">정산 가능 금액</p>
 						<p class="stat__value" th:text="${'₩' + #numbers.formatInteger(dashboardSummary.availableSettlementAmount, 3, 'COMMA')}">₩0</p>
-						<p class="stat__delta stat__delta--up">
-							<svg><use href="#icon-arrow-up"></use></svg> 12% · 지난달 대비
-						</p>
+						<p class="stat__delta">정산 가능 결제 <span th:text="${dashboardSummary.availableSettlementCount}">0</span>건</p>
 					</div>
 				</section>
 
 				<!-- 처리할 일 -->
 				<section class="todo" aria-label="처리할 일">
 					<a href="review.html" th:each="alert : ${dashboardAlerts}" th:href="${alert.targetUrl}" class="todo__item">
-						<span class="todo__icon" aria-hidden="true"><svg><use href="#icon-star"></use></svg></span>
+						<span class="todo__icon" aria-hidden="true"><svg><use href="#icon-star" th:attr="href=${alert.alertType == 'SETTLEMENT' ? '#icon-wallet' : (alert.alertType == 'INQUIRY' ? '#icon-chat' : '#icon-star')}"></use></svg></span>
 						<span class="todo__text">
 							<span class="todo__title" th:text="${alert.alertTitle}">확인할 알림이 있습니다.</span>
 							<span class="todo__desc" th:text="${alert.alertContent}">알림 내용</span>
 						</span>
 						<span class="todo__count" th:text="${alert.alertCount + '건'}">0건</span>
 					</a>
-					<a href="settlement-request.html" th:href="@{/author/settlements/new}" class="todo__item todo__item--settlement">
-						<span class="todo__icon" aria-hidden="true"><svg><use href="#icon-wallet"></use></svg></span>
-						<span class="todo__text">
-							<span class="todo__title">정산 신청을 잊지 마세요</span>
-							<span class="todo__desc">5월 정산 신청 마감까지 3일 남았어요</span>
-						</span>
-						<span class="todo__action">바로가기</span>
-					</a>
+					<div class="todo__empty" th:if="${#lists.isEmpty(dashboardAlerts)}">현재 처리할 알림이 없습니다.</div>
 				</section>
 
 				<div class="grid">
@@ -115,13 +102,6 @@
 								<a href="schedule.html" th:href="@{/author/schedules}" class="link-more">전체 일정 보기 <svg><use href="#icon-chevron-right"></use></svg></a>
 							</div>
 							<div class="card__body">
-								<!--
-									[썸네일 규칙] 아래 img 는 mock 이다.
-									실제로는 카테고리 일러스트가 아니라 그 클래스의 대표 사진이 들어간다.
-									  = CLASS_IMG 중 표시 순서 1번 (등록 1단계 "첫 번째 사진이 대표 사진")
-									대표 사진이 없을 때만 카테고리 일러스트를 fallback 으로 쓴다.
-									원본을 그대로 걸지 말 것. 업로드 원본은 장당 3~5MB 라 목록이 수십 MB 가 된다.
-								-->
 								<ul class="today">
 									<li th:each="todayClass : ${todayClasses}">
 										<p class="today__time"><b th:text="${todayClass.startTime}">10:00</b><span th:text="${todayClass.endTime}">12:00</span></p>
@@ -149,62 +129,15 @@
 							</div>
 							<div class="card__body">
 								<ul class="recent">
-									<li>
-										<span class="recent__avatar">김</span>
+									<li th:each="reservation : ${recentReservations}">
+										<span class="recent__avatar" th:text="${#strings.substring(reservation.memberName, 0, 1)}">김</span>
 										<span class="recent__main">
-											<span class="recent__name">[라탄] 라탄 트레이 만들기</span>
-											<span class="recent__meta">김지연 · 2명 · 05.28 09:41</span>
+											<span class="recent__name" th:text="${'[' + reservation.categoryName + '] ' + reservation.classTitle}">클래스명</span>
+											<span class="recent__meta"><span th:text="${reservation.memberName}">회원</span> · <span th:text="${reservation.peopleNumber}">0</span>명 · <span th:text="${#dates.format(reservation.reservationDate, 'MM.dd HH:mm')}">00.00 00:00</span></span>
 										</span>
-										<span class="badge badge--green">예약 완료</span>
+										<span class="badge" th:classappend="${reservation.reservationStatus == '예약' ? 'badge--green' : 'badge--gray'}" th:text="${reservation.reservationStatus == '예약' ? '예약 완료' : '예약 취소'}">예약 완료</span>
 									</li>
-									<li>
-										<span class="recent__avatar">이</span>
-										<span class="recent__main">
-											<span class="recent__name">[캔들] 소이캔들 원데이 클래스</span>
-											<span class="recent__meta">이수인 · 1명 · 05.28 09:15</span>
-										</span>
-										<span class="badge badge--green">예약 완료</span>
-									</li>
-									<li>
-										<span class="recent__avatar">박</span>
-										<span class="recent__main">
-											<span class="recent__name">[드로잉] 수채화 일러스트 클래스</span>
-											<span class="recent__meta">박세은 · 1명 · 05.27 21:33</span>
-										</span>
-										<span class="badge badge--green">예약 완료</span>
-									</li>
-									<li>
-										<span class="recent__avatar">최</span>
-										<span class="recent__main">
-											<span class="recent__name">[라탄] 라탄 트레이 만들기</span>
-											<span class="recent__meta">최은영 · 2명 · 05.27 18:02</span>
-										</span>
-										<span class="badge badge--gray">예약 취소</span>
-									</li>
-									<li>
-										<span class="recent__avatar">장</span>
-										<span class="recent__main">
-											<span class="recent__name">[캔들] 소이캔들 원데이 클래스</span>
-											<span class="recent__meta">장하늘 · 1명 · 05.27 15:58</span>
-										</span>
-										<span class="badge badge--green">예약 완료</span>
-									</li>
-									<li>
-										<span class="recent__avatar">윤</span>
-										<span class="recent__main">
-											<span class="recent__name">[드로잉] 수채화 일러스트 클래스</span>
-											<span class="recent__meta">윤서아 · 2명 · 05.26 20:14</span>
-										</span>
-										<span class="badge badge--green">예약 완료</span>
-									</li>
-									<li>
-										<span class="recent__avatar">한</span>
-										<span class="recent__main">
-											<span class="recent__name">[라탄] 라탄 트레이 만들기</span>
-											<span class="recent__meta">한도윤 · 1명 · 05.26 13:27</span>
-										</span>
-										<span class="badge badge--green">예약 완료</span>
-									</li>
+									<li th:if="${#lists.isEmpty(recentReservations)}"><span class="recent__meta">최근 예약 내역이 없습니다.</span></li>
 								</ul>
 							</div>
 						</section>
@@ -219,10 +152,9 @@
 									<img src="/author/images/photo/studio-profile.png" th:src="${authorSummary.profileImagePath != null} ? ${authorSummary.profileImagePath} : @{/author/images/photo/studio-profile.png}" alt="" width="1256" height="1256" loading="lazy">
 								</span>
 								<div class="profile__info">
-									<p class="profile__name"><span th:text="${authorSummary.authorName}">작가</span> <span class="badge badge--green">활동 중</span></p>
-									<!-- AuthorSummaryDTO에 소개·활동지역 필드가 없어 정적 문구를 유지한다 -->
-									<p class="profile__desc">작가 소개</p>
-									<p class="profile__meta">활동 지역</p>
+									<p class="profile__name"><span th:text="${authorSummary.authorName}">작가</span> <span class="badge" th:classappend="${authorSummary.approvalStatus == '승인' ? 'badge--green' : 'badge--gray'}" th:text="${authorSummary.approvalStatus == '승인' ? '활동 중' : authorSummary.approvalStatus}">활동 중</span></p>
+									<p class="profile__desc" th:text="${#strings.isEmpty(authorSummary.authorIntroduction) ? '등록된 작가 소개가 없습니다.' : authorSummary.authorIntroduction}">작가 소개</p>
+									<p class="profile__meta" th:text="${#strings.isEmpty(authorSummary.activityRegion) ? '활동 지역 미등록' : authorSummary.activityRegion}">활동 지역</p>
 									<p class="profile__summary">
 										<span>누적 클래스 <b th:text="${authorSummary.classCount + '개'}">0개</b></span>
 										<span class="profile__rating">★ <b th:text="${#numbers.formatDecimal(authorSummary.averageRating, 1, 1)}">0.0</b> (후기 <span th:text="${authorSummary.reviewCount}">0</span>개)</span>
@@ -241,37 +173,23 @@
 								<div class="chart" id="reservationChart">
 									<svg viewBox="0 0 480 132" role="img" aria-label="최근 7일 예약 건수 막대 그래프">
 										<path class="chart__grid" d="M36 10H468M36 35H468M36 60H468M36 85H468M36 110H468"/>
-										<text class="chart__tick" x="28" y="13" text-anchor="end">16</text>
-										<text class="chart__tick" x="28" y="38" text-anchor="end">12</text>
-										<text class="chart__tick" x="28" y="63" text-anchor="end">8</text>
-										<text class="chart__tick" x="28" y="88" text-anchor="end">4</text>
+										<text class="chart__tick" x="28" y="13" text-anchor="end" th:text="${reservationChartMax}">4</text>
+										<text class="chart__tick" x="28" y="38" text-anchor="end" th:text="${reservationChartMax * 3 / 4}">3</text>
+										<text class="chart__tick" x="28" y="63" text-anchor="end" th:text="${reservationChartMax / 2}">2</text>
+										<text class="chart__tick" x="28" y="88" text-anchor="end" th:text="${reservationChartMax / 4}">1</text>
 										<text class="chart__tick" x="28" y="113" text-anchor="end">0</text>
 
-										<rect class="chart__bar" x="56" y="72" width="24" height="38" rx="4"/>
-										<rect class="chart__bar" x="118" y="66" width="24" height="44" rx="4"/>
-										<rect class="chart__bar" x="180" y="54" width="24" height="56" rx="4"/>
-										<rect class="chart__bar" x="242" y="54" width="24" height="56" rx="4"/>
-										<rect class="chart__bar" x="304" y="41" width="24" height="69" rx="4"/>
-										<rect class="chart__bar" x="366" y="54" width="24" height="56" rx="4"/>
-										<rect class="chart__bar chart__bar--today" x="428" y="79" width="24" height="31" rx="4"/>
+										<rect class="chart__bar" th:each="point, status : ${reservationChart}" th:classappend="${status.last ? 'chart__bar--today' : ''}" x="56" y="110" width="24" height="0" rx="4"
+											  th:attr="x=${56 + status.index * 62},y=${110 - point.reservationCount * 100 / reservationChartMax},height=${point.reservationCount * 100 / reservationChartMax}"/>
 
-										<text class="chart__value" x="440" y="72" text-anchor="middle">5건</text>
+										<text class="chart__value" th:each="point, status : ${reservationChart}" th:if="${status.last}" x="440" y="103" text-anchor="middle"
+											  th:attr="x=${68 + status.index * 62},y=${103 - point.reservationCount * 100 / reservationChartMax}" th:text="${point.reservationCount + '건'}">0건</text>
 
-										<text class="chart__xlabel" x="68" y="126" text-anchor="middle">5.22 (수)</text>
-										<text class="chart__xlabel" x="130" y="126" text-anchor="middle">5.23 (목)</text>
-										<text class="chart__xlabel" x="192" y="126" text-anchor="middle">5.24 (금)</text>
-										<text class="chart__xlabel" x="254" y="126" text-anchor="middle">5.25 (토)</text>
-										<text class="chart__xlabel" x="316" y="126" text-anchor="middle">5.26 (일)</text>
-										<text class="chart__xlabel" x="378" y="126" text-anchor="middle">5.27 (월)</text>
-										<text class="chart__xlabel chart__xlabel--today" x="440" y="126" text-anchor="middle">5.28 (화)</text>
+										<text class="chart__xlabel" th:each="point, status : ${reservationChart}" th:classappend="${status.last ? 'chart__xlabel--today' : ''}" x="68" y="126" text-anchor="middle"
+											  th:attr="x=${68 + status.index * 62}" th:text="${#dates.format(point.reservationDate, 'M.d (E)')}">0.0</text>
 
-										<rect class="chart__hit" x="40" y="6" width="56" height="108" data-label="5월 22일" data-value="6건"/>
-										<rect class="chart__hit" x="102" y="6" width="56" height="108" data-label="5월 23일" data-value="7건"/>
-										<rect class="chart__hit" x="164" y="6" width="56" height="108" data-label="5월 24일" data-value="9건"/>
-										<rect class="chart__hit" x="226" y="6" width="56" height="108" data-label="5월 25일" data-value="9건"/>
-										<rect class="chart__hit" x="288" y="6" width="56" height="108" data-label="5월 26일" data-value="11건"/>
-										<rect class="chart__hit" x="350" y="6" width="56" height="108" data-label="5월 27일" data-value="9건"/>
-										<rect class="chart__hit" x="412" y="6" width="56" height="108" data-label="5월 28일 (오늘)" data-value="5건"/>
+										<rect class="chart__hit" th:each="point, status : ${reservationChart}" x="40" y="6" width="56" height="108" data-label="날짜" data-value="0건"
+											  th:attr="x=${40 + status.index * 62},data-label=${#dates.format(point.reservationDate, 'M월 d일') + (status.last ? ' (오늘)' : '')},data-value=${point.reservationCount + '건'}"/>
 									</svg>
 									<div class="chart-tip" data-chart-tip></div>
 								</div>
@@ -285,7 +203,7 @@
 							</div>
 							<div class="card__body">
 								<ul class="shortcut">
-									<li><a href="class-register.html" th:href="@{/author/classes/new}">
+									<li><a href="class-register.html" th:href="@{/author/classes/register-guide}">
 										<svg><use href="#icon-plus-box"></use></svg> 클래스 등록
 										<svg class="shortcut__arrow"><use href="#icon-chevron-right"></use></svg>
 									</a></li>
@@ -308,13 +226,15 @@
 						<section class="card">
 							<div class="card__head">
 								<h2 class="card__title">공지사항</h2>
-								<a href="notice.html" th:href="@{/author/notices}" class="link-more">전체 보기 <svg><use href="#icon-chevron-right"></use></svg></a>
+								<span class="link-more">최신 3건</span>
 							</div>
 							<div class="card__body">
 								<ul class="notice">
-									<li><a href="notice.html" th:href="@{/author/notices}">[안내] 6월 정산 일정 안내</a><time datetime="2024-05-27">05.27</time></li>
-									<li><a href="notice.html" th:href="@{/author/notices}">[안내] 클래스 운영 정책 변경 안내</a><time datetime="2024-05-20">05.20</time></li>
-									<li><a href="notice.html" th:href="@{/author/notices}">[안내] 여름 시즌 프로모션 안내</a><time datetime="2024-05-13">05.13</time></li>
+									<li th:each="notice : ${recentNotices}">
+										<span class="notice__title" th:text="${'[' + notice.noticeType + '] ' + notice.title}">공지 제목</span>
+										<time datetime="2024-01-01" th:attr="datetime=${#dates.format(notice.inputDate, 'yyyy-MM-dd')}" th:text="${#dates.format(notice.inputDate, 'MM.dd')}">00.00</time>
+									</li>
+									<li th:if="${#lists.isEmpty(recentNotices)}"><span class="notice__title">등록된 공지사항이 없습니다.</span></li>
 								</ul>
 							</div>
 						</section>

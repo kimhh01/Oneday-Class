@@ -3,10 +3,10 @@
 	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!-- 클래스 등록 일정·반복규칙 Mapper -->
-<mapper namespace="kr.co.oneclass.author.classbasic.dao.ScheduleDAO">
+<mapper namespace="kr.co.oneclass.author.classbasic.ScheduleDAO">
 
 	<select id="selectRepeatScheduleList" parameterType="int"
-		resultType="kr.co.oneclass.author.classbasic.dto.RepeatScheduleDTO">
+		resultType="kr.co.oneclass.author.classbasic.RepeatScheduleDTO">
 		SELECT
 			r.REPEAT_RULE_CODE AS REPEAT_SCHEDULE_CODE,
 			r.CLASS_CODE,
@@ -18,7 +18,7 @@
 	</select>
 
 	<select id="selectScheduleList" parameterType="int"
-		resultType="kr.co.oneclass.author.classbasic.dto.ScheduleDTO">
+		resultType="kr.co.oneclass.author.classbasic.ScheduleDTO">
 		SELECT
 			s.SCHEDULE_CODE,
 			r.CLASS_CODE,
@@ -29,8 +29,8 @@
 			s.MIN_PEOPLE,
 			s.MAX_PEOPLE,
 			CASE
-				WHEN s.SOLD_OUT_YN = 'Y' THEN '모집 마감'
 				WHEN TRUNC(s.CLASS_DATE) &lt; TRUNC(SYSDATE) THEN '진행 완료'
+				WHEN s.SOLD_OUT_YN = 'Y' THEN '모집 마감'
 				ELSE '모집중'
 			END AS SCHEDULE_STATUS
 		FROM SCHEDULE s
@@ -38,6 +38,93 @@
 		WHERE r.CLASS_CODE = #{classCode}
 		ORDER BY s.CLASS_DATE, s.START_TIME, s.SCHEDULE_CODE
 	</select>
+
+	<!-- 클래스 관리 상세가 공통으로 사용하는 일정별 예약·잔여 인원 컬럼 -->
+	<sql id="scheduleManageColumns">
+			s.SCHEDULE_CODE,
+			r.CLASS_CODE,
+			s.CLASS_DATE AS SCHEDULE_DATE,
+			s.START_TIME,
+			s.END_TIME,
+			s.MIN_PEOPLE,
+			s.MAX_PEOPLE,
+			NVL((
+				SELECT SUM(rv.PEOPLE_NUMBER)
+				FROM RESERVATION rv
+				WHERE rv.SCHEDULE_CODE = s.SCHEDULE_CODE
+				  AND rv.STATUS = '예약'
+			), 0) AS RESERVED_COUNT,
+			s.REMAINING_PEOPLE,
+			CASE
+				WHEN TRUNC(s.CLASS_DATE) &lt; TRUNC(SYSDATE) THEN '진행 완료'
+				WHEN s.SOLD_OUT_YN = 'Y' OR s.REMAINING_PEOPLE = 0 THEN '모집 마감'
+				ELSE '모집중'
+			END AS SCHEDULE_STATUS
+	</sql>
+
+	<!-- 클래스 관리 상세의 일정별 예약 인원과 남은 자리를 조회한다 -->
+	<select id="selectScheduleManageList" parameterType="int"
+		resultType="kr.co.oneclass.author.classmanage.ScheduleManageDTO">
+		SELECT
+			<include refid="scheduleManageColumns"/>
+		FROM SCHEDULE s
+		JOIN CLASS_REPEAT_RULE r ON r.REPEAT_RULE_CODE = s.REPEAT_RULE_CODE
+		WHERE r.CLASS_CODE = #{classCode}
+		ORDER BY s.CLASS_DATE, s.START_TIME, s.SCHEDULE_CODE
+	</select>
+
+	<select id="selectScheduleManage" parameterType="int"
+		resultType="kr.co.oneclass.author.classmanage.ScheduleManageDTO">
+		SELECT
+			<include refid="scheduleManageColumns"/>
+		FROM SCHEDULE s
+		JOIN CLASS_REPEAT_RULE r ON r.REPEAT_RULE_CODE = s.REPEAT_RULE_CODE
+		WHERE s.SCHEDULE_CODE = #{scheduleCode}
+	</select>
+
+	<!-- 이미 예약된 인원을 침범하지 않는 범위에서 향후 일정의 남은 자리만 변경한다 -->
+	<update id="updateRemainingPeople" parameterType="map">
+		UPDATE SCHEDULE s
+		SET s.REMAINING_PEOPLE = #{remainingPeople},
+			s.SOLD_OUT_YN = CASE WHEN #{remainingPeople} = 0 THEN 'Y' ELSE 'N' END
+		WHERE s.SCHEDULE_CODE = #{scheduleCode}
+		  AND TRUNC(s.CLASS_DATE) &gt;= TRUNC(SYSDATE)
+		  AND EXISTS (
+			SELECT 1
+			FROM CLASS_REPEAT_RULE r
+			JOIN CLASS c ON c.CLASS_CODE = r.CLASS_CODE
+			WHERE r.REPEAT_RULE_CODE = s.REPEAT_RULE_CODE
+			  AND c.OPERATOR_CODE = #{authorCode}
+			  AND c.APPROVAL_STATUS = '승인'
+			  AND c.STATUS IN ('모집중', '준비중')
+		  )
+		  AND #{remainingPeople} BETWEEN 0 AND (
+			s.MAX_PEOPLE - NVL((
+				SELECT SUM(rv.PEOPLE_NUMBER)
+				FROM RESERVATION rv
+				WHERE rv.SCHEDULE_CODE = s.SCHEDULE_CODE
+				  AND rv.STATUS = '예약'
+			), 0)
+		  )
+	</update>
+
+	<!-- 일정 취소를 별도 상태값 없이 모집 마감으로 보존한다 -->
+	<update id="closeSchedule" parameterType="map">
+		UPDATE SCHEDULE s
+		SET REMAINING_PEOPLE = 0,
+			SOLD_OUT_YN = 'Y'
+		WHERE s.SCHEDULE_CODE = #{scheduleCode}
+		  AND TRUNC(s.CLASS_DATE) &gt;= TRUNC(SYSDATE)
+		  AND EXISTS (
+			SELECT 1
+			FROM CLASS_REPEAT_RULE r
+			JOIN CLASS c ON c.CLASS_CODE = r.CLASS_CODE
+			WHERE r.REPEAT_RULE_CODE = s.REPEAT_RULE_CODE
+			  AND c.OPERATOR_CODE = #{authorCode}
+			  AND c.APPROVAL_STATUS = '승인'
+			  AND c.STATUS IN ('모집중', '준비중')
+		  )
+	</update>
 
 	<!-- SCHEDULE 이 CLASS_REPEAT_RULE 을 참조하므로 일정부터 지운다 -->
 	<delete id="deleteScheduleList" parameterType="int">
@@ -55,7 +142,7 @@
 	</delete>
 
 	<insert id="insertRepeatSchedule"
-		parameterType="kr.co.oneclass.author.classbasic.dto.RepeatScheduleDTO">
+		parameterType="kr.co.oneclass.author.classbasic.RepeatScheduleDTO">
 		<selectKey keyProperty="repeatScheduleCode" resultType="int" order="BEFORE">
 			SELECT (SELECT NVL(MAX(REPEAT_RULE_CODE), 0) FROM CLASS_REPEAT_RULE)
 				+ SEQ_CLASS_REPEAT_RULE_CODE.NEXTVAL
@@ -69,7 +156,7 @@
 	</insert>
 
 	<insert id="insertSchedule"
-		parameterType="kr.co.oneclass.author.classbasic.dto.ScheduleDTO">
+		parameterType="kr.co.oneclass.author.classbasic.ScheduleDTO">
 		<selectKey keyProperty="scheduleCode" resultType="int" order="BEFORE">
 			SELECT (SELECT NVL(MAX(SCHEDULE_CODE), 0) FROM SCHEDULE)
 				+ SEQ_SCHEDULE_CODE.NEXTVAL

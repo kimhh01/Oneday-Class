@@ -3,11 +3,11 @@
 	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!-- 클래스 등록 기본정보·장소정보 Mapper -->
-<mapper namespace="kr.co.oneclass.author.classbasic.dao.ClassDAO">
+<mapper namespace="kr.co.oneclass.author.classbasic.ClassDAO">
 
 	<!-- 기존 클래스 코드 1~5와 시퀀스 시작값이 겹쳐도 충돌하지 않도록 오프셋을 둔다 -->
 	<insert id="insertDraftClass"
-		parameterType="kr.co.oneclass.author.classbasic.dto.ClassBasicDTO">
+		parameterType="kr.co.oneclass.author.classbasic.ClassBasicDTO">
 		<selectKey keyProperty="classCode" resultType="int" order="BEFORE">
 			SELECT (SELECT NVL(MAX(CLASS_CODE), 0) FROM CLASS) + SEQ_CLASS_CODE.NEXTVAL
 			FROM DUAL
@@ -29,7 +29,7 @@
 	</insert>
 
 	<select id="selectLatestDraftClass" parameterType="long"
-		resultType="kr.co.oneclass.author.classbasic.dto.ClassBasicDTO">
+		resultType="kr.co.oneclass.author.classbasic.ClassBasicDTO">
 		SELECT CLASS_CODE, AUTHOR_CODE, CATEGORY_CODE, CATEGORY_NAME,
 			CLASS_TITLE, SHORT_INTRODUCTION, CLASS_INTRODUCTION, MAIN_IMAGE_PATH,
 			REGISTER_STEP
@@ -58,7 +58,7 @@
 	</select>
 
 	<select id="selectClassBasic" parameterType="map"
-		resultType="kr.co.oneclass.author.classbasic.dto.ClassBasicDTO">
+		resultType="kr.co.oneclass.author.classbasic.ClassBasicDTO">
 		SELECT
 			c.CLASS_CODE,
 			c.OPERATOR_CODE AS AUTHOR_CODE,
@@ -80,7 +80,7 @@
 	</select>
 
 	<update id="updateClassBasic"
-		parameterType="kr.co.oneclass.author.classbasic.dto.ClassBasicDTO">
+		parameterType="kr.co.oneclass.author.classbasic.ClassBasicDTO">
 		UPDATE CLASS c
 		SET c.CATEGORY_CODE = #{categoryCode},
 			c.NAME = #{classTitle},
@@ -98,8 +98,27 @@
 		  )
 	</update>
 
+	<!-- 관리자 재검수 없이 승인 상태를 유지하는 운영 클래스 기본정보 수정 -->
+	<update id="updateApprovedClassBasic"
+		parameterType="kr.co.oneclass.author.classbasic.ClassBasicDTO">
+		UPDATE CLASS c
+		SET c.CATEGORY_CODE = #{categoryCode},
+			c.NAME = #{classTitle},
+			c.SINGLE_INTRODUCE = #{shortIntroduction},
+			c.INTRODUCE = #{classIntroduction}
+		WHERE c.CLASS_CODE = #{classCode}
+		  AND c.OPERATOR_CODE = #{authorCode}
+		  AND c.STATUS IN ('모집중', '준비중')
+		  AND c.APPROVAL_STATUS = '승인'
+		  AND EXISTS (
+			  SELECT 1 FROM CATEGORY ct
+			  WHERE ct.CATEGORY_CODE = #{categoryCode}
+			    AND ct.PARENTS_CATEGORY IS NOT NULL
+		  )
+	</update>
+
 	<select id="selectClassLocation" parameterType="map"
-		resultType="kr.co.oneclass.author.classbasic.dto.ClassLocationDTO">
+		resultType="kr.co.oneclass.author.classbasic.ClassLocationDTO">
 		SELECT
 			c.CLASS_CODE,
 			c.OPERATOR_CODE AS AUTHOR_CODE,
@@ -115,7 +134,7 @@
 	</select>
 
 	<update id="updateClassLocation"
-		parameterType="kr.co.oneclass.author.classbasic.dto.ClassLocationDTO">
+		parameterType="kr.co.oneclass.author.classbasic.ClassLocationDTO">
 		UPDATE CLASS
 		SET ZIPCODE = #{zipcode},
 			ADDRESS = #{address},
@@ -130,8 +149,23 @@
 		  AND APPROVAL_STATUS = '작성중'
 	</update>
 
+	<update id="updateApprovedClassLocation"
+		parameterType="kr.co.oneclass.author.classbasic.ClassLocationDTO">
+		UPDATE CLASS
+		SET ZIPCODE = #{zipcode},
+			ADDRESS = #{address},
+			OLD_ADDRESS = #{oldAddress},
+			ADDRESS2 = #{detailAddress},
+			LAT = #{latitude},
+			LNG = #{longitude}
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND STATUS IN ('모집중', '준비중')
+		  AND APPROVAL_STATUS = '승인'
+	</update>
+
 	<select id="selectCategoryList"
-		resultType="kr.co.oneclass.author.classbasic.dto.CategoryDTO">
+		resultType="kr.co.oneclass.author.classbasic.CategoryDTO">
 		SELECT CATEGORY_CODE, NAME
 		FROM CATEGORY
 		WHERE PARENTS_CATEGORY IS NOT NULL
@@ -139,7 +173,7 @@
 	</select>
 
 	<select id="selectClassSchedule" parameterType="map"
-		resultType="kr.co.oneclass.author.classbasic.dto.ClassScheduleDTO">
+		resultType="kr.co.oneclass.author.classbasic.ClassScheduleDTO">
 		SELECT
 			c.CLASS_CODE,
 			c.OPERATOR_CODE AS AUTHOR_CODE,
@@ -179,7 +213,7 @@
 	</select>
 
 	<update id="updateClassSchedule"
-		parameterType="kr.co.oneclass.author.classbasic.dto.ClassScheduleDTO">
+		parameterType="kr.co.oneclass.author.classbasic.ClassScheduleDTO">
 		UPDATE CLASS
 		SET PRICE = #{regularPrice},
 			DESIRED_PRICE = #{desiredPrice},
@@ -195,8 +229,25 @@
 		  AND APPROVAL_STATUS = '작성중'
 	</update>
 
+	<!-- 예약이 참조하는 일정은 유지하고 새 예약에 적용할 가격만 변경한다 -->
+	<update id="updateApprovedClassPricing"
+		parameterType="kr.co.oneclass.author.classbasic.ClassScheduleDTO">
+		UPDATE CLASS
+		SET PRICE = #{regularPrice},
+			DESIRED_PRICE = #{desiredPrice},
+			INGREDIENTS_INCLUDE =
+			<choose>
+				<when test="materialIncluded">'Y'</when>
+				<otherwise>'N'</otherwise>
+			</choose>
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND STATUS IN ('모집중', '준비중')
+		  AND APPROVAL_STATUS = '승인'
+	</update>
+
 	<resultMap id="classDetailMap"
-		type="kr.co.oneclass.author.classbasic.dto.ClassDetailDTO">
+		type="kr.co.oneclass.author.classbasic.ClassDetailDTO">
 		<id property="classCode" column="CLASS_CODE"/>
 		<result property="authorCode" column="AUTHOR_CODE"/>
 		<result property="resultDescription" column="RESULT_DESCRIPTION"/>
@@ -260,7 +311,7 @@
 	</select>
 
 	<update id="updateClassDetail"
-		parameterType="kr.co.oneclass.author.classbasic.dto.ClassDetailDTO">
+		parameterType="kr.co.oneclass.author.classbasic.ClassDetailDTO">
 		UPDATE CLASS
 		SET FINISH_INTRODUCE = #{resultDescription},
 			WRITE_DATE = SYSDATE
@@ -268,6 +319,16 @@
 		  AND OPERATOR_CODE = #{authorCode}
 		  AND STATUS = '준비중'
 		  AND APPROVAL_STATUS = '작성중'
+	</update>
+
+	<update id="updateApprovedClassDetail"
+		parameterType="kr.co.oneclass.author.classbasic.ClassDetailDTO">
+		UPDATE CLASS
+		SET FINISH_INTRODUCE = #{resultDescription}
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND STATUS IN ('모집중', '준비중')
+		  AND APPROVAL_STATUS = '승인'
 	</update>
 
 	<delete id="deleteDetailInfoList" parameterType="map">
@@ -337,7 +398,7 @@
 	</insert>
 
 	<select id="selectOfferingList"
-		resultType="kr.co.oneclass.author.classbasic.dto.OfferingDTO">
+		resultType="kr.co.oneclass.author.classbasic.OfferingDTO">
 		SELECT
 			CLASS_OFFERING_CODE AS OFFERING_CODE,
 			OFFERING_NAME
@@ -380,7 +441,7 @@
 	</update>
 
 	<select id="selectRegisterResult" parameterType="map"
-		resultType="kr.co.oneclass.author.classbasic.dto.ClassRegisterResultDTO">
+		resultType="kr.co.oneclass.author.classbasic.ClassRegisterResultDTO">
 		SELECT
 			c.CLASS_CODE,
 			c.NAME AS CLASS_TITLE,
@@ -412,6 +473,15 @@
 		  AND OPERATOR_CODE = #{authorCode}
 	</select>
 
+	<select id="countApprovedEditableClass" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+		FROM CLASS
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND STATUS IN ('모집중', '준비중')
+		  AND APPROVAL_STATUS = '승인'
+	</select>
+
 	<update id="touchDraftClass" parameterType="map">
 		UPDATE CLASS
 		SET WRITE_DATE = SYSDATE
@@ -419,6 +489,15 @@
 		  AND OPERATOR_CODE = #{authorCode}
 		  AND STATUS = '준비중'
 		  AND APPROVAL_STATUS = '작성중'
+	</update>
+
+	<update id="guardApprovedClassEdit" parameterType="map">
+		UPDATE CLASS
+		SET WRITE_DATE = WRITE_DATE
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND STATUS IN ('모집중', '준비중')
+		  AND APPROVAL_STATUS = '승인'
 	</update>
 
 </mapper>

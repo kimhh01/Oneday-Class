@@ -7,18 +7,25 @@
 	상태값은 팀 DB 실측값(한글)을 그대로 사용한다 - 모집중 / 예약 / 결제완료 / 작가.
 	작가 PK 는 CREATOR.OPERATOR_CODE 이며 코드상 authorCode 에 대응한다.
 -->
-<mapper namespace="kr.co.oneclass.author.dashboard.dao.DashboardDAO">
+<mapper namespace="kr.co.oneclass.author.dashboard.DashboardDAO">
 
 	<!-- 모집중 클래스, 미답변 문의, 오늘 예약, 정산 가능금액을 한 행으로 집계한다 -->
 	<select id="selectDashboardSummary" parameterType="long"
-		resultType="kr.co.oneclass.author.dashboard.dto.DashboardSummaryDTO">
+		resultType="kr.co.oneclass.author.dashboard.DashboardSummaryDTO">
 		SELECT
 			(
 				SELECT COUNT(*)
 				FROM CLASS
 				WHERE OPERATOR_CODE = #{authorCode}
+				  AND APPROVAL_STATUS = '승인'
 				  AND STATUS = '모집중'
 			) AS RECRUITING_CLASS_COUNT,
+			(
+				SELECT COUNT(*)
+				FROM CLASS
+				WHERE OPERATOR_CODE = #{authorCode}
+				  AND APPROVAL_STATUS = '승인'
+			) AS TOTAL_CLASS_COUNT,
 			(
 				SELECT COUNT(*)
 				FROM INQUIRY
@@ -27,13 +34,28 @@
 				  AND ANSWER IS NULL
 			) AS UNANSWERED_INQUIRY_COUNT,
 			(
-				SELECT COUNT(*)
+				SELECT NVL(ROUND(AVG(ANSWER_DATE - INQUIRY_DATE), 1), 0)
+				FROM INQUIRY
+				WHERE OPERATOR_CODE = #{authorCode}
+				  AND WRITER_TYPE = '작가'
+				  AND ANSWER_DATE IS NOT NULL
+			) AS AVERAGE_RESPONSE_DAYS,
+			(
+				SELECT NVL(SUM(rv.PEOPLE_NUMBER), 0)
 				FROM RESERVATION rv
 				JOIN CLASS c ON rv.CLASS_CODE = c.CLASS_CODE
 				WHERE c.OPERATOR_CODE = #{authorCode}
 				  AND rv.STATUS = '예약'
 				  AND TRUNC(rv.RESERVATION_DATE) = TRUNC(SYSDATE)
 			) AS TODAY_RESERVATION_COUNT,
+			(
+				SELECT NVL(SUM(rv.PEOPLE_NUMBER), 0)
+				FROM RESERVATION rv
+				JOIN CLASS c ON rv.CLASS_CODE = c.CLASS_CODE
+				WHERE c.OPERATOR_CODE = #{authorCode}
+				  AND rv.STATUS = '예약'
+				  AND TRUNC(rv.RESERVATION_DATE) = TRUNC(SYSDATE) - 1
+			) AS YESTERDAY_RESERVATION_COUNT,
 			(
 				SELECT NVL(SUM(p.AMOUNT), 0)
 				FROM PAYMENT p
@@ -46,7 +68,20 @@
 					  FROM CALCULATE ca
 					  WHERE ca.PAYMENT_CODE = p.PAYMENT_CODE
 				  )
-			) AS AVAILABLE_SETTLEMENT_AMOUNT
+			) AS AVAILABLE_SETTLEMENT_AMOUNT,
+			(
+				SELECT COUNT(*)
+				FROM PAYMENT p
+				JOIN RESERVATION rv ON p.RESERVATION_CODE = rv.RESERVATION_CODE
+				JOIN CLASS c ON rv.CLASS_CODE = c.CLASS_CODE
+				WHERE c.OPERATOR_CODE = #{authorCode}
+				  AND p.STATUS = '결제완료'
+				  AND NOT EXISTS (
+					  SELECT 1
+					  FROM CALCULATE ca
+					  WHERE ca.PAYMENT_CODE = p.PAYMENT_CODE
+				  )
+			) AS AVAILABLE_SETTLEMENT_COUNT
 		FROM DUAL
 	</select>
 
@@ -56,7 +91,7 @@
 		일정 상태 컬럼도 없으므로 SOLD_OUT_YN 으로 계산한다 (표기값 팀 확정 전).
 	-->
 	<select id="selectTodayClassList" parameterType="long"
-		resultType="kr.co.oneclass.author.dashboard.dto.TodayClassDTO">
+		resultType="kr.co.oneclass.author.dashboard.TodayClassDTO">
 		SELECT
 			s.SCHEDULE_CODE,
 			c.CLASS_CODE,
@@ -83,6 +118,8 @@
 		JOIN CLASS c ON r.CLASS_CODE = c.CLASS_CODE
 		JOIN CREATOR cr ON c.OPERATOR_CODE = cr.OPERATOR_CODE
 		WHERE c.OPERATOR_CODE = #{authorCode}
+		  AND c.APPROVAL_STATUS = '승인'
+		  AND c.STATUS IN ('모집중', '준비중')
 		  AND TRUNC(s.CLASS_DATE) = TRUNC(SYSDATE)
 		ORDER BY s.START_TIME, s.SCHEDULE_CODE
 	</select>
@@ -93,7 +130,7 @@
 		건수로 집계해 만들고, 0건인 항목은 노출하지 않는다.
 	-->
 	<select id="selectAlertList" parameterType="long"
-		resultType="kr.co.oneclass.author.dashboard.dto.DashboardAlertDTO">
+		resultType="kr.co.oneclass.author.dashboard.DashboardAlertDTO">
 		SELECT ALERT_TYPE, ALERT_TITLE, ALERT_CONTENT, ALERT_COUNT, TARGET_URL
 		FROM (
 			SELECT
@@ -112,8 +149,8 @@
 			UNION ALL
 			SELECT
 				'INQUIRY',
-				'미답변 문의',
-				'답변을 기다리는 문의가 있습니다.',
+				'1:1 문의 답변 대기',
+				'관리자 답변을 기다리는 문의가 있습니다.',
 				(
 					SELECT COUNT(*)
 					FROM INQUIRY
@@ -121,7 +158,7 @@
 					  AND WRITER_TYPE = '작가'
 					  AND ANSWER IS NULL
 				),
-				'/author/reviews'
+				'/author/qna'
 			FROM DUAL
 			UNION ALL
 			SELECT
@@ -149,7 +186,7 @@
 
 	<!-- 최근 7일 예약 추이. 예약이 없는 날도 0건으로 채워 반환한다 -->
 	<select id="selectReservationChart" parameterType="long"
-		resultType="kr.co.oneclass.author.dashboard.dto.ReservationChartDTO">
+		resultType="kr.co.oneclass.author.dashboard.ReservationChartDTO">
 		SELECT
 			d.RESERVATION_DATE,
 			NVL(rv.RESERVATION_COUNT, 0) AS RESERVATION_COUNT
@@ -172,13 +209,52 @@
 		ORDER BY d.RESERVATION_DATE
 	</select>
 
+	<!-- 작가 클래스에 들어온 최근 예약 7건을 예약일 역순으로 조회한다 -->
+	<select id="selectRecentReservationList" parameterType="long"
+		resultType="kr.co.oneclass.author.dashboard.RecentReservationDTO">
+		SELECT *
+		FROM (
+			SELECT
+				rv.RESERVATION_CODE,
+				c.CLASS_CODE,
+				c.NAME AS CLASS_TITLE,
+				ct.NAME AS CATEGORY_NAME,
+				m.NAME AS MEMBER_NAME,
+				rv.PEOPLE_NUMBER,
+				rv.RESERVATION_DATE,
+				rv.STATUS AS RESERVATION_STATUS
+			FROM RESERVATION rv
+			JOIN CLASS c ON c.CLASS_CODE = rv.CLASS_CODE
+			JOIN CATEGORY ct ON ct.CATEGORY_CODE = c.CATEGORY_CODE
+			JOIN MEMBER m ON m.MEMBER_CODE = rv.MEMBER_CODE
+			WHERE c.OPERATOR_CODE = #{authorCode}
+			ORDER BY rv.RESERVATION_DATE DESC, rv.RESERVATION_CODE DESC
+		)
+		WHERE ROWNUM &lt;= 7
+	</select>
+
+	<!-- 전체 공지 중 최신 3건을 대시보드에 노출한다 -->
+	<select id="selectRecentNoticeList"
+		resultType="kr.co.oneclass.author.dashboard.DashboardNoticeDTO">
+		SELECT *
+		FROM (
+			SELECT NOTICE_CODE, NOTICE_TYPE, TITLE, INPUT_DATE
+			FROM NOTICE
+			ORDER BY INPUT_DATE DESC, NOTICE_CODE DESC
+		)
+		WHERE ROWNUM &lt;= 3
+	</select>
+
 	<!-- 대시보드 상단 작가 요약. 작가명은 실명이 아닌 CREATOR.ACTIVITY_NAME 을 쓴다 -->
 	<select id="selectAuthorSummary" parameterType="long"
-		resultType="kr.co.oneclass.author.dashboard.dto.AuthorSummaryDTO">
+		resultType="kr.co.oneclass.author.dashboard.AuthorSummaryDTO">
 		SELECT
 			cr.OPERATOR_CODE AS AUTHOR_CODE,
 			cr.ACTIVITY_NAME AS AUTHOR_NAME,
 			cr.PROFILE_IMAGE AS PROFILE_IMAGE_PATH,
+			cr.CREATOR_INTRODUCTION AS AUTHOR_INTRODUCTION,
+			cr.ACTIVITY_REGION,
+			cr.APPROVAL_STATUS,
 			(
 				SELECT COUNT(*)
 				FROM CLASS c

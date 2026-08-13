@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>클래스 수정 · 가격 | 숨비당 원데이 클래스</title>
+<link rel="stylesheet" href="/author/css/common.css" th:href="@{/author/css/common.css}">
+<link rel="stylesheet" href="/author/css/header.css" th:href="@{/author/css/header.css}">
+<link rel="stylesheet" href="/author/css/sidebar.css" th:href="@{/author/css/sidebar.css}">
+<link rel="stylesheet" href="/author/css/class-register.css" th:href="@{/author/css/class-register.css}">
+<link rel="stylesheet" href="/author/css/class-edit.css" th:href="@{/author/css/class-edit.css}">
+<script src="/author/js/layout.js" th:src="@{/author/js/layout.js}" defer></script>
+<script src="/author/js/class-register-draft.js" th:src="@{/author/js/class-register-draft.js}" defer></script>
+</head>
+<body class="author-page register-form-page" data-menu="class-manage" data-page="클래스 수정">
+<div class="app">
+	<div th:replace="~{author/fragments/icons :: icons}"></div>
+	<div th:replace="~{author/fragments/header :: header}"></div>
+	<div class="app-body">
+		<div th:replace="~{author/fragments/sidebar :: sidebar}"></div>
+		<main class="content">
+			<div class="content__inner">
+				<header class="register-page-head register-page-head--compact">
+					<h1 class="page-title">클래스 수정 <svg class="title-leaf" aria-hidden="true"><use href="#icon-title-leaf"></use></svg></h1>
+					<p class="page-desc">앞으로 접수되는 예약에 적용할 클래스 가격을 수정합니다.</p>
+					<p class="reply-error" th:if="${registerError}" th:text="${registerError}" role="alert">입력값을 확인해주세요.</p>
+					<p class="form-success" th:if="${draftSaved}" th:text="${draftSaved}" role="status">가격 정보를 저장했습니다.</p>
+				</header>
+
+				<p class="class-edit-notice">수정 내용은 별도 관리자 검수 없이 저장 즉시 반영됩니다. 기존 결제 금액과 이미 확정된 환불 금액은 바뀌지 않습니다.</p>
+				<div th:replace="~{author/fragments/class-edit-nav :: editNav(${editClassCode}, ${editStep})}"></div>
+
+				<form class="class-edit-pricing" method="post" novalidate data-draft-form
+					  th:action="${editFormAction}" th:object="${pricingForm}">
+					<input type="hidden" name="classCode" th:value="${pricingForm.classCode}">
+					<section class="card" aria-labelledby="pricingTitle">
+						<div class="card-head-icon">
+							<span class="icon-box"><svg aria-hidden="true"><use href="#icon-won"></use></svg></span>
+							<div>
+								<h2 class="card-head-icon__title" id="pricingTitle">가격 정보</h2>
+								<p class="card-head-icon__desc">클래스 정가와 실제 판매 희망가를 입력해주세요.</p>
+							</div>
+						</div>
+						<div class="card__body">
+							<div class="class-edit-price-fields">
+								<div class="field">
+									<label class="field__label" for="regularPrice">정가</label>
+									<div class="field__control">
+										<input class="input" id="regularPrice" type="number" min="0" step="100" inputmode="numeric" th:field="*{regularPrice}" required>
+										<p class="field__help">할인 전 기준 가격입니다.</p>
+									</div>
+								</div>
+								<div class="field">
+									<label class="field__label" for="desiredPrice">판매 희망가</label>
+									<div class="field__control">
+										<input class="input" id="desiredPrice" type="number" min="0" step="100" inputmode="numeric" th:field="*{desiredPrice}" required>
+										<p class="field__help">수강생에게 표시할 실제 판매 가격입니다.</p>
+									</div>
+								</div>
+							</div>
+							<label class="class-edit-checkbox" for="materialIncluded">
+								<input id="materialIncluded" type="checkbox" th:field="*{materialIncluded}">
+								<span>판매 희망가에 재료비가 포함되어 있습니다.</span>
+							</label>
+						</div>
+					</section>
+
+					<div class="step-actions">
+						<button type="submit" name="saveMode" value="stay" class="btn btn--ghost btn--lg step-actions__save"><svg aria-hidden="true"><use href="#icon-bookmark"></use></svg>저장</button>
+						<div class="step-actions__nav">
+							<a th:href="@{/author/classes/{classCode}/edit/basic(classCode=${editClassCode})}" class="btn btn--ghost btn--lg step-actions__previous">이전 단계</a>
+							<button type="submit" name="saveMode" value="next" class="btn btn--primary btn--lg step-actions__next"><span>다음 단계</span><span class="step-actions__next-icon"><svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg></span></button>
+						</div>
+					</div>
+				</form>
+
+				<footer class="site-footer" th:replace="~{author/fragments/footer :: footer}"></footer>
+			</div>
+		</main>
+	</div>
+</div>
+</body>
+</html>

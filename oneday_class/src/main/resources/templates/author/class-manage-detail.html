@@ -14,12 +14,8 @@
 <!--
 	클래스 관리 상세
 
-	[매출] 결제 완료 금액을 합산한다. 정산 수수료 산식은 정책 확정 후 별도로 반영한다.
-
-	[폐쇄] 남은 일정(모집 중 / 마감 / 종료 예정)이 하나라도 있으면 폐쇄할 수 없다.
-	       일정을 전부 취소해야 폐쇄 버튼이 열린다. 폐쇄는 되돌릴 수 없다.
-
-	화면의 숫자와 이름은 전부 레이아웃 확인용 mock 이다.
+	일정·예약 인원·남은 자리·결제 완료 매출을 실제 DB에서 조회한다.
+	일정 취소는 모집 마감과 예약·환불 상태 변경으로, 클래스 폐강은 CLASS.STATUS로 처리한다.
 -->
 <body class="author-page management-page" data-menu="class-manage" data-page="클래스 관리 상세">
 
@@ -39,6 +35,8 @@
 						<p class="page-desc mgmt-head__desc">일정별 모집 현황을 확인하고 좌석과 공개 여부를 조정할 수 있어요.</p>
 					</div>
 				</header>
+				<p class="form-error" th:if="${managementError}" th:text="${managementError}" role="alert"></p>
+				<p class="form-success" th:if="${managementMessage}" th:text="${managementMessage}" role="status"></p>
 
 				<!-- 클래스 요약 -->
 				<section class="class-hero" aria-label="클래스 정보">
@@ -46,12 +44,20 @@
 						 alt="처음이어도 완성하는 도자기 꽃바구니 대표 사진" width="232" height="168">
 					<div class="class-hero__body">
 						<div class="class-hero__top">
-							<span class="badge badge--green" id="classState" th:text="${classDetail.classStatus}">모집 중</span>
+							<span class="badge" id="classState"
+								  th:classappend="${classDetail.classStatus == '모집중'} ? ' badge--green' : (${classDetail.classStatus == '폐강'} ? ' badge--red' : ' badge--gray')"
+								  th:text="${classDetail.classStatus == '모집중' ? '모집 중' : (classDetail.classStatus == '준비중' ? '비공개' : classDetail.classStatus)}">모집 중</span>
 							<div class="class-hero__actions">
-								<a class="btn btn--ghost btn--sm" href="#" aria-disabled="true" title="준비 중">
+								<a class="btn btn--ghost btn--sm"
+								   th:if="${classDetail.classStatus != '폐강'}"
+								   th:href="@{/author/classes/{classCode}/edit/basic(classCode=${classDetail.classPreview.classBasic.classCode})}">
 									<svg aria-hidden="true"><use href="#icon-pencil"></use></svg> 클래스 수정
 								</a>
+								<span class="btn btn--ghost btn--sm" th:if="${classDetail.classStatus == '폐강'}" aria-disabled="true" title="폐강한 클래스는 수정할 수 없습니다.">
+									<svg aria-hidden="true"><use href="#icon-pencil"></use></svg> 클래스 수정
+								</span>
 								<button type="button" class="btn btn--ghost btn--sm" id="visibilityButton"
+										th:disabled="${classDetail.classStatus == '폐강'}"
 										th:attr="data-current-status=${classDetail.classStatus},data-open-url=@{/author/classes/{classCode}/open(classCode=${classDetail.classPreview.classBasic.classCode})},data-hide-url=@{/author/classes/{classCode}/hide(classCode=${classDetail.classPreview.classBasic.classCode})}">
 									<svg aria-hidden="true"><use href="#icon-eye-off"></use></svg>
 									<span id="visibilityLabel">클래스 비공개</span>
@@ -75,7 +81,7 @@
 							<div>
 								<svg aria-hidden="true"><use href="#icon-bookmark"></use></svg>
 								<dt>카테고리</dt>
-								<dd>공예</dd>
+								<dd th:text="${classDetail.classPreview.classBasic.categoryName}">공예</dd>
 							</div>
 							<div>
 								<svg aria-hidden="true"><use href="#icon-map-pin"></use></svg>
@@ -93,7 +99,7 @@
 						<div class="mgmt-stat__body">
 							<p class="mgmt-stat__label">전체 일정</p>
 							<p class="mgmt-stat__value" id="statTotal"><th:block th:text="${#lists.size(classDetail.scheduleList)}">6</th:block><small>회</small></p>
-							<p class="mgmt-stat__caption" id="statTotalCaption">취소 0회 포함</p>
+							<p class="mgmt-stat__caption" id="statTotalCaption">등록된 전체 일정</p>
 						</div>
 					</div>
 					<div class="mgmt-stat">
@@ -108,7 +114,7 @@
 						<span class="mgmt-stat__icon"><svg aria-hidden="true"><use href="#icon-seat"></use></svg></span>
 						<div class="mgmt-stat__body">
 							<p class="mgmt-stat__label">남은 자리</p>
-							<p class="mgmt-stat__value" id="statSeats">16</th:block><small>석</small></p>
+							<p class="mgmt-stat__value" id="statSeats">0<small>석</small></p>
 							<p class="mgmt-stat__caption">모집 중인 일정 기준</p>
 						</div>
 					</div>
@@ -116,7 +122,7 @@
 						<span class="mgmt-stat__icon"><svg aria-hidden="true"><use href="#icon-won"></use></svg></span>
 						<div class="mgmt-stat__body">
 							<p class="mgmt-stat__label">누적 매출 금액</p>
-							<p class="mgmt-stat__value" id="statSales" >₩2,080,000</p>
+							<p class="mgmt-stat__value" id="statSales" th:text="${'₩' + #numbers.formatInteger(classDetail.salesAmount, 1, 'COMMA')}">₩0</p>
 							<p class="mgmt-stat__caption">결제 완료 금액 기준</p>
 						</div>
 					</div>
@@ -128,7 +134,7 @@
 						<h2 class="schedule-card__title" id="scheduleTitle">일정별 운영 현황</h2>
 						<p class="schedule-card__note">
 							<svg aria-hidden="true"><use href="#icon-info"></use></svg>
-							각 일정의 신청자 명단은 일정 관리에서 확인할 수 있습니다.
+							전체 클래스 일정은 일정 관리에서 한 번에 확인할 수 있습니다.
 						</p>
 					</div>
 					<div class="mgmt-panel__scroll">
@@ -147,14 +153,14 @@
 							</thead>
 							<tbody id="scheduleRows">
 								<tr class="schedule-row" th:each="schedule, stat : ${classDetail.scheduleList}"
-									th:attr="data-no=${stat.count},data-code=${schedule.scheduleCode},data-capacity-url=@{/author/classes/schedules/{scheduleCode}/people(scheduleCode=${schedule.scheduleCode})},data-date=${schedule.scheduleDate},data-time=${schedule.startTime + ' ~ ' + schedule.endTime},data-min=${schedule.minPeople},data-max=${schedule.maxPeople},data-applied=${schedule.reservedCount},data-seats=${schedule.remainingPeople},data-state=${schedule.scheduleStatus}">
+									th:attr="data-no=${stat.count},data-code=${schedule.scheduleCode},data-capacity-url=@{/author/classes/schedules/{scheduleCode}/people(scheduleCode=${schedule.scheduleCode})},data-cancel-url=@{/author/classes/schedules/{scheduleCode}/cancel(scheduleCode=${schedule.scheduleCode})},data-date=${schedule.scheduleDate},data-time=${schedule.startTime + ' ~ ' + schedule.endTime},data-min=${schedule.minPeople},data-max=${schedule.maxPeople},data-applied=${schedule.reservedCount},data-seats=${schedule.remainingPeople},data-state=${schedule.scheduleStatus}">
 									<td class="col-num" th:text="${stat.count}">1</td>
-									<td th:text="${schedule.scheduleDate}">2026-08-08</td>
+									<td th:text="${#dates.format(schedule.scheduleDate, 'yyyy.MM.dd')}">2026.08.08</td>
 									<td class="col-muted" th:text="${schedule.startTime + ' ~ ' + schedule.endTime}">14:00 ~ 16:00</td>
 									<td class="col-num" th:text="${schedule.minPeople + ' / ' + schedule.maxPeople + '명'}">2 / 6명</td>
 									<td class="col-num" data-cell="applied" th:text="${schedule.reservedCount + '명'}">0명</td>
 									<td class="col-num" data-cell="seats" th:text="${schedule.remainingPeople + '석'}">6석</td>
-									<td class="col-badge" data-cell="state"><span class="badge" th:classappend="${schedule.scheduleStatus == 'RECRUITING'} ? ' badge--green' : (${schedule.scheduleStatus == 'CLOSED'} ? ' badge--blue' : ' badge--gray')" th:text="${schedule.scheduleStatus == 'RECRUITING' ? '모집 중' : (schedule.scheduleStatus == 'CLOSED' ? '모집 마감' : '종료')}">모집 중</span></td>
+									<td class="col-badge" data-cell="state"><span class="badge" th:classappend="${schedule.scheduleStatus == '모집중'} ? ' badge--green' : (${schedule.scheduleStatus == '모집 마감'} ? ' badge--blue' : ' badge--gray')" th:text="${schedule.scheduleStatus == '모집중' ? '모집 중' : schedule.scheduleStatus}">모집 중</span></td>
 									<td class="mgmt-table__action col-action"><button type="button" class="btn btn--outline btn--sm" data-open-schedule>일정 관리</button></td>
 								</tr>
 								<tr th:remove="all" class="schedule-row" data-no="1" data-code="SCH-2025-0524-01"
@@ -254,7 +260,7 @@
 							<span class="settle__icon"><svg aria-hidden="true"><use href="#icon-bag"></use></svg></span>
 							<div>
 								<p class="settle__label">클래스 판매 금액</p>
-								<p class="settle__value" id="settleSales" >₩2,080,000</p>
+								<p class="settle__value" id="settleSales" th:text="${'₩' + #numbers.formatInteger(classDetail.salesAmount, 1, 'COMMA')}">₩0</p>
 							</div>
 						</div>
 						<div class="settle__item">
@@ -281,11 +287,13 @@
 				<div>
 					<div class="class-foot">
 						<a class="btn btn--ghost btn--lg" href="class-manage.html" th:href="@{/author/classes}">목록으로</a>
-						<button type="button" class="btn btn--danger btn--lg" id="closeClassButton" aria-describedby="closeReason">
-							클래스 폐쇄
+						<button type="button" class="btn btn--danger btn--lg" id="closeClassButton"
+								th:disabled="${classDetail.classStatus == '폐강'}" aria-describedby="closeReason">
+							클래스 폐강
 						</button>
 					</div>
-					<p class="class-foot__reason" id="closeReason"></p>
+					<p class="class-foot__reason" id="closeReason"
+					   th:text="${classDetail.classStatus == '폐강' ? '이미 폐강한 클래스입니다.' : '모집 중인 일정과 예약을 모두 취소하면 폐강할 수 있습니다.'}">모집 중인 일정과 예약을 모두 취소하면 폐강할 수 있습니다.</p>
 				</div>
 
 				<footer class="site-footer" th:replace="~{author/fragments/footer :: footer}">
@@ -309,7 +317,12 @@
 
 <form id="scheduleCapacityForm" method="post" hidden
 	  th:action="@{/author/classes/schedules/0/people}">
+	<input type="hidden" name="classCode" th:value="${classDetail.classPreview.classBasic.classCode}">
 	<input type="number" name="remainingPeople" id="serverRemainingPeople">
+</form>
+<form id="scheduleCancelForm" method="post" hidden
+	  th:action="@{/author/classes/schedules/0/cancel}">
+	<input type="hidden" name="classCode" th:value="${classDetail.classPreview.classBasic.classCode}">
 </form>
 <form id="classOpenForm" method="post" hidden
 	  th:action="@{/author/classes/{classCode}/open(classCode=${classDetail.classPreview.classBasic.classCode})}"></form>
@@ -373,7 +386,7 @@
 			</div>
 			<div class="seat-rule seat-rule--none">
 				<svg aria-hidden="true"><use href="#icon-alert"></use></svg>
-				<p><b>신청자가 없는 경우</b>남은 자리를 0석으로 설정하면 일정 상태가 &lsquo;취소&rsquo;로 변경돼요.</p>
+				<p><b>신청자가 없는 경우</b>남은 자리를 0석으로 설정해도 일정 상태는 &lsquo;모집 마감&rsquo;으로 변경돼요.</p>
 			</div>
 		</div>
 
@@ -384,14 +397,15 @@
 			<span class="state-preview__next"><span id="previewTo" class="badge badge--gray">변경 없음</span></span>
 		</div>
 
-		<div class="mgmt-notice mgmt-notice--plain">
+		<div class="mgmt-notice mgmt-notice--warn">
 			<svg aria-hidden="true"><use href="#icon-info"></use></svg>
-			<p>수업 1일 전까지 최소 인원이 모집되지 않으면 자동 취소될 수 있어요.</p>
+			<p>일정 취소 시 모집을 마감하고 예약·결제 상태를 취소·환불완료로 반영합니다.<br>
+				자동 메시지는 발송되지 않으므로 예약자가 있다면 카카오톡으로 직접 안내해주세요.</p>
 		</div>
 	</div>
 
 	<div class="mgmt-dialog__foot">
-		<button type="button" class="btn btn--ghost is-far-left" id="cancelScheduleButton" disabled title="현재 DB에는 일정 취소 상태 컬럼이 없습니다.">일정 취소</button>
+		<button type="button" class="btn btn--danger is-far-left" id="cancelScheduleButton">일정 취소</button>
 		<button type="button" class="btn btn--ghost" data-close-dialog>취소</button>
 		<button type="button" class="btn btn--primary" id="saveScheduleButton">저장</button>
 	</div>
@@ -476,7 +490,7 @@
 </dialog>
 
 
-<!-- ============ 클래스 폐쇄 ============
+<!-- ============ 클래스 폐강 ============
 	 남은 일정이 0건일 때만 열린다. 게이트는 아래 스크립트가 건다. -->
 <dialog class="mgmt-dialog mgmt-dialog--center" id="closeDialog" aria-labelledby="closeDialogTitle">
 	<div class="mgmt-dialog__head">
@@ -490,16 +504,16 @@
 		<span class="mgmt-dialog__mark mgmt-dialog__mark--warn">
 			<svg aria-hidden="true"><use href="#icon-alert"></use></svg>
 		</span>
-		<h2 class="mgmt-dialog__title" id="closeDialogTitle">클래스를 폐쇄하시겠습니까?</h2>
+		<h2 class="mgmt-dialog__title" id="closeDialogTitle">클래스를 폐강하시겠습니까?</h2>
 		<p class="mgmt-dialog__desc">
-			남은 일정이 모두 취소되어 폐쇄할 수 있습니다.<br>
-			폐쇄하면 이 클래스는 목록에서 내려가고 신규 신청을 받을 수 없습니다.
+			모집 일정과 예약이 모두 정리되어 폐강할 수 있습니다.<br>
+			폐강하면 신규 신청을 받을 수 없습니다.
 		</p>
 
 		<div class="mgmt-notice mgmt-notice--warn">
 			<svg aria-hidden="true"><use href="#icon-alert"></use></svg>
-			<p><b>폐쇄한 클래스는 다시 활성화할 수 없습니다.</b><br>
-				취소된 일정의 신청자에게는 취소 안내가 이미 발송되었습니다. 폐쇄 전 공지가 필요하면 먼저 진행해 주세요.</p>
+			<p><b>폐강한 클래스는 다시 활성화할 수 없습니다.</b><br>
+				자동 안내는 발송되지 않습니다. 취소된 일정의 예약자에게 카카오톡 안내를 완료했는지 확인해주세요.</p>
 		</div>
 
 		<div class="password-field">
@@ -518,32 +532,27 @@
 
 	<div class="mgmt-dialog__foot">
 		<button type="button" class="btn btn--ghost" data-close-dialog>취소</button>
-		<button type="button" class="btn btn--danger" id="confirmCloseButton">클래스 폐쇄</button>
+		<button type="button" class="btn btn--danger" id="confirmCloseButton">클래스 폐강</button>
 	</div>
 </dialog>
 
 
 <script th:inline="javascript">
-/* -------------------------------------------------------------
-   클래스 관리 상세 — 화면 확인용 동작
-   서비스 구현 후 각 동작은 POST 컨트롤러로 연결한다. 여기서는 DOM 만 고친다.
-   ------------------------------------------------------------- */
+/* 클래스 관리 상세 — 일정 인원과 공개 상태 변경을 서버 POST에 연결한다. */
 (function () {
 	'use strict';
 
-	var PRICE = /*[[${classDetail.classPreview.classSchedule.regularPrice}]]*/ 0; /* 1인 가격 */
-
-	/* 상태 정의. done/cancelled 이 아니면 '남은 일정'이다. */
+	/* 현재 DB에서 계산 가능한 일정 상태 */
 	var STATES = {
-		open:      { label: '모집 중',   badge: 'badge--green', remaining: true },
-		closed:    { label: '마감',      badge: 'badge--blue',  remaining: true },
-		ending:    { label: '종료 예정', badge: 'badge--gray',  remaining: true },
-		done:      { label: '종료',      badge: 'badge--gray',  remaining: false },
-		cancelled: { label: '취소',      badge: 'badge--red',   remaining: false }
+		'모집중':   { label: '모집 중',   badge: 'badge--green', editable: true, recruiting: true },
+		'모집 마감': { label: '모집 마감', badge: 'badge--blue',  editable: true, recruiting: false },
+		'진행 완료': { label: '진행 완료', badge: 'badge--gray',  editable: false, recruiting: false }
 	};
 
 	var rows = [].slice.call(document.querySelectorAll('.schedule-row'));
-	var won = function (n) { return '₩' + n.toLocaleString('ko-KR'); };
+	var visibilityButton = document.getElementById('visibilityButton');
+	var classStatus = visibilityButton.getAttribute('data-current-status');
+	var classClosed = classStatus === '폐강';
 
 	/* ---------- 공통 : 다이얼로그 ---------- */
 	function openDialog(dialog) { dialog.showModal(); }
@@ -567,57 +576,60 @@
 		row.querySelector('[data-cell="seats"]').textContent = seats + '석';
 		row.querySelector('[data-cell="state"]').innerHTML =
 			'<span class="badge ' + state.badge + '">' + state.label + '</span>';
-		row.classList.toggle('is-cancelled', row.dataset.state === 'cancelled');
 
-		/* 끝났거나 취소된 일정은 더 손댈 게 없다 */
+		/* 끝난 일정과 폐강한 클래스는 더 손댈 수 없다 */
 		var action = row.querySelector('[data-open-schedule]');
-		action.disabled = !state.remaining;
-		action.classList.toggle('btn--ghost', !state.remaining);
-		action.classList.toggle('btn--outline', state.remaining);
+		var editable = state.editable && !classClosed;
+		action.disabled = !editable;
+		action.classList.toggle('btn--ghost', !editable);
+		action.classList.toggle('btn--outline', editable);
 	}
 
-	/* ---------- 지표 · 정산 · 폐쇄 게이트 ---------- */
+	/* ---------- 지표 · 정산 · 폐강 게이트 ---------- */
 	function refresh() {
-		var applied = 0, seats = 0, remaining = 0, cancelled = 0;
+		var applied = 0, seats = 0, recruiting = 0, activeReservations = 0;
 
 		rows.forEach(function (row) {
 			var state = STATES[row.dataset.state];
-			if (row.dataset.state === 'cancelled') {
-				cancelled += 1;
-				return;                       /* 취소분은 인원·금액에서 통째로 빠진다 */
-			}
 			applied += Number(row.dataset.applied);
-			if (state.remaining) {
+			if (state.editable) {
 				seats += Number(row.dataset.seats);
-				remaining += 1;
+				activeReservations += Number(row.dataset.applied);
+			}
+			if (state.recruiting) {
+				recruiting += 1;
 			}
 		});
 
-		/* 판매 금액이 곧 순액이다. 취소 금액을 따로 빼지 않는다. */
-		var sales = applied * PRICE;
-
 		document.getElementById('statTotal').innerHTML = rows.length + '<small>회</small>';
-		document.getElementById('statTotalCaption').textContent = '취소 ' + cancelled + '회 포함';
+		document.getElementById('statTotalCaption').textContent = '등록된 전체 일정';
 		document.getElementById('statApplied').innerHTML = applied + '<small>명</small>';
 		document.getElementById('statSeats').innerHTML = seats + '<small>석</small>';
-		document.getElementById('statSales').textContent = won(sales);
 
-		document.getElementById('settleSales').textContent = won(sales);
-
-		setCloseGate(remaining);
+		setCloseGate(recruiting, activeReservations);
 	}
 
-	/* 남은 일정이 하나라도 있으면 폐쇄할 수 없다 */
-	function setCloseGate(remaining) {
+	/* 모집 일정이나 활성 예약이 하나라도 있으면 폐강할 수 없다 */
+	function setCloseGate(recruiting, activeReservations) {
 		var button = document.getElementById('closeClassButton');
 		var reason = document.getElementById('closeReason');
-
-		if (remaining > 0) {
+		if (classClosed) {
+			button.disabled = true;
 			button.setAttribute('aria-disabled', 'true');
-			reason.innerHTML = '남은 일정 <b>' + remaining + '건</b>을 모두 취소해야 클래스를 폐쇄할 수 있어요.';
+			reason.textContent = '이미 폐강한 클래스입니다.';
+			return;
+		}
+
+		button.disabled = false;
+		if (recruiting > 0) {
+			button.setAttribute('aria-disabled', 'true');
+			reason.innerHTML = '모집 중인 일정 <b>' + recruiting + '건</b>을 모두 취소해야 클래스를 폐강할 수 있어요.';
+		} else if (activeReservations > 0) {
+			button.setAttribute('aria-disabled', 'true');
+			reason.innerHTML = '취소되지 않은 예약 인원 <b>' + activeReservations + '명</b>을 먼저 일정 취소로 정리해주세요.';
 		} else {
 			button.removeAttribute('aria-disabled');
-			reason.textContent = '남은 일정이 없어 폐쇄할 수 있습니다. 폐쇄 후에는 되돌릴 수 없어요.';
+			reason.textContent = '모집 일정과 예약이 모두 정리되어 폐강할 수 있습니다. 폐강 후에는 되돌릴 수 없어요.';
 		}
 	}
 
@@ -627,10 +639,9 @@
 	var seatValue = 0, seatMax = 0;
 
 	function previewState() {
-		var applied = Number(current.dataset.applied);
 		if (seatValue === Number(current.dataset.seats)) { return null; }   /* 변경 없음 */
-		if (seatValue === 0) { return applied > 0 ? 'closed' : 'cancelled'; }
-		return 'open';
+		if (seatValue === 0) { return '모집 마감'; }
+		return '모집중';
 	}
 
 	function paintDialog() {
@@ -647,6 +658,16 @@
 			to.className = 'badge badge--gray';
 			to.textContent = '변경 없음';
 		}
+
+		var cancelButton = document.getElementById('cancelScheduleButton');
+		var alreadyClosedWithoutReservation = Number(current.dataset.seats) === 0
+			&& Number(current.dataset.applied) === 0;
+		cancelButton.disabled = classClosed
+			|| !STATES[current.dataset.state].editable
+			|| alreadyClosedWithoutReservation;
+		cancelButton.title = cancelButton.disabled
+			? '이미 종료되었거나 예약 없이 마감된 일정입니다.'
+			: '예약과 결제 상태를 취소·환불완료로 변경합니다.';
 	}
 
 	rows.forEach(function (row) {
@@ -690,26 +711,34 @@
 	});
 
 	document.getElementById('cancelScheduleButton').addEventListener('click', function () {
-		current.dataset.state = 'cancelled';
-		current.dataset.seats = '0';
-		current.dataset.applied = '0';      /* 취소하면 신청 인원은 환불되어 빠진다 */
-		paintRow(current);
-		refresh();
-		dialog.close();
+		if (!current || this.disabled) { return; }
+		var applied = Number(current.dataset.applied);
+		var message = applied > 0
+			? '이 일정을 취소하면 예약 ' + applied + '명의 예약·결제 상태가 취소·환불완료로 변경됩니다.\n자동 메시지는 발송되지 않으므로 카카오톡 안내가 필요합니다. 계속하시겠습니까?'
+			: '이 일정을 취소하고 모집을 마감하시겠습니까?';
+		if (!window.confirm(message)) { return; }
+
+		var form = document.getElementById('scheduleCancelForm');
+		form.action = current.dataset.cancelUrl;
+		form.submit();
 	});
 
 	/* ---------- 공개 / 비공개 ---------- */
 	var hideDialog = document.getElementById('hideDialog');
-	var publishedDialog = document.getElementById('publishedDialog');
-	var visibilityButton = document.getElementById('visibilityButton');
-	var isPublic = visibilityButton.getAttribute('data-current-status') === 'OPEN';
+	var isPublic = visibilityButton.getAttribute('data-current-status') === '모집중';
 
 	function paintVisibility() {
 		var state = document.getElementById('classState');
 		var label = document.getElementById('visibilityLabel');
 		var icon = visibilityButton.querySelector('use');
 
-		if (isPublic) {
+		if (classClosed) {
+			state.className = 'badge badge--red';
+			state.textContent = '폐강';
+			label.textContent = '폐강 완료';
+			icon.setAttribute('href', '#icon-eye-off');
+			visibilityButton.disabled = true;
+		} else if (isPublic) {
 			state.className = 'badge badge--green';
 			state.textContent = '모집 중';
 			label.textContent = '클래스 비공개';
@@ -723,6 +752,7 @@
 	}
 
 	visibilityButton.addEventListener('click', function () {
+		if (classClosed) { return; }
 		if (isPublic) {
 			openDialog(hideDialog);          /* 숨기는 건 확인을 받는다 */
 			return;
@@ -734,7 +764,7 @@
 		document.getElementById('classHideForm').submit();   /* 확인 후 비공개 제출 */
 	});
 
-	/* ---------- 폐쇄 ---------- */
+	/* ---------- 폐강 ---------- */
 	var closeDialog = document.getElementById('closeDialog');
 	var password = document.getElementById('closePassword');
 	var passwordError = document.getElementById('closePasswordError');
@@ -764,7 +794,7 @@
 		}
 		document.getElementById('serverClosePassword').value = password.value;
 		password.value = '';
-		document.getElementById('classCloseForm').submit();  /* 경고·비밀번호 확인 후 폐쇄 제출 */
+		document.getElementById('classCloseForm').submit();  /* 경고·비밀번호 확인 후 폐강 제출 */
 	});
 
 	/* ---------- 첫 그리기 ---------- */

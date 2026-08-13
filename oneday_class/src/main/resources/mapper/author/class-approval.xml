@@ -3,10 +3,10 @@
 	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!-- 작가센터 클래스 검수 조회 Mapper. 작성중 초안만 목록에서 제외한다. -->
-<mapper namespace="kr.co.oneclass.author.classapproval.dao.ClassApprovalDAO">
+<mapper namespace="kr.co.oneclass.author.classapproval.ClassApprovalDAO">
 
 	<select id="selectClassApprovalList" parameterType="map"
-		resultType="kr.co.oneclass.author.classapproval.dto.ClassApprovalDTO">
+		resultType="kr.co.oneclass.author.classapproval.ClassApprovalDTO">
 		SELECT
 			c.CLASS_CODE,
 			c.OPERATOR_CODE AS AUTHOR_CODE,

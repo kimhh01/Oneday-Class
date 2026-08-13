@@ -2,10 +2,10 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="kr.co.oneclass.author.common.dao.AuthorSessionDAO">
+<mapper namespace="kr.co.oneclass.author.common.AuthorSessionDAO">
 
 	<select id="selectByMemberCode" parameterType="int"
-		resultType="kr.co.oneclass.author.common.dto.AuthorSessionDTO">
+		resultType="kr.co.oneclass.author.common.AuthorSessionDTO">
 		SELECT
 			cr.OPERATOR_CODE AS AUTHOR_CODE,
 			cr.MEMBER_CODE,

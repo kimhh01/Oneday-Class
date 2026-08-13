@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="kr.co.oneclass.author.classbasic.dao.ClassImageDAO">
+<mapper namespace="kr.co.oneclass.author.classbasic.ClassImageDAO">
 
 	<sql id="classImageSelect">
 		SELECT
@@ -16,14 +16,14 @@
 	</sql>
 
 	<select id="selectClassImageList" parameterType="int"
-		resultType="kr.co.oneclass.author.classbasic.dto.ClassImageDTO">
+		resultType="kr.co.oneclass.author.classbasic.ClassImageDTO">
 		<include refid="classImageSelect"/>
 		WHERE CLASS_CODE = #{classCode}
 		ORDER BY SORT_ORDER, CLASS_IMG_CODE
 	</select>
 
 	<select id="selectClassImageListByType" parameterType="map"
-		resultType="kr.co.oneclass.author.classbasic.dto.ClassImageDTO">
+		resultType="kr.co.oneclass.author.classbasic.ClassImageDTO">
 		<include refid="classImageSelect"/>
 		WHERE CLASS_CODE = #{classCode}
 		  AND TYPE = #{imageType}
@@ -37,7 +37,7 @@
 	</delete>
 
 	<insert id="insertClassImage"
-		parameterType="kr.co.oneclass.author.classbasic.dto.ClassImageDTO">
+		parameterType="kr.co.oneclass.author.classbasic.ClassImageDTO">
 		<selectKey keyProperty="imageCode" resultType="int" order="BEFORE">
 			SELECT (SELECT NVL(MAX(CLASS_IMG_CODE), 0) FROM CLASS_IMG)
 				+ SEQ_CLASS_IMG_CODE.NEXTVAL
