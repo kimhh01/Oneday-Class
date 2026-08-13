@@ -31,14 +31,16 @@
             </div>
             <p id="idCheckMsg" class="signup-form__hint"></p>
 
-            <!-- 2. 이메일 주소 (신규 추가, email 바인딩) -->
+            <!-- 2. 이메일 주소 & 중복확인 (email 바인딩) -->
             <div class="signup-form__row">
                 <label for="email" class="signup-form__label">이메일 주소</label>
-                <div class="signup-form__control">
+                <div class="signup-form__control signup-form__control--with-button">
                     <input type="email" id="email" th:field="*{email}" class="signup-form__input"
                            placeholder="example@email.com" required>
+                    <button type="button" id="btnEmailCheck" class="btn btn--outline">중복확인</button>
                 </div>
             </div>
+            <p id="emailCheckMsg" class="signup-form__hint"></p>
 
             <!-- 3. 이름 -->
             <div class="signup-form__row">
@@ -193,19 +195,29 @@ function execKakaoPostcode() {
 
 document.addEventListener('DOMContentLoaded', function () {
     const signupForm = document.getElementById('signupForm');
+    
+    // 아이디 관련
     const btnIdCheck = document.getElementById('btnIdCheck');
-    const idInput = document.getElementById('id'); // 아이디 입력 필드
+    const idInput = document.getElementById('id');
     const idCheckMsg = document.getElementById('idCheckMsg');
     
+    // 이메일 관련 (신규 추가)
+    const btnEmailCheck = document.getElementById('btnEmailCheck');
+    const emailInput = document.getElementById('email');
+    const emailCheckMsg = document.getElementById('emailCheckMsg');
+    
+    // 비밀번호 관련
     const passInput = document.getElementById('pass');
     const passConfirmInput = document.getElementById('passwordConfirm');
     const passCheckMsg = document.getElementById('passCheckMsg');
 
+    // 마케팅 동의 관련
     const agreeMarketing = document.getElementById('agreeMarketing');
     const smsReceiveYN = document.getElementById('smsReceiveYN');
     const emailReceiveYN = document.getElementById('emailReceiveYN');
 
     let isIdChecked = false;
+    let isEmailChecked = false; // 이메일 중복 확인 여부 플래그
 
     // 2. 아이디 중복확인 AJAX
     idInput.addEventListener('input', function() {
@@ -254,7 +266,62 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // 3. 마케팅 동의 & SMS/이메일 연동 로직
+    // 3. 이메일 중복확인 AJAX (신규 구현)
+    emailInput.addEventListener('input', function() {
+        isEmailChecked = false;
+        emailCheckMsg.textContent = '';
+        emailCheckMsg.className = 'signup-form__hint';
+    });
+
+    btnEmailCheck.addEventListener('click', function () {
+        const inputEmail = emailInput.value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!inputEmail) {
+            emailCheckMsg.textContent = '이메일을 입력해주세요.';
+            emailCheckMsg.className = 'signup-form__hint signup-form__hint--error';
+            emailInput.focus();
+            return;
+        }
+
+        if (!emailRegex.test(inputEmail)) {
+            emailCheckMsg.textContent = '올바른 이메일 형식이 아닙니다.';
+            emailCheckMsg.className = 'signup-form__hint signup-form__hint--error';
+            emailInput.focus();
+            return;
+        }
+
+        fetch('/member/emailDupCheck', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'email=' + encodeURIComponent(inputEmail)
+        })
+        .then(response => response.text())
+        .then(data => {
+            if (data === 'DUPLICATE') {
+                emailCheckMsg.textContent = '이미 가입된 이메일 주소입니다.';
+                emailCheckMsg.className = 'signup-form__hint signup-form__hint--error';
+                isEmailChecked = false;
+            } else if (data === 'OK') {
+                emailCheckMsg.textContent = '사용 가능한 이메일입니다.';
+                emailCheckMsg.className = 'signup-form__hint signup-form__hint--ok';
+                isEmailChecked = true;
+            } else if (data === 'EMPTY') {
+                emailCheckMsg.textContent = '이메일을 입력해주세요.';
+                emailCheckMsg.className = 'signup-form__hint signup-form__hint--error';
+                isEmailChecked = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            emailCheckMsg.textContent = '중복 확인 처리 중 오류가 발생했습니다.';
+            emailCheckMsg.className = 'signup-form__hint signup-form__hint--error';
+        });
+    });
+
+    // 4. 마케팅 동의 & SMS/이메일 연동 로직
     agreeMarketing.addEventListener('change', function() {
         const isChecked = agreeMarketing.checked;
         smsReceiveYN.checked = isChecked;
@@ -268,7 +335,7 @@ document.addEventListener('DOMContentLoaded', function () {
     smsReceiveYN.addEventListener('change', updateMarketingState);
     emailReceiveYN.addEventListener('change', updateMarketingState);
 
-    // 4. 비밀번호 가시성 토글
+    // 5. 비밀번호 가시성 토글
     document.querySelectorAll('.signup-form__toggle-visibility').forEach(button => {
         button.addEventListener('click', function() {
             const input = this.previousElementSibling;
@@ -280,12 +347,19 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // 5. 폼 제출 검증
+    // 6. 폼 제출 검증
     signupForm.addEventListener('submit', function(e) {
         if (!isIdChecked) {
             e.preventDefault();
             alert('아이디 중복확인을 진행해주세요.');
             idInput.focus();
+            return;
+        }
+
+        if (!isEmailChecked) {
+            e.preventDefault();
+            alert('이메일 중복확인을 진행해주세요.');
+            emailInput.focus();
             return;
         }
 

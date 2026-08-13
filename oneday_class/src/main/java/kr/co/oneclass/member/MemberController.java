@@ -102,6 +102,23 @@ public class MemberController {
         return isDuplicate ? "DUPLICATE" : "OK";
     }
     
+    @GetMapping("/member/emailDupCheck")
+    public String emailDupCheckForm(@RequestParam String email, Model model) {
+    	model.addAttribute("email", email);
+    	return "member/emailDupCheckResult";
+    }
+    
+    @ResponseBody
+    @PostMapping("/member/emailDupCheck")
+    public String emailDupCheckAjax(@RequestParam("email") String email) {
+    	if (email == null || email.trim().isEmpty()) {
+    		return "EMPTY";
+    	}
+    	
+    	boolean isDuplicate = ms.isEmailDuplicate(email);
+    	return isDuplicate ? "DUPLICATE" : "OK";
+    }
+    
     @GetMapping("/member/signUpSuccess")
     public String signUpSuccess() {
         return "member/signUpSuccess";

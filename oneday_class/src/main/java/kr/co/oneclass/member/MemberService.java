@@ -48,4 +48,7 @@ public interface MemberService {
     // 신규 추가: 소셜(구글) 연동 해제용 토큰 폐기
     // ==========================================
     boolean revokeGoogleToken(String accessToken);
+    
+    // 이메일 중복 확인
+	boolean isEmailDuplicate(String email);
 }

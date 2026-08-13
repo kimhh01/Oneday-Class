@@ -11,7 +11,7 @@
         <result property="password" column="local_password" />
         <result property="name" column="name" />
         <result property="phone" column="phone" />
-        <result property="zipCode" column="zip_code" />
+        <result property="zipCode" column="zipcode" />
         <result property="address" column="address" />
         <result property="address2" column="address2" />
         <result property="loginType" column="login_type" />
@@ -19,8 +19,8 @@
         <result property="status" column="status" />
         <result property="profileImg" column="profile_img" />
         <result property="inputDate" column="input_date" />
-        <result property="smsReceiveYN" column="sms_receive_yn" />
-        <result property="emailReceiveYN" column="email_receive_yn" />
+        <result property="smsReceiveYN" column="sms_receive" />
+        <result property="emailReceiveYN" column="email_receive" />
     </resultMap>
 
     <!-- 1. 회원 코드로 회원 조회 -->
@@ -32,11 +32,11 @@
             a.local_password,
             a.oauth_provider_id
         FROM member m
-        JOIN member_auth a ON m.member_code = a.member_code
+        LEFT JOIN member_auth a ON m.member_code = a.member_code
         WHERE m.member_code = #{memberCode}
     </select>
 
-    <!-- 2. 일반 로그인 -->
+    <!-- 2. 일반 로그인 (활성화된 회원만 가능) -->
     <select id="selectByLoginId" parameterType="kr.co.oneclass.member.LoginDTO" resultMap="memberResultMap">
         SELECT 
             m.*, 
@@ -48,9 +48,10 @@
         JOIN member_auth a ON m.member_code = a.member_code
         WHERE a.local_login_id = #{id} 
           AND a.login_type = 'LOCAL'
+          AND m.status = '정상'
     </select>
 
-    <!-- 3. OAuth 로그인 -->
+    <!-- 3. OAuth 로그인 (활성화된 회원만 가능) -->
     <select id="selectByOAuthId" parameterType="kr.co.oneclass.member.OAuthLoginDTO" resultMap="memberResultMap">
         SELECT 
             m.*, 
@@ -60,9 +61,10 @@
         JOIN member_auth a ON m.member_code = a.member_code
         WHERE a.oauth_provider_id = #{oauthProviderId} 
           AND a.login_type = #{provider}
+          AND m.status = '정상'
     </select>
 
-    <!-- 4. 일반 회원 기본 정보 저장 (시퀀스 채번) -->
+    <!-- 4. 일반 회원 기본 정보 저장 (항상 신규 INSERT) -->
     <insert id="insertMember" parameterType="kr.co.oneclass.member.SignUpDTO">
         <selectKey keyProperty="memberCode" resultType="int" order="BEFORE">
             SELECT seq_member_code.NEXTVAL FROM dual
@@ -96,7 +98,7 @@
         )
     </insert>
 
-    <!-- 5. OAuth 전용 회원 기본 정보 저장 -->
+    <!-- 5. OAuth 전용 회원 기본 정보 저장 (항상 신규 INSERT) -->
     <insert id="insertOAuthMember" parameterType="kr.co.oneclass.member.OAuthLoginDTO">
         <selectKey keyProperty="memberCode" resultType="int" order="BEFORE">
             SELECT seq_member_code.NEXTVAL FROM dual
@@ -161,8 +163,23 @@
         WHERE local_login_id = #{id} 
           AND login_type = 'LOCAL'
     </select>
+    
+    <!-- 8. 아이디 중복 확인 -->
+    <select id="countByLocalEmail" resultType="int">
+        SELECT COUNT(*) 
+        FROM member
+        WHERE email = #{email} 
+    </select>
 
-    <!-- 9. 아이디 찾기 -->
+    <!-- 9. 이메일 중복 확인 (정상 상태인 회원만 검사) -->
+    <select id="countByEmail" resultType="int">
+        SELECT COUNT(*) 
+        FROM member 
+        WHERE email = #{email} 
+          AND status = '정상'
+    </select>
+
+    <!-- 10. 아이디 찾기 -->
     <select id="selectId" parameterType="kr.co.oneclass.member.IdFindDTO" resultType="String">
         SELECT a.local_login_id 
         FROM member m
@@ -170,10 +187,11 @@
         WHERE m.name = #{name} 
           AND m.email = #{email} 
           AND a.login_type = 'LOCAL' 
+          AND m.status = '정상'
           AND ROWNUM = 1
     </select>
 
-    <!-- 10. 비밀번호 찾기 전 회원 검증 -->
+    <!-- 11. 비밀번호 찾기 전 회원 검증 -->
     <select id="selectMemberForPassword" parameterType="kr.co.oneclass.member.PassFindDTO" resultMap="memberResultMap">
         SELECT m.*, a.local_login_id 
         FROM member m
@@ -182,9 +200,10 @@
           AND m.name = #{name} 
           AND m.email = #{email} 
           AND a.login_type = 'LOCAL'
+          AND m.status = '정상'
     </select>
 
-    <!-- 11. 임시 비밀번호 업데이트 -->
+    <!-- 12. 임시 비밀번호 업데이트 -->
     <update id="updateTempPassword">
         UPDATE member_auth 
         SET local_password = #{password}
@@ -192,16 +211,30 @@
           AND login_type = 'LOCAL'
     </update>
 
-    <!-- 12. 회원 탈퇴 - 인증 정보 삭제 -->
+    <!-- 13. 회원 탈퇴 - 인증 정보 완전히 삭제 -->
     <delete id="deleteMemberAuth">
         DELETE FROM member_auth 
         WHERE member_code = #{memberCode}
     </delete>
 
-    <!-- 13. 회원 탈퇴 - 회원 기본 정보 삭제 -->
-    <delete id="deleteMember">
-        DELETE FROM member 
+	<!-- 14. 회원 탈퇴 - 개인정보 익명화(마스킹), 프로필 이미지 삭제 및 상태 변경 -->
+    <update id="deleteMember">
+        UPDATE member 
+        SET status = '탈퇴',
+            email = 'withdrawn_' || LOWER(RAWTOHEX(SYS_GUID())) || '@deleted.com',
+            name = '탈퇴회원',
+            phone = NULL,
+            zipcode = NULL,
+            address = NULL,
+            address2 = NULL,
+            image = NULL
         WHERE member_code = #{memberCode}
-    </delete>
+    </update>
+    
+    <!-- 로그인 이력 저장 쿼리 -->
+    <insert id="insertLoginHistory">
+        INSERT INTO login_history (member_code, operator_code, member_type, ip_address, login_date) 
+        VALUES (#{memberCode}, NULL, '회원', #{ipAddress}, SYSDATE)
+    </insert>
 
 </mapper>

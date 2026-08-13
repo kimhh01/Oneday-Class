@@ -29,6 +29,9 @@ public interface MemberDAO {
 
     // 8. 아이디 중복 확인
     int countByLocalLoginId(@Param("id") String id);
+    
+    // 8-1. 이메일 중복 확인
+    int countByLocalEmail(@Param("email") String email);
 
     // 9. 아이디 찾기
     String selectId(IdFindDTO iddto);
@@ -44,4 +47,10 @@ public interface MemberDAO {
 
     // 13. 회원 탈퇴: member 기본 정보 삭제 (또는 status='WITHDRAWN' 변경)
     int deleteMember(@Param("memberCode") int memberCode);
+    
+    /**
+     * 로그인 이력 저장 (LOGIN_HISTORY 테이블 INSERT)
+     */
+    int insertLoginHistory(@Param("memberCode") int memberCode, @Param("ipAddress") String ipAddress);
+
 }

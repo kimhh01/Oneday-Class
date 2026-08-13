@@ -12,12 +12,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-// 💡 RestTemplate 및 Http 통신용 import 추가
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+
+// IP 자동 추출을 위한 Spring RequestContextHolder
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+import jakarta.servlet.http.HttpServletRequest;
 
 import java.util.UUID;
 
@@ -31,6 +35,32 @@ public class MemberServiceImpl implements MemberService {
     private EmailAuthService emailAuthService;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+    /**
+     * 현재 HTTP 요청에서 클라이언트 IP 주소 추출 유틸
+     */
+    private String getClientIp() {
+        try {
+            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+            if (attributes != null) {
+                HttpServletRequest request = attributes.getRequest();
+                String ip = request.getHeader("X-Forwarded-For");
+                if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+                    ip = request.getHeader("Proxy-Client-IP");
+                }
+                if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+                    ip = request.getHeader("WL-Proxy-Client-IP");
+                }
+                if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
+                    ip = request.getRemoteAddr();
+                }
+                return ip;
+            }
+        } catch (Exception e) {
+            // 요청 컨텍스트가 없을 경우 Fallback 처리
+        }
+        return "127.0.0.1";
+    }
 
     @Override
     public Member login(LoginDTO ldto) {
@@ -57,6 +87,9 @@ public class MemberServiceImpl implements MemberService {
         if (!isMatch) {
             return null;
         }
+
+        // 💡 로그인 성공 시 자동으로 클라이언트 IP를 추출하여 LOGIN_HISTORY 테이블에 기록
+        memberDAO.insertLoginHistory(member.getMemberCode(), getClientIp());
 
         return member;
     }
@@ -103,12 +136,19 @@ public class MemberServiceImpl implements MemberService {
     public Member processOAuthLogin(OAuthLoginDTO oauthdto) {
         Member member = memberDAO.selectByOAuthId(oauthdto);
         if (member != null) {
+            // 💡 소셜 로그인 성공 시 접속 이력 기록
+            memberDAO.insertLoginHistory(member.getMemberCode(), getClientIp());
             return member;
         }
 
         boolean isSignedUp = oAuthSignUp(oauthdto);
         if (isSignedUp) {
-            return memberDAO.selectMember(oauthdto.getMemberCode());
+            Member newMember = memberDAO.selectMember(oauthdto.getMemberCode());
+            if (newMember != null) {
+                // 💡 신규 소셜 가입 후 로그인 시 접속 이력 기록
+                memberDAO.insertLoginHistory(newMember.getMemberCode(), getClientIp());
+            }
+            return newMember;
         }
 
         return null;
@@ -147,10 +187,6 @@ public class MemberServiceImpl implements MemberService {
         return memberDAO.selectMemberForPassword(dto) != null;
     }
 
-    // ==========================================
-    // 신규 구현: 비밀번호 검증 및 회원탈퇴
-    // ==========================================
-
     @Override
     public boolean checkPassword(int memberCode, String rawPassword) {
         Member member = memberDAO.selectMember(memberCode);
@@ -160,7 +196,6 @@ public class MemberServiceImpl implements MemberService {
 
         String dbPassword = member.getPassword();
 
-        // BCrypt 암호화 형태 확인 후 일치 여부 비교
         if (dbPassword.startsWith("$2a$") || dbPassword.startsWith("$2b$") || dbPassword.startsWith("$2y$")) {
             return passwordEncoder.matches(rawPassword, dbPassword);
         } else {
@@ -177,18 +212,15 @@ public class MemberServiceImpl implements MemberService {
 
         int code = Integer.parseInt(memberCode);
 
-        // 1) MEMBER_AUTH 관련 데이터 삭제/업데이트
+        // 1) MEMBER_AUTH 관련 데이터 완전히 삭제
         int result1 = memberDAO.deleteMemberAuth(code);
         
-        // 2) MEMBER 테이블 회원 삭제/상태 변경(탈퇴)
+        // 2) MEMBER 테이블 회원 개인정보 마스킹 및 상태 변경(탈퇴)
         int result2 = memberDAO.deleteMember(code);
 
         return result1 > 0 || result2 > 0;
     }
 
-    // ==========================================
-    // 💡 신규 구현: 소셜(구글) 연동 해제용 토큰 폐기 로직
-    // ==========================================
     @Override
     public boolean revokeGoogleToken(String accessToken) {
         if (accessToken == null || accessToken.trim().isEmpty()) {
@@ -197,25 +229,18 @@ public class MemberServiceImpl implements MemberService {
 
         try {
             RestTemplate restTemplate = new RestTemplate();
-            
-            // 구글 Token Revoke Endpoint
             String revokeUrl = "https://oauth2.googleapis.com/revoke?token=" + accessToken;
 
-            // 구글 권장 방식: POST, application/x-www-form-urlencoded
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
             
             HttpEntity<String> entity = new HttpEntity<>(headers);
 
-            // POST 요청 발송
             ResponseEntity<String> response = restTemplate.postForEntity(revokeUrl, entity, String.class);
 
-            // 상태 코드가 200번대(200 OK 등)이면 폐기 성공
             return response.getStatusCode().is2xxSuccessful();
             
         } catch (Exception e) {
-            // 토큰이 이미 만료되었거나 올바르지 않으면 Exception이 발생할 수 있으므로
-            // 탈퇴 흐름이 중단되지 않도록 로그만 남기고 false 리턴 처리
             System.err.println("구글 토큰 폐기 중 오류 발생: " + e.getMessage());
             return false;
         }
@@ -224,4 +249,10 @@ public class MemberServiceImpl implements MemberService {
     private String createTempPassword() {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 10);
     }
+
+	@Override
+	public boolean isEmailDuplicate(String email) {
+        int count = memberDAO.countByLocalEmail(email);
+        return count > 0;
+	}
 }
