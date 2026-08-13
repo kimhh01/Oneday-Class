@@ -18,8 +18,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // 1. 개발 편의를 위한 CSRF 비활성화
-            .csrf(csrf -> csrf.disable())
+            // 1. CSRF 활성화
+            //.csrf(csrf -> csrf.disable())
 
             // 2. 모든 요청에 대해 접근 전체 허용 (로그인 없이 모든 페이지/정적 자원 접근 가능)
             .authorizeHttpRequests(auth -> auth
