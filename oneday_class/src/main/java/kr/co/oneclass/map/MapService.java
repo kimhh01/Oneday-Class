@@ -25,8 +25,4 @@ public class MapService {
 		return cDAO.selectCategoryList();
 	}
 	
-	
-	public List<MapSearchDTO> search(double minLat, double maxLat, double minLng, double maxLng) {
-		return mDAO.search(minLat, maxLat, minLng, maxLng);
-	}
 }

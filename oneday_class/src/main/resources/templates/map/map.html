@@ -173,7 +173,6 @@
 						th:text="${classList != null ? classList.size() : 0}">0</span>개의
 					클래스
 				</div>
-				<button class="filter-icon-btn" title="필터 상세 설정">⚙️</button>
 			</div>
 
 			<!-- 클래스 카드 리스트 컨테이너 -->
@@ -182,8 +181,8 @@
 				<th:block
 					th:if="${classList != null and !#lists.isEmpty(classList)}">
 					<div th:each="item : ${classList}" class="class-card"
-						th:data-lat="${item.lat}" th:data-lng="${item.lng}"
-						th:data-title="${item.name}">
+						th:data-id="${item.classCode}" th:data-lat="${item.lat}"
+						th:data-lng="${item.lng}" th:data-title="${item.name}">
 
 						<div class="img-wrapper">
 							<img
@@ -195,7 +194,8 @@
 						<div class="card-info">
 							<div>
 								<h3 class="class-title" th:text="${item.name}">토끼 빵 만들기</h3>
-								<span class="category-badge" th:text="${item.categoryCode}">베이킹</span>
+								<!-- 카테고리 코드가 아닌 카테고리의 이름이 들어가야함 -->
+								<span class="category-badge" th:text="${item.categoryName}">베이킹</span>
 								<p class="class-address" th:text="${item.address}">서울 마포구</p>
 								<p class="class-date"
 									th:text="${#dates.format(item.writeDate, 'yyyy.MM.dd (E) HH:mm')}">2026.07.25
@@ -215,9 +215,9 @@
 					class="no-data-msg">조건에 맞는 클래스가 없습니다.</div>
 			</div>
 
-			<button class="more-class-btn">더 많은 클래스 보기 +</button>
+			<a th:href="@{/#void}"><button class="more-class-btn">더
+					많은 클래스 보기 +</button></a>
 		</div>
-
 		<!-- 우측 영역: 지도 -->
 		<div class="map-container">
 			<div id="map"></div>

@@ -14,6 +14,7 @@ import lombok.Getter;
 		private int classCode;
 		private long operatorCode;
 		private int categoryCode;
+		private String categoryName;
 		private String name;
 		private int price;
 		private int desiredPrice;

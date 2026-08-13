@@ -3,16 +3,15 @@
  */
 document.addEventListener("DOMContentLoaded", function() {
 	
-	// 💡 전역 데이터가 잘 들어왔는지 먼저 출력!
-	    console.log("전체 데이터 목록:", classListData);
-	    
-
+	// 💡 전역 데이터 출력
+    console.log("전체 데이터 목록:", classListData);
+    
     // -------------------------------------------------------------
     // 1. 카카오 지도 생성 및 전역 변수
     // -------------------------------------------------------------
     const mapContainer = document.getElementById('map');
     let allClassData = typeof classListData !== 'undefined' ? classListData : [];
-	    console.log("allClassData 개수:", allClassData.length);
+    console.log("allClassData 개수:", allClassData.length);
     let markers = []; // 생성된 커스텀 오버레이 객체 저장 배열
 
     let defaultLat = 37.5381;
@@ -33,10 +32,10 @@ document.addEventListener("DOMContentLoaded", function() {
     const ps = new kakao.maps.services.Places();
 
     // -------------------------------------------------------------
-    // 2. 🔥 카테고리별 물방울 마커 스타일 & 생성 함수 (이미지 스타일 적용)
+    // 2. 카테고리별 물방울 마커 스타일 & 생성 함수
     // -------------------------------------------------------------
 	const CATEGORY_STYLE = {
-	    '1': { icon: '/map/images/cook.png', name: '요리/베이킹' },
+	    '1': { icon: '/map/images/free.png', name: '요리/베이킹' },
 	    '2': { icon: '/map/images/craft.png',   name: '공예' },
 	    '3': { icon: '/images/category/flower.png',  name: '플라워' },
 	    '4': { icon: '/images/category/candle.png',  name: '캔들' },
@@ -44,9 +43,6 @@ document.addEventListener("DOMContentLoaded", function() {
 	    'DEFAULT': { icon: '/map/images/cook-marker.png', name: '클래스' }
 	};
 
-	/**
-	     * 카테고리별 물방울(Pin) CustomOverlay 생성 함수
-	     */
 	function createCustomMarker(item) {
 	        let parentCategoryCode = 'DEFAULT';
 	        if (item.categoryCode !== undefined && item.categoryCode !== null) {
@@ -69,16 +65,15 @@ document.addEventListener("DOMContentLoaded", function() {
 	                justify-content: center;
 	                cursor: pointer;
 	                transition: transform 0.2s ease;
-	                overflow: hidden; /* 🔥 이미지가 핀 바깥으로 삐져나가지 않게 처리 */
+	                overflow: hidden;
 	            ">
-	                <!-- 🔥 이미지 태그 적용 (Pin 이 회전되어 있으므로 역회전 rotate(45deg) 필수) -->
 	                <img src="${style.icon}" alt="${style.name}" style="
 	                    transform: rotate(45deg);
 	                    width: 15px;
 	                    height: 15px;
 	                    object-fit: contain;
 	                    display: block;
-	                    position: absolute; /* 🔥 중앙 정렬을 위한 추가 */
+	                    position: absolute;
 	                "/>
 	            </div>
 	        `;
@@ -87,7 +82,6 @@ document.addEventListener("DOMContentLoaded", function() {
 	        container.innerHTML = contentHtml;
 	        const markerElement = container.firstElementChild;
 
-	        // 마커 호버 애니메이션
 	        markerElement.addEventListener('mouseenter', function() {
 	            this.style.transform = 'rotate(-45deg) scale(1.15)';
 	        });
@@ -105,7 +99,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	            xAnchor: 0.5,
 	            yAnchor: 1.0
 	        });
-	    }
+	}
 
     // -------------------------------------------------------------
     // 3. 지도의 현재 범위(Bounds) 필터링 & 마커/사이드바 렌더링
@@ -129,7 +123,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function renderMarkersAndSidebar(classList) {
-        // 기존 마커(커스텀 오버레이) 전체 삭제
         markers.forEach(overlay => overlay.setMap(null));
         markers = [];
 
@@ -151,9 +144,13 @@ document.addEventListener("DOMContentLoaded", function() {
             classList.forEach(item => {
                 const imgPath = (item.imageList && item.imageList.length > 0) ? item.imageList[0].image : '/images/default.jpg';
                 const formattedPrice = item.price ? Number(item.price).toLocaleString() + '원' : '0원';
+                
+                // 🔥 [해결 1] 타임리프와 동일하게 item.classCode (또는 대소문자 고려)를 추출
+                const targetId = item.classCode || item.classcode || item.classNo || item.id;
 
+                // 🔥 [해결 2] data-id="${targetId}" 부여
                 cardHtml += `
-                    <div class="class-card" data-lat="${item.lat}" data-lng="${item.lng}" data-title="${item.name}">
+                    <div class="class-card" data-id="${targetId}" data-lat="${item.lat}" data-lng="${item.lng}" data-title="${item.name}">
                         <div class="img-wrapper">
                             <img src="${imgPath}" class="class-img" alt="클래스 이미지">
                             <button class="wish-btn" aria-label="관심목록 추가">♡</button>
@@ -161,7 +158,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         <div class="card-info">
                             <div>
                                 <h3 class="class-title">${item.name}</h3>
-                                <span class="category-badge">${item.categoryCode || '클래스'}</span>
+                                <span class="category-badge">${item.categoryName || '클래스'}</span>
                                 <p class="class-address">${item.address || ''}</p>
                             </div>
                             <div class="price-row">
@@ -175,17 +172,16 @@ document.addEventListener("DOMContentLoaded", function() {
             cardContainer.innerHTML = cardHtml;
         }
 
-        // 🔥 각 클래스 위치에 동그라미 커스텀 오버레이 마커 꽂기
+        // 마커 생성
         classList.forEach(item => {
             if (item.lat && item.lng) {
                 const customOverlay = createCustomMarker(item);
-                customOverlay.setMap(map); // 지도 위에 오버레이 렌더링
+                customOverlay.setMap(map);
                 markers.push(customOverlay);
             }
         });
     }
 
-    // 지도 움직임(드래그, 줌) 완료 시 화면 범위 기반 필터링 재실행
     kakao.maps.event.addListener(map, 'idle', function() {
         filterClassesByMapBounds();
     });
@@ -208,7 +204,6 @@ document.addEventListener("DOMContentLoaded", function() {
     let selectedSigungu = "";
     let selectedDong = "";
 
-    // 지역 모달 열기/닫기
     btnRegionToggle?.addEventListener('click', (e) => {
         e.stopPropagation();
         categoryModal?.classList.add('hidden');
@@ -220,7 +215,6 @@ document.addEventListener("DOMContentLoaded", function() {
         regionModal?.classList.add('hidden');
     });
 
-    // 시/도 -> 구/군 동적 생성
     listSido?.addEventListener('click', function(e) {
         const target = e.target.closest('li');
         if (!target) return;
@@ -254,7 +248,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
-    // 구/군 -> 동 목록 생성
     listSigungu?.addEventListener('click', function(e) {
         const target = e.target.closest('li');
         if (!target) return;
@@ -290,7 +283,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
-    // 동 선택
     listDong?.addEventListener('click', function(e) {
         const target = e.target.closest('li');
         if (!target) return;
@@ -302,7 +294,6 @@ document.addEventListener("DOMContentLoaded", function() {
         if (selectedDong === '선택안함') selectedDong = '';
     });
 
-    // 모달 검색 클릭
     btnRegionSearch?.addEventListener('click', function(e) {
         e.stopPropagation();
         const fullAddress = `${selectedSido} ${selectedSigungu} ${selectedDong}`.trim();
@@ -324,7 +315,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
-    // 내 위치 중심 버튼
     const btnMyLocation = document.getElementById('btn-my-location');
     btnMyLocation?.addEventListener('click', function() {
         if (navigator.geolocation) {
@@ -336,7 +326,6 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // 외부 영역 클릭 시 모달 닫기
     document.addEventListener('click', function(e) {
         if (regionModal && !regionModal.contains(e.target) && !btnRegionToggle.contains(e.target)) {
             regionModal.classList.add('hidden');
@@ -345,4 +334,34 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // 초기 실행
     filterClassesByMapBounds();
+	
+    // -------------------------------------------------------------
+    // 5. 🔥 카드 클릭 시 상세 페이지 이동 이벤트
+    // -------------------------------------------------------------
+	const cardContainer = document.getElementById('card-list-container');
+
+	if (cardContainer) {
+	    cardContainer.addEventListener('click', (e) => {
+	        // 1. 관심목록(♡) 클릭 시 페이지 이동 방지
+	        if (e.target.closest('.wish-btn')) {
+	            e.stopPropagation();
+	            return;
+	        }
+
+	        // 2. 가장 가까운 .class-card 요소 탐색
+	        const card = e.target.closest('.class-card');
+	        if (!card) return;
+
+	        // 3. 카드에 할당된 data-id 읽기
+	        const selectedId = card.dataset.id;
+	        console.log("선택한 클래스 ID:", selectedId);
+
+	        // 4. 유효성 체크 후 페이지 이동
+	        if (selectedId && selectedId !== 'undefined' && selectedId !== 'null') {
+	            window.location.href = `/classDetail?classCode=${selectedId}`;
+	        } else {
+	            console.error("클래스 ID를 읽어오지 못했습니다. 데이터 필드명을 확인하세요.");
+	        }
+	    });
+	}
 });
