@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}"/>
+    <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}"/>
+
     <title>프로필 수정 | 숨쉬당</title>
-    <!-- 프로필 페이지 기본 CSS 및 사이드바/모달 CSS -->
     <link rel="stylesheet" th:href="@{/profile/css/profile.css}">
     <link rel="stylesheet" th:href="@{/fragments/css/sidebar.css}">
 </head>
@@ -13,10 +15,10 @@
 <div class="profile-wrapper">
     <div class="profile-container">
 
-        <!-- 1. 좌측 사이드바 Fragment 불러오기 (현재 메뉴 'profile' 전달) -->
+        <!-- 1. 좌측 사이드바 Fragment -->
         <aside th:replace="~{fragments/sidebar :: sidebar('profile')}"></aside>
 
-        <!-- 2. 우측 메인 프로필 수정 영역 -->
+        <!-- 2. 우측 메인 영역 -->
         <main class="profile-main">
             
             <div class="page-header">
@@ -24,11 +26,10 @@
                 <p class="page-subtitle">회원 정보를 관리하고 수정할 수 있습니다.</p>
             </div>
 
-            <!-- [섹션 1] 프로필 이미지 변경 박스 -->
+            <!-- 프로필 이미지 변경 박스 -->
             <div class="card-section">
                 <div class="img-change-box">
                     <div class="img-preview-wrapper">
-                        <!-- 프로필 이미지 프리뷰 -->
                         <img th:if="${member != null and member.profileImg != null}" 
                              th:src="@{${member.profileImg}}" alt="프로필 이미지">
                         <svg th:unless="${member != null and member.profileImg != null}" 
@@ -46,14 +47,13 @@
                 </div>
             </div>
 
-            <!-- [섹션 2] 계정 정보 수정 Form -->
+            <!-- 계정 정보 수정 Form -->
             <form th:action="@{/profile/updateProfile}" method="post" id="profileUpdateForm">
                 <input type="hidden" name="memberCode" th:value="${member != null ? member.memberCode : 0}">
 
                 <div class="card-section">
                     <h2 class="section-title">계정 정보</h2>
 
-                    <!-- 예약자 이름 (구글 계정인 경우 수정 불가 readonly) -->
                     <div class="form-group">
                         <label for="name" class="form-label">예약자 이름</label>
                         <input type="text" id="name" name="name" class="form-input" 
@@ -63,24 +63,27 @@
                                required>
                     </div>
 
-                    <!-- 휴대폰 번호 -->
                     <div class="form-group">
                         <label for="phone" class="form-label">휴대폰 번호</label>
                         <input type="tel" id="phone" name="phone" class="form-input" 
                                th:value="${member != null ? member.phone : ''}" placeholder="010-0000-0000">
                     </div>
 
-                    <!-- 이메일 (구글 계정인 경우 수정 불가 readonly) -->
+                    <!-- 이메일 & 중복확인 -->
                     <div class="form-group">
                         <label for="email" class="form-label">이메일</label>
-                        <input type="email" id="email" name="email" class="form-input" 
-                               th:value="${member != null ? member.email : ''}" 
-                               th:readonly="${member != null and member.loginType == 'GOOGLE'}" 
-                               th:style="${member != null and member.loginType == 'GOOGLE'} ? 'background-color: #f9f9f9; color: #888;' : ''"
-                               required>
+                        <div class="password-row" style="margin-bottom: 0;">
+                            <input type="email" id="email" name="email" class="form-input" 
+                                   th:value="${member != null ? member.email : ''}" 
+                                   th:readonly="${member != null and member.loginType == 'GOOGLE'}" 
+                                   th:style="${member != null and member.loginType == 'GOOGLE'} ? 'background-color: #f9f9f9; color: #888;' : ''"
+                                   required>
+                            <button type="button" id="btnEmailCheck" class="btn-outline" 
+                                    th:if="${member == null or member.loginType != 'GOOGLE'}">중복확인</button>
+                        </div>
                     </div>
 
-                    <!-- 주소 입력 그룹 (우편번호, 기본주소, 상세주소) -->
+                    <!-- 주소 입력 -->
                     <div class="form-group">
                         <label class="form-label">주소</label>
                         <div class="password-row" style="margin-bottom: 8px;">
@@ -96,7 +99,7 @@
                         </div>
                     </div>
 
-                    <!-- 비밀번호 (일반 회원일 때만 비번 변경 모달 호출 가능) -->
+                    <!-- 비밀번호 -->
                     <div class="form-group" th:if="${member == null or member.loginType != 'GOOGLE'}">
                         <label class="form-label">비밀번호</label>
                         <div class="password-row">
@@ -105,7 +108,7 @@
                         </div>
                     </div>
                     
-                    <!-- 💡 신규 추가: SMS 및 이메일 수신 여부 설정 -->
+                    <!-- 수신 동의 -->
                     <div class="form-group">
                         <label class="form-label">알림 수신 동의</label>
                         <div style="display: flex; gap: 24px; align-items: center; margin-top: 10px;">
@@ -125,7 +128,6 @@
                     </div>
                 </div>
 
-                <!-- 하단 버튼 영역 -->
                 <div class="form-actions">
                     <a th:href="@{/mypage}" class="btn-text">취소</a>
                     <button type="submit" class="btn-primary btn-submit">변경</button>
@@ -137,33 +139,118 @@
     </div>
 </div>
 
-<!-- 동적으로 로드된 모달 HTML이 들어가는 컨테이너 -->
 <div id="modalContainer"></div>
 
-<!-- 공통 결과 안내 알림 모달 Fragment 불러오기 -->
+<!-- 💡 커스텀 알림 모달 Fragment 불러오기 -->
 <div th:replace="~{profile/fragments/alertModal :: alertModal}"></div>
 
-<!-- 카카오 우편번호 서비스 CDN 스크립트 추가 -->
 <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 
-<!-- 모달 동적 로드 및 주소 검색 스크립트 -->
 <script>
-    // [중요] 브라우저 전체에 파일 드래그 시 파일이 새 창으로 열리는 기본 동작 차단
     window.addEventListener('dragover', function(e) { e.preventDefault(); }, false);
     window.addEventListener('drop', function(e) { e.preventDefault(); }, false);
 
-    // 카카오 우편번호 API 연동 함수
+    // 💡 작성한 커스텀 알림 모달을 동적으로 띄우는 함수
+    function showProfileAlert(message) {
+        const alertModal = document.getElementById('alertModal');
+        const alertModalMessage = document.getElementById('alertModalMessage');
+
+        if (alertModal && alertModalMessage) {
+            alertModalMessage.textContent = message;
+            alertModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const emailInput = document.getElementById('email');
+        const btnEmailCheck = document.getElementById('btnEmailCheck');
+        const profileUpdateForm = document.getElementById('profileUpdateForm');
+
+        const originalEmail = emailInput ? emailInput.value.trim() : '';
+        let isEmailChecked = true;
+
+        if (emailInput && btnEmailCheck) {
+            emailInput.addEventListener('input', function () {
+                const currentEmail = emailInput.value.trim();
+                isEmailChecked = (currentEmail === originalEmail);
+            });
+
+            btnEmailCheck.addEventListener('click', function () {
+                const inputEmail = emailInput.value.trim();
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+                if (!inputEmail) {
+                    showProfileAlert('이메일을 입력해주세요.');
+                    emailInput.focus();
+                    return;
+                }
+
+                if (!emailRegex.test(inputEmail)) {
+                    showProfileAlert('올바른 이메일 형식이 아닙니다.');
+                    emailInput.focus();
+                    return;
+                }
+
+                if (inputEmail === originalEmail) {
+                    showProfileAlert('현재 사용 중인 본인의 이메일입니다.');
+                    isEmailChecked = true;
+                    return;
+                }
+
+                const tokenMeta = document.querySelector("meta[name='_csrf']");
+                const headerMeta = document.querySelector("meta[name='_csrf_header']");
+                const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+
+                if (tokenMeta && headerMeta && tokenMeta.content) {
+                    headers[headerMeta.content] = tokenMeta.content;
+                }
+
+                fetch('/member/emailDupCheck', {
+                    method: 'POST',
+                    headers: headers,
+                    body: 'email=' + encodeURIComponent(inputEmail)
+                })
+                .then(response => response.text())
+                .then(data => {
+                    if (data === 'DUPLICATE') {
+                        showProfileAlert('이미 다른 계정에서 사용 중인 이메일입니다.');
+                        isEmailChecked = false;
+                    } else if (data === 'OK') {
+                        showProfileAlert('사용 가능한 이메일입니다.');
+                        isEmailChecked = true;
+                    } else if (data === 'EMPTY') {
+                        showProfileAlert('이메일을 입력해주세요.');
+                        isEmailChecked = false;
+                    } else {
+                        showProfileAlert('이메일 확인 중 오류가 발생했습니다.');
+                        isEmailChecked = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showProfileAlert('중복 확인 처리 중 오류가 발생했습니다.');
+                    isEmailChecked = false;
+                });
+            });
+        }
+
+        if (profileUpdateForm) {
+            profileUpdateForm.addEventListener('submit', function (e) {
+                if (emailInput && !isEmailChecked && emailInput.value.trim() !== originalEmail) {
+                    e.preventDefault();
+                    showProfileAlert('변경할 이메일의 중복확인을 진행해주세요.');
+                    emailInput.focus();
+                }
+            });
+        }
+    });
+
     function execDaumPostcode() {
         new daum.Postcode({
             oncomplete: function(data) {
-                let addr = ''; // 주소 변수
-                let extraAddr = ''; // 참고항목 변수
-
-                if (data.userSelectedType === 'R') { // 도로명 주소
-                    addr = data.roadAddress;
-                } else { // 지번 주소
-                    addr = data.jibunAddress;
-                }
+                let addr = data.userSelectedType === 'R' ? data.roadAddress : data.jibunAddress;
+                let extraAddr = '';
 
                 if(data.bname !== '' && /[동|로|가]$/g.test(data.bname)){
                     extraAddr += data.bname;
@@ -182,19 +269,16 @@
         }).open();
     }
 
-    // Controller에서 모달 HTML을 받아와 화면에 띄우는 함수
     function loadModal(url) {
         fetch(url)
             .then(response => {
-                if (!response.ok) {
-                    throw new Error("모달 로드에 실패했습니다.");
-                }
+                if (!response.ok) throw new Error("모달 로드에 실패했습니다.");
                 return response.text();
             })
             .then(html => {
                 const container = document.getElementById('modalContainer');
                 container.innerHTML = html;
-                document.body.style.overflow = 'hidden'; // 배경 스크롤 차단
+                document.body.style.overflow = 'hidden';
 
                 const scripts = container.querySelectorAll('script');
                 scripts.forEach(oldScript => {
@@ -207,13 +291,11 @@
             .catch(error => console.error(error));
     }
 
-    // 모달 닫기 함수
     function closeModal() {
         document.getElementById('modalContainer').innerHTML = ' ';
         document.body.style.overflow = 'auto';
     }
 
-    // 모달 어두운 배경 클릭 시 닫기
     function closeModalOnBackdrop(event) {
         if (event.target.classList.contains('modal-backdrop')) {
             closeModal();

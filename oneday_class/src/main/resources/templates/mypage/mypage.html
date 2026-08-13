@@ -5,9 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>마이페이지 | 숨쉬당</title>
     <link rel="stylesheet" th:href="@{/mypage/css/mypage.css}">
+        <link rel="stylesheet" th:href="@{fragments/css/header.css}">
 </head>
 <body>
 
+<div th:replace="~{fragments/header :: header}"></div>
 <div class="mypage-wrapper">
     <div class="mypage-container">
 

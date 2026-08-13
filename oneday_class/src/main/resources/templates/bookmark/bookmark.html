@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- 💡 CSRF 토큰 메타 태그 추가 -->
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>관심 클래스 | 숨쉬당</title>
     <!-- CSS 연결 -->
     <link rel="stylesheet" th:href="@{/profile/css/profile.css}">
@@ -42,7 +45,12 @@
             <!-- DB 조회 데이터 반복 출력 영역 (데이터가 있을 때) -->
             <div class="class-grid" th:if="${bookmarkList != null and !#lists.isEmpty(bookmarkList)}">
                 
-                <div class="class-card" th:each="item : ${bookmarkList}">
+                <!-- 💡 카드 클릭 시 클래스 상세 페이지로 이동 (cursor: pointer 추가) -->
+                <div class="class-card" 
+                     th:each="item : ${bookmarkList}"
+                     th:onclick="|location.href='@{/classDetail(classCode=${item.classCode})}'|"
+                     style="cursor: pointer;">
+                     
                     <div class="card-thumb">
                         <img th:src="${item.classImg != null and item.classImg != '' ? item.classImg : '/uploads/default_class.png'}" 
                              th:alt="${item.className}"
@@ -51,8 +59,10 @@
                     <div class="card-body">
                         <div class="card-title-row">
                             <h3 class="class-title" th:text="${item.className}">클래스명</h3>
+                            
+                            <!-- 💡 event 파라미터 전달 추가 (상세 페이지 이동 방지용) -->
                             <button type="button" class="btn-heart active" aria-label="관심 해제" 
-                                    th:onclick="|toggleHeart(this, '${item.classCode}')|">
+                                    th:onclick="|toggleHeart(event, this, '${item.classCode}')|">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="#ff4d4f" stroke="#ff4d4f" stroke-width="2">
                                     <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                                 </svg>
@@ -79,38 +89,50 @@
 </div>
 
 <script>
-    // 관심 클래스 해제 (비동기 AJAX)
-    function toggleHeart(btn, classCode) {
-        fetch('/mypage/bookmark/toggle', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: 'classCode=' + encodeURIComponent(classCode)
-        })
-        .then(response => response.text())
-        .then(data => {
-            if (data === 'REMOVED' || data === 'false') {
-                const card = btn.closest('.class-card');
-                if (card) {
-                    card.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
-                    card.style.opacity = '0';
-                    card.style.transform = 'scale(0.9)';
-                    setTimeout(() => {
-                        card.remove();
-                        const remainingCards = document.querySelectorAll('.class-card');
-                        if (remainingCards.length === 0) {
-                            location.reload();
-                        }
-                    }, 200);
-                }
-            } else if (data === 'LOGIN_REQUIRED') {
-                alert('로그인이 필요한 서비스입니다.');
-                location.href = '/member/login';
-            }
-        })
-        .catch(error => console.error('Error:', error));
+//관심 클래스 해제 (비동기 AJAX)
+function toggleHeart(event, btn, classCode) {
+    event.stopPropagation();
+
+    // 💡 메타 태그에서 CSRF 토큰 및 헤더 이름 가져오기
+    const tokenMeta = document.querySelector("meta[name='_csrf']");
+    const headerMeta = document.querySelector("meta[name='_csrf_header']");
+    
+    const headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+    };
+
+    if (tokenMeta && headerMeta) {
+        headers[headerMeta.getAttribute("content")] = tokenMeta.getAttribute("content");
     }
+
+    fetch('/mypage/bookmark/toggle', {
+        method: 'POST',
+        headers: headers, // CSRF 헤더가 포함된 headers 전달
+        body: 'classCode=' + encodeURIComponent(classCode)
+    })
+    .then(response => response.text())
+    .then(data => {
+        if (data === 'REMOVED' || data === 'false') {
+            const card = btn.closest('.class-card');
+            if (card) {
+                card.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    card.remove();
+                    const remainingCards = document.querySelectorAll('.class-card');
+                    if (remainingCards.length === 0) {
+                        location.reload();
+                    }
+                }, 200);
+            }
+        } else if (data === 'LOGIN_REQUIRED') {
+            alert('로그인이 필요한 서비스입니다.');
+            location.href = '/member/login';
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
 </script>
 
 </body>
