@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title th:text="${pageTitle + ' | 숨비당 원데이 클래스'}">준비 중 | 숨비당 원데이 클래스</title>
+<link rel="stylesheet" href="/author/css/common.css" th:href="@{/author/css/common.css}">
+<link rel="stylesheet" href="/author/css/header.css" th:href="@{/author/css/header.css}">
+<link rel="stylesheet" href="/author/css/sidebar.css" th:href="@{/author/css/sidebar.css}">
+<script src="/author/js/layout.js" th:src="@{/author/js/layout.js}" defer></script>
+</head>
+<body class="author-page" data-menu="" data-page="준비 중"
+	  th:attr="data-menu=${menuKey},data-page=${pageTitle}">
+<div class="app">
+	<div th:replace="~{author/fragments/icons :: icons}"></div>
+	<div th:replace="~{author/fragments/header :: header}"></div>
+	<div class="app-body">
+		<div th:replace="~{author/fragments/sidebar :: sidebar}"></div>
+		<main class="content">
+			<div class="content__inner">
+				<section class="card empty-state">
+					<div class="empty-state__body">
+						<h1 class="page-title" th:text="${pageTitle}">준비 중</h1>
+						<p class="page-desc">화면 구조만 연결되어 있습니다. 기능과 데이터는 다음 구현 단계에서 추가합니다.</p>
+						<a class="btn btn--primary" href="index.html" th:href="@{/author}">작가페이지 홈</a>
+					</div>
+				</section>
+				<div th:replace="~{author/fragments/footer :: footer}"></div>
+			</div>
+		</main>
+	</div>
+</div>
+</body>
+</html>

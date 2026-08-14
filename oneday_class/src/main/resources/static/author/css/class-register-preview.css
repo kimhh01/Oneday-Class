@@ -1,0 +1,798 @@
+@charset "UTF-8";
+
+/* =============================================================
+   클래스 등록 06 · 사용자 화면 직접 미리보기
+   ============================================================= */
+
+.register-preview-page .register-page-head {
+	margin-bottom: 18px;
+}
+
+.register-preview-page .step-nav-wrap {
+	margin-bottom: 22px;
+}
+
+.preview-review-layout {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 286px;
+	gap: 18px;
+	align-items: start;
+}
+
+.preview-review-card,
+.preview-check-card {
+	min-width: 0;
+	border: 1px solid #E8E5DF;
+	border-radius: 13px;
+	background: #FFF;
+	box-shadow: 0 4px 18px rgba(45, 57, 49, .055);
+}
+
+.preview-review-card {
+	padding: 20px;
+}
+
+.preview-review-card__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 18px;
+	margin-bottom: 15px;
+}
+
+.preview-review-card__head h2,
+.preview-check-card__head h2 {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 750;
+	letter-spacing: -.02em;
+	color: #2C322D;
+}
+
+.preview-review-card__head p {
+	margin: 4px 0 0;
+	font-size: 11px;
+	line-height: 1.5;
+	color: #8A8F88;
+}
+
+.preview-review-card__head > span {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	flex: none;
+	height: 30px;
+	padding: 0 10px;
+	border: 1px solid #BFD6C5;
+	border-radius: 999px;
+	background: #F4FAF5;
+	font-size: 10px;
+	font-weight: 700;
+	color: #347449;
+}
+
+.preview-review-card__head > span svg {
+	width: 14px;
+	height: 14px;
+}
+
+/* ---------- 고객용 상세 화면 ---------- */
+.customer-preview {
+	overflow: hidden;
+	border: 1px solid #D9DDD7;
+	border-radius: 10px;
+	background: #FFF;
+	box-shadow: inset 0 0 0 4px #F6F7F4;
+}
+
+.customer-preview__bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	height: 42px;
+	padding: 0 15px;
+	border-bottom: 1px solid #E6E8E3;
+	background: #FAFBF8;
+}
+
+.customer-preview__bar strong {
+	font-size: 12px;
+	color: #24452E;
+}
+
+.customer-preview__bar span {
+	padding: 4px 8px;
+	border-radius: 999px;
+	background: #E9F4EB;
+	font-size: 9px;
+	font-weight: 700;
+	color: #347A4B;
+}
+
+.customer-gallery {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1.65fr) minmax(145px, .75fr);
+	grid-template-rows: repeat(2, 112px);
+	gap: 5px;
+	padding: 8px;
+	background: #F1EEE8;
+}
+
+.customer-gallery img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.customer-gallery__main {
+	grid-row: 1 / 3;
+	border-radius: 7px 0 0 7px;
+}
+
+.customer-gallery__step--one {
+	border-radius: 0 7px 0 0;
+	object-position: 0% center;
+}
+
+.customer-gallery__step--two {
+	border-radius: 0 0 7px 0;
+	object-position: 50% center;
+}
+
+.customer-gallery__count {
+	position: absolute;
+	right: 17px;
+	bottom: 16px;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 5px 7px;
+	border-radius: 6px;
+	background: rgba(31, 34, 31, .72);
+	font-size: 9px;
+	font-weight: 700;
+	color: #FFF;
+}
+
+.customer-gallery__count svg {
+	width: 12px;
+	height: 12px;
+}
+
+.customer-detail-layout {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 195px;
+	align-items: start;
+}
+
+.customer-detail {
+	min-width: 0;
+	border-right: 1px solid #EBEDE8;
+}
+
+.customer-intro,
+.customer-section {
+	padding: 19px 20px;
+}
+
+.customer-section {
+	border-top: 1px solid #ECEEEA;
+}
+
+.customer-intro__badges,
+.customer-intro__meta,
+.customer-intro__tags {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+}
+
+.customer-intro__badges {
+	gap: 5px;
+}
+
+.customer-intro__badges span {
+	padding: 4px 7px;
+	border-radius: 999px;
+	background: #EEF5EF;
+	font-size: 9px;
+	font-weight: 700;
+	color: #37704A;
+}
+
+.customer-intro__badges span + span {
+	background: #F4F1EB;
+	color: #756B60;
+}
+
+.customer-intro h3 {
+	margin: 9px 0 0;
+	font-size: 21px;
+	font-weight: 750;
+	line-height: 1.35;
+	letter-spacing: -.025em;
+	color: #282D29;
+}
+
+.customer-intro > p {
+	margin: 5px 0 0;
+	font-size: 11px;
+	color: #777C76;
+}
+
+.customer-intro__meta {
+	gap: 11px;
+	margin-top: 13px;
+}
+
+.customer-intro__meta span {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 9px;
+	color: #626861;
+}
+
+.customer-intro__meta svg {
+	width: 12px;
+	height: 12px;
+	color: #3C8A56;
+}
+
+.customer-intro__tags {
+	gap: 7px;
+	margin-top: 9px;
+}
+
+.customer-intro__tags span {
+	font-size: 9px;
+	color: #738078;
+}
+
+.customer-studio {
+	display: grid;
+	grid-template-columns: 38px minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 9px;
+	margin: 0 20px 18px;
+	padding: 10px;
+	border-radius: 8px;
+	background: #F7F6F2;
+}
+
+.customer-studio img {
+	width: 38px;
+	height: 38px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+
+.customer-studio div {
+	display: flex;
+	min-width: 0;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.customer-studio strong {
+	font-size: 10px;
+	color: #3C423D;
+}
+
+.customer-studio div span {
+	overflow: hidden;
+	font-size: 8px;
+	color: #8B9089;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.customer-studio em {
+	font-size: 8px;
+	font-style: normal;
+	font-weight: 700;
+	color: #3C7F50;
+}
+
+.customer-section h4,
+.customer-booking h4 {
+	margin: 0;
+	font-size: 12px;
+	font-weight: 750;
+	color: #333934;
+}
+
+.customer-section > p {
+	margin: 9px 0 0;
+	font-size: 9px;
+	line-height: 1.75;
+	color: #777D76;
+}
+
+.customer-benefits {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 7px;
+	margin: 12px 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.customer-benefits li {
+	display: flex;
+	align-items: flex-start;
+	gap: 6px;
+	padding: 9px;
+	border: 1px solid #E1EBE3;
+	border-radius: 7px;
+	background: #F8FBF8;
+}
+
+.customer-benefits svg {
+	width: 13px;
+	height: 13px;
+	flex: none;
+	color: #3A9057;
+}
+
+.customer-benefits span {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	font-size: 8px;
+	line-height: 1.4;
+	color: #858A84;
+}
+
+.customer-benefits b {
+	font-size: 9px;
+	color: #465048;
+}
+
+.customer-curriculum > div {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+.customer-curriculum > div > span {
+	font-size: 8px;
+	color: #8A9089;
+}
+
+.customer-curriculum ol {
+	margin: 10px 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.customer-curriculum li {
+	display: grid;
+	grid-template-columns: 26px minmax(0, 1fr);
+	align-items: center;
+	gap: 8px;
+	padding: 7px 0;
+}
+
+.customer-curriculum li + li {
+	border-top: 1px solid #EFF0ED;
+}
+
+.customer-curriculum li > b {
+	display: grid;
+	place-items: center;
+	width: 25px;
+	height: 25px;
+	border: 1px solid #CFE1D3;
+	border-radius: 50%;
+	font-size: 8px;
+	color: #347A4B;
+}
+
+.customer-curriculum li > span {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.customer-curriculum strong {
+	font-size: 9px;
+	color: #4B514C;
+}
+
+.customer-curriculum small {
+	font-size: 8px;
+	color: #92968F;
+}
+
+.customer-booking {
+	padding: 18px 14px;
+	background: #FFF;
+}
+
+.customer-booking > span {
+	display: block;
+	font-size: 8px;
+	color: #8B908A;
+}
+
+.customer-booking > strong {
+	display: inline-block;
+	margin-top: 3px;
+	font-size: 21px;
+	color: #29302B;
+}
+
+.customer-booking > strong small {
+	margin-left: 2px;
+	font-size: 10px;
+}
+
+.customer-booking > del {
+	margin-left: 4px;
+	font-size: 8px;
+	color: #A3A69F;
+}
+
+.customer-booking__schedule {
+	margin-top: 13px;
+	padding: 13px 0;
+	border-top: 1px solid #E9EBE7;
+	border-bottom: 1px solid #E9EBE7;
+}
+
+.customer-booking__schedule h4 {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	margin-bottom: 7px;
+}
+
+.customer-booking__schedule h4 svg {
+	width: 12px;
+	height: 12px;
+	color: #398553;
+}
+
+.customer-booking__schedule label {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	margin-top: 6px;
+	padding: 7px;
+	border: 1px solid #E2E5E0;
+	border-radius: 6px;
+	font-size: 8px;
+}
+
+.customer-booking__schedule label:has(input:checked) {
+	border-color: #75A984;
+	background: #F2F8F3;
+}
+
+.customer-booking__more {
+	margin: 8px 0 0;
+	padding-top: 8px;
+	border-top: 1px dashed #E2E5E0;
+	font-size: 8px;
+	font-weight: 700;
+	text-align: center;
+	color: #6F776F;
+}
+
+.customer-booking__schedule input {
+	margin: 0;
+	accent-color: #2F844B;
+}
+
+.customer-booking__schedule label span,
+.customer-booking__place span {
+	display: flex;
+	min-width: 0;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.customer-booking__schedule b,
+.customer-booking__place b {
+	font-size: 8px;
+	color: #4D544E;
+}
+
+.customer-booking__schedule small,
+.customer-booking__place small {
+	font-size: 7px;
+	color: #91968F;
+}
+
+.customer-booking__place {
+	display: flex;
+	align-items: flex-start;
+	gap: 6px;
+	padding: 13px 0;
+}
+
+.customer-booking__place > svg {
+	width: 13px;
+	height: 13px;
+	flex: none;
+	color: #398553;
+}
+
+.customer-booking > button {
+	width: 100%;
+	height: 36px;
+	border: 0;
+	border-radius: 7px;
+	background: #DFE9E1;
+	font-size: 8px;
+	font-weight: 700;
+	color: #6C8071;
+}
+
+/* ---------- 약관 ---------- */
+.preview-agreement {
+	margin-top: 18px;
+}
+
+.preview-agreement__head {
+	margin-bottom: 10px;
+}
+
+.preview-agreement__head h3 {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 750;
+	color: #343A35;
+}
+
+.preview-agreement__head p {
+	margin: 4px 0 0;
+	font-size: 10px;
+	color: #8D918B;
+}
+
+.preview-agreement > label {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	min-height: 52px;
+	padding: 9px 13px;
+	border: 1px solid #E1E3DE;
+	background: #FFF;
+	cursor: pointer;
+}
+
+.preview-agreement > label:first-of-type {
+	border-radius: 7px 7px 0 0;
+}
+
+.preview-agreement > label + label {
+	border-top: 0;
+	border-radius: 0 0 7px 7px;
+}
+
+.preview-agreement > label:has(input:checked) {
+	background: #F7FBF7;
+}
+
+.preview-agreement label span {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.preview-agreement label b {
+	font-size: 11px;
+	color: #4B504B;
+}
+
+.preview-agreement label small {
+	font-size: 9px;
+	color: #949892;
+}
+
+.preview-agreement input {
+	width: 18px;
+	height: 18px;
+	flex: none;
+	accent-color: #2E8A4D;
+}
+
+.preview-agreement__error {
+	min-height: 17px;
+	margin: 6px 0 0;
+	font-size: 10px;
+	color: #C64F4F;
+}
+
+/* ---------- 우측 안내 ---------- */
+.preview-check-card {
+	position: static;
+	padding: 20px 18px 18px;
+}
+
+.preview-check-card__head {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	padding-bottom: 12px;
+}
+
+.preview-check-card__head > span {
+	display: grid;
+	place-items: center;
+	width: 34px;
+	height: 34px;
+	border-radius: 50%;
+	background: #E9F5EB;
+	color: #368B54;
+}
+
+.preview-check-card__head svg {
+	width: 18px;
+	height: 18px;
+}
+
+.preview-check-card__head h2 {
+	font-size: 16px;
+	color: #2F7C48;
+}
+
+.preview-check-card > section {
+	display: grid;
+	grid-template-columns: 38px minmax(0, 1fr);
+	gap: 10px;
+	padding: 16px 0;
+	border-top: 1px solid #EBEDE8;
+}
+
+.preview-check-card > section > span {
+	display: grid;
+	place-items: center;
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	background: #F1F7F2;
+	color: #559268;
+}
+
+.preview-check-card > section svg {
+	width: 18px;
+	height: 18px;
+}
+
+.preview-check-card h3 {
+	margin: 0;
+	font-size: 11px;
+	font-weight: 750;
+	line-height: 1.45;
+	color: #434943;
+}
+
+.preview-check-card section p {
+	margin: 5px 0 0;
+	font-size: 9px;
+	line-height: 1.65;
+	color: #81867F;
+}
+
+.preview-check-card__tip {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	margin-top: 4px;
+	padding: 11px;
+	border-radius: 8px;
+	background: #EFF7F0;
+	color: #477A55;
+}
+
+.preview-check-card__tip svg {
+	width: 16px;
+	height: 16px;
+	flex: none;
+}
+
+.preview-check-card__tip p {
+	margin: 0;
+	font-size: 9px;
+	font-weight: 600;
+	line-height: 1.55;
+}
+
+/* ---------- 이동 버튼 ---------- */
+.preview-actions {
+	grid-column: 1 / -1;
+	justify-content: flex-end;
+	gap: 10px;
+}
+
+.preview-actions .btn {
+	width: 188px;
+	height: 40px;
+	border-radius: 8px;
+}
+
+.preview-actions .btn--primary {
+	width: 188px;
+}
+
+.preview-actions .is-disabled {
+	background: #8DBD9A;
+	cursor: not-allowed;
+	opacity: .7;
+}
+
+/* ---------- 반응형 ---------- */
+@media (min-width: 1025px) and (max-width: 1260px) {
+	.preview-review-layout {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.preview-check-card {
+		position: static;
+	}
+}
+
+@media (max-width: 1024px) {
+	.preview-review-layout {
+		grid-template-columns: minmax(0, 1fr) 260px;
+	}
+}
+
+@media (max-width: 860px) {
+	.preview-review-layout {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.preview-check-card {
+		position: static;
+	}
+}
+
+@media (max-width: 700px) {
+	.preview-review-card {
+		padding: 16px;
+	}
+
+	.preview-review-card__head {
+		align-items: flex-start;
+		flex-direction: column;
+	}
+
+	.customer-gallery {
+		grid-template-columns: minmax(0, 1fr) 95px;
+		grid-template-rows: repeat(2, 80px);
+	}
+
+	.customer-detail-layout {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.customer-detail {
+		border-right: 0;
+	}
+
+	.customer-booking {
+		border-top: 1px solid #EBEDE8;
+	}
+
+	.customer-benefits {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.preview-actions {
+		display: grid;
+		grid-template-columns: 1fr 1.2fr;
+	}
+
+	.preview-actions .btn,
+	.preview-actions .btn--primary {
+		width: 100%;
+	}
+}

@@ -1,0 +1,1654 @@
+@charset "UTF-8";
+
+.form-success,
+.form-error,
+.reply-error {
+	margin: 0 0 14px;
+	padding: 11px 14px;
+	border-radius: 9px;
+	font-size: 12px;
+}
+
+.form-success {
+	border: 1px solid #CFE2D4;
+	background: #F0F7F2;
+	color: #23643D;
+}
+
+.form-error,
+.reply-error {
+	border: 1px solid #E8CFC9;
+	background: #FFF5F2;
+	color: #A14638;
+}
+
+/* =============================================================
+   클래스 등록 전용 화면
+   - 따뜻한 아이보리 표면과 실제 사진을 중심으로 구성
+   - 공통 토큰/헤더/사이드바는 common.css에서 상속
+   ============================================================= */
+
+.register-page-head {
+	margin: 0 0 24px;
+}
+
+.register-page-head--compact {
+	margin-bottom: 22px;
+}
+
+
+.register-form-page .register-page-head--compact .page-desc {
+	margin-top: 5px;
+	font-size: 13px;
+	line-height: 1.4;
+}
+
+.register-start-page .register-page-head {
+	margin-bottom: 35px;
+}
+
+.register-start-page .register-page-head .page-desc {
+	margin-top: 14px;
+}
+
+.register-eyebrow {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 24px;
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+.register-eyebrow span {
+	font-size: 18px;
+	line-height: 1;
+	color: #b8ae9f;
+}
+
+.title-leaf {
+	display: inline-block;
+	margin-left: 3px;
+	width: .68em;
+	height: .68em;
+	vertical-align: -.04em;
+	color: #c8a66c;
+	transform: rotate(-12deg);
+}
+
+/* ---------- 등록 시작 히어로 ---------- */
+.register-hero {
+	position: relative;
+	display: block;
+	min-height: 398px;
+	overflow: hidden;
+	border: 1px solid var(--border);
+	border-radius: 12px;
+	background: #f4efe5;
+}
+
+.register-hero__copy {
+	position: relative;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: center;
+	width: 49%;
+	min-height: 398px;
+	padding: 48px 20px 44px 44px;
+	background: linear-gradient(90deg, rgba(248,244,235,.98) 0%, rgba(248,244,235,.9) 72%, rgba(248,244,235,0) 100%);
+}
+
+.register-hero__kicker {
+	margin-bottom: 12px;
+	font-size: 10px;
+	font-weight: 700;
+	letter-spacing: .2em;
+	color: #947f5c;
+}
+
+.register-start-page .register-hero__kicker { display: none; }
+.register-start-page .register-hero__copy {
+	padding-top: 44px;
+	padding-bottom: 40px;
+}
+
+.register-hero h2 {
+	font-family: var(--font-body);
+	font-size: clamp(30px, 2.45vw, 44px);
+	font-weight: 700;
+	line-height: 1.32;
+	letter-spacing: -.035em;
+	color: #1d1b17;
+}
+
+.register-hero__copy > p:not(.register-hero__kicker):not(.register-hero__note) {
+	margin-top: 20px;
+	font-size: 14px;
+	line-height: 1.8;
+	color: var(--text-body);
+}
+
+.register-hero__button {
+	min-width: 234px;
+	margin-top: 28px;
+	border-radius: 8px !important;
+	background: #176034 !important;
+	box-shadow: 0 7px 18px rgba(23, 96, 52, .14);
+}
+
+.register-hero__button:hover {
+	background: #104d29 !important;
+}
+
+.register-hero__button svg {
+	margin-left: auto;
+}
+
+.register-hero__note {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 12px;
+	font-size: var(--fs-caption);
+	color: var(--text-muted);
+}
+
+.register-hero__note svg {
+	width: 14px;
+	height: 14px;
+	flex: none;
+}
+
+.register-hero__photo {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	background-color: #e9dfcd;
+	background-image:
+		url("../images/photo/register-collage.png");
+	background-position: center;
+	background-size: cover;
+}
+
+.has-modal {
+	overflow: hidden;
+}
+
+.draft-choice-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 1000;
+	display: grid;
+	place-items: center;
+	padding: 20px;
+}
+
+.draft-choice-modal[hidden] {
+	display: none;
+}
+
+.draft-choice-modal__backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(24, 21, 18, .5);
+}
+
+.draft-choice-modal__panel {
+	position: relative;
+	width: min(100%, 430px);
+	padding: 30px;
+	border: 1px solid var(--border);
+	border-radius: 14px;
+	background: #fff;
+	box-shadow: 0 20px 60px rgba(34, 27, 20, .2);
+	text-align: center;
+}
+
+.draft-choice-modal__panel h2 {
+	font-size: 20px;
+	font-weight: 700;
+}
+
+.draft-choice-modal__name {
+	margin: 16px 0 10px;
+	padding: 11px 14px;
+	border-radius: 8px;
+	background: var(--bg-soft);
+	font-weight: 700;
+	color: var(--text-body);
+}
+
+.draft-choice-modal__panel > p:last-of-type {
+	font-size: 13px;
+	color: var(--text-muted);
+}
+
+.draft-choice-modal__actions {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 10px;
+	margin-top: 24px;
+}
+
+.draft-choice-modal__actions form,
+.draft-choice-modal__actions .btn {
+	width: 100%;
+}
+
+.draft-choice-modal__delete {
+	border-color: #D8B5AE;
+	background: #FFF7F5;
+	color: #9B4035;
+}
+
+.draft-choice-modal__delete:hover {
+	background: #FDECE8;
+}
+
+@media (max-width: 520px) {
+	.draft-choice-modal__panel {
+		padding: 24px 20px;
+	}
+
+	.draft-choice-modal__actions {
+		grid-template-columns: 1fr;
+	}
+}
+
+/* ---------- 등록 시작 안내 ---------- */
+.start-guide {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	margin-top: 14px;
+	padding: 28px 24px;
+	border: 1px solid var(--border);
+	border-radius: 16px;
+	background: #fff;
+}
+
+.register-start-page .start-guide {
+	padding-top: 38px;
+	padding-bottom: 38px;
+}
+
+.start-guide__item {
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	min-width: 0;
+	padding: 0 28px;
+}
+
+.start-guide__item + .start-guide__item {
+	border-left: 1px solid var(--border-soft);
+}
+
+.start-guide__icon {
+	display: grid;
+	place-items: center;
+	width: 58px;
+	height: 58px;
+	flex: none;
+	border-radius: 50%;
+	background: #edf5ee;
+	color: #176034;
+}
+
+.start-guide__icon svg {
+	width: 26px;
+	height: 26px;
+}
+
+.start-guide__item h2 {
+	margin-bottom: 6px;
+	font-size: 14px;
+	font-weight: 700;
+	letter-spacing: -.01em;
+}
+
+.start-guide__item p {
+	font-size: 12px;
+	line-height: 1.7;
+	color: var(--text-muted);
+}
+
+.start-ready {
+	display: flex;
+	align-items: center;
+	gap: 36px;
+	margin-top: 14px;
+	padding: 18px 28px;
+	border: 1px solid var(--border);
+	border-radius: 14px;
+	background: linear-gradient(90deg, #fbf8f2, #fff);
+}
+
+.register-start-page .start-ready { margin-top: 22px; }
+
+.start-ready__title {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	min-width: 270px;
+}
+
+.start-ready__mark {
+	display: grid;
+	place-items: center;
+	width: 38px;
+	height: 38px;
+	flex: none;
+	border: 1px solid #d7bd91;
+	border-radius: 50%;
+	color: #ad8350;
+}
+
+.start-ready__title h2 {
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.start-ready ul {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	flex: 1;
+	gap: 28px;
+}
+
+.start-ready li {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+	font-size: 12px;
+	color: var(--text-body);
+}
+
+.start-ready li svg {
+	width: 14px;
+	height: 14px;
+	flex: none;
+	color: #176034;
+}
+
+/* ---------- 단계 표시 ---------- */
+.step-nav-wrap {
+	margin: 0 0 26px;
+	overflow-x: auto;
+	scrollbar-width: thin;
+}
+
+.step-nav {
+	display: flex;
+	min-width: 750px;
+	padding: 2px 10px 0;
+}
+
+.step {
+	position: relative;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+}
+
+.step__link,
+.step__static {
+	display: flex;
+	width: 100%;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	border-radius: 10px;
+}
+
+.step__link:hover .step__num {
+	border-color: #91B99E;
+	background: #F6FBF7;
+	color: #1F6337;
+}
+
+.step::before {
+	content: "";
+	position: absolute;
+	top: 18px;
+	right: calc(50% + 25px);
+	left: calc(-50% + 25px);
+	height: 1px;
+	background: #ded4c4;
+}
+
+.step:first-child::before {
+	display: none;
+}
+
+.step.is-active::before {
+	background: linear-gradient(90deg, #ded4c4, #1d6b3e);
+}
+
+.step__num {
+	position: relative;
+	z-index: 1;
+	display: grid;
+	place-items: center;
+	width: 38px;
+	height: 38px;
+	border: 1px solid #ded4c4;
+	border-radius: 50%;
+	background: var(--bg-page);
+	font-size: 12px;
+	font-weight: 700;
+	color: #8f8578;
+	font-variant-numeric: tabular-nums;
+}
+
+.step__label {
+	font-size: 12px;
+	color: var(--text-muted);
+	white-space: nowrap;
+}
+
+.step.is-done .step__num {
+	border-color: #d1c4b2;
+	color: #7f7263;
+	background: #fff;
+}
+
+.step.is-active .step__num {
+	border-color: #1d6b3e;
+	background: #1d6b3e;
+	color: #fff;
+	box-shadow: 0 0 0 5px rgba(29, 107, 62, .07);
+}
+
+.step.is-active .step__label {
+	color: #1d6b3e;
+	font-weight: 700;
+}
+
+.step.is-active .step__link:hover .step__num {
+	border-color: #1d6b3e;
+	background: #1d6b3e;
+	color: #fff;
+}
+
+/* ---------- 기본 정보 2열 ---------- */
+.register-grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1.12fr) minmax(390px, 1fr);
+	gap: 18px;
+	align-items: stretch;
+}
+
+.register-grid > .card {
+	display: flex;
+	min-width: 0;
+	flex-direction: column;
+}
+
+.register-grid > .card + .card {
+	margin-top: 0;
+}
+
+.register-grid > .card > .card__body {
+	display: flex;
+	flex: 1;
+	flex-direction: column;
+	padding-right: 20px;
+	padding-left: 20px;
+}
+
+.register-info-card .field {
+	gap: 16px;
+	padding: 0;
+}
+
+.register-info-card .field__label {
+	width: 92px;
+	padding-top: 11px;
+}
+
+.register-info-card .input,
+.register-info-card .select select {
+	height: 42px;
+}
+
+.register-info-card .textarea {
+	min-height: 82px;
+}
+
+.register-grid .card-head-icon {
+	padding-right: 20px;
+	padding-left: 20px;
+}
+
+.register-info-card .field__help {
+	margin-top: 5px;
+	line-height: 1.5;
+}
+
+.address-control {
+	display: flex;
+}
+
+.address-control .input {
+	border-radius: 10px 0 0 10px;
+}
+
+.address-control__button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 5px;
+	min-width: 94px;
+	padding: 0 12px;
+	border: 1px solid var(--border);
+	border-left: 0;
+	border-radius: 0 10px 10px 0;
+	background: #f7f2e9;
+	font-size: 12px;
+	color: var(--text-body);
+}
+
+.address-control__button:hover {
+	background: #efe8db;
+}
+
+.address-control__button svg {
+	width: 14px;
+	height: 14px;
+}
+
+/* ---------- 사진 업로드 ---------- */
+.upload-zone {
+	position: relative;
+	display: block;
+	width: 100%;
+	height: auto;
+	min-height: 0;
+	aspect-ratio: 2.05 / 1;
+	overflow: hidden;
+	border-radius: 13px;
+	background: #e6ddcf;
+	cursor: pointer;
+}
+
+.upload-zone::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border: 2px solid transparent;
+	border-radius: inherit;
+	pointer-events: none;
+	transition: border-color .15s;
+}
+
+.upload-zone:hover::after,
+.upload-zone.is-dragging::after {
+	border-color: rgba(46, 158, 91, .75);
+}
+
+.upload-zone__preview {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.upload-zone__overlay {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	min-width: min(82%, 300px);
+	padding: 15px 20px;
+	border-radius: 12px;
+	background: rgba(24, 21, 18, .68);
+	color: #fff;
+	text-align: center;
+	transform: translate(-50%, -50%);
+	backdrop-filter: blur(4px);
+}
+
+.upload-zone__cta {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 7px;
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.upload-zone__cta svg {
+	width: 17px;
+	height: 17px;
+}
+
+.upload-zone__hint {
+	margin-top: 6px;
+	font-size: var(--fs-caption);
+	color: rgba(255, 255, 255, .78);
+}
+
+.upload-thumbs {
+	display: grid;
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+	gap: 10px;
+	margin-top: 12px;
+}
+
+.upload-thumb {
+	position: relative;
+	display: grid;
+	place-items: center;
+	aspect-ratio: 1.28 / 1;
+	overflow: hidden;
+	border: 1px dashed #d9cdbd;
+	border-radius: 10px;
+	background: #fcfaf6;
+	font-size: 28px;
+	font-weight: 300;
+	color: #796f62;
+	transition: border-color .15s, background .15s;
+}
+
+.upload-thumb:hover {
+	border-color: #1d6b3e;
+	background: var(--green-50);
+}
+
+.upload-thumb img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.upload-thumb--preview {
+	border-style: solid;
+}
+
+.upload-thumb__badge {
+	position: absolute;
+	left: 6px;
+	bottom: 6px;
+	padding: 2px 6px;
+	border-radius: 999px;
+	background: rgba(23, 96, 52, .88);
+	font-size: 9px;
+	font-weight: 700;
+	color: #fff;
+}
+
+.upload-notes {
+	margin-top: 14px;
+}
+
+.upload-notes li {
+	display: flex;
+	align-items: flex-start;
+	gap: 7px;
+	padding: 1px 0;
+	font-size: var(--fs-caption);
+	line-height: 1.45;
+	color: var(--text-muted);
+}
+
+.upload-notes svg {
+	width: 13px;
+	height: 13px;
+	flex: none;
+	margin-top: 2px;
+	color: #247747;
+}
+
+/* ---------- 하단 작업 바: 페이지 흐름 안에 위치 ---------- */
+.step-actions {
+	grid-column: 1 / -1;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 14px;
+	margin-top: 2px;
+	padding: 9px 16px;
+	border: 1px solid var(--border);
+	border-radius: 14px;
+	background: #fff;
+}
+
+.step-actions__save svg {
+	width: 15px;
+	height: 15px;
+}
+
+.step-actions__nav {
+	display: flex;
+	gap: 10px;
+}
+
+/* 모양(높이·radius)은 common.css 의 .btn 을 그대로 쓴다. 여기서는 폭만 정한다. */
+.step-actions__nav .btn {
+	min-width: 150px;
+}
+
+.step-actions__nav .btn--primary {
+	min-width: 178px;
+}
+
+/* ---------- 반응형 ---------- */
+@media (max-width: 1220px) {
+	.register-hero {
+		grid-template-columns: minmax(310px, .88fr) minmax(440px, 1.32fr);
+	}
+
+	.register-hero__copy {
+		padding-left: 36px;
+	}
+
+	.start-guide__item {
+		padding: 0 18px;
+	}
+
+	.start-ready {
+		gap: 22px;
+	}
+
+	.start-ready__title {
+		min-width: 235px;
+	}
+
+	.start-ready ul {
+		gap: 16px;
+	}
+}
+
+/* =============================================================
+   등록 시작 / 기본 정보 화면 보정
+   ============================================================= */
+.register-start-page,
+.register-form-page {
+	background: var(--bg-page);
+}
+
+.register-start-page .app-header,
+.register-start-page .sidebar,
+.register-form-page .app-header,
+.register-form-page .sidebar {
+	background: #FEFEFE;
+	border-color: #ECE8E0;
+}
+
+.start-ready__mark svg {
+	width: 22px;
+	height: 22px;
+}
+
+@media (min-width: 1025px) {
+	/* ---------- 등록 시작 ----------
+	   레이아웃 치수(--header-h / --sidebar-w / 본문 좌우 여백)는 common.css 것을 그대로 쓴다.
+	   여기서 다시 잡으면 메뉴를 옮길 때마다 헤더와 사이드바가 몇 px 씩 밀린다. */
+	.register-start-page .content {
+		background: linear-gradient(180deg, #FFFDFC 0%, #FCFAF8 100%);
+	}
+	.register-start-page .register-page-head {
+		margin-bottom: 23px;
+	}
+	.register-start-page .register-eyebrow {
+		margin-bottom: 25px;
+	}
+	.register-start-page .register-page-head .page-desc {
+		margin-top: 21px;
+	}
+	/* 크기·굵기는 common.css 의 .page-title 이 정한다. 여기서는 잎 아이콘 배치만. */
+	.register-start-page .register-page-head .page-title {
+		display: flex;
+		align-items: center;
+		gap: 7px;
+	}
+	.register-start-page .register-page-head .title-leaf {
+		width: 26px;
+		height: 24px;
+		margin-left: 0;
+	}
+
+	.register-start-page .register-hero {
+		height: 400px;
+		min-height: 400px;
+		border-color: #ECE8E0;
+		border-radius: 12px;
+		background: #F8F4EC;
+		box-shadow: 0 3px 12px rgba(73, 54, 31, .025);
+	}
+	.register-start-page .register-hero__photo {
+		background-color: #F8F4EC;
+		background-image: url("../images/photo/register-collage.png");
+		background-position: center 52%;
+		background-size: cover;
+	}
+	.register-start-page .register-hero__copy {
+		justify-content: flex-start;
+		width: 51%;
+		min-height: 398px;
+		padding: 50px 20px 34px 46px;
+		background:
+			linear-gradient(
+				90deg,
+				#F8F4EC 0%,
+				rgba(248, 244, 236, .98) 62%,
+				rgba(248, 244, 236, .74) 79%,
+				rgba(248, 244, 236, 0) 100%
+			);
+	}
+	.register-start-page .register-hero h2 {
+		font-size: 40px;
+		font-weight: 400;
+		line-height: 1.3;
+		letter-spacing: -.035em;
+	}
+	.register-start-page .register-hero__copy > p:not(.register-hero__kicker):not(.register-hero__note) {
+		margin-top: 20px;
+		font-size: 14px;
+		line-height: 1.8;
+	}
+	.register-start-page .register-hero__button {
+		width: 258px;
+		min-width: 258px;
+		height: 56px;
+		margin-top: 28px;
+		padding-right: 24px;
+		padding-left: 28px;
+		background: #1C542F !important;
+		box-shadow: 0 5px 12px rgba(28, 84, 47, .12);
+	}
+	.register-start-page .register-hero__button svg {
+		width: 18px;
+		height: 18px;
+	}
+	.register-start-page .register-hero__note {
+		margin-top: 12px;
+		font-size: 11px;
+	}
+
+	.register-start-page .start-guide {
+		/* 시안에서 잰 px(391/407)을 그대로 박으면 폭이 조금만 달라져도
+		   세 번째 칸이 찌그러진다. 3등분으로 두고 높이도 최소값만 준다. */
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		min-height: 150px;
+		margin-top: 10px;
+		padding: 34px 24px;
+		border-color: #ECE8E0;
+		border-radius: 10px;
+		background: #FEFEFE;
+		box-shadow: 0 2px 10px rgba(73, 54, 31, .025);
+	}
+	.register-start-page .start-guide__item {
+		gap: 20px;
+		padding: 0 0 0 40px;
+	}
+	.register-start-page .start-guide__item + .start-guide__item {
+		border-left: 0;
+	}
+	.register-start-page .start-guide__icon {
+		width: 80px;
+		height: 80px;
+		background: #EFF4EF;
+		color: #1B6338;
+	}
+	.register-start-page .start-guide__icon svg {
+		width: 32px;
+		height: 32px;
+	}
+	.register-start-page .start-guide__item h2 {
+		margin-bottom: 7px;
+		font-size: 14px;
+	}
+	.register-start-page .start-guide__item p {
+		font-size: 12px;
+		line-height: 1.65;
+	}
+
+	.register-start-page .start-ready {
+		height: 73px;
+		gap: 36px;
+		margin-top: 22px;
+		padding: 12px 34px;
+		border-color: #ECE8E0;
+		border-radius: 10px;
+		background: #F9F6F2;
+		box-shadow: 0 2px 8px rgba(73, 54, 31, .02);
+	}
+	.register-start-page .start-ready__title {
+		min-width: 320px;
+		gap: 24px;
+	}
+	.register-start-page .start-ready__mark {
+		width: 46px;
+		height: 46px;
+		border-color: #D7BD91;
+	}
+	.register-start-page .start-ready ul {
+		grid-template-columns: 264px 234px minmax(0, 1fr);
+		gap: 26px;
+	}
+	.register-start-page .start-ready li {
+		gap: 8px;
+		font-size: 12px;
+		white-space: nowrap;
+	}
+	.register-start-page .start-ready li svg {
+		width: 14px;
+		height: 14px;
+	}
+
+	/* ---------- 기본 정보 ---------- */
+	.register-form-page .content {
+		background: var(--bg-page);
+	}
+	/* 크기·굵기는 common.css 의 .page-title 이 정한다. 여기서는 잎 아이콘 배치만. */
+	.register-form-page .register-page-head--compact .page-title {
+		display: flex;
+		align-items: center;
+		gap: 7px;
+	}
+	.register-form-page .register-page-head--compact .title-leaf {
+		width: 23px;
+		height: 20px;
+		margin-left: 0;
+	}
+	.register-form-page .step-nav-wrap {
+		margin-bottom: 24px;
+	}
+	.register-form-page .step-nav {
+		padding-right: 0;
+		padding-left: 0;
+	}
+
+	.register-form-page .register-grid {
+		grid-template-columns: minmax(0, 1.09fr) minmax(390px, 1fr);
+		gap: 16px;
+	}
+	.register-form-page .register-grid > .card {
+		height: auto;
+		min-height: 565px;
+		border-color: #ECE8E0;
+		border-radius: 12px;
+		box-shadow: 0 4px 16px rgba(60, 45, 30, .045);
+	}
+	.register-form-page .register-grid .card-head-icon {
+		padding: 20px 20px 0;
+	}
+	.register-form-page .register-grid .card-head-icon .icon-box {
+		width: 40px;
+		height: 40px;
+	}
+	.register-form-page .register-grid .card-head-icon__title {
+		font-size: 16px;
+		line-height: 1.35;
+	}
+	.register-form-page .register-grid .card-head-icon__desc {
+		margin-top: 4px;
+		font-size: 12px;
+		line-height: 1.5;
+	}
+	.register-form-page .register-info-card > .card__body {
+		display: grid;
+		gap: 18px;
+		padding: 22px 20px 24px;
+	}
+	.register-form-page .register-photo-card > .card__body {
+		padding: 18px 20px 24px;
+	}
+
+	.register-form-page .register-info-card .field {
+		gap: 16px;
+		margin-bottom: 0;
+		padding: 0;
+		border-bottom: 0;
+	}
+	.register-form-page .register-info-card .field__label {
+		width: 102px;
+		padding-top: 7px;
+	}
+	.register-form-page .register-info-card .input,
+	.register-form-page .register-info-card .select select {
+		height: var(--control-md);
+		border-radius: 7px;
+	}
+	.register-form-page .register-info-card .textarea {
+		min-height: 84px;
+		height: 84px;
+		padding-top: 8px;
+		padding-bottom: 8px;
+		border-radius: 7px;
+		line-height: 1.5;
+	}
+	.register-form-page .register-info-card .field__help {
+		margin-top: 5px;
+		line-height: 1.5;
+	}
+	.register-form-page .address-control .input {
+		border-radius: 7px 0 0 7px;
+	}
+	.register-form-page .address-control__button {
+		height: var(--control-md);
+		border-radius: 0 7px 7px 0;
+	}
+
+	.register-form-page .upload-zone {
+		aspect-ratio: 2.09 / 1;
+		border-radius: 8px;
+	}
+	.register-form-page .upload-zone__overlay {
+		min-width: 280px;
+		padding: 14px 20px;
+		border-radius: 10px;
+	}
+	.register-form-page .upload-thumbs {
+		grid-template-columns: repeat(5, 92px);
+		gap: 18px;
+		margin-top: 14px;
+	}
+	.register-form-page .upload-thumb {
+		width: 92px;
+		height: 83px;
+		aspect-ratio: auto;
+		border-radius: 8px;
+	}
+	.register-form-page .upload-notes {
+		margin-top: 19px;
+		padding-bottom: 6px;
+	}
+
+	.register-form-page .step-actions {
+		height: 68px;
+		margin-top: 2px;
+		padding: 14px 24px;
+		border-color: #ECE8E0;
+		border-radius: 12px;
+		box-shadow: 0 4px 14px rgba(60, 45, 30, .04);
+	}
+	/* 높이 40px 은 공통 .btn 과 같은 값이다. 바 높이 68px - 상하 여백 28px 에 딱 맞는다. */
+	.register-form-page .step-actions .btn { height: 40px; }
+	.register-form-page .step-actions__save {
+		width: 112px;
+		padding-right: 14px;
+		padding-left: 14px;
+	}
+	.register-form-page .step-actions__nav {
+		gap: 10px;
+		flex: none;
+		min-width: 390px;
+	}
+	/* 이전/다음은 같은 폭으로 둔다 */
+	.register-form-page .step-actions__previous,
+	.register-form-page .step-actions__next {
+		flex: none;
+		width: 188px;
+		min-width: 188px;
+	}
+	.register-form-page .step-actions__next { background: #1F6337; }
+
+	/* 화살표는 글자와 같은 줄에 둔다.
+	   예전에는 버튼을 grid 로 쪼개고 세로 구분선을 넣었는데,
+	   버튼 하나가 두 개로 붙어 있는 것처럼 보여서 없앴다.
+	   다른 화면 버튼은 전부 아이콘을 글자 옆에 그냥 붙인다. */
+	.register-form-page .step-actions__next-icon {
+		display: inline-grid;
+		place-items: center;
+	}
+	.register-form-page .step-actions__next-icon svg {
+		width: 15px;
+		height: 15px;
+	}
+}
+
+/* ---------- 기본 정보 · 위치 설정 ---------- */
+.location-grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	gap: 16px;
+	align-items: stretch;
+}
+
+.location-grid > .card {
+	min-width: 0;
+	height: 100%;
+}
+
+.location-info-card,
+.location-map-card {
+	display: flex;
+	min-height: 430px;
+	flex-direction: column;
+	border-color: #ECE8E0;
+	border-radius: 12px;
+	box-shadow: 0 4px 16px rgba(60, 45, 30, .045);
+}
+
+.location-info-card .card-head-icon,
+.location-map-card .card-head-icon {
+	padding: 20px 20px 0;
+}
+
+.location-info-card .card-head-icon .icon-box,
+.location-map-card .card-head-icon .icon-box {
+	width: 40px;
+	height: 40px;
+}
+
+.location-info-card .card__body,
+.location-map-card .card__body {
+	display: flex;
+	min-height: 0;
+	flex: 1;
+	flex-direction: column;
+	padding: 14px 20px 18px;
+}
+
+.location-section__title {
+	margin: 0 0 12px;
+	font-size: 13px;
+	font-weight: 700;
+	color: #302B26;
+}
+
+.location-field {
+	margin-bottom: 10px;
+}
+
+.location-field__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.location-field__label {
+	display: block;
+	margin-bottom: 7px;
+	font-size: 12px;
+	font-weight: 700;
+	color: #39332D;
+}
+
+.location-field__label span {
+	font-weight: 400;
+	color: #8C8379;
+}
+
+.location-field__count,
+.location-field__help {
+	font-size: 10px;
+	color: #91877C;
+}
+
+.location-field__help {
+	margin: 5px 0 0;
+	line-height: 1.5;
+}
+
+.location-address-control {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 84px;
+}
+
+.location-address-control .input {
+	height: 36px;
+	border-radius: 7px 0 0 7px;
+}
+
+.location-address-control__button {
+	display: grid;
+	place-items: center;
+	height: 36px;
+	border: 1px solid #91B99E;
+	border-radius: 0 7px 7px 0;
+	background: #F6FBF7;
+	font-size: 11px;
+	font-weight: 700;
+	color: #1F6337;
+}
+
+.location-address-control__button:hover {
+	background: #ECF6EF;
+}
+
+.location-info-card > .card__body > .location-section .input {
+	height: 36px;
+	border-radius: 7px;
+}
+
+.location-info-card .textarea {
+	min-height: 60px;
+	height: 60px;
+	padding: 10px 12px;
+	border-radius: 7px;
+	line-height: 1.5;
+}
+
+.selected-location {
+	display: grid;
+	grid-template-columns: 38px minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 11px;
+	margin-top: 4px;
+	padding: 8px 10px;
+	border: 1px solid #DFEAE2;
+	border-radius: 9px;
+	background: #F8FBF8;
+}
+
+.selected-location__icon {
+	display: grid;
+	place-items: center;
+	width: 38px;
+	height: 38px;
+	border-radius: 50%;
+	background: #EAF4EC;
+	color: #2E8C51;
+}
+
+.selected-location__icon svg {
+	width: 19px;
+	height: 19px;
+}
+
+.selected-location__copy {
+	display: flex;
+	min-width: 0;
+	flex-direction: column;
+	gap: 2px;
+}
+
+.selected-location__label,
+.selected-location__copy > span:last-child {
+	font-size: 10px;
+	line-height: 1.4;
+	color: #8A8278;
+}
+
+.selected-location__copy strong {
+	overflow: hidden;
+	font-size: 11px;
+	color: #3B3630;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.selected-location__change {
+	height: 28px;
+	padding: 0 10px;
+	border: 1px solid #DED7CE;
+	border-radius: 6px;
+	background: #fff;
+	font-size: 10px;
+	color: #655D54;
+}
+
+.location-map-placeholder {
+	min-height: 0;
+	flex: 1;
+	border: 1px solid #E6E1D9;
+	border-radius: 9px;
+	background: #FBFAF8;
+}
+
+.location-map-note {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin: 10px 0 0;
+	padding: 9px 10px;
+	border: 1px solid #DFEAE2;
+	border-radius: 7px;
+	background: #F6FAF7;
+	font-size: 10px;
+	line-height: 1.45;
+	color: #667168;
+}
+
+.location-map-note svg {
+	width: 14px;
+	height: 14px;
+	flex: none;
+	color: #2E8C51;
+}
+
+.location-summary-card {
+	grid-column: 1 / -1;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 18px;
+	min-height: 72px;
+	padding: 13px 18px;
+	border-color: #ECE8E0;
+	border-radius: 12px;
+	box-shadow: 0 4px 14px rgba(60, 45, 30, .04);
+}
+
+.location-summary-card__copy {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.location-summary-card__icon {
+	display: grid;
+	place-items: center;
+	width: 38px;
+	height: 38px;
+	border-radius: 50%;
+	background: #EAF4EC;
+	color: #2E8C51;
+}
+
+.location-summary-card__icon svg {
+	width: 18px;
+	height: 18px;
+}
+
+.location-summary-card h2 {
+	margin: 0;
+	font-size: 13px;
+	color: #37322D;
+}
+
+.location-summary-card p {
+	margin: 3px 0 0;
+	font-size: 10px;
+	color: #8B8278;
+}
+
+.location-summary-card__toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	height: 30px;
+	padding: 0 12px;
+	border: 1px solid #E0DAD2;
+	border-radius: 7px;
+	background: #fff;
+	font-size: 10px;
+	color: #625A52;
+}
+
+.location-summary-card__toggle svg {
+	width: 12px;
+	height: 12px;
+}
+
+@media (min-width: 1025px) and (max-width: 1120px) {
+	.register-form-page .register-grid,
+	.register-form-page .location-grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.location-info-card,
+	.location-map-card {
+		min-height: 500px;
+	}
+}
+
+@media (min-width: 1025px) and (max-width: 1450px) {
+	.register-start-page .start-guide {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		padding-right: 18px;
+		padding-left: 18px;
+	}
+
+	.register-start-page .start-guide__item {
+		min-width: 0;
+		gap: 13px;
+		padding: 0 14px;
+	}
+
+	.register-start-page .start-guide__icon {
+		width: 64px;
+		height: 64px;
+	}
+
+	.register-start-page .start-guide__icon svg {
+		width: 27px;
+		height: 27px;
+	}
+
+	.register-start-page .start-ready {
+		gap: 16px;
+		padding-right: 20px;
+		padding-left: 20px;
+	}
+
+	.register-start-page .start-ready__title {
+		min-width: 220px;
+		gap: 13px;
+	}
+
+	.register-start-page .start-ready ul {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 12px;
+		min-width: 0;
+	}
+
+	.register-start-page .start-ready li {
+		min-width: 0;
+		white-space: normal;
+	}
+
+	.register-form-page .upload-thumbs {
+		grid-template-columns: repeat(5, minmax(0, 1fr));
+		gap: 10px;
+	}
+
+	.register-form-page .upload-thumb {
+		width: 100%;
+		height: auto;
+		aspect-ratio: 1.1 / 1;
+	}
+}
+
+@media (max-width: 1120px) {
+	.register-grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.location-grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.upload-zone {
+		height: min(54vw, 430px);
+	}
+
+	.start-guide {
+		padding: 24px 14px;
+	}
+
+	.start-guide__item {
+		align-items: flex-start;
+		padding: 0 14px;
+	}
+
+	.start-guide__icon {
+		width: 48px;
+		height: 48px;
+	}
+
+	.start-guide__icon svg {
+		width: 22px;
+		height: 22px;
+	}
+
+	.start-ready {
+		align-items: flex-start;
+	}
+
+	.start-ready ul {
+		grid-template-columns: 1fr;
+		gap: 8px;
+	}
+}
+
+@media (max-width: 860px) {
+	.register-hero {
+		display: flex;
+		flex-direction: column;
+		min-height: 0;
+	}
+
+	.register-hero__copy {
+		width: 100%;
+		min-height: 0;
+		padding: 42px 36px;
+		background: #f8f4eb;
+	}
+
+	.register-hero__photo {
+		position: relative;
+		inset: auto;
+		order: -1;
+		width: 100%;
+		min-height: 300px;
+		background-image: url("../images/photo/register-collage.png");
+		background-position: center;
+	}
+
+	.start-guide {
+		grid-template-columns: 1fr;
+		padding: 8px 24px;
+	}
+
+	.start-guide__item {
+		padding: 20px 0;
+	}
+
+	.start-guide__item + .start-guide__item {
+		border-top: 1px solid var(--border-soft);
+		border-left: 0;
+	}
+
+	.start-ready {
+		flex-direction: column;
+	}
+}
+
+@media (max-width: 640px) {
+	.register-page-head {
+		margin-bottom: 18px;
+	}
+
+	.register-eyebrow {
+		display: none;
+	}
+
+	.register-hero {
+		border-radius: 14px;
+	}
+
+	.register-hero__copy {
+		padding: 30px 22px 32px;
+	}
+
+	.register-hero__photo {
+		min-height: 230px;
+	}
+
+	.register-hero h2 {
+		font-size: 30px;
+	}
+
+	.register-hero__button {
+		width: 100%;
+		min-width: 0;
+	}
+
+	.start-guide {
+		padding-right: 18px;
+		padding-left: 18px;
+	}
+
+	.start-guide__item {
+		gap: 14px;
+	}
+
+	.start-guide__item p br {
+		display: none;
+	}
+
+	.start-ready {
+		padding: 18px;
+	}
+
+	.start-ready__title {
+		min-width: 0;
+	}
+
+	.step-nav-wrap {
+		margin-right: calc(-1 * var(--gutter-x));
+		margin-left: calc(-1 * var(--gutter-x));
+		padding-left: 6px;
+	}
+
+	.register-info-card .field__label {
+		width: auto;
+		padding-top: 0;
+	}
+
+	.address-control {
+		flex-direction: column;
+		gap: 8px;
+	}
+
+	.address-control .input {
+		border-radius: 10px;
+	}
+
+	.address-control__button {
+		height: 40px;
+		border: 1px solid var(--border);
+		border-radius: 10px;
+	}
+
+	.upload-zone {
+		height: 60vw;
+		min-height: 220px;
+	}
+
+	.upload-zone__overlay {
+		min-width: 88%;
+		padding: 12px;
+	}
+
+	.upload-thumbs {
+		gap: 6px;
+	}
+
+	.upload-thumb {
+		border-radius: 8px;
+		font-size: 22px;
+	}
+
+	.step-actions {
+		align-items: stretch;
+		flex-direction: column;
+		padding: 12px;
+	}
+
+	.step-actions__nav {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+	}
+
+	.step-actions .btn,
+	.step-actions__nav .btn,
+	.step-actions__nav .btn--primary {
+		width: 100%;
+		min-width: 0;
+		padding-right: 12px;
+		padding-left: 12px;
+	}
+}

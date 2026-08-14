@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>클래스 등록 · 일정 및 가격 | 숨비당 원데이 클래스</title>
+<link rel="stylesheet" href="/author/css/common.css" th:href="@{/author/css/common.css}">
+<link rel="stylesheet" href="/author/css/header.css" th:href="@{/author/css/header.css}">
+<link rel="stylesheet" href="/author/css/sidebar.css" th:href="@{/author/css/sidebar.css}">
+<link rel="stylesheet" href="/author/css/class-register.css" th:href="@{/author/css/class-register.css}">
+<link rel="stylesheet" href="/author/css/class-register-schedule.css" th:href="@{/author/css/class-register-schedule.css}">
+<script src="/author/js/layout.js" th:src="@{/author/js/layout.js}" defer></script>
+<script src="/author/js/class-register-draft.js" th:src="@{/author/js/class-register-draft.js}" defer></script>
+</head>
+<!--
+	클래스 등록 3단계(일정 및 가격).
+
+	[일정 유형 2가지 - AGENTS.md 9장]
+	  개별 일정 : 수업 날짜 한 건 = SCHEDULE 한 행
+	  요일 반복 : 운영 기간(CLASS_REPEAT_RULE.OPERATION_START_DATE ~ OPERATION_END_DATE) 안에서
+	              선택한 요일마다 SCHEDULE 행을 만든다
+
+	[시안과 다르게 한 곳]
+	  시안은 개별 일정 입력이 "모집 시작일 / 모집 종료일" 인데,
+	  AGENTS.md 9장은 개별 일정에 모집 기간 대신 수업 날짜를 쓰라고 되어 있고
+	  DB(SCHEDULE.CLASS_DATE)도 그쪽이다. 그래서 라벨만 수업 날짜로 맞췄다.
+	  모집(운영) 기간은 요일 반복 모드에 두었다.
+
+	[아직 안 정해진 것 - 서버 붙일 때 확인]
+	  · SCHEDULE.REPEAT_RULE_CODE 가 NOT NULL 이라 개별 일정도 규칙 행이 필요한지
+	  · START_TIME / END_TIME 이 VARCHAR2(50) 이라 저장 형식을 무엇으로 고정할지 (여기선 "HH:MM")
+-->
+<body class="author-page register-form-page register-schedule-page" data-menu="class-register" data-page="클래스 등록">
+
+<div class="app">
+	<div th:replace="~{author/fragments/icons :: icons}"></div>
+	<div th:replace="~{author/fragments/header :: header}"></div>
+
+	<div class="app-body">
+		<div th:replace="~{author/fragments/sidebar :: sidebar}"></div>
+
+		<main class="content">
+			<div class="content__inner">
+				<header class="register-page-head register-page-head--compact">
+					<h1 class="page-title">클래스 등록하기 <svg class="title-leaf" aria-hidden="true"><use href="#icon-title-leaf"></use></svg></h1>
+					<p class="page-desc">원데이 클래스 일정과 가격 정보를 입력해주세요.</p>
+					<p class="reply-error" th:if="${registerError}" th:text="${registerError}">입력값을 확인해주세요.</p>
+				</header>
+
+				<div th:replace="~{author/fragments/class-register-steps :: steps(${scheduleForm.classCode}, 3, false, null)}"></div>
+
+				<form class="schedule-grid" id="scheduleForm" method="post" novalidate data-draft-form th:action="@{/author/classes/register/schedule}" th:object="${scheduleForm}">
+					<input type="hidden" name="classCode" th:value="${scheduleForm.classCode}">
+					<input type="hidden" id="scheduleType" name="scheduleType" value="ONCE" th:value="${scheduleForm.scheduleType}">
+
+					<!-- ======================= 왼쪽 : 입력 ======================= -->
+					<section class="card schedule-card" aria-labelledby="scheduleTitle">
+						<div class="card-head-icon">
+							<span class="icon-box"><svg aria-hidden="true"><use href="#icon-calendar"></use></svg></span>
+							<div>
+								<h2 class="card-head-icon__title" id="scheduleTitle">일정 및 가격</h2>
+								<p class="card-head-icon__desc">수강생이 예약할 일정과 가격 정보를 설정해 주세요.</p>
+							</div>
+						</div>
+
+						<div class="card__body">
+
+							<!-- ---------- 일정 등록 ---------- -->
+							<div class="sched-block">
+								<h3 class="sched-block__title">일정 등록</h3>
+
+								<div class="sched-mode" role="tablist" aria-label="일정 유형">
+									<button type="button" class="sched-mode__btn" role="tab"
+											id="modeOnce" aria-selected="true" aria-controls="panelOnce" data-mode="once">
+										<svg aria-hidden="true"><use href="#icon-calendar"></use></svg>
+										개별 일정
+									</button>
+									<button type="button" class="sched-mode__btn" role="tab"
+											id="modeRepeat" aria-selected="false" aria-controls="panelRepeat" data-mode="repeat">
+										<svg aria-hidden="true"><use href="#icon-repeat"></use></svg>
+										요일 반복
+									</button>
+								</div>
+
+								<!-- 개별 일정 -->
+								<div class="sched-panel" id="panelOnce" role="tabpanel" aria-labelledby="modeOnce">
+									<div class="sched-row">
+										<div class="sched-cell">
+											<label class="sched-cell__label" for="onceDate">수업 날짜 <span class="req">*</span></label>
+											<input class="input" type="date" id="onceDate" name="onceDate">
+										</div>
+										<div class="sched-cell">
+											<label class="sched-cell__label" for="onceStart">시작 시간 <span class="req">*</span></label>
+											<div class="select">
+												<select id="onceStart" name="onceStart" data-time-options></select>
+												<svg class="select__arrow" aria-hidden="true"><use href="#icon-chevron-down"></use></svg>
+											</div>
+										</div>
+										<div class="sched-cell">
+											<label class="sched-cell__label" for="onceDuration">수업 소요시간</label>
+											<div class="select">
+												<select id="onceDuration" name="onceDuration">
+													<option value="60">60분</option>
+													<option value="90">90분</option>
+													<option value="120" selected>120분</option>
+													<option value="150">150분</option>
+													<option value="180">180분</option>
+												</select>
+												<svg class="select__arrow" aria-hidden="true"><use href="#icon-chevron-down"></use></svg>
+											</div>
+										</div>
+										<div class="sched-cell sched-cell--auto">
+											<button type="button" class="btn btn--outline sched-add" id="addOnce">
+												<svg aria-hidden="true"><use href="#icon-plus"></use></svg>
+												일정 추가
+											</button>
+										</div>
+									</div>
+								</div>
+
+								<!-- 요일 반복 -->
+								<div class="sched-panel" id="panelRepeat" role="tabpanel" aria-labelledby="modeRepeat" hidden>
+									<div class="sched-row">
+										<div class="sched-cell">
+											<label class="sched-cell__label" for="repeatFrom">운영 시작일 <span class="req">*</span></label>
+											<input class="input" type="date" id="repeatFrom" name="repeatFrom">
+										</div>
+										<div class="sched-cell">
+											<label class="sched-cell__label" for="repeatTo">운영 종료일 <span class="req">*</span></label>
+											<input class="input" type="date" id="repeatTo" name="repeatTo">
+										</div>
+									</div>
+
+									<div class="sched-row">
+										<div class="sched-cell">
+											<span class="sched-cell__label" id="dayChipsLabel">반복 요일 선택 <span class="req">*</span></span>
+											<div class="day-chips" role="group" aria-labelledby="dayChipsLabel" id="dayChips">
+												<input type="hidden" id="repeatDays" name="repeatDays" value="">
+												<button type="button" class="day-chip" data-dow="0" aria-pressed="false">일 <svg aria-hidden="true"><use href="#icon-check"></use></svg></button>
+												<button type="button" class="day-chip" data-dow="1" aria-pressed="false">월 <svg aria-hidden="true"><use href="#icon-check"></use></svg></button>
+												<button type="button" class="day-chip" data-dow="2" aria-pressed="false">화 <svg aria-hidden="true"><use href="#icon-check"></use></svg></button>
+												<button type="button" class="day-chip" data-dow="3" aria-pressed="false">수 <svg aria-hidden="true"><use href="#icon-check"></use></svg></button>
+												<button type="button" class="day-chip" data-dow="4" aria-pressed="false">목 <svg aria-hidden="true"><use href="#icon-check"></use></svg></button>
+												<button type="button" class="day-chip" data-dow="5" aria-pressed="false">금 <svg aria-hidden="true"><use href="#icon-check"></use></svg></button>
+												<button type="button" class="day-chip" data-dow="6" aria-pressed="false">토 <svg aria-hidden="true"><use href="#icon-check"></use></svg></button>
+											</div>
+										</div>
+									</div>
+
+									<div class="sched-row">
+										<div class="sched-cell">
+											<label class="sched-cell__label" for="repeatStart">시작 시간 <span class="req">*</span></label>
+											<div class="select">
+												<select id="repeatStart" name="repeatStart" data-time-options></select>
+												<svg class="select__arrow" aria-hidden="true"><use href="#icon-chevron-down"></use></svg>
+											</div>
+										</div>
+										<div class="sched-cell">
+											<label class="sched-cell__label" for="repeatDuration">수업 소요시간</label>
+											<div class="select">
+												<select id="repeatDuration" name="repeatDuration">
+													<option value="60">60분</option>
+													<option value="90">90분</option>
+													<option value="120" selected>120분</option>
+													<option value="150">150분</option>
+													<option value="180">180분</option>
+												</select>
+												<svg class="select__arrow" aria-hidden="true"><use href="#icon-chevron-down"></use></svg>
+											</div>
+										</div>
+										<div class="sched-cell sched-cell--auto">
+											<button type="button" class="btn btn--outline sched-add" id="addRepeat">
+												<svg aria-hidden="true"><use href="#icon-plus"></use></svg>
+												일정 추가
+											</button>
+										</div>
+									</div>
+
+									<p class="field__help">선택한 요일의 일정이 운영 기간 안에서 반복 등록됩니다.</p>
+								</div>
+							</div>
+
+							<!-- ---------- 등록된 일정 ---------- -->
+							<div class="sched-block">
+								<h3 class="sched-block__title">
+									등록된 일정
+									<span class="sched-block__count" id="schedCount">0건</span>
+								</h3>
+
+								<div class="sched-table-wrap" id="schedTableWrap">
+									<input type="hidden" id="schedulesJson" name="schedulesJson" value="[]">
+									<div id="savedScheduleData" hidden>
+										<i th:each="saved : ${scheduleForm.scheduleList}"
+										   data-saved-schedule
+										   th:attr="data-date=${#dates.format(saved.scheduleDate, 'yyyy-MM-dd')},
+													data-start=${saved.startTime},data-end=${saved.endTime},
+													data-min=${saved.minPeople},data-max=${saved.maxPeople}"></i>
+									</div>
+									<table class="sched-table">
+										<caption class="sr-only">등록된 클래스 일정 목록</caption>
+										<thead>
+											<tr>
+												<th scope="col" class="sched-table__no"><span class="sr-only">순번</span></th>
+												<th scope="col">일정</th>
+												<th scope="col">시간</th>
+												<th scope="col">정원</th>
+												<th scope="col">관리</th>
+											</tr>
+										</thead>
+										<tbody id="schedTableBody"></tbody>
+									</table>
+								</div>
+
+								<div class="sched-empty" id="schedEmpty" hidden>
+									<svg aria-hidden="true"><use href="#icon-calendar"></use></svg>
+									<b>등록된 일정이 없습니다.</b>
+									<span>위에서 날짜와 시간을 고른 뒤 일정 추가 버튼을 눌러주세요.</span>
+								</div>
+							</div>
+
+							<!-- ---------- 가격 정보 ---------- -->
+							<div class="sched-block sched-block--divided">
+								<h3 class="sched-block__title">가격 정보</h3>
+
+								<!--
+									가격은 두 컬럼이다 (AGENTS.md 10장).
+									  정가   = CLASS.PRICE
+									  희망가 = CLASS.DESIRED_PRICE  ← 수강생 화면에 실제로 노출되는 값
+									하나로 합치지 않는다.
+									TODO: 희망가가 정가보다 높아도 되는지는 팀 정책 미확정.
+									      확정되면 Service 에서 검증한다(화면 검증만 믿지 않는다).
+								-->
+								<div class="price-row">
+									<div class="sched-cell">
+										<label class="sched-cell__label" for="price">정가 <span class="req">*</span></label>
+										<div class="unit-input">
+											<input class="input" type="text" id="price" name="regularPrice" inputmode="numeric"
+												   value="80,000" th:value="${#numbers.formatInteger(scheduleForm.regularPrice, 1, 'COMMA')}" autocomplete="off" required>
+											<span class="unit-input__unit">원</span>
+										</div>
+									</div>
+									<div class="sched-cell">
+										<label class="sched-cell__label" for="desiredPrice">
+											희망가 <span class="req">*</span>
+											<span class="sched-cell__label-sub">(수강생에게 표시됨)</span>
+										</label>
+										<div class="unit-input">
+											<input class="input" type="text" id="desiredPrice" name="desiredPrice" inputmode="numeric"
+												   value="58,000" th:value="${#numbers.formatInteger(scheduleForm.desiredPrice, 1, 'COMMA')}" autocomplete="off" required>
+											<span class="unit-input__unit">원</span>
+										</div>
+										<p class="field__help">클래스 가격으로 표시됩니다.</p>
+									</div>
+								</div>
+
+								<div class="price-row">
+									<div class="sched-cell">
+										<label class="sched-cell__label" for="minPeople">최소 인원</label>
+										<div class="select">
+											<select id="minPeople" name="minPeople">
+												<option value="1" th:selected="${scheduleForm.minPeople == 1}">1명</option>
+												<option value="2" th:selected="${scheduleForm.minPeople == 2}">2명</option>
+												<option value="3" th:selected="${scheduleForm.minPeople == 3}">3명</option>
+												<option value="4" th:selected="${scheduleForm.minPeople == 4}">4명</option>
+												<option value="5" th:selected="${scheduleForm.minPeople == 5}">5명</option>
+											</select>
+											<svg class="select__arrow" aria-hidden="true"><use href="#icon-chevron-down"></use></svg>
+										</div>
+									</div>
+									<div class="sched-cell">
+										<label class="sched-cell__label" for="maxPeople">최대 인원</label>
+										<div class="select">
+											<select id="maxPeople" name="maxPeople">
+												<option value="4" th:selected="${scheduleForm.maxPeople == 4}">4명</option>
+												<option value="5" th:selected="${scheduleForm.maxPeople == 5}">5명</option>
+												<option value="6" th:selected="${scheduleForm.maxPeople == 6}">6명</option>
+												<option value="8" th:selected="${scheduleForm.maxPeople == 8}">8명</option>
+												<option value="10" th:selected="${scheduleForm.maxPeople == 10}">10명</option>
+												<option value="12" th:selected="${scheduleForm.maxPeople == 12}">12명</option>
+											</select>
+											<svg class="select__arrow" aria-hidden="true"><use href="#icon-chevron-down"></use></svg>
+										</div>
+									</div>
+								</div>
+
+								<div class="price-row">
+									<div class="sched-cell sched-cell--auto">
+										<label class="switch">
+										<input type="checkbox" id="materialIncluded" name="materialIncluded" value="true" th:checked="${scheduleForm.materialIncluded}">
+											<span class="switch__track" aria-hidden="true"></span>
+											재료비 포함
+											<svg class="switch__hint" aria-hidden="true"><use href="#icon-info"></use></svg>
+										</label>
+									</div>
+								</div>
+
+								<p class="field__help">최소·최대 인원은 새로 추가하는 일정에 적용됩니다. 이미 등록된 일정은 표의 값을 유지해요.</p>
+							</div>
+						</div>
+					</section>
+
+					<!-- ======================= 오른쪽 : 미리보기 ======================= -->
+					<aside class="card preview-card" aria-labelledby="previewTitle">
+						<div class="card__head">
+							<h2 class="card__title" id="previewTitle">예약 화면 미리보기</h2>
+						</div>
+
+						<div class="card__body">
+							<!-- 작은 달력 : 일정이 잡힌 날에 초록 동그라미 -->
+							<div class="mini-cal">
+								<div class="mini-cal__head">
+									<button type="button" class="mini-cal__nav" id="calPrev">
+										<svg aria-hidden="true"><use href="#icon-chevron-left"></use></svg>
+										<span class="sr-only">이전 달</span>
+									</button>
+									<span class="mini-cal__title" id="calTitle" aria-live="polite"></span>
+									<button type="button" class="mini-cal__nav" id="calNext">
+										<svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
+										<span class="sr-only">다음 달</span>
+									</button>
+								</div>
+
+								<div class="mini-cal__grid" id="calGrid" role="grid" aria-labelledby="calTitle"></div>
+
+								<p class="mini-cal__legend">
+									<span class="mini-cal__dot" aria-hidden="true"></span>
+									선택된 일정
+								</p>
+							</div>
+
+							<div class="preview-stats">
+								<div class="preview-stat">
+									<svg aria-hidden="true"><use href="#icon-calendar"></use></svg>
+									<div>
+										<p class="preview-stat__label">예정 일정</p>
+										<p class="preview-stat__value" id="statCount">0회</p>
+									</div>
+								</div>
+								<div class="preview-stat">
+									<svg aria-hidden="true"><use href="#icon-users"></use></svg>
+									<div>
+										<p class="preview-stat__label">예상 정원</p>
+										<p class="preview-stat__value" id="statPeople">최대 0명</p>
+									</div>
+								</div>
+							</div>
+
+							<div class="preview-price">
+								<!-- 미리보기는 수강생이 보는 화면이므로 희망가를 띄운다 -->
+								<p class="preview-price__label">클래스 가격 <span class="preview-price__sub">(희망가)</span></p>
+								<p class="preview-price__amount">
+									<span id="statPrice">0</span><small>원</small> <em>/ 1인</em>
+								</p>
+								<p class="preview-price__note" id="statPriceNote">재료비 포함 · 1인 기준</p>
+							</div>
+
+							<div class="preview-state">
+								<div class="preview-state__row">
+									<span class="preview-state__label">진행 상태</span>
+									<span class="preview-state__pill">
+										<svg aria-hidden="true"><use href="#icon-calendar-check"></use></svg>
+										<span id="statModeLabel">개별 일정 등록됨</span>
+									</span>
+								</div>
+								<p class="preview-state__desc" id="statModeDesc">개별 일정을 등록했습니다.</p>
+							</div>
+						</div>
+					</aside>
+
+					<!-- ======================= 하단 버튼 ======================= -->
+					<div class="step-actions">
+						<button type="submit" name="saveMode" value="stay" class="btn btn--ghost btn--lg step-actions__save">
+							<svg aria-hidden="true"><use href="#icon-bookmark"></use></svg>
+							임시 저장
+						</button>
+						<div class="step-actions__nav">
+							<a href="class-register-location.html" th:href="@{/author/classes/register/location(classCode=${scheduleForm.classCode})}" class="btn btn--ghost btn--lg step-actions__previous">이전 단계</a>
+							<button type="submit" name="saveMode" value="next" class="btn btn--primary btn--lg step-actions__next">
+								<span>다음 단계</span>
+								<span class="step-actions__next-icon"><svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg></span>
+							</button>
+						</div>
+					</div>
+				</form>
+
+				<footer class="site-footer" th:replace="~{author/fragments/footer :: footer}">
+					<div class="site-footer__links">
+						<a href="guide.html" th:href="@{/author/guide}">작가 가이드</a>
+						<a href="notice.html" th:href="@{/author/notices}">공지사항</a>
+						<a href="qna.html" th:href="@{/author/qna}">사업자 문의</a>
+						<a href="#">이용약관</a>
+						<a href="#">개인정보처리방침</a>
+					</div>
+					<p class="site-footer__copy">
+						<b>숨비당 원데이 클래스</b> 작가센터 · 평일 10:00 ~ 18:00 (점심 12:00 ~ 13:00)<br>
+						© 2026 숨비당. All rights reserved.
+					</p>
+				</footer>
+			</div>
+		</main>
+	</div>
+</div>
+
+<script>
+/**
+ * 클래스 등록 03 · 일정 및 가격
+ *
+ * 이 화면은 아직 서버가 없다. 일정 목록을 브라우저 메모리(schedules 배열)에만 담고,
+ * 값이 바뀔 때마다 [표 / 달력 / 오른쪽 미리보기] 를 통째로 다시 그린다.
+ * "바뀐 부분만 골라서 고치기" 보다 이 방식이 훨씬 단순하고 버그가 적다.
+ *
+ * 서비스 구현 후에는 schedules 를 Model 값으로 초기화하고, 폼 제출 시
+ * schedulesJson을 DTO로 변환해 단계별 임시 저장에 사용한다.
+ */
+(function () {
+	'use strict';
+
+	var DOW = ['일', '월', '화', '수', '목', '금', '토'];
+	var MAX_SCHEDULES = 100;   /* 요일 반복이 폭주하지 않도록 상한 */
+
+	/* 일정 한 건 = { date:'2026-08-01', start:'14:00', end:'16:00', min:2, max:6 }
+	   date 는 SCHEDULE.CLASS_DATE, start/end 는 START_TIME/END_TIME(VARCHAR2) 자리다. */
+	var schedules = [].slice.call(document.querySelectorAll('[data-saved-schedule]')).map(function (item) {
+		return {
+			date: item.dataset.date,
+			start: item.dataset.start,
+			end: item.dataset.end,
+			min: Number(item.dataset.min),
+			max: Number(item.dataset.max)
+		};
+	});
+	var mode = document.getElementById('scheduleType').value === 'REPEAT' ? 'repeat' : 'once';
+	var viewYear, viewMonth;   /* 달력이 지금 보여주는 연·월 */
+
+	/* ---------------- 날짜 도우미 ---------------- */
+
+	/* Date -> 'YYYY-MM-DD'
+	   toISOString() 을 쓰면 UTC 로 바뀌면서 한국 시간 기준 날짜가
+	   하루 밀리는 일이 생긴다. 그래서 직접 만든다. */
+	function toKey(date) {
+		var m = date.getMonth() + 1;
+		var d = date.getDate();
+		return date.getFullYear() + '-' + (m < 10 ? '0' + m : m) + '-' + (d < 10 ? '0' + d : d);
+	}
+
+	function fromKey(key) {
+		var p = key.split('-');
+		return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+	}
+
+	/* '14:00' + 120분 -> '16:00' */
+	function addMinutes(time, minutes) {
+		var p = time.split(':');
+		var total = Number(p[0]) * 60 + Number(p[1]) + Number(minutes);
+		total = Math.min(total, 23 * 60 + 59);
+		var h = Math.floor(total / 60);
+		var m = total % 60;
+		return (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m);
+	}
+
+	/* '14:00' -> '오후 2:00' */
+	function toKoreanTime(time) {
+		var p = time.split(':');
+		var h = Number(p[0]);
+		var half = h < 12 ? '오전' : '오후';
+		var h12 = h % 12 === 0 ? 12 : h % 12;
+		return half + ' ' + h12 + ':' + p[1];
+	}
+
+	/* '2026-08-01' -> '08.01 (토)' */
+	function toKoreanDate(key) {
+		var date = fromKey(key);
+		var p = key.split('-');
+		return p[1] + '.' + p[2] + ' (' + DOW[date.getDay()] + ')';
+	}
+
+	function comma(number) {
+		return String(number).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+	}
+
+	function onlyDigits(text) {
+		var n = Number(String(text).replace(/[^0-9]/g, ''));
+		return isNaN(n) ? 0 : n;
+	}
+
+	/* ---------------- 시간 select 채우기 ----------------
+	   09:00 ~ 21:00 을 30분 간격으로. option 25개를 HTML 에 손으로 쓰면
+	   마크업이 지저분해져서 여기서 만든다. */
+	function fillTimeOptions() {
+		var boxes = document.querySelectorAll('[data-time-options]');
+		var html = '';
+		for (var minutes = 9 * 60; minutes <= 21 * 60; minutes += 30) {
+			var h = Math.floor(minutes / 60);
+			var m = minutes % 60;
+			var value = (h < 10 ? '0' + h : h) + ':' + (m < 10 ? '0' + m : m);
+			html += '<option value="' + value + '"' + (value === '14:00' ? ' selected' : '') + '>' + value + '</option>';
+		}
+		boxes.forEach(function (box) { box.innerHTML = html; });
+	}
+
+	/* ---------------- 일정 추가 / 삭제 ---------------- */
+
+	function currentPeople() {
+		return {
+			min: Number(document.getElementById('minPeople').value),
+			max: Number(document.getElementById('maxPeople').value)
+		};
+	}
+
+	/* 같은 날 같은 시작 시간은 중복으로 보고 넣지 않는다. */
+	function addSchedule(date, start, duration, people) {
+		var exists = schedules.some(function (s) {
+			return s.date === date && s.start === start;
+		});
+		if (exists) { return false; }
+		if (schedules.length >= MAX_SCHEDULES) { return false; }
+
+		schedules.push({
+			date: date,
+			start: start,
+			end: addMinutes(start, duration),
+			min: people.min,
+			max: people.max
+		});
+		return true;
+	}
+
+	function sortSchedules() {
+		schedules.sort(function (a, b) {
+			if (a.date !== b.date) { return a.date < b.date ? -1 : 1; }
+			return a.start < b.start ? -1 : 1;
+		});
+	}
+
+	/* ---------------- 그리기 ---------------- */
+
+	function renderTable() {
+		var body = document.getElementById('schedTableBody');
+		var wrap = document.getElementById('schedTableWrap');
+		var empty = document.getElementById('schedEmpty');
+		var count = document.getElementById('schedCount');
+
+		count.textContent = schedules.length + '건';
+		wrap.hidden = schedules.length === 0;
+		empty.hidden = schedules.length !== 0;
+
+		body.innerHTML = '';
+		schedules.forEach(function (item, index) {
+			var tr = document.createElement('tr');
+
+			var no = document.createElement('td');
+			no.className = 'sched-table__no';
+			no.innerHTML = '<span class="sched-no">' + (index + 1) + '</span>';
+
+			var date = document.createElement('td');
+			date.className = 'sched-table__date';
+			date.textContent = toKoreanDate(item.date);
+
+			var time = document.createElement('td');
+			time.textContent = toKoreanTime(item.start);
+
+			var people = document.createElement('td');
+			people.textContent = item.min + '명 ~ ' + item.max + '명';
+
+			var manage = document.createElement('td');
+			var button = document.createElement('button');
+			button.type = 'button';
+			button.className = 'sched-del';
+			button.dataset.remove = String(index);
+			button.innerHTML = '<svg aria-hidden="true"><use href="#icon-trash"></use></svg>삭제';
+			button.setAttribute('aria-label', toKoreanDate(item.date) + ' 일정 삭제');
+			manage.appendChild(button);
+
+			tr.appendChild(no);
+			tr.appendChild(date);
+			tr.appendChild(time);
+			tr.appendChild(people);
+			tr.appendChild(manage);
+			body.appendChild(tr);
+		});
+	}
+
+	function renderCalendar() {
+		var title = document.getElementById('calTitle');
+		var grid = document.getElementById('calGrid');
+
+		title.textContent = viewYear + '년 ' + (viewMonth + 1) + '월';
+
+		/* 일정이 잡힌 날짜를 빠르게 찾으려고 Set 으로 만들어 둔다.
+		   (배열째로 매 칸마다 훑으면 42 x 일정수 만큼 비교하게 된다) */
+		var marked = {};
+		schedules.forEach(function (s) { marked[s.date] = true; });
+
+		grid.innerHTML = '';
+
+		DOW.forEach(function (name) {
+			var cell = document.createElement('span');
+			cell.className = 'mini-cal__dow';
+			cell.textContent = name;
+			grid.appendChild(cell);
+		});
+
+		/* 1일이 무슨 요일인지 보고 그만큼 앞의 지난달 날짜부터 그린다.
+		   new Date(년, 월, 0 이하) 를 넣으면 알아서 지난달로 넘어간다. */
+		var firstDow = new Date(viewYear, viewMonth, 1).getDay();
+
+		for (var i = 0; i < 42; i += 1) {
+			var day = new Date(viewYear, viewMonth, 1 - firstDow + i);
+			var key = toKey(day);
+			var cell = document.createElement('span');
+			var classes = ['mini-cal__day'];
+
+			if (day.getMonth() !== viewMonth) {
+				classes.push('mini-cal__day--out');
+			} else if (day.getDay() === 6) {
+				classes.push('mini-cal__day--sat');
+			}
+			if (marked[key]) {
+				classes.push('mini-cal__day--on');
+				cell.setAttribute('aria-label', key + ' 일정 있음');
+			}
+
+			cell.className = classes.join(' ');
+			cell.textContent = day.getDate();
+			grid.appendChild(cell);
+		}
+	}
+
+	function renderPreview() {
+		/* 미리보기에 띄우는 값은 정가(price)가 아니라 희망가(desiredPrice)다.
+		   수강생 화면에 실제로 노출되는 값이 희망가이기 때문 (AGENTS.md 10장). */
+		var desiredPrice = onlyDigits(document.getElementById('desiredPrice').value);
+		var material = document.getElementById('materialIncluded').checked;
+
+		document.getElementById('statCount').textContent = schedules.length + '회';
+
+		/* 예상 정원 = 모든 일정의 최대 인원을 더한 값 */
+		var total = schedules.reduce(function (sum, s) { return sum + s.max; }, 0);
+		document.getElementById('statPeople').textContent = '최대 ' + total + '명';
+
+		document.getElementById('statPrice').textContent = comma(desiredPrice);
+		document.getElementById('statPriceNote').textContent =
+			(material ? '재료비 포함' : '재료비 별도') + ' · 1인 기준';
+
+		var label = document.getElementById('statModeLabel');
+		var desc = document.getElementById('statModeDesc');
+		if (schedules.length === 0) {
+			label.textContent = '일정 미등록';
+			desc.textContent = '아직 등록된 일정이 없습니다.';
+		} else if (mode === 'repeat') {
+			label.textContent = '요일 반복 등록됨';
+			desc.textContent = '요일 반복으로 ' + schedules.length + '개의 일정을 등록했습니다.';
+		} else {
+			label.textContent = '개별 일정 등록됨';
+			desc.textContent = '개별 일정 ' + schedules.length + '건을 등록했습니다.';
+		}
+	}
+
+	/* 값이 바뀌면 항상 이 함수 하나만 부른다. */
+	function renderAll() {
+		sortSchedules();
+		document.getElementById('schedulesJson').value = JSON.stringify(schedules);
+		renderTable();
+		renderCalendar();
+		renderPreview();
+	}
+
+	/* ---------------- 이벤트 ---------------- */
+
+	function bindModeSwitch() {
+		var buttons = document.querySelectorAll('.sched-mode__btn');
+		buttons.forEach(function (button) {
+			var on = button.dataset.mode === mode;
+			button.setAttribute('aria-selected', String(on));
+			document.getElementById(button.getAttribute('aria-controls')).hidden = !on;
+		});
+		buttons.forEach(function (button) {
+			button.addEventListener('click', function () {
+				mode = button.dataset.mode;
+				document.getElementById('scheduleType').value = mode === 'repeat' ? 'REPEAT' : 'ONCE';
+				buttons.forEach(function (other) {
+					var on = other === button;
+					other.setAttribute('aria-selected', String(on));
+					document.getElementById(other.getAttribute('aria-controls')).hidden = !on;
+				});
+				renderPreview();
+			});
+		});
+	}
+
+	function bindDayChips() {
+		document.getElementById('dayChips').addEventListener('click', function (event) {
+			var chip = event.target.closest('.day-chip');
+			if (!chip) { return; }
+			var on = chip.getAttribute('aria-pressed') === 'true';
+			chip.setAttribute('aria-pressed', String(!on));
+			document.getElementById('repeatDays').value = [].slice.call(
+				document.querySelectorAll('.day-chip[aria-pressed="true"]')
+			).map(function (selected) { return selected.dataset.dow; }).join(',');
+		});
+	}
+
+	function bindAddOnce() {
+		document.getElementById('addOnce').addEventListener('click', function () {
+			var date = document.getElementById('onceDate').value;
+			var start = document.getElementById('onceStart').value;
+			var duration = document.getElementById('onceDuration').value;
+
+			if (!date) {
+				alert('수업 날짜를 선택해주세요.');
+				return;
+			}
+			if (!addSchedule(date, start, duration, currentPeople())) {
+				alert('이미 같은 날짜·시간의 일정이 있습니다.');
+				return;
+			}
+
+			/* 달력을 방금 추가한 날짜의 달로 옮겨서 바로 보이게 한다 */
+			var added = fromKey(date);
+			viewYear = added.getFullYear();
+			viewMonth = added.getMonth();
+			renderAll();
+		});
+	}
+
+	function bindAddRepeat() {
+		document.getElementById('addRepeat').addEventListener('click', function () {
+			var from = document.getElementById('repeatFrom').value;
+			var to = document.getElementById('repeatTo').value;
+			var start = document.getElementById('repeatStart').value;
+			var duration = document.getElementById('repeatDuration').value;
+
+			var picked = [].slice.call(document.querySelectorAll('.day-chip[aria-pressed="true"]'))
+				.map(function (chip) { return Number(chip.dataset.dow); });
+
+			if (!from || !to) {
+				alert('운영 시작일과 종료일을 선택해주세요.');
+				return;
+			}
+			if (from > to) {
+				alert('운영 종료일이 시작일보다 빠릅니다.');
+				return;
+			}
+			if (picked.length === 0) {
+				alert('반복할 요일을 하나 이상 선택해주세요.');
+				return;
+			}
+
+			/* 시작일부터 종료일까지 하루씩 넘기면서 고른 요일만 담는다 */
+			var people = currentPeople();
+			var cursor = fromKey(from);
+			var last = fromKey(to);
+			var added = 0;
+
+			while (cursor <= last) {
+				if (picked.indexOf(cursor.getDay()) !== -1) {
+					if (addSchedule(toKey(cursor), start, duration, people)) { added += 1; }
+				}
+				cursor.setDate(cursor.getDate() + 1);
+			}
+
+			if (added === 0) {
+				alert('추가된 일정이 없습니다. 기간 안에 선택한 요일이 있는지 확인해주세요.');
+				return;
+			}
+
+			var first = fromKey(from);
+			viewYear = first.getFullYear();
+			viewMonth = first.getMonth();
+			renderAll();
+		});
+	}
+
+	function bindRemove() {
+		/* 행은 계속 다시 그려지므로, 버튼마다 이벤트를 다는 대신
+		   표 전체에 하나만 달고 클릭된 대상을 찾는다 (이벤트 위임). */
+		document.getElementById('schedTableBody').addEventListener('click', function (event) {
+			var button = event.target.closest('[data-remove]');
+			if (!button) { return; }
+			schedules.splice(Number(button.dataset.remove), 1);
+			renderAll();
+		});
+	}
+
+	function bindCalendarNav() {
+		document.getElementById('calPrev').addEventListener('click', function () {
+			viewMonth -= 1;
+			if (viewMonth < 0) { viewMonth = 11; viewYear -= 1; }
+			renderCalendar();
+		});
+		document.getElementById('calNext').addEventListener('click', function () {
+			viewMonth += 1;
+			if (viewMonth > 11) { viewMonth = 0; viewYear += 1; }
+			renderCalendar();
+		});
+	}
+
+	function bindPriceInputs() {
+		/* 정가·희망가 둘 다 숫자만 남기고 세 자리마다 콤마를 찍는다.
+		   같은 처리라 id 만 바꿔 가며 한 번에 건다. */
+		['price', 'desiredPrice'].forEach(function (id) {
+			var box = document.getElementById(id);
+			box.addEventListener('input', function () {
+				var caretAtEnd = box.selectionStart === box.value.length;
+				box.value = comma(onlyDigits(box.value));
+				/* 콤마를 다시 찍으면 커서가 앞으로 튄다.
+				   맨 끝에서 치고 있었을 때만 끝으로 되돌려 준다. */
+				if (caretAtEnd) { box.setSelectionRange(box.value.length, box.value.length); }
+				renderPreview();
+			});
+		});
+		document.getElementById('materialIncluded').addEventListener('change', renderPreview);
+	}
+
+	/* ---------------- 시작 ---------------- */
+
+	function init() {
+		var today = new Date();
+		viewYear = today.getFullYear();
+		viewMonth = today.getMonth();
+
+		fillTimeOptions();
+
+		/* 날짜 입력의 기본값 : 오늘 / 오늘+2개월 */
+		document.getElementById('onceDate').value = toKey(today);
+		document.getElementById('repeatFrom').value = toKey(today);
+		var later = new Date(today.getFullYear(), today.getMonth() + 2, today.getDate());
+		document.getElementById('repeatTo').value = toKey(later);
+
+		bindModeSwitch();
+		bindDayChips();
+		bindAddOnce();
+		bindAddRepeat();
+		bindRemove();
+		bindCalendarNav();
+		bindPriceInputs();
+
+		/* 실제 일정은 사용자가 입력한 값만 등록한다. */
+
+		/* 달력은 첫 일정이 있는 달로 연다.
+		   오늘 달을 그대로 두면 일정이 다음 달에만 있을 때
+		   흐린 칸에만 표시가 찍혀서 안 보이는 것처럼 느껴진다. */
+		if (schedules.length > 0) {
+			sortSchedules();
+			var first = fromKey(schedules[0].date);
+			viewYear = first.getFullYear();
+			viewMonth = first.getMonth();
+		}
+
+		renderAll();
+
+		document.getElementById('scheduleForm').addEventListener('submit', function (event) {
+			var form = this;
+			form.querySelectorAll('[data-server-schedule]').forEach(function (element) { element.remove(); });
+			schedules.forEach(function (item, index) {
+				var values = {
+					'scheduleDate': item.date, 'startTime': item.start, 'endTime': item.end,
+					'minPeople': item.min, 'maxPeople': item.max
+				};
+				Object.keys(values).forEach(function (property) {
+					var input = document.createElement('input');
+					input.type = 'hidden';
+					input.name = 'scheduleList[' + index + '].' + property;
+					input.value = values[property];
+					input.setAttribute('data-server-schedule', '');
+					form.appendChild(input);
+				});
+			});
+			['price', 'desiredPrice'].forEach(function (id) {
+				var input = document.getElementById(id);
+				input.value = String(input.value).replace(/[^0-9]/g, '');
+			});
+		});
+	}
+
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', init);
+	} else {
+		init();
+	}
+}());
+</script>
+
+</body>
+</html>

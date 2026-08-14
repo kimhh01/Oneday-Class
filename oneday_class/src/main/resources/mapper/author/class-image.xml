@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.oneclass.author.classbasic.ClassImageDAO">
+
+	<sql id="classImageSelect">
+		SELECT
+			CLASS_IMG_CODE AS IMAGE_CODE,
+			CLASS_CODE,
+			IMAGE AS IMAGE_PATH,
+			TYPE AS IMAGE_TYPE,
+			CAST(NULL AS VARCHAR2(100)) AS IMAGE_TITLE,
+			SORT_ORDER AS IMAGE_ORDER
+		FROM CLASS_IMG
+	</sql>
+
+	<select id="selectClassImageList" parameterType="int"
+		resultType="kr.co.oneclass.author.classbasic.ClassImageDTO">
+		<include refid="classImageSelect"/>
+		WHERE CLASS_CODE = #{classCode}
+		ORDER BY SORT_ORDER, CLASS_IMG_CODE
+	</select>
+
+	<select id="selectClassImageListByType" parameterType="map"
+		resultType="kr.co.oneclass.author.classbasic.ClassImageDTO">
+		<include refid="classImageSelect"/>
+		WHERE CLASS_CODE = #{classCode}
+		  AND TYPE = #{imageType}
+		ORDER BY SORT_ORDER, CLASS_IMG_CODE
+	</select>
+
+	<delete id="deleteClassImageListByType" parameterType="map">
+		DELETE FROM CLASS_IMG
+		WHERE CLASS_CODE = #{classCode}
+		  AND TYPE = #{imageType}
+	</delete>
+
+	<delete id="deleteClassImageList" parameterType="int">
+		DELETE FROM CLASS_IMG
+		WHERE CLASS_CODE = #{classCode}
+	</delete>
+
+	<insert id="insertClassImage"
+		parameterType="kr.co.oneclass.author.classbasic.ClassImageDTO">
+		<selectKey keyProperty="imageCode" resultType="int" order="BEFORE">
+			SELECT SEQ_CLASS_IMG_CODE.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO CLASS_IMG (
+			CLASS_IMG_CODE, CLASS_CODE, TYPE, IMAGE, SORT_ORDER
+		) VALUES (
+			#{imageCode}, #{classCode}, #{imageType}, #{imagePath}, #{imageOrder}
+		)
+	</insert>
+
+	<delete id="deleteClassImage" parameterType="int">
+		DELETE FROM CLASS_IMG
+		WHERE CLASS_IMG_CODE = #{imageCode}
+	</delete>
+
+</mapper>

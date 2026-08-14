@@ -1,0 +1,119 @@
+<!-- =============================================================
+	 sidebar.html - 작가페이지 좌측 공통 메뉴
+	 * 현재 메뉴 활성화는 각 페이지 body 의 data-menu 값과
+	   아래 data-menu-key 값을 맞춰서 js/layout.js 가 처리합니다.
+	 * 예약은 결제 시점에 확정되는 구조라 작가가 승인하는 화면이 없습니다.
+	   (예전 '신청자 관리' 메뉴 제거, 예약자 확인은 '일정 관리'에서)
+	 ============================================================= -->
+<th:block th:fragment="sidebar">
+<aside class="sidebar" id="sidebar">
+	<a href="index.html" th:href="@{/author}" class="sidebar-brand" aria-label="숨비당 작가페이지 홈">
+		<svg><use href="#icon-leaf"></use></svg>
+		<span class="sidebar-brand__copy">
+			<strong>숨비당 <span>원데이 클래스</span></strong>
+			<small>작가의 하루, 특별한 경험</small>
+		</span>
+	</a>
+
+	<nav>
+		<ul>
+			<li>
+				<a href="index.html" th:href="@{/author}" class="nav-link" data-menu-key="home">
+					<svg><use href="#icon-home"></use></svg> 작가페이지 홈
+				</a>
+			</li>
+		</ul>
+
+		<div class="nav-group">
+			<p class="nav-group__title">클래스</p>
+			<ul>
+				<li>
+					<a href="class-register.html" th:href="@{/author/classes/register-guide}" class="nav-link" data-menu-key="class-register">
+						<svg><use href="#icon-plus-box"></use></svg> 클래스 등록
+					</a>
+				</li>
+				<li>
+					<a href="class-manage.html" th:href="@{/author/classes}" class="nav-link" data-menu-key="class-manage">
+						<svg><use href="#icon-list"></use></svg> 클래스 관리
+					</a>
+				</li>
+				<li>
+					<a href="class-approval.html" th:href="@{/author/class-approval}" class="nav-link" data-menu-key="class-approval">
+						<svg><use href="#icon-check-circle"></use></svg> 클래스 검수
+					</a>
+				</li>
+				<li>
+					<a href="schedule-manage.html" th:href="@{/author/schedules}" class="nav-link" data-menu-key="schedule">
+						<svg><use href="#icon-calendar"></use></svg> 일정 관리
+					</a>
+				</li>
+			</ul>
+		</div>
+
+		<div class="nav-group">
+			<p class="nav-group__title">매출/정산</p>
+			<ul>
+				<li>
+					<a href="sales.html" th:href="@{/author/sales}" class="nav-link" data-menu-key="sales">
+						<svg><use href="#icon-chart"></use></svg> 매출 현황
+					</a>
+				</li>
+				<li>
+					<a href="settlement-history.html" th:href="@{/author/settlements}" class="nav-link" data-menu-key="settlement-history">
+						<svg><use href="#icon-receipt"></use></svg> 정산 내역
+					</a>
+				</li>
+				<li>
+					<a href="settlement-request.html" th:href="@{/author/settlements/new}" class="nav-link" data-menu-key="settlement-request">
+						<svg><use href="#icon-wallet"></use></svg> 정산 신청
+					</a>
+				</li>
+			</ul>
+		</div>
+
+		<div class="nav-group">
+			<p class="nav-group__title">고객 관리</p>
+			<ul>
+				<li>
+					<a href="review.html" th:href="@{/author/reviews}" class="nav-link" data-menu-key="review">
+						<svg><use href="#icon-star"></use></svg> 리뷰 관리
+					</a>
+				</li>
+				<li>
+					<a href="qna.html" th:href="@{/author/qna}" class="nav-link" data-menu-key="qna">
+				<svg><use href="#icon-chat"></use></svg> 1:1 문의
+					</a>
+				</li>
+			</ul>
+		</div>
+
+		<div class="nav-group">
+			<p class="nav-group__title">작가 정보</p>
+			<ul>
+				<li>
+					<a href="profile.html" th:href="@{/author/profile}" class="nav-link" data-menu-key="profile">
+						<svg><use href="#icon-user"></use></svg> 프로필 관리
+					</a>
+				</li>
+			</ul>
+		</div>
+	</nav>
+
+	<div class="sidebar__spacer"></div>
+
+	<div class="guide-card">
+		<img class="guide-card__illust"
+			 src="/author/images/photo/dashboard-hero.png" th:src="@{/author/images/photo/dashboard-hero.png}"
+			 alt="" width="1919" height="820" loading="lazy">
+		<div class="guide-card__body">
+			<p class="guide-card__title">작가 가이드</p>
+			<p class="guide-card__desc">처음이신가요?<br>이용 가이드를 확인해보세요.</p>
+			<a href="#" aria-disabled="true" title="준비 중" class="btn btn--outline btn--sm">
+				바로가기 <svg><use href="#icon-chevron-right"></use></svg>
+			</a>
+		</div>
+	</div>
+</aside>
+
+<div class="sidebar-backdrop" data-sidebar-backdrop></div>
+</th:block>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title th:text="${editMode == true ? '클래스 수정 · 커리큘럼 | 숨비당 원데이 클래스' : '클래스 등록 · 커리큘럼 | 숨비당 원데이 클래스'}">클래스 등록 · 커리큘럼 | 숨비당 원데이 클래스</title>
+<link rel="stylesheet" href="/author/css/common.css" th:href="@{/author/css/common.css}">
+<link rel="stylesheet" href="/author/css/header.css" th:href="@{/author/css/header.css}">
+<link rel="stylesheet" href="/author/css/sidebar.css" th:href="@{/author/css/sidebar.css}">
+<link rel="stylesheet" href="/author/css/class-register.css" th:href="@{/author/css/class-register.css}">
+<link rel="stylesheet" href="/author/css/class-register-curriculum.css" th:href="@{/author/css/class-register-curriculum.css}">
+<link rel="stylesheet" href="/author/css/class-edit.css" th:href="@{/author/css/class-edit.css}">
+<script src="/author/js/layout.js" th:src="@{/author/js/layout.js}" defer></script>
+<script src="/author/js/class-register-draft.js" th:src="@{/author/js/class-register-draft.js}" defer></script>
+</head>
+<body class="author-page register-form-page register-curriculum-page"
+	  data-menu="class-register" data-page="클래스 등록"
+	  th:attr="data-menu=${editMode == true ? 'class-manage' : 'class-register'},data-page=${editMode == true ? '클래스 수정' : '클래스 등록'}">
+
+<div class="app">
+	<div th:replace="~{author/fragments/icons :: icons}"></div>
+	<div th:replace="~{author/fragments/header :: header}"></div>
+	<div class="app-body">
+		<div th:replace="~{author/fragments/sidebar :: sidebar}"></div>
+		<main class="content">
+			<div class="content__inner">
+				<header class="register-page-head register-page-head--compact">
+					<h1 class="page-title"><span th:text="${editMode == true ? '클래스 수정' : '클래스 등록하기'}">클래스 등록하기</span> <svg class="title-leaf" aria-hidden="true"><use href="#icon-title-leaf"></use></svg></h1>
+					<p class="page-desc" th:text="${editMode == true ? '운영 중인 클래스의 커리큘럼을 수정합니다.' : '수강생이 수업의 흐름을 이해할 수 있도록 커리큘럼을 구성해주세요.'}">수강생이 수업의 흐름을 이해할 수 있도록 커리큘럼을 구성해주세요.</p>
+				</header>
+				<p class="class-edit-notice" th:if="${editMode == true}">수정 내용은 별도 관리자 검수 없이 저장 즉시 반영됩니다.</p>
+				<div th:replace="~{author/fragments/class-register-steps :: steps(${curriculumForm.classCode}, 5, ${editMode}, ${editStep})}"></div>
+
+				<p class="form-error" th:if="${registerError}" th:text="${registerError}" role="alert">저장 오류</p>
+
+				<form class="curriculum-grid" id="curriculumForm" method="post" enctype="multipart/form-data" novalidate data-draft-form
+					  th:action="${editMode == true ? editFormAction : '/author/classes/register/curriculum'}" th:object="${curriculumForm}">
+					<input type="hidden" name="classCode" th:value="${curriculumForm.classCode}">
+					<section class="card curriculum-editor" aria-labelledby="curriculumTitle">
+						<div class="card-head-icon curriculum-editor__head">
+							<span class="icon-box"><svg aria-hidden="true"><use href="#icon-clipboard-list"></use></svg></span>
+							<div><h2 class="card-head-icon__title" id="curriculumTitle">커리큘럼 구성</h2><p class="card-head-icon__desc">수업 진행 순서에 맞춰 단계별 내용을 입력해주세요.</p></div>
+							<span class="curriculum-count" id="curriculumCount" aria-live="polite"
+								  th:text="${'총 ' + #lists.size(curriculumForm.stepList) + '단계'}">총 0단계</span>
+						</div>
+
+						<div class="card__body">
+							<div class="curriculum-list" id="curriculumList">
+								<article class="curriculum-step" data-curriculum-step
+										 th:each="step, stat : ${curriculumForm.stepList}">
+									<input type="hidden" data-curriculum-code
+										   th:name="|stepList[${stat.index}].curriculumCode|" th:value="${step.curriculumCode}">
+									<div class="curriculum-step__head">
+										<div class="curriculum-step__heading">
+											<span class="curriculum-step__number" data-step-number
+												  th:text="|STEP ${#numbers.formatInteger(stat.count, 2)}|">STEP 01</span>
+											<div><h3 data-step-heading th:text="|${stat.count}번째 커리큘럼|">커리큘럼</h3><p>단계별 제목과 내용, 대표 이미지 한 장을 등록해주세요.</p></div>
+										</div>
+										<button type="button" class="curriculum-step__delete" data-delete-step><svg aria-hidden="true"><use href="#icon-trash"></use></svg><span>삭제</span></button>
+									</div>
+									<div class="curriculum-step__body">
+										<div class="curriculum-step__fields">
+											<div class="curriculum-field">
+												<div class="curriculum-field__label-row"><label>단계 제목 <span class="required">*</span></label><span class="curriculum-field__count"><b data-title-count th:text="${#strings.length(step.title)}">0</b> / 50</span></div>
+												<input class="input" type="text" maxlength="50" required data-title-input
+													   th:name="|stepList[${stat.index}].title|" th:value="${step.title}" placeholder="예: 흙과 도구 익히기">
+											</div>
+											<div class="curriculum-field">
+												<div class="curriculum-field__label-row"><label>단계 내용 <span class="required">*</span></label><span class="curriculum-field__count"><b data-content-count th:text="${#strings.length(step.content)}">0</b> / 300</span></div>
+												<textarea class="textarea" maxlength="300" required data-content-input
+														  th:name="|stepList[${stat.index}].content|" th:text="${step.content}" placeholder="이 단계에서 배우고 만드는 내용을 자세히 적어주세요."></textarea>
+											</div>
+										</div>
+										<div class="curriculum-image-field">
+											<span class="curriculum-image-field__label">단계 이미지 <span class="required">*</span></span>
+											<label class="curriculum-image">
+												<input class="sr-only" type="file" accept="image/jpeg,image/png" data-image-input
+													   th:name="|stepList[${stat.index}].imageFile|">
+												<img th:src="${#strings.isEmpty(step.imagePath)} ? @{/author/images/photo/class-upload-placeholder.png} : ${step.imagePath}"
+													 alt="커리큘럼 단계 이미지" data-image-preview>
+												<span class="curriculum-image__overlay"><svg aria-hidden="true"><use href="#icon-image"></use></svg><span>이미지 변경</span></span>
+											</label>
+											<p class="curriculum-image-field__help">JPG, PNG · 단계별 1장 · 기존 사진은 새 사진을 선택할 때만 교체됩니다.</p>
+										</div>
+									</div>
+								</article>
+							</div>
+
+							<button type="button" class="curriculum-add" id="addCurriculumStep">
+								<span class="curriculum-add__icon"><svg aria-hidden="true"><use href="#icon-plus"></use></svg></span>
+								<span><b>커리큘럼 단계 추가</b><small>최대 10단계까지 추가할 수 있어요.</small></span>
+							</button>
+						</div>
+					</section>
+
+					<aside class="card curriculum-guide" aria-labelledby="curriculumGuideTitle">
+						<div class="curriculum-guide__visual">
+							<img class="pottery-guide-visual" src="/author/images/photo/curriculum-pottery-steps.png" th:src="@{/author/images/photo/curriculum-pottery-steps.png}" alt="공방의 수업 과정">
+							<span>수업의 흐름이 보이는<br>커리큘럼을 만들어보세요.</span>
+						</div>
+						<div class="curriculum-guide__body">
+							<h2 id="curriculumGuideTitle"><span><svg aria-hidden="true"><use href="#icon-bulb"></use></svg></span>작성 가이드</h2>
+							<ul>
+								<li><svg aria-hidden="true"><use href="#icon-check-circle"></use></svg><div><b>짧고 명확한 단계 제목</b><span>수강생이 한눈에 이해할 수 있게 적어주세요.</span></div></li>
+								<li><svg aria-hidden="true"><use href="#icon-check-circle"></use></svg><div><b>배우는 내용과 결과물</b><span>무엇을 익히고 완성하는지 구체적으로 알려주세요.</span></div></li>
+								<li><svg aria-hidden="true"><use href="#icon-check-circle"></use></svg><div><b>단계별 사진은 한 장씩</b><span>각 단계를 가장 잘 보여주는 사진을 선택해주세요.</span></div></li>
+							</ul>
+							<div class="curriculum-guide__note"><svg aria-hidden="true"><use href="#icon-info"></use></svg><p><b>잠깐!</b> 커리큘럼은 수강생이 클래스 난이도와 진행 방식을 판단하는 중요한 정보예요.</p></div>
+						</div>
+					</aside>
+
+					<div class="step-actions">
+						<button type="submit" name="saveMode" value="stay" class="btn btn--ghost btn--lg step-actions__save"><svg aria-hidden="true"><use href="#icon-bookmark"></use></svg><span th:text="${editMode == true ? '저장' : '임시 저장'}">임시 저장</span></button>
+						<div class="step-actions__nav">
+							<a th:href="${editMode == true ? '/author/classes/' + editClassCode + '/edit/detail-extra' : '/author/classes/register/detail-extra?classCode=' + curriculumForm.classCode}" class="btn btn--ghost btn--lg step-actions__previous">이전 단계</a>
+							<button type="submit" name="saveMode" value="next" class="btn btn--primary btn--lg step-actions__next"><span th:text="${editMode == true ? '수정 완료' : '다음 단계'}">다음 단계</span><span class="step-actions__next-icon"><svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg></span></button>
+						</div>
+					</div>
+				</form>
+
+				<footer class="site-footer" th:replace="~{author/fragments/footer :: footer}"></footer>
+			</div>
+		</main>
+	</div>
+</div>
+
+<script>
+(function () {
+	'use strict';
+	var list = document.getElementById('curriculumList');
+	var addButton = document.getElementById('addCurriculumStep');
+	var countOutput = document.getElementById('curriculumCount');
+	var objectUrls = [];
+	var placeholder = '/author/images/photo/class-upload-placeholder.png';
+
+	function ordinal(index) {
+		var labels = ['첫 번째', '두 번째', '세 번째', '네 번째', '다섯 번째', '여섯 번째', '일곱 번째', '여덟 번째', '아홉 번째', '열 번째'];
+		return labels[index] || (index + 1) + '번째';
+	}
+
+	function bindStep(step) {
+		var title = step.querySelector('[data-title-input]');
+		var content = step.querySelector('[data-content-input]');
+		var titleCount = step.querySelector('[data-title-count]');
+		var contentCount = step.querySelector('[data-content-count]');
+		var imageInput = step.querySelector('[data-image-input]');
+		var preview = step.querySelector('[data-image-preview]');
+		title.addEventListener('input', function () { titleCount.textContent = title.value.length; });
+		content.addEventListener('input', function () { contentCount.textContent = content.value.length; });
+		imageInput.addEventListener('change', function () {
+			var file = (imageInput.files || [])[0];
+			if (!file) return;
+			if (preview.dataset.objectUrl) URL.revokeObjectURL(preview.dataset.objectUrl);
+			var url = URL.createObjectURL(file);
+			objectUrls.push(url);
+			preview.dataset.objectUrl = url;
+			preview.src = url;
+		});
+	}
+
+	function renumber() {
+		var steps = Array.from(list.querySelectorAll('[data-curriculum-step]'));
+		steps.forEach(function (step, index) {
+			var title = step.querySelector('[data-title-input]');
+			var content = step.querySelector('[data-content-input]');
+			var image = step.querySelector('[data-image-input]');
+			var code = step.querySelector('[data-curriculum-code]');
+			step.querySelector('[data-step-number]').textContent = 'STEP ' + String(index + 1).padStart(2, '0');
+			step.querySelector('[data-step-heading]').textContent = ordinal(index) + ' 커리큘럼';
+			title.name = 'stepList[' + index + '].title';
+			content.name = 'stepList[' + index + '].content';
+			image.name = 'stepList[' + index + '].imageFile';
+			code.name = 'stepList[' + index + '].curriculumCode';
+			step.querySelector('[data-delete-step]').disabled = steps.length === 1;
+		});
+		countOutput.textContent = '총 ' + steps.length + '단계';
+		addButton.disabled = steps.length >= 10;
+	}
+
+	function createStep(focus) {
+		if (list.querySelectorAll('[data-curriculum-step]').length >= 10) return;
+		var step = document.createElement('article');
+		step.className = 'curriculum-step';
+		step.setAttribute('data-curriculum-step', '');
+		step.innerHTML = '<input type="hidden" value="0" data-curriculum-code>' +
+			'<div class="curriculum-step__head"><div class="curriculum-step__heading"><span class="curriculum-step__number" data-step-number></span><div><h3 data-step-heading></h3><p>단계별 제목과 내용, 대표 이미지 한 장을 등록해주세요.</p></div></div><button type="button" class="curriculum-step__delete" data-delete-step><svg aria-hidden="true"><use href="#icon-trash"></use></svg><span>삭제</span></button></div>' +
+			'<div class="curriculum-step__body"><div class="curriculum-step__fields"><div class="curriculum-field"><div class="curriculum-field__label-row"><label>단계 제목 <span class="required">*</span></label><span class="curriculum-field__count"><b data-title-count>0</b> / 50</span></div><input class="input" type="text" maxlength="50" required data-title-input placeholder="예: 흙과 도구 익히기"></div><div class="curriculum-field"><div class="curriculum-field__label-row"><label>단계 내용 <span class="required">*</span></label><span class="curriculum-field__count"><b data-content-count>0</b> / 300</span></div><textarea class="textarea" maxlength="300" required data-content-input placeholder="이 단계에서 배우고 만드는 내용을 자세히 적어주세요."></textarea></div></div>' +
+			'<div class="curriculum-image-field"><span class="curriculum-image-field__label">단계 이미지 <span class="required">*</span></span><label class="curriculum-image"><input class="sr-only" type="file" accept="image/jpeg,image/png" required data-image-input><img src="' + placeholder + '" alt="커리큘럼 단계 이미지" data-image-preview><span class="curriculum-image__overlay"><svg aria-hidden="true"><use href="#icon-image"></use></svg><span>이미지 선택</span></span></label><p class="curriculum-image-field__help">JPG, PNG · 단계별 1장</p></div></div>';
+		list.appendChild(step);
+		bindStep(step);
+		renumber();
+		if (focus) step.querySelector('[data-title-input]').focus();
+	}
+
+	Array.from(list.querySelectorAll('[data-curriculum-step]')).forEach(bindStep);
+	if (!list.querySelector('[data-curriculum-step]')) createStep(false);
+	list.addEventListener('click', function (event) {
+		var button = event.target.closest('[data-delete-step]');
+		if (!button || button.disabled) return;
+		var step = button.closest('[data-curriculum-step]');
+		var preview = step.querySelector('[data-image-preview]');
+		if (preview.dataset.objectUrl) URL.revokeObjectURL(preview.dataset.objectUrl);
+		step.remove();
+		renumber();
+	});
+	addButton.addEventListener('click', function () { createStep(true); });
+	window.addEventListener('beforeunload', function () { objectUrls.forEach(URL.revokeObjectURL); });
+	renumber();
+}());
+</script>
+</body>
+</html>
