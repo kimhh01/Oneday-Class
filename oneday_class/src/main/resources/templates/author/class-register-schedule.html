@@ -45,41 +45,9 @@
 					<h1 class="page-title">클래스 등록하기 <svg class="title-leaf" aria-hidden="true"><use href="#icon-title-leaf"></use></svg></h1>
 					<p class="page-desc">원데이 클래스 일정과 가격 정보를 입력해주세요.</p>
 					<p class="reply-error" th:if="${registerError}" th:text="${registerError}">입력값을 확인해주세요.</p>
-					<p class="form-success" th:if="${draftSaved}" th:text="${draftSaved}" role="status">임시 저장했습니다.</p>
 				</header>
 
-				<nav class="step-nav-wrap" aria-label="클래스 등록 단계">
-					<ol class="step-nav">
-						<li class="step is-done">
-							<span class="step__num">01</span>
-							<span class="step__label">등록 시작</span>
-						</li>
-						<li class="step is-done">
-							<span class="step__num">02</span>
-							<span class="step__label">기본 정보</span>
-						</li>
-						<li class="step is-active" aria-current="step">
-							<span class="step__num">03</span>
-							<span class="step__label">일정 및 가격</span>
-						</li>
-						<li class="step">
-							<span class="step__num">04</span>
-							<span class="step__label">상세 정보</span>
-						</li>
-						<li class="step">
-							<span class="step__num">05</span>
-							<span class="step__label">커리큘럼</span>
-						</li>
-						<li class="step">
-							<span class="step__num">06</span>
-							<span class="step__label">미리보기</span>
-						</li>
-						<li class="step">
-							<span class="step__num">07</span>
-							<span class="step__label">등록 완료</span>
-						</li>
-					</ol>
-				</nav>
+				<div th:replace="~{author/fragments/class-register-steps :: steps(${scheduleForm.classCode}, 3, false, null)}"></div>
 
 				<form class="schedule-grid" id="scheduleForm" method="post" novalidate data-draft-form th:action="@{/author/classes/register/schedule}" th:object="${scheduleForm}">
 					<input type="hidden" name="classCode" th:value="${scheduleForm.classCode}">

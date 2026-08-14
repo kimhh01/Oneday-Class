@@ -536,8 +536,7 @@
 
 /* ---------- 우측 가이드 ---------- */
 .detail-guide {
-	position: sticky;
-	top: calc(var(--header-h) + 22px);
+	position: static;
 	padding: 20px 18px 18px;
 }
 
@@ -637,32 +636,7 @@
 
 /* ---------- 하단 이동 버튼 ---------- */
 .detail-layout > .detail-actions {
-	grid-column: 1;
-	display: flex;
-	height: auto;
-	justify-content: center;
-	margin: 0;
-	padding: 0;
-	border: 0;
-	border-radius: 0;
-	background: transparent;
-	box-shadow: none;
-}
-
-.register-form-page .detail-actions .step-actions__nav {
-	display: grid;
-	grid-template-columns: minmax(150px, 1fr) minmax(190px, 1.3fr);
-	gap: 12px;
-	width: min(100%, 520px);
-	min-width: 0;
-}
-
-.register-form-page .detail-actions .step-actions__previous,
-.register-form-page .detail-actions .step-actions__next {
-	width: 100%;
-	min-width: 0;
-	height: 44px;
-	border-radius: 7px;
+	grid-column: 1 / -1;
 }
 
 /* ---------- 반응형 ---------- */
@@ -741,9 +715,6 @@
 		min-height: 120px;
 	}
 
-	.register-form-page .detail-actions .step-actions__nav {
-		grid-template-columns: 1fr 1.2fr;
-	}
 }
 
 @media (max-width: 420px) {

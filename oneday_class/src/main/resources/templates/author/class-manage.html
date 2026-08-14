@@ -40,7 +40,6 @@
 					</div>
 				</header>
 				<p class="form-error" th:if="${managementError}" th:text="${managementError}" role="alert"></p>
-				<p class="form-success" th:if="${managementMessage}" th:text="${managementMessage}" role="status"></p>
 
 				<!-- 주요 지표 -->
 				<section class="mgmt-stats" aria-label="클래스 운영 지표">
@@ -107,7 +106,7 @@
 							<svg class="mgmt-search__icon" aria-hidden="true"><use href="#icon-search"></use></svg>
 						</div>
 					</div>
-					<button type="submit" class="btn btn--outline">검색</button>
+					<button type="submit" class="btn btn--primary mgmt-filter__submit"><svg aria-hidden="true"><use href="#icon-search"></use></svg>검색</button>
 				</form>
 
 				<!-- 상태 탭 -->

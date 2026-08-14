@@ -40,6 +40,10 @@ public class ClassImageDAO {
         return sqlSession.delete(NAMESPACE + "deleteClassImageListByType", param);
     }
 
+    public int deleteClassImageList(int classCode) {
+        return sqlSession.delete(NAMESPACE + "deleteClassImageList", classCode);
+    }
+
     // 클래스 이미지를 등록한다
     public int insertClassImage(ClassImageDTO ciDTO) {
         return sqlSession.insert(NAMESPACE + "insertClassImage", ciDTO);

@@ -30,22 +30,9 @@
 					<h1 class="page-title" th:text="${editMode == true ? '클래스 수정' : '클래스 등록하기'}">클래스 등록하기</h1>
 					<p class="page-desc" th:text="${editMode == true ? '상세 정보 2/2와 작품 갤러리를 수정합니다.' : '상세 정보 2/2와 작품 갤러리를 등록해주세요.'}">상세 정보 2/2와 작품 갤러리를 등록해주세요.</p>
 					<p class="reply-error" th:if="${registerError}" th:text="${registerError}">입력값을 확인해주세요.</p>
-					<p class="form-success" th:if="${draftSaved}" th:text="${draftSaved}" role="status">임시 저장했습니다.</p>
 				</header>
 				<p class="class-edit-notice" th:if="${editMode == true}">수정 내용은 별도 관리자 검수 없이 저장 즉시 반영됩니다.</p>
-				<div th:if="${editMode == true}" th:replace="~{author/fragments/class-edit-nav :: editNav(${editClassCode}, ${editStep})}"></div>
-
-				<nav class="step-nav-wrap" aria-label="클래스 등록 단계" th:unless="${editMode == true}">
-					<ol class="step-nav">
-						<li class="step is-done"><span class="step__num">01</span><span class="step__label">등록 시작</span></li>
-						<li class="step is-done"><span class="step__num">02</span><span class="step__label">기본 정보</span></li>
-						<li class="step is-done"><span class="step__num">03</span><span class="step__label">일정 및 가격</span></li>
-						<li class="step is-active" aria-current="step"><span class="step__num">04</span><span class="step__label">상세 정보 2/2</span></li>
-						<li class="step"><span class="step__num">05</span><span class="step__label">커리큘럼</span></li>
-						<li class="step"><span class="step__num">06</span><span class="step__label">미리보기</span></li>
-						<li class="step"><span class="step__num">07</span><span class="step__label">등록 완료</span></li>
-					</ol>
-				</nav>
+				<div th:replace="~{author/fragments/class-register-steps :: steps(${detailForm.classCode}, 4, ${editMode}, ${editStep})}"></div>
 
 				<form class="detail-layout" id="detailForm" method="post" enctype="multipart/form-data" novalidate data-draft-form
 					  th:action="${editMode == true ? editFormAction : '/author/classes/register/detail-extra'}" th:object="${detailForm}">
@@ -124,8 +111,8 @@
 					<div class="step-actions detail-actions">
 						<button type="submit" name="saveMode" value="stay" class="btn btn--ghost btn--lg step-actions__save"><svg aria-hidden="true"><use href="#icon-bookmark"></use></svg><span th:text="${editMode == true ? '저장' : '임시 저장'}">임시 저장</span></button>
 						<div class="step-actions__nav">
-							<a th:href="${editMode == true ? '/author/classes/' + editClassCode + '/edit/detail' : '/author/classes/register/detail?classCode=' + detailForm.classCode}" class="btn btn--ghost btn--lg step-actions__previous">이전</a>
-							<button type="submit" name="saveMode" value="next" class="btn btn--primary btn--lg step-actions__next">다음 단계</button>
+							<a th:href="${editMode == true ? '/author/classes/' + editClassCode + '/edit/detail' : '/author/classes/register/detail?classCode=' + detailForm.classCode}" class="btn btn--ghost btn--lg step-actions__previous">이전 단계</a>
+							<button type="submit" name="saveMode" value="next" class="btn btn--primary btn--lg step-actions__next"><span>다음 단계</span><span class="step-actions__next-icon"><svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg></span></button>
 						</div>
 					</div>
 				</form>

@@ -36,11 +36,15 @@
 		  AND TYPE = #{imageType}
 	</delete>
 
+	<delete id="deleteClassImageList" parameterType="int">
+		DELETE FROM CLASS_IMG
+		WHERE CLASS_CODE = #{classCode}
+	</delete>
+
 	<insert id="insertClassImage"
 		parameterType="kr.co.oneclass.author.classbasic.ClassImageDTO">
 		<selectKey keyProperty="imageCode" resultType="int" order="BEFORE">
-			SELECT (SELECT NVL(MAX(CLASS_IMG_CODE), 0) FROM CLASS_IMG)
-				+ SEQ_CLASS_IMG_CODE.NEXTVAL
+			SELECT SEQ_CLASS_IMG_CODE.NEXTVAL
 			FROM DUAL
 		</selectKey>
 		INSERT INTO CLASS_IMG (

@@ -473,6 +473,16 @@
 	background: #F2F8F3;
 }
 
+.customer-booking__more {
+	margin: 8px 0 0;
+	padding-top: 8px;
+	border-top: 1px dashed #E2E5E0;
+	font-size: 8px;
+	font-weight: 700;
+	text-align: center;
+	color: #6F776F;
+}
+
 .customer-booking__schedule input {
 	margin: 0;
 	accent-color: #2F844B;
@@ -602,8 +612,7 @@
 
 /* ---------- 우측 안내 ---------- */
 .preview-check-card {
-	position: sticky;
-	top: calc(var(--header-h) + 22px);
+	position: static;
 	padding: 20px 18px 18px;
 }
 
@@ -698,20 +707,19 @@
 
 /* ---------- 이동 버튼 ---------- */
 .preview-actions {
-	grid-column: 1;
-	display: flex;
+	grid-column: 1 / -1;
 	justify-content: flex-end;
 	gap: 10px;
 }
 
 .preview-actions .btn {
-	width: 160px;
-	height: 44px;
-	border-radius: 7px;
+	width: 188px;
+	height: 40px;
+	border-radius: 8px;
 }
 
 .preview-actions .btn--primary {
-	width: 190px;
+	width: 188px;
 }
 
 .preview-actions .is-disabled {

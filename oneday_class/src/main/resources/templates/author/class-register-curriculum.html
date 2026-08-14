@@ -29,22 +29,9 @@
 					<p class="page-desc" th:text="${editMode == true ? '운영 중인 클래스의 커리큘럼을 수정합니다.' : '수강생이 수업의 흐름을 이해할 수 있도록 커리큘럼을 구성해주세요.'}">수강생이 수업의 흐름을 이해할 수 있도록 커리큘럼을 구성해주세요.</p>
 				</header>
 				<p class="class-edit-notice" th:if="${editMode == true}">수정 내용은 별도 관리자 검수 없이 저장 즉시 반영됩니다.</p>
-				<div th:if="${editMode == true}" th:replace="~{author/fragments/class-edit-nav :: editNav(${editClassCode}, ${editStep})}"></div>
-
-				<nav class="step-nav-wrap" aria-label="클래스 등록 단계" th:unless="${editMode == true}">
-					<ol class="step-nav">
-						<li class="step is-done"><span class="step__num">01</span><span class="step__label">등록 시작</span></li>
-						<li class="step is-done"><span class="step__num">02</span><span class="step__label">기본 정보</span></li>
-						<li class="step is-done"><span class="step__num">03</span><span class="step__label">일정 및 가격</span></li>
-						<li class="step is-done"><span class="step__num">04</span><span class="step__label">상세 정보</span></li>
-						<li class="step is-active" aria-current="step"><span class="step__num">05</span><span class="step__label">커리큘럼</span></li>
-						<li class="step"><span class="step__num">06</span><span class="step__label">미리보기</span></li>
-						<li class="step"><span class="step__num">07</span><span class="step__label">등록 완료</span></li>
-					</ol>
-				</nav>
+				<div th:replace="~{author/fragments/class-register-steps :: steps(${curriculumForm.classCode}, 5, ${editMode}, ${editStep})}"></div>
 
 				<p class="form-error" th:if="${registerError}" th:text="${registerError}" role="alert">저장 오류</p>
-				<p class="form-success" th:if="${draftSaved}" th:text="${draftSaved}" role="status">임시 저장했습니다.</p>
 
 				<form class="curriculum-grid" id="curriculumForm" method="post" enctype="multipart/form-data" novalidate data-draft-form
 					  th:action="${editMode == true ? editFormAction : '/author/classes/register/curriculum'}" th:object="${curriculumForm}">

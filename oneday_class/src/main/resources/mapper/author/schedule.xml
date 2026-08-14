@@ -144,8 +144,7 @@
 	<insert id="insertRepeatSchedule"
 		parameterType="kr.co.oneclass.author.classbasic.RepeatScheduleDTO">
 		<selectKey keyProperty="repeatScheduleCode" resultType="int" order="BEFORE">
-			SELECT (SELECT NVL(MAX(REPEAT_RULE_CODE), 0) FROM CLASS_REPEAT_RULE)
-				+ SEQ_CLASS_REPEAT_RULE_CODE.NEXTVAL
+			SELECT SEQ_CLASS_REPEAT_RULE_CODE.NEXTVAL
 			FROM DUAL
 		</selectKey>
 		INSERT INTO CLASS_REPEAT_RULE (
@@ -158,8 +157,7 @@
 	<insert id="insertSchedule"
 		parameterType="kr.co.oneclass.author.classbasic.ScheduleDTO">
 		<selectKey keyProperty="scheduleCode" resultType="int" order="BEFORE">
-			SELECT (SELECT NVL(MAX(SCHEDULE_CODE), 0) FROM SCHEDULE)
-				+ SEQ_SCHEDULE_CODE.NEXTVAL
+			SELECT SEQ_SCHEDULE_CODE.NEXTVAL
 			FROM DUAL
 		</selectKey>
 		INSERT INTO SCHEDULE (

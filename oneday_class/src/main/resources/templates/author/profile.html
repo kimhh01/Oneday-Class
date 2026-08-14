@@ -127,24 +127,22 @@
 	</form>
 </dialog>
 
-<div class="profile-toast" id="profileToast" role="status" aria-live="polite" th:hidden="${message == null}"><svg aria-hidden="true"><use href="#icon-check-circle"></use></svg><span th:text="${message}"></span></div>
 
 <script>
 (function(){
 	'use strict';
 	var form=document.getElementById('profileForm'),photoInput=document.getElementById('profilePhoto'),photoPreview=document.getElementById('profilePhotoPreview'),initialPhoto=photoPreview.src,previewUrl='';
-	var intro=document.getElementById('introduction'),introCount=document.getElementById('introCount'),toast=document.getElementById('profileToast'),toastTimer;
+	var intro=document.getElementById('introduction'),introCount=document.getElementById('introCount');
 	var accountDialog=document.getElementById('accountDialog'),accountForm=document.getElementById('accountForm'),accountInput=document.getElementById('settlementAccount'),bankbookInput=document.getElementById('bankbookFile');
 
 	function updateIntroCount(){introCount.textContent=intro.value.length;}
-	function showToast(message){clearTimeout(toastTimer);toast.querySelector('span').textContent=message;toast.hidden=false;toastTimer=setTimeout(function(){toast.hidden=true;},2600);}
 	function closeAccountDialog(){accountDialog.close();}
 
 	updateIntroCount();
 	intro.addEventListener('input',updateIntroCount);
 	photoInput.addEventListener('change',function(){var file=photoInput.files[0];if(!file)return;if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl=URL.createObjectURL(file);photoPreview.src=previewUrl;});
 
-	document.getElementById('resetProfile').addEventListener('click',function(){setTimeout(function(){if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl='';photoPreview.src=initialPhoto;updateIntroCount();showToast('변경사항을 되돌렸습니다.');},0);});
+	document.getElementById('resetProfile').addEventListener('click',function(){setTimeout(function(){if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl='';photoPreview.src=initialPhoto;updateIntroCount();},0);});
 
 	document.getElementById('openAccountDialog').addEventListener('click',function(){accountDialog.showModal();});
 	document.getElementById('closeAccountDialog').addEventListener('click',closeAccountDialog);

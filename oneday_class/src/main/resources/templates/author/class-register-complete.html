@@ -27,17 +27,7 @@
 					<p class="page-desc">원데이 클래스 등록 신청이 완료되었습니다.</p>
 				</header>
 
-				<nav class="step-nav-wrap" aria-label="클래스 등록 단계">
-					<ol class="step-nav">
-						<li class="step is-done"><span class="step__num">01</span><span class="step__label">등록 시작</span></li>
-						<li class="step is-done"><span class="step__num">02</span><span class="step__label">기본 정보</span></li>
-						<li class="step is-done"><span class="step__num">03</span><span class="step__label">일정 및 가격</span></li>
-						<li class="step is-done"><span class="step__num">04</span><span class="step__label">상세 정보</span></li>
-						<li class="step is-done"><span class="step__num">05</span><span class="step__label">커리큘럼</span></li>
-						<li class="step is-done"><span class="step__num">06</span><span class="step__label">미리보기</span></li>
-						<li class="step is-active" aria-current="step"><span class="step__num">07</span><span class="step__label">등록 완료</span></li>
-					</ol>
-				</nav>
+				<div th:replace="~{author/fragments/class-register-steps :: steps(${classResult.classCode}, 7, false, null)}"></div>
 
 				<section class="registration-result" aria-labelledby="registrationResultTitle">
 					<div class="registration-result__success" aria-hidden="true">

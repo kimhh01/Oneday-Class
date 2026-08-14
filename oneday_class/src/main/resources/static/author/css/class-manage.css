@@ -8,7 +8,7 @@
 
 /* ---------- 목록 : 필터 열 배치 ---------- */
 .class-filter {
-	grid-template-columns: minmax(300px, 1.15fr) 200px minmax(260px, 1fr);
+	grid-template-columns: minmax(300px, 1.15fr) 200px minmax(260px, 1fr) 112px;
 	align-items: end;
 }
 
@@ -405,6 +405,7 @@
 @media (max-width: 1200px) {
 	.class-filter { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 	.class-filter .mgmt-filter__field:first-child { grid-column: 1 / -1; }
+	.class-filter .mgmt-filter__submit { grid-column: 1 / -1; }
 	.settle__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 1024px) {
@@ -416,6 +417,8 @@
 }
 @media (max-width: 768px) {
 	.class-filter { grid-template-columns: minmax(0, 1fr); }
+	.class-filter .mgmt-filter__field:first-child,
+	.class-filter .mgmt-filter__submit { grid-column: auto; }
 	.class-hero {
 		grid-template-columns: minmax(0, 1fr);
 		padding: 18px;
@@ -457,13 +460,30 @@
 .mgmt-table--list th:nth-child(8) { width: 9.2%; }   /* 상태 */
 .mgmt-table--list th:nth-child(9) { width: 10.4%; }  /* 관리 */
 
-/* 일정별 운영 현황 : 여유를 열당 42.6px 씩 나눠 가진다 */
-.mgmt-table--schedule { min-width: 740px; }
-.mgmt-table--schedule th:nth-child(1) { width: 11.2%; }  /* 일정 번호 */
-.mgmt-table--schedule th:nth-child(2) { width: 14.9%; }  /* 날짜 */
-.mgmt-table--schedule th:nth-child(3) { width: 13.9%; }  /* 시간 */
-.mgmt-table--schedule th:nth-child(4) { width: 12.7%; }  /* 최소/최대 인원 */
-.mgmt-table--schedule th:nth-child(5) { width: 10.7%; }  /* 신청 인원 */
-.mgmt-table--schedule th:nth-child(6) { width: 10.7%; }  /* 남은 자리 */
-.mgmt-table--schedule th:nth-child(7) { width: 12.2%; }  /* 상태 */
-.mgmt-table--schedule th:nth-child(8) { width: 13.7%; }  /* 관리 */
+/* 일정별 운영 현황 */
+.mgmt-table--schedule {
+	min-width: 740px;
+}
+
+/* 8개 열 너비 동일 */
+.mgmt-table--schedule th:nth-child(1),
+.mgmt-table--schedule th:nth-child(2),
+.mgmt-table--schedule th:nth-child(3),
+.mgmt-table--schedule th:nth-child(4),
+.mgmt-table--schedule th:nth-child(5),
+.mgmt-table--schedule th:nth-child(6),
+.mgmt-table--schedule th:nth-child(7),
+.mgmt-table--schedule th:nth-child(8) {
+	width: 12.5%;
+}
+
+/* 이 표에서만 가운데 정렬 */
+.mgmt-table--schedule th,
+.mgmt-table--schedule td,
+.mgmt-table--schedule .col-num,
+.mgmt-table--schedule .col-right,
+.mgmt-table--schedule .col-badge,
+.mgmt-table--schedule .col-action,
+.mgmt-table--schedule .mgmt-table__action {
+	text-align: center;
+}

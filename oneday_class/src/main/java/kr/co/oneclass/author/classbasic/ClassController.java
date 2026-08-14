@@ -42,8 +42,25 @@ public class ClassController {
     // 클래스 등록 시작 버튼
     @PostMapping("/author/classes/register/start")
     public String startClassRegister(HttpSession session) {
-        int classCode = cService.addDraftClass(AuthorSessionUtils.getAuthorCode(session));
-        return "redirect:/author/classes/register/basic?classCode=" + classCode;
+        long authorCode = AuthorSessionUtils.getAuthorCode(session);
+        int classCode = cService.addDraftClass(authorCode);
+        return "redirect:" + cService.getDraftResumePath(authorCode, classCode);
+    }
+
+    @PostMapping("/author/classes/register/restart")
+    public String restartClassRegister(
+            @RequestParam("classCode") int classCode,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        long authorCode = AuthorSessionUtils.getAuthorCode(session);
+        try {
+            int newClassCode = cService.replaceDraftClass(authorCode, classCode);
+            return "redirect:/author/classes/register/basic?classCode=" + newClassCode;
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+            redirectAttributes.addFlashAttribute("registerError", exception.getMessage());
+            return "redirect:/author/classes/register-guide";
+        }
     }
 
     // 클래스명·카테고리·소개·대표사진 입력 화면

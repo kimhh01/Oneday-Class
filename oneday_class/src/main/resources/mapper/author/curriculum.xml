@@ -28,8 +28,7 @@
 	<insert id="insertCurriculumStep"
 		parameterType="kr.co.oneclass.author.classbasic.CurriculumStepDTO">
 		<selectKey keyProperty="curriculumCode" resultType="int" order="BEFORE">
-			SELECT (SELECT NVL(MAX(CURRICULUM_CODE), 0) FROM CLASS_CURRICULUM)
-				+ SEQ_CLASS_CURRICULUM_CODE.NEXTVAL
+			SELECT SEQ_CLASS_CURRICULUM_CODE.NEXTVAL
 			FROM DUAL
 		</selectKey>
 		INSERT INTO CLASS_CURRICULUM (

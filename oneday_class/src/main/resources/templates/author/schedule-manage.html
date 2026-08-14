@@ -36,7 +36,6 @@
 				</header>
 
 				<p class="form-error" th:if="${managementError}" th:text="${managementError}" role="alert"></p>
-				<p class="form-success" th:if="${managementMessage}" th:text="${managementMessage}" role="status"></p>
 
 				<section class="mgmt-stats" aria-label="조회된 일정 운영 지표">
 					<div class="mgmt-stat">
@@ -101,12 +100,12 @@
 							<svg class="mgmt-search__icon" aria-hidden="true"><use href="#icon-search"></use></svg>
 						</div>
 					</div>
-					<button type="submit" class="btn btn--outline">검색</button>
+					<button type="submit" class="btn btn--primary mgmt-filter__submit"><svg aria-hidden="true"><use href="#icon-search"></use></svg>검색</button>
 				</form>
 
 				<div class="schedule-guide" role="note">
 					<svg aria-hidden="true"><use href="#icon-info"></use></svg>
-					<p>일정 취소는 남은 자리를 0석으로 마감하고 예약·결제를 취소·환불완료 상태로 변경합니다. 자동 메시지는 발송되지 않으므로 예약자가 있다면 카카오톡으로 직접 안내해주세요.</p>
+					<p>일정 취소시에 자동 알림이 되지 않으니 수강생들에게 연락해 주세요.</p>
 				</div>
 
 				<section class="mgmt-panel" aria-label="일정 목록">

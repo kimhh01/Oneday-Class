@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="/author/css/header.css" th:href="@{/author/css/header.css}">
 <link rel="stylesheet" href="/author/css/sidebar.css" th:href="@{/author/css/sidebar.css}">
 <link rel="stylesheet" href="/author/css/class-register.css" th:href="@{/author/css/class-register.css}">
-<link rel="stylesheet" href="/author/css/class-register-preview.css?v=20260804-2" th:href="@{/author/css/class-register-preview.css(v='20260804-2')}">
+<link rel="stylesheet" href="/author/css/class-register-preview.css?v=20260813-1" th:href="@{/author/css/class-register-preview.css(v='20260813-1')}">
 <script src="/author/js/layout.js" th:src="@{/author/js/layout.js}" defer></script>
 </head>
 <body class="author-page register-form-page register-preview-page" data-menu="class-register" data-page="클래스 등록">
@@ -27,25 +27,15 @@
 					<p class="page-desc">등록 전 입력한 정보와 수강생에게 보일 화면을 최종 확인해주세요.</p>
 				</header>
 
-				<nav class="step-nav-wrap" aria-label="클래스 등록 단계">
-					<ol class="step-nav">
-						<li class="step is-done"><span class="step__num">01</span><span class="step__label">등록 시작</span></li>
-						<li class="step is-done"><span class="step__num">02</span><span class="step__label">기본 정보</span></li>
-						<li class="step is-done"><span class="step__num">03</span><span class="step__label">일정 및 가격</span></li>
-						<li class="step is-done"><span class="step__num">04</span><span class="step__label">상세 정보</span></li>
-						<li class="step is-done"><span class="step__num">05</span><span class="step__label">커리큘럼</span></li>
-						<li class="step is-active" aria-current="step"><span class="step__num">06</span><span class="step__label">미리보기</span></li>
-						<li class="step"><span class="step__num">07</span><span class="step__label">등록 완료</span></li>
-					</ol>
-				</nav>
+				<div th:replace="~{author/fragments/class-register-steps :: steps(${preview.classBasic.classCode}, 6, false, null)}"></div>
 				<p class="form-error" th:if="${registerError}" th:text="${registerError}" role="alert">등록 오류</p>
 
 				<form class="preview-review-layout" method="post" th:action="@{/author/classes/register/submit}">
 					<input type="hidden" name="classCode" th:value="${preview.classBasic.classCode}">
 					<section class="preview-review-card" aria-labelledby="previewReviewTitle">
 						<header class="preview-review-card__head">
-							<div><h2 id="previewReviewTitle">등록 정보 최종 확인</h2><p>아래 화면은 수강생이 실제 클래스 상세 페이지에서 보게 될 모습이에요.</p></div>
-							<span><svg aria-hidden="true"><use href="#icon-eye"></use></svg>수강생 화면</span>
+							<div><h2 id="previewReviewTitle">등록 정보 최종 확인</h2><p>입력한 클래스 정보를 최종 확인해주세요.</p></div>
+							<span><svg aria-hidden="true"><use href="#icon-eye"></use></svg>미리보기</span>
 						</header>
 
 						<!-- 고객용 클래스 상세 페이지를 별도 팝업 없이 현재 화면에 직접 노출한다. -->
@@ -100,7 +90,9 @@
 									<del th:text="${#numbers.formatInteger(preview.classSchedule.regularPrice, 1, 'COMMA') + '원'}">80,000원</del>
 									<div class="customer-booking__schedule">
 										<h4><svg aria-hidden="true"><use href="#icon-calendar"></use></svg>일정 선택</h4>
-										<label th:each="schedule, stat : ${preview.classSchedule.scheduleList}"><input type="radio" name="customerSchedule" th:checked="${stat.first}"><span><b th:text="${(schedule.scheduleDate == null ? '-' : #dates.format(schedule.scheduleDate,'yyyy.MM.dd')) + ' ' + schedule.startTime}">일정</b><small th:text="${'정원 ' + schedule.maxPeople + '명'}">정원</small></span></label>
+									<label th:each="schedule, stat : ${preview.classSchedule.scheduleList}" th:if="${stat.index < 4}"><input type="radio" name="customerSchedule" th:checked="${stat.first}"><span><b th:text="${(schedule.scheduleDate == null ? '-' : #dates.format(schedule.scheduleDate,'yyyy.MM.dd')) + ' ' + schedule.startTime}">일정</b><small th:text="${'정원 ' + schedule.maxPeople + '명'}">정원</small></span></label>
+									<p class="customer-booking__more" th:if="${#lists.size(preview.classSchedule.scheduleList) > 4}"
+									   th:text="${'외 ' + (#lists.size(preview.classSchedule.scheduleList) - 4) + '개 일정'}">외 일정</p>
 									</div>
 									<div class="customer-booking__place"><svg aria-hidden="true"><use href="#icon-map-pin"></use></svg><span><b>클래스 장소</b><small th:text="${preview.classLocation.address + ' ' + preview.classLocation.detailAddress}">주소</small></span></div>
 									<button type="button" disabled>미리보기에서는 예약할 수 없어요</button>
@@ -125,8 +117,8 @@
 						<div class="preview-check-card__tip"><svg aria-hidden="true"><use href="#icon-check-circle"></use></svg><p>현재 화면은 등록 전 초안이며 아직 수강생에게 공개되지 않습니다.</p></div>
 					</aside>
 
-					<div class="preview-actions">
-						<a href="class-register-curriculum.html" th:href="@{/author/classes/register/curriculum(classCode=${preview.classBasic.classCode})}" class="btn btn--ghost btn--lg">이전</a>
+					<div class="step-actions preview-actions">
+						<a href="class-register-curriculum.html" th:href="@{/author/classes/register/curriculum(classCode=${preview.classBasic.classCode})}" class="btn btn--ghost btn--lg">이전 단계</a>
 						<button type="submit" class="btn btn--primary btn--lg" id="registerRequest"
 								data-href="class-register-complete.html" th:attr="data-href=@{/author/classes/register/submit}">등록 신청</button>
 					</div>

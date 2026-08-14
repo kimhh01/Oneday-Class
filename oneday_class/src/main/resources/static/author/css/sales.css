@@ -40,3 +40,31 @@
 .sales-pagination a{display:grid;place-items:center;min-width:35px;height:35px;padding:0 8px;border:1px solid transparent;border-radius:7px;color:#726A61;text-decoration:none}
 .sales-pagination a[aria-current="page"]{border-color:#77A786;background:#fff;color:#247043;font-weight:700}
 .sales-pagination a.is-disabled{pointer-events:none;opacity:.38}
+
+/* =============================================================
+   결제 내역 표 정렬 통일
+   - 기본 데이터 / 숫자 / 상태 / 관리 : 가운데
+   - 클래스 정보만 왼쪽
+   ============================================================= */
+
+.sales-table th,
+.sales-table td {
+	text-align: center;
+}
+
+/* 기존 숫자 오른쪽 정렬 덮어쓰기 */
+.sales-table .is-number {
+	text-align: center;
+	font-variant-numeric: tabular-nums;
+}
+
+/* 클래스 이미지 + 클래스명 열은 왼쪽 유지 */
+.sales-table th:nth-child(3),
+.sales-table td:nth-child(3) {
+	text-align: left;
+}
+
+/* 클래스 이미지와 이름도 왼쪽부터 정렬 */
+.sales-class {
+	justify-content: flex-start;
+}

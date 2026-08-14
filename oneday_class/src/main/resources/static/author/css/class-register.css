@@ -172,6 +172,91 @@
 	background-size: cover;
 }
 
+.has-modal {
+	overflow: hidden;
+}
+
+.draft-choice-modal {
+	position: fixed;
+	inset: 0;
+	z-index: 1000;
+	display: grid;
+	place-items: center;
+	padding: 20px;
+}
+
+.draft-choice-modal[hidden] {
+	display: none;
+}
+
+.draft-choice-modal__backdrop {
+	position: absolute;
+	inset: 0;
+	background: rgba(24, 21, 18, .5);
+}
+
+.draft-choice-modal__panel {
+	position: relative;
+	width: min(100%, 430px);
+	padding: 30px;
+	border: 1px solid var(--border);
+	border-radius: 14px;
+	background: #fff;
+	box-shadow: 0 20px 60px rgba(34, 27, 20, .2);
+	text-align: center;
+}
+
+.draft-choice-modal__panel h2 {
+	font-size: 20px;
+	font-weight: 700;
+}
+
+.draft-choice-modal__name {
+	margin: 16px 0 10px;
+	padding: 11px 14px;
+	border-radius: 8px;
+	background: var(--bg-soft);
+	font-weight: 700;
+	color: var(--text-body);
+}
+
+.draft-choice-modal__panel > p:last-of-type {
+	font-size: 13px;
+	color: var(--text-muted);
+}
+
+.draft-choice-modal__actions {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 10px;
+	margin-top: 24px;
+}
+
+.draft-choice-modal__actions form,
+.draft-choice-modal__actions .btn {
+	width: 100%;
+}
+
+.draft-choice-modal__delete {
+	border-color: #D8B5AE;
+	background: #FFF7F5;
+	color: #9B4035;
+}
+
+.draft-choice-modal__delete:hover {
+	background: #FDECE8;
+}
+
+@media (max-width: 520px) {
+	.draft-choice-modal__panel {
+		padding: 24px 20px;
+	}
+
+	.draft-choice-modal__actions {
+		grid-template-columns: 1fr;
+	}
+}
+
 /* ---------- 등록 시작 안내 ---------- */
 .start-guide {
 	display: grid;
@@ -307,8 +392,23 @@
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	gap: 10px;
 	text-align: center;
+}
+
+.step__link,
+.step__static {
+	display: flex;
+	width: 100%;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	border-radius: 10px;
+}
+
+.step__link:hover .step__num {
+	border-color: #91B99E;
+	background: #F6FBF7;
+	color: #1F6337;
 }
 
 .step::before {
@@ -367,6 +467,12 @@
 .step.is-active .step__label {
 	color: #1d6b3e;
 	font-weight: 700;
+}
+
+.step.is-active .step__link:hover .step__num {
+	border-color: #1d6b3e;
+	background: #1d6b3e;
+	color: #fff;
 }
 
 /* ---------- 기본 정보 2열 ---------- */
@@ -489,11 +595,6 @@
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
-	transition: transform .25s;
-}
-
-.upload-zone:hover .upload-zone__preview {
-	transform: scale(1.015);
 }
 
 .upload-zone__overlay {
@@ -893,23 +994,19 @@
 		line-height: 1.5;
 	}
 	.register-form-page .register-info-card > .card__body {
-		padding: 22px 24px 24px 20px;
+		display: grid;
+		gap: 18px;
+		padding: 22px 20px 24px;
 	}
 	.register-form-page .register-photo-card > .card__body {
-		padding: 18px 18px 24px 20px;
+		padding: 18px 20px 24px;
 	}
 
 	.register-form-page .register-info-card .field {
 		gap: 16px;
-		margin-bottom: 16px;
+		margin-bottom: 0;
 		padding: 0;
 		border-bottom: 0;
-	}
-	.register-form-page .register-info-card .field:nth-child(5) {
-		margin-bottom: 21px;
-	}
-	.register-form-page .register-info-card .field:last-child {
-		margin-bottom: 0;
 	}
 	.register-form-page .register-info-card .field__label {
 		width: 102px;
@@ -1018,6 +1115,7 @@
 
 .location-grid > .card {
 	min-width: 0;
+	height: 100%;
 }
 
 .location-info-card,

@@ -1,7 +1,7 @@
 @charset "UTF-8";
 
 .schedule-filter {
-	grid-template-columns: minmax(300px, 1.1fr) 190px minmax(280px, 1fr);
+	grid-template-columns: minmax(300px, 1.1fr) 190px minmax(280px, 1fr) 112px;
 	align-items: end;
 }
 
@@ -69,6 +69,7 @@
 @media (max-width: 1200px) {
 	.schedule-filter { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 	.schedule-filter .mgmt-filter__field:first-child { grid-column: 1 / -1; }
+	.schedule-filter .mgmt-filter__submit { grid-column: 1 / -1; }
 }
 
 @media (max-width: 768px) {

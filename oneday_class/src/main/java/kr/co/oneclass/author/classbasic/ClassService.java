@@ -26,7 +26,7 @@ public class ClassService {
 
     private static final Logger log = LoggerFactory.getLogger(ClassService.class);
     private static final String MAIN_IMAGE_TYPE = "대표";
-    private static final String RESULT_IMAGE_TYPE = "완성작";
+    private static final String RESULT_IMAGE_TYPE = "완성";
     private static final String GALLERY_IMAGE_TYPE = "갤러리";
     private static final String LEGACY_DETAIL_IMAGE_TYPE = "상세";
     private static final String DRAFT_PLACEHOLDER = "작성 중";
@@ -51,12 +51,59 @@ public class ClassService {
     // 등록 시작 시 초안 클래스를 생성하고 클래스 코드를 발급한다
     @Transactional
     public int addDraftClass(long authorCode) {
+        cDAO.lockDraftOwner(authorCode);
+        ClassBasicDTO savedDraft = cDAO.selectLatestDraftClass(authorCode);
+        if (savedDraft != null) {
+            return savedDraft.getClassCode();
+        }
+
         ClassBasicDTO draft = new ClassBasicDTO();
         draft.setAuthorCode(authorCode);
         if (cDAO.insertDraftClass(draft) != 1) {
             throw new IllegalStateException("클래스 등록을 시작하지 못했습니다.");
         }
         return draft.getClassCode();
+    }
+
+    @Transactional
+    public int replaceDraftClass(long authorCode, int classCode) {
+        cDAO.lockDraftOwner(authorCode);
+        ClassBasicDTO draft = cDAO.selectLatestDraftClass(authorCode);
+        if (draft == null || draft.getClassCode() != classCode) {
+            throw new IllegalArgumentException("삭제할 수 있는 작성 중 클래스가 없습니다.");
+        }
+
+        List<String> imagePaths = ciDAO.selectClassImageList(classCode).stream()
+                .map(ClassImageDTO::getImagePath)
+                .toList();
+        List<String> curriculumImagePaths = cuDAO.selectCurriculumStepList(authorCode, classCode).stream()
+                .map(CurriculumStepDTO::getImagePath)
+                .filter(path -> path != null && !path.isBlank())
+                .toList();
+
+        sDAO.deleteScheduleList(classCode);
+        sDAO.deleteRepeatScheduleList(classCode);
+        cuDAO.deleteCurriculumStepList(classCode);
+        ciDAO.deleteClassImageList(classCode);
+        cDAO.deleteClassDetailInfoList(classCode);
+        cDAO.deleteClassOptionList(classCode);
+        cDAO.deleteClassNoticeList(classCode);
+        cDAO.deleteClassTagList(classCode);
+
+        if (cDAO.deleteDraftClass(authorCode, classCode) != 1) {
+            throw new IllegalArgumentException("삭제할 수 있는 작성 중 클래스가 없습니다.");
+        }
+
+        ClassBasicDTO newDraft = new ClassBasicDTO();
+        newDraft.setAuthorCode(authorCode);
+        if (cDAO.insertDraftClass(newDraft) != 1) {
+            throw new IllegalStateException("클래스 등록을 시작하지 못했습니다.");
+        }
+
+        List<String> pathsToDelete = new ArrayList<>(imagePaths);
+        pathsToDelete.addAll(curriculumImagePaths);
+        deleteAfterCommit(pathsToDelete.stream().distinct().toList());
+        return newDraft.getClassCode();
     }
 
     // 가장 최근에 저장한 초안을 조회한다

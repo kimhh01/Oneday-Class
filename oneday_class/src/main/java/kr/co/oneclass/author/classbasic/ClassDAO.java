@@ -24,9 +24,17 @@ public class ClassDAO {
         return sqlSession.insert(NAMESPACE + "insertDraftClass", cbDTO);
     }
 
+    public void lockDraftOwner(long authorCode) {
+        sqlSession.selectOne(NAMESPACE + "lockDraftOwner", authorCode);
+    }
+
     // 작가가 가장 최근에 저장한 작성중 초안을 조회한다
     public ClassBasicDTO selectLatestDraftClass(long authorCode) {
         return sqlSession.selectOne(NAMESPACE + "selectLatestDraftClass", authorCode);
+    }
+
+    public int deleteDraftClass(long authorCode, int classCode) {
+        return sqlSession.delete(NAMESPACE + "deleteDraftClass", ownerParam(authorCode, classCode));
     }
 
     // 기본정보를 조회한다
@@ -113,6 +121,10 @@ public class ClassDAO {
         param.put("classCode", classCode);
         param.put("detailType", "추천");
         return sqlSession.delete(NAMESPACE + "deleteDetailInfoList", param);
+    }
+
+    public int deleteClassDetailInfoList(int classCode) {
+        return sqlSession.delete(NAMESPACE + "deleteClassDetailInfoList", classCode);
     }
 
     // '이런분께 추천해요' 목록을 등록한다

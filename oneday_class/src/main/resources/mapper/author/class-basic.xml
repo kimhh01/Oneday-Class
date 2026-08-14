@@ -5,11 +5,11 @@
 <!-- 클래스 등록 기본정보·장소정보 Mapper -->
 <mapper namespace="kr.co.oneclass.author.classbasic.ClassDAO">
 
-	<!-- 기존 클래스 코드 1~5와 시퀀스 시작값이 겹쳐도 충돌하지 않도록 오프셋을 둔다 -->
+	<!-- 신규 PK는 보정된 Oracle 시퀀스의 NEXTVAL만 사용한다 -->
 	<insert id="insertDraftClass"
 		parameterType="kr.co.oneclass.author.classbasic.ClassBasicDTO">
 		<selectKey keyProperty="classCode" resultType="int" order="BEFORE">
-			SELECT (SELECT NVL(MAX(CLASS_CODE), 0) FROM CLASS) + SEQ_CLASS_CODE.NEXTVAL
+			SELECT SEQ_CLASS_CODE.NEXTVAL
 			FROM DUAL
 		</selectKey>
 		INSERT INTO CLASS (
@@ -27,6 +27,13 @@
 			'작성 중', 0, 0, '작성중', NULL, SYSDATE, 'basic'
 		)
 	</insert>
+
+	<select id="lockDraftOwner" parameterType="long" resultType="long">
+		SELECT OPERATOR_CODE
+		FROM CREATOR
+		WHERE OPERATOR_CODE = #{authorCode}
+		FOR UPDATE
+	</select>
 
 	<select id="selectLatestDraftClass" parameterType="long"
 		resultType="kr.co.oneclass.author.classbasic.ClassBasicDTO">
@@ -56,6 +63,14 @@
 		)
 		WHERE ROWNUM = 1
 	</select>
+
+	<delete id="deleteDraftClass" parameterType="map">
+		DELETE FROM CLASS
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND STATUS = '준비중'
+		  AND APPROVAL_STATUS = '작성중'
+	</delete>
 
 	<select id="selectClassBasic" parameterType="map"
 		resultType="kr.co.oneclass.author.classbasic.ClassBasicDTO">
@@ -337,10 +352,14 @@
 		  AND CHARACTER = #{detailType}
 	</delete>
 
+	<delete id="deleteClassDetailInfoList" parameterType="int">
+		DELETE FROM DETAIL_INFO
+		WHERE CLASS_CODE = #{classCode}
+	</delete>
+
 	<insert id="insertDetailInfo" parameterType="map">
 		<selectKey keyProperty="generatedCode" resultType="int" order="BEFORE">
-			SELECT (SELECT NVL(MAX(DETAIL_INFO_CODE), 0) FROM DETAIL_INFO)
-				+ SEQ_DETAIL_INFO_CODE.NEXTVAL
+			SELECT SEQ_DETAIL_INFO_CODE.NEXTVAL
 			FROM DUAL
 		</selectKey>
 		INSERT INTO DETAIL_INFO (DETAIL_INFO_CODE, CLASS_CODE, CHARACTER, INGREDIENTS)
@@ -369,8 +388,7 @@
 
 	<insert id="insertClassNotice" parameterType="map">
 		<selectKey keyProperty="generatedCode" resultType="int" order="BEFORE">
-			SELECT (SELECT NVL(MAX(ADDITIONAL_INFO_CODE), 0) FROM CLASS_ADDITIONAL_INFO)
-				+ SEQ_CLASS_ADDITIONAL_INFO_CODE.NEXTVAL
+			SELECT SEQ_CLASS_ADDITIONAL_INFO_CODE.NEXTVAL
 			FROM DUAL
 		</selectKey>
 		INSERT INTO CLASS_ADDITIONAL_INFO (
@@ -387,8 +405,7 @@
 
 	<insert id="insertClassTag" parameterType="map">
 		<selectKey keyProperty="generatedCode" resultType="int" order="BEFORE">
-			SELECT (SELECT NVL(MAX(TAG_CODE), 0) FROM TAG)
-				+ SEQ_TAG_CODE.NEXTVAL
+			SELECT SEQ_TAG_CODE.NEXTVAL
 			FROM DUAL
 		</selectKey>
 		INSERT INTO TAG (TAG_CODE, CLASS_CODE, TAG_NAME)
