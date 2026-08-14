@@ -10,6 +10,11 @@
 	        r.reservation_code AS reservationCode,
 	        r.class_code AS classCode,
 	        c.name AS className,
+	        
+	        /* 💡 class 테이블(c)에서 operator_code를 직접 가져와 유실 방지 */
+	        c.operator_code AS operatorCode,
+	        cr.activity_name AS activityName,
+	        
 	        img.image AS classImg,
 	        c.address AS address,
 	        TO_CHAR(r.reservation_date, 'YYYY.MM.DD(DY) HH24:MI') AS reservationDate,
@@ -28,6 +33,10 @@
 	        END AS classStatus
 	    FROM reservation r
 	    JOIN class c ON r.class_code = c.class_code
+	    
+	    /* 💡 class(c)의 operator_code와 creator(cr)의 operator_code 조인 */
+	    LEFT JOIN creator cr ON c.operator_code = cr.operator_code
+	    
 	    LEFT JOIN class_img img ON c.class_code = img.class_code 
 	                           AND img.type = '대표' 
 	                           AND img.sort_order = 1

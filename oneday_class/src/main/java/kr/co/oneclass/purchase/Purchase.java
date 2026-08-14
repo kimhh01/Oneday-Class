@@ -13,7 +13,6 @@ public class Purchase {
 
 	// 1. CLASS 테이블 매핑
     private int classCode;             // class_code
-    private int operatorCode;          // operator_code
     private int categoryCode;          // category_code
     private String className;           // name (클래스명)
     private int classPrice;            // price
@@ -41,6 +40,10 @@ public class Purchase {
     private String pgCode;              // PG_code
     private Integer refund;             // refund
     private String refundDate;          // refund_date
+    
+    // 4. CREATOR 테이블 매핑 
+    private Long operatorCode;			// 작가 코드
+    private String activityName;		// 작가 이름
 
     // HTML(purchase.html) 바인딩 호환용 Getter
     public String getStatus() {
