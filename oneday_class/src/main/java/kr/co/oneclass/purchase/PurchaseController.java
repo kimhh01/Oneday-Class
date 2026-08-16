@@ -74,49 +74,4 @@ public class PurchaseController {
 
         return "purchase/purchase_detail";
     }
-
-    /**
-     * 3. 리뷰 작성 폼 이동
-     */
-    @GetMapping("/review/write")
-    public String reviewForm(@RequestParam("reservationCode") String reservationCode,
-                             Model model,
-                             HttpSession session) {
-
-        Member loginMember = (Member) session.getAttribute("loginMember");
-        if (loginMember == null) {
-            return "redirect:/member/login";
-        }
-
-        // 리뷰 작성할 클래스 정보 pre-load
-        Purchase purchase = ps.getPurchaseDetail(reservationCode);
-        model.addAttribute("purchase", purchase);
-
-        return "purchase/review_write";
-    }
-
-    /**
-     * 4. 리뷰 등록 처리
-     */
-    @PostMapping("/review/write")
-    public String writeReview(Object rdto,
-                              @RequestParam(value = "image", required = false) MultipartFile image) {
-
-        ps.writeReview(rdto);
-        return "redirect:/mypage/purchase";
-    }
-
-    /**
-     * 5. 작성 리뷰 상세 보기
-     */
-    @GetMapping("/review/view")
-    public String reviewView(@RequestParam("memberCode") int memberCode,
-                             @RequestParam("classCode") int classCode,
-                             Model model) {
-
-        Object review = ps.reviewView(memberCode, classCode);
-        model.addAttribute("review", review);
-
-        return "purchase/review_detail";
-    }
 }

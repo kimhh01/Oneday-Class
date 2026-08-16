@@ -9,57 +9,49 @@
 	    SELECT 
 	        r.reservation_code AS reservationCode,
 	        r.class_code AS classCode,
+	        r.member_code AS memberCode,
 	        c.name AS className,
-	        
-	        /* 💡 class 테이블(c)에서 operator_code를 직접 가져와 유실 방지 */
 	        c.operator_code AS operatorCode,
 	        cr.activity_name AS activityName,
-	        
 	        img.image AS classImg,
 	        c.address AS address,
 	        TO_CHAR(r.reservation_date, 'YYYY.MM.DD(DY) HH24:MI') AS reservationDate,
 	        TO_CHAR(r.reservation_date, 'YYYY.MM.DD(DY) HH24:MI') AS classDate,
 	        
-	        /* 
-	           [상태 조건]
-	           1. 취소 관련 상태('취소', '취소완료', '환불완료' 등)인 경우 수강완료로 변경하지 않고 기존 취소 상태 유지
-	           2. 수강 일시(reservation_date)가 현재 시간(SYSDATE)을 지난 경우 '수강완료'로 판별
-	           3. 그 외 수강 일시 이전인 정상 구매건은 기본 '예약' (또는 r.status 기본값) 상태 유지
-	        */
 	        CASE 
 	            WHEN r.status LIKE '%취소%' OR r.status LIKE '%환불%' THEN r.status
 	            WHEN r.reservation_date &lt; SYSDATE THEN '수강완료'
 	            ELSE r.status
-	        END AS classStatus
+	        END AS classStatus,
+	
+	        /* 💡 NVL을 사용하여 리뷰가 없으면 0, 있으면 review_code를 반환 */
+	        NVL(rev.review_code, 0) AS reviewCode
+	
 	    FROM reservation r
 	    JOIN class c ON r.class_code = c.class_code
-	    
-	    /* 💡 class(c)의 operator_code와 creator(cr)의 operator_code 조인 */
 	    LEFT JOIN creator cr ON c.operator_code = cr.operator_code
-	    
 	    LEFT JOIN class_img img ON c.class_code = img.class_code 
 	                           AND img.type = '대표' 
 	                           AND img.sort_order = 1
+	
+	    /* 💡 MEMBER_CODE와 CLASS_CODE 기준으로 리뷰 테이블 LEFT JOIN */
+	    LEFT JOIN review rev ON r.class_code = rev.class_code 
+	                        AND r.member_code = rev.member_code
+	
 	    WHERE r.member_code = TO_NUMBER(#{memberCode})
 	    <if test="status != null and status != '' and status != 'ALL'">
 	        <choose>
-	            <!-- 1) '예약' 탭 선택 시: 취소되지 않았고, 수강 시간이 아직 지나지 않은 예약 건만 조회 -->
 	            <when test="status == '예약' or status == '이용 예정'">
 	                AND NOT (r.status LIKE '%취소%' OR r.status LIKE '%환불%')
 	                AND r.reservation_date &gt;= SYSDATE
 	            </when>
-	            
-	            <!-- 2) '수강완료' 탭 선택 시: DB 상태가 '수강완료'이거나, 수강 시간이 지난 정상 예약 건 조회 -->
 	            <when test="status == '수강완료' or status == '이용 완료'">
 	                AND NOT (r.status LIKE '%취소%' OR r.status LIKE '%환불%')
 	                AND (r.status IN ('수강완료', '이용 완료') OR r.reservation_date &lt; SYSDATE)
 	            </when>
-	            
-	            <!-- 3) '취소/환불' 탭 선택 시: 취소/환불 관련 상태만 조회 -->
 	            <when test="status == '취소/환불'">
 	                AND (r.status LIKE '%취소%' OR r.status LIKE '%환불%')
 	            </when>
-	            
 	            <otherwise>
 	                AND r.status = #{status}
 	            </otherwise>

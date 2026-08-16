@@ -44,6 +44,8 @@ public class Purchase {
     // 4. CREATOR 테이블 매핑 
     private Long operatorCode;			// 작가 코드
     private String activityName;		// 작가 이름
+    
+    private int reviewCode;
 
     // HTML(purchase.html) 바인딩 호환용 Getter
     public String getStatus() {
