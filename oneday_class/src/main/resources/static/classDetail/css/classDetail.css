@@ -1109,3 +1109,131 @@ body.map-page-body {
     fill: #ff4757;
     stroke: #ff4757;
 }
+/* =========================================
+   상품정보고시 테이블 스타일
+   ========================================= */
+.info-disclosure-section {
+    margin-top: 2.5rem;
+    margin-bottom: 2rem;
+}
+
+.product-information-disclosure {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 0.85rem;
+}
+
+/* 테이블 전체 테두리 & 모서리 둥글게 설정 */
+.info-disclosure-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    overflow: hidden;
+    font-size: 0.85rem;
+}
+
+/* 셀 공통 레이아웃 */
+.info-disclosure-table th,
+.info-disclosure-table td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+    box-sizing: border-box;
+}
+/* 테이블 열 비율 조정 (2번째 열을 더 넓게 설정) */
+.info-disclosure-table col:nth-child(1) { width: 18%; }
+.info-disclosure-table col:nth-child(2) { width: 32%; }
+.info-disclosure-table col:nth-child(3) { width: 22%; }
+.info-disclosure-table col:nth-child(4) { width: 28%; }
+/* 회색 배경 라벨 셀 (서비스 제공자 / 취소/환불 규정) */
+.info-disclosure-table th.info-label {
+    background-color: #f8f9fa;
+    color: #495057;
+    font-weight: 500;
+    text-align: left;
+    border-right: 1px solid #e9ecef;
+}
+
+/* 값 셀 내부 레이아웃 (한 줄 정렬 핵심) */
+.info-disclosure-table td.info-value {
+    background-color: #ffffff;
+    color: #212529;
+    border-right: 1px solid #e9ecef;
+    
+    /* 🔥 한 줄 배치를 위한 Flex 속성 추가 */
+    display: flex;
+    align-items: center;
+    gap: 8px; /* 텍스트와 버튼 사이 간격 */
+    white-space: nowrap; /* 줄바꿈 절대 방지 */
+}
+
+.info-disclosure-table td.info-value:last-child {
+    border-right: none; /* 마지막 열의 오른쪽 선 제거 */
+}
+
+/* 제공자 이름 텍스트가 길어질 경우 대비 */
+.provider-name {
+    font-weight: 600;
+    color: #343a40;
+    white-space: nowrap;
+}
+
+/* 버튼 줄바꿈 방지 */
+.btn-info-detail {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    color: #495057;
+    background-color: #ffffff;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap; /* 버튼 내부 텍스트 줄바꿈 방지 */
+    flex-shrink: 0; /* 셀이 좁아져도 버튼 크기 줄어들지 않음 */
+}
+
+.btn-info-detail:hover {
+    background-color: #f8f9fa;
+    border-color: #adb5bd;
+    color: #212529;
+}
+
+/* a 태그 버튼 정렬 보정 */
+a.btn-info-detail {
+    text-align: center;
+}
+
+/* 메인 배너 Swiper 스타일링 */
+.main-banner-wrapper {
+    position: relative;
+    width: 100%;
+    height: 420px; /* 원하는 이미지 높이 지정 */
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.main-banner-swiper {
+    width: 100%;
+    height: 100%;
+}
+
+.main-banner-swiper .swiper-slide img.main-banner-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* 이미지가 비율을 유지하며 영역을 꽉 채우도록 설정 */
+}
+
+/* Swiper 화살표 및 페이지네이션 색상 커스텀 (필요 시) */
+.main-banner-swiper .swiper-button-next,
+.main-banner-swiper .swiper-button-prev {
+    color: #ffffff;
+}
+
+.main-banner-swiper .swiper-pagination-bullet-active {
+    background-color: #10b981; /* 브랜드 주요 컬러 지정 */
+}

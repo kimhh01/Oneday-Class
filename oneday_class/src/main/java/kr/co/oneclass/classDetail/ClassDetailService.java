@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import kr.co.oneclass.bookmark.BookmarkDAO;
 import kr.co.oneclass.common.ClassDTO;
+import kr.co.oneclass.common.ClassImageDTO;
 import kr.co.oneclass.common.ScheduleDTO;
 
 @Service
@@ -28,19 +29,21 @@ public class ClassDetailService {
 			return null;
 		}
 
-		// 2. 클래스 정보에서 얻은 creatorCode(또는 operatorCode)와 categoryCode 추출
-		// DTO 내부 변수명에 맞게 호출해주세요 (예: getCreatorCode, getCategoryCode)
-		long creatorCode = classDto.getOperatorCode();
-		int categoryCode = classDto.getCategoryCode();
+		// 💡 [추가] 이미지 리스트 조회 후 ClassDTO에 넣어주기!
+	    List<ClassImageDTO> imageList = classDetailDAO.selectClassImageList(classCode);
+	    classDto.setImageList(imageList);
+		
+	 // 2. 기존 로직 동일
+	    long creatorCode = classDto.getOperatorCode();
+	    int categoryCode = classDto.getCategoryCode();
 
-		// 3. 추가 정보들을 DAO를 통해 조회
-		OperatorDTO creatorDto = classDetailDAO.selectCreator(creatorCode);
-		List<ClassDTO> sameCategoryList = classDetailDAO.selectSameCategoryList(classCode, categoryCode);
-		List<CurriculumDTO> curriculumList = classDetailDAO.selectCurriculum(classCode);
-		List<ReviewDTO> reviewList = classDetailDAO.selectReviewList(classCode);
-		ReviewSummaryDTO reviewSummaryDto = classDetailDAO.selectReviewSummary(classCode);
-		List<ScheduleDTO> representativeSchedule = classDetailDAO.selectSchedule(classCode);
-		List<ScheduleDTO> scheduleList = classDetailDAO.selectScheduleList(classCode);
+	    OperatorDTO creatorDto = classDetailDAO.selectCreator(creatorCode);
+	    List<ClassDTO> sameCategoryList = classDetailDAO.selectSameCategoryList(classCode, categoryCode);
+	    List<CurriculumDTO> curriculumList = classDetailDAO.selectCurriculum(classCode);
+	    List<ReviewDTO> reviewList = classDetailDAO.selectReviewList(classCode);
+	    ReviewSummaryDTO reviewSummaryDto = classDetailDAO.selectReviewSummary(classCode);
+	    List<ScheduleDTO> representativeSchedule = classDetailDAO.selectSchedule(classCode);
+	    List<ScheduleDTO> scheduleList = classDetailDAO.selectScheduleList(classCode);
 
 		// 4. 하나의 DTO로 결합하여 반환
 		return new ClassDetailResponseDTO(classDto, creatorDto, sameCategoryList, curriculumList, reviewList,

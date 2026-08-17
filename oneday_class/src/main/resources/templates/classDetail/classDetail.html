@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <title
 	th:text="${detail?.classDetail != null ? detail.classDetail.name : '원데이클래스'}">원데이클래스</title>
+
+<!-- 💡 Swiper CDN을 커스텀 CSS보다 먼저 배치합니다 -->
+<link rel="stylesheet"
+	href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 <link rel="stylesheet" th:href="@{/classDetail/css/classDetail.css}">
 </head>
 <body class="map-page-body">
@@ -41,12 +45,36 @@
 		<!-- [좌측 영역] -->
 		<div class="left-content-area">
 
-			<!-- (1) 메인 이미지 + 중앙 텍스트 배너 -->
+			<!-- (1) 메인 이미지 슬라이더 배너 -->
 			<div class="main-banner-wrapper">
-				<img
-					th:if="${detail?.classDetail?.imageList != null and !#lists.isEmpty(detail.classDetail.imageList)}"
-					th:src="${detail.classDetail.imageList[0]?.image}"
-					class="main-banner-img" alt="클래스 메인 이미지">
+				<th:block
+					th:if="${detail?.classDetail?.imageList != null and !#lists.isEmpty(detail.classDetail.imageList)}">
+					<!-- Swiper 컨테이너 -->
+					<div class="swiper main-banner-swiper">
+						<div class="swiper-wrapper">
+							<!-- 💡 type이 '대표'인 이미지 나타내기 -->
+							<th:block th:each="img : ${detail.classDetail.imageList}">
+								<div class="swiper-slide"
+									th:if="${img != null and img.type == '대표'}">
+									<img th:if="${img?.image != null}" th:src="${img.image}"
+										class="main-banner-img" alt="클래스 메인 이미지">
+								</div>
+							</th:block>
+						</div>
+						<!-- 필요 시 컨트롤 요소 추가 -->
+						<div class="swiper-pagination"></div>
+						<div class="swiper-button-next"></div>
+						<div class="swiper-button-prev"></div>
+					</div>
+				</th:block>
+
+				<!-- 이미지가 없을 경우 노출할 기본 대체 이미지 -->
+				<th:block
+					th:unless="${detail?.classDetail?.imageList != null and !#lists.isEmpty(detail.classDetail.imageList)}">
+					<img
+						src="https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=800"
+						class="main-banner-img" alt="기본 메인 이미지">
+				</th:block>
 			</div>
 
 			<!-- (2) 탭 메뉴 -->
@@ -93,8 +121,11 @@
 				<h3 class="section-heading">완성 작품 갤러리</h3>
 				<div class="gallery-grid-4x4">
 					<th:block th:if="${detail?.classDetail?.imageList != null}">
+						<!-- 💡 type이 '완성'인 이미지만 필터링해서 출력 -->
 						<th:block th:each="img : ${detail.classDetail.imageList}">
-							<img th:if="${img?.image != null}" th:src="${img.image}" alt="작품">
+							<img
+								th:if="${img != null and img.image != null and img.type == '완성'}"
+								th:src="${img.image}" alt="완성 작품">
 						</th:block>
 					</th:block>
 				</div>
@@ -266,24 +297,32 @@
 			</section>
 
 			<!-- 상품 정보 고시 -->
-			<section>
+			<section class="info-disclosure-section">
 				<h2 class="product-information-disclosure">상품정보고시</h2>
-				<div>
-					<div>
-						<span>서비스 제공자</span>
-					</div>
-					<div>
-						<span>아라쌤</span><button type="button">상세 정보 확인</button>
-					</div>
-					<div>
-						<span>취소/환불 규정</span>
-					</div>
-					<div>
-						<a th:href="@{/refundPolicy}">상세 규정 확인</a>
-					</div>
-				</div>
+
+				<table class="info-disclosure-table">
+					<colgroup>
+						<col style="width: 18%;">
+						<col style="width: 32%;">
+						<col style="width: 22%;">
+						<col style="width: 28%;">
+					</colgroup>
+					<tbody>
+						<tr>
+							<th class="info-label">서비스 제공자</th>
+							<td class="info-value"><span class="provider-name"
+								th:text="${detail?.creator?.activityName != null ? detail.creator.activityName : '도예공방 하루'}">도예공방
+									하루</span>
+								<button type="button" class="btn-info-detail">상세 정보 확인</button>
+							</td>
+							<th class="info-label">취소/환불 규정</th>
+							<td class="info-value"><a th:href="@{/refundPolicy}"
+								class="btn-info-detail">상세 규정 확인</a></td>
+						</tr>
+					</tbody>
+				</table>
 			</section>
-			
+
 			<!-- (8) 비슷한 클래스 섹션 -->
 			<section class="content-section">
 				<h3 class="section-heading">이런 클래스는 어때요?</h3>
@@ -406,80 +445,111 @@
 	</footer>
 
 </body>
-
+<script
+	src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script th:inline="javascript">
-    // 백엔드에서 넘어온 전체 scheduleList 객체 배열
-    const scheduleDataList = /*[[${detail?.scheduleList}]]*/ [];
-    
-    // 선택한 스케줄 ID를 저장할 변수
-    let selectedScheduleId = null;
-    
-    document.addEventListener("DOMContentLoaded", function () {
-        if (!scheduleDataList || scheduleDataList.length === 0) {
-            document.getElementById('calendarDaysBar').innerHTML = '';
-            document.getElementById('timeSlotsContainer').innerHTML = 
-                '<div style="grid-column: 1/-1; text-align: center; color: #868e96; padding: 20px 0;">등록된 수강 일정이 없습니다.</div>';
-            return;
-        }
+//백엔드 데이터 선언
+const scheduleDataList = /*[[${detail?.scheduleList}]]*/ [];
+let selectedScheduleId = null;
 
-        // 날짜 선택 바(Bar) 동적 생성
-        renderCalendarDaysBar();
+document.addEventListener("DOMContentLoaded", function () {
+    
+    // 1. 메인 이미지 Swiper 초기화
+    const mainSwiper = new Swiper('.main-banner-swiper', {
+        loop: true,
+        autoplay: {
+            delay: 3500,
+            disableOnInteraction: false,
+        },
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        },
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
     });
 
-    // 날짜 선택 바 생성 함수
-    function renderCalendarDaysBar() {
-        const daysBar = document.getElementById('calendarDaysBar');
-        daysBar.innerHTML = '';
-
-        const dateStrings = scheduleDataList.map(item => formatDateString(item.classDate));
-        
-        dateStrings.sort();
-        const minDate = new Date(dateStrings[0]);
-        const maxDate = new Date(dateStrings[dateStrings.length - 1]);
-
-        const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
-        let firstActiveElement = null;
-
-        let currentDate = new Date(minDate);
-        while (currentDate <= maxDate) {
-            const dateStr = formatDateString(currentDate);
-            const dayNum = currentDate.getDate();
-            const dayStr = daysOfWeek[currentDate.getDay()];
-
-            const hasSchedule = scheduleDataList.some(item => formatDateString(item.classDate) === dateStr);
-            const isAllSoldOut = hasSchedule && scheduleDataList
-                .filter(item => formatDateString(item.classDate) === dateStr)
-                .every(item => item.soldOutYn === 'Y');
-
-            const dayItem = document.createElement('div');
-            dayItem.className = `day-item ${!hasSchedule ? 'disabled-day' : ''}`;
-            dayItem.setAttribute('data-date', dateStr);
-
-            dayItem.innerHTML = `
-                <span class="day-str">${dayStr}</span>
-                ${isAllSoldOut ? '<span class="sold-out-badge">매진</span>' : ''}
-                <span class="day-num">${dayNum}</span>
-            `;
-
-            if (hasSchedule) {
-                dayItem.onclick = function() { selectScheduleDate(this); };
-                if (!firstActiveElement) {
-                    firstActiveElement = dayItem;
-                }
-            } else {
-                dayItem.style.opacity = "0.35";
-                dayItem.style.cursor = "not-allowed";
-            }
-
-            daysBar.appendChild(dayItem);
-
-            currentDate.setDate(currentDate.getDate() + 1);
-        }
-
-        if (firstActiveElement) {
-            selectScheduleDate(firstActiveElement);
-        }
+    // 2. 수강 일정 처리 로직
+    if (!scheduleDataList || scheduleDataList.length === 0) {
+        document.getElementById('calendarDaysBar').innerHTML = '';
+        document.getElementById('timeSlotsContainer').innerHTML = 
+            '<div style="grid-column: 1/-1; text-align: center; color: #868e96; padding: 20px 0;">등록된 수강 일정이 없습니다.</div>';
+        return;
     }
+
+    // 날짜 선택 바 동적 생성
+    renderCalendarDaysBar();
+});
+
+//날짜 선택 바 생성 함수 (오늘부터 30일 기준)
+function renderCalendarDaysBar() {
+    const daysBar = document.getElementById('calendarDaysBar');
+    daysBar.innerHTML = '';
+
+    // 1. 기준 날짜 설정 (오늘 ~ 오늘부터 30일 후)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // 시간 정보를 00:00:00으로 초기화하여 날짜 비교 정확도 향상
+
+    const endDate = new Date(today);
+    endDate.setDate(today.getDate() + 30); // 오늘 기준 30일 뒤
+
+    const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
+    let firstActiveElement = null;
+
+    let currentDate = new Date(today);
+
+    // 2. 오늘부터 30일 뒤까지 1일씩 증가하며 루프 실행
+    while (currentDate <= endDate) {
+        const dateStr = formatDateString(currentDate);
+        const dayNum = currentDate.getDate();
+        const dayStr = daysOfWeek[currentDate.getDay()];
+
+        // 해당 날짜에 수강 스케줄이 존재하는지 체크
+        const hasSchedule = scheduleDataList.some(item => formatDateString(item.classDate) === dateStr);
+        
+        // 스케줄이 존재하고, 해당 날짜의 모든 슬롯이 매진(Y)인지 체크
+        const isAllSoldOut = hasSchedule && scheduleDataList
+            .filter(item => formatDateString(item.classDate) === dateStr)
+            .every(item => item.soldOutYn === 'Y');
+
+        const dayItem = document.createElement('div');
+        dayItem.className = `day-item ${!hasSchedule ? 'disabled-day' : ''}`;
+        dayItem.setAttribute('data-date', dateStr);
+
+        dayItem.innerHTML = `
+            <span class="day-str">${dayStr}</span>
+            ${isAllSoldOut ? '<span class="sold-out-badge">매진</span>' : ''}
+            <span class="day-num">${dayNum}</span>
+        `;
+
+        if (hasSchedule) {
+            dayItem.onclick = function() { selectScheduleDate(this); };
+            // 예약 가능한 가장 첫 번째 활성 날짜를 기억했다가 자동 선택
+            if (!firstActiveElement) {
+                firstActiveElement = dayItem;
+            }
+        } else {
+            dayItem.style.opacity = "0.35";
+            dayItem.style.cursor = "not-allowed";
+        }
+
+        daysBar.appendChild(dayItem);
+
+        // 다음 날짜로 이동
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+
+    // 3. 30일 이내에 선택 가능한 날짜가 있다면 해당 날짜를 기본 활성화
+    if (firstActiveElement) {
+        selectScheduleDate(firstActiveElement);
+    } else {
+        // 30일 이내에 일정이 아예 없을 경우 안내 처리
+        document.getElementById('timeSlotsContainer').innerHTML = 
+            '<div style="grid-column: 1/-1; text-align: center; color: #868e96; padding: 15px 0;">한 달 이내 가능한 수강 일정이 없습니다.</div>';
+    }
+}
 
  // 날짜 클릭 이벤트 함수
     function selectScheduleDate(element) {

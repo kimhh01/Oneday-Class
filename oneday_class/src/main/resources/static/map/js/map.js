@@ -13,9 +13,11 @@ document.addEventListener("DOMContentLoaded", function() {
     
     let markers = []; // 생성된 커스텀 오버레이 객체 저장 배열
 
-    // 🔥 필터용 전역 변수를 최상단으로 이동 (스코프 문제 해결)
+    // 필터용 전역 변수
     let selectedCategoryCode = "";
     let selectedCategoryName = "카테고리 전체";
+    let selectedDate = ""; // 선택된 날짜 (예: "2026-08-17")
+    let selectedTime = ""; // 선택된 시간 (예: "15:00")
 
     let defaultLat = 37.5381;
     let defaultLng = 127.11609;
@@ -105,10 +107,9 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     // -------------------------------------------------------------
-    // 3. 지도의 현재 범위(Bounds) + 카테고리 조건 동시 필터링
+    // 3. 지도의 현재 범위(Bounds) + 필터 조건 동시 필터링
     // -------------------------------------------------------------
     function filterClassesByMapBounds() {
-        // 1) 지도의 현재 영역(좌하단, 우상단 좌표) 구하기
         const bounds = map.getBounds();
         const swLatLng = bounds.getSouthWest();
         const neLatLng = bounds.getNorthEast();
@@ -118,22 +119,26 @@ document.addEventListener("DOMContentLoaded", function() {
         const minLng = swLatLng.getLng();
         const maxLng = neLatLng.getLng();
 
-        // 2) [지도 화면 범위 이내] AND [선택된 카테고리 조건] 동시 만족 항목만 필터링
         const filteredClasses = allClassData.filter(item => {
             if (!item.lat || !item.lng) return false;
 
-            // 조건 A: 현재 지도 화면 바운더리 내에 있는지 확인
+            // 조건 A: 지도 화면 영역 범위 내
             const isInMapBounds = (item.lat >= minLat && item.lat <= maxLat && item.lng >= minLng && item.lng <= maxLng);
             
-            // 조건 B: 선택된 카테고리가 없거나(전체), 해당 카테고리/부모카테고리와 일치하는지 확인
+            // 조건 B: 카테고리 일치
             const isMatchingCategory = !selectedCategoryCode || 
                 (String(item.categoryCode) === String(selectedCategoryCode) || 
                  String(item.parentCategoryCode) === String(selectedCategoryCode));
 
-            return isInMapBounds && isMatchingCategory;
+            // 조건 C: 날짜 일치
+            const isMatchingDate = !selectedDate || (item.writeDate && item.writeDate.includes(selectedDate));
+
+            // 조건 D: 시간 일치
+            const isMatchingTime = !selectedTime || (item.writeDate && item.writeDate.includes(selectedTime));
+
+            return isInMapBounds && isMatchingCategory && isMatchingDate && isMatchingTime;
         });
 
-        // 3) 필터링된 데이터로 화면 렌더링
         renderMarkersAndSidebar(filteredClasses);
     }
 
@@ -217,6 +222,8 @@ document.addEventListener("DOMContentLoaded", function() {
     btnRegionToggle?.addEventListener('click', (e) => {
         e.stopPropagation();
         categoryModal?.classList.add('hidden');
+        dateModal?.classList.add('hidden');
+        timeModal?.classList.add('hidden');
         regionModal?.classList.toggle('hidden');
     });
 
@@ -325,19 +332,180 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
+    // -------------------------------------------------------------
+    // 5. 날짜 및 시간 선택 관련
+    // -------------------------------------------------------------
+    const btnDateToggle = document.getElementById('btn-date-toggle');
+    const dateModal = document.getElementById('date-modal');
+    const btnDateCancel = document.getElementById('btn-date-cancel');
+    const btnDateSearch = document.getElementById('btn-date-search');
+    const listDate = document.getElementById('list-date');
+
+    const btnTimeToggle = document.getElementById('btn-time-toggle');
+    const timeModal = document.getElementById('time-modal');
+    const btnTimeCancel = document.getElementById('btn-time-cancel');
+    const btnTimeSearch = document.getElementById('btn-time-search');
+    const listTime = document.getElementById('list-time');
+
+    function initDateList() {
+        if (!listDate) return;
+        listDate.innerHTML = '<li class="active" data-date="">전체 날짜</li>';
+        
+        const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
+        const today = new Date();
+
+        for (let i = 0; i < 7; i++) {
+            const d = new Date();
+            d.setDate(today.getDate() + i);
+
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const date = String(d.getDate()).padStart(2, '0');
+            const dayName = weekDays[d.getDay()];
+
+            const formattedValue = `${year}-${month}-${date}`;
+            const displayText = i === 0 
+                ? `오늘 (${month}.${date} ${dayName})` 
+                : `${month}.${date} (${dayName})`;
+
+            const li = document.createElement('li');
+            li.setAttribute('data-date', formattedValue);
+            li.textContent = displayText;
+            listDate.appendChild(li);
+        }
+    }
+
+    function initTimeList() {
+        if (!listTime) return;
+        listTime.innerHTML = '<li class="active" data-time="">전체 시간</li>';
+
+        for (let hour = 0; hour < 24; hour++) {
+            const formattedHour = String(hour).padStart(2, '0') + ':00';
+            const li = document.createElement('li');
+            li.setAttribute('data-time', formattedHour);
+            li.textContent = formattedHour;
+            listTime.appendChild(li);
+        }
+    }
+
+    initDateList();
+    initTimeList();
+
+    btnDateToggle?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        regionModal?.classList.add('hidden');
+        categoryModal?.classList.add('hidden');
+        timeModal?.classList.add('hidden');
+        dateModal?.classList.toggle('hidden');
+    });
+
+    btnDateCancel?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dateModal?.classList.add('hidden');
+    });
+
+    listDate?.addEventListener('click', function(e) {
+        const target = e.target.closest('li');
+        if (!target) return;
+
+        listDate.querySelectorAll('li').forEach(el => el.classList.remove('active'));
+        target.classList.add('active');
+
+        selectedDate = target.getAttribute('data-date') || "";
+    });
+
+    btnDateSearch?.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dateModal?.classList.add('hidden');
+
+        const textSpan = btnDateToggle.querySelector('.select-text');
+        if (textSpan) {
+            const activeLi = listDate.querySelector('li.active');
+            textSpan.innerText = selectedDate ? activeLi.innerText : "날짜 선택";
+        }
+
+        filterClassesByMapBounds();
+    });
+
+    btnTimeToggle?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        regionModal?.classList.add('hidden');
+        categoryModal?.classList.add('hidden');
+        dateModal?.classList.add('hidden');
+        timeModal?.classList.toggle('hidden');
+    });
+
+    btnTimeCancel?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        timeModal?.classList.add('hidden');
+    });
+
+    listTime?.addEventListener('click', function(e) {
+        const target = e.target.closest('li');
+        if (!target) return;
+
+        listTime.querySelectorAll('li').forEach(el => el.classList.remove('active'));
+        target.classList.add('active');
+
+        selectedTime = target.getAttribute('data-time') || "";
+    });
+
+    btnTimeSearch?.addEventListener('click', function(e) {
+        e.stopPropagation();
+        timeModal?.classList.add('hidden');
+
+        const textSpan = btnTimeToggle.querySelector('.select-text');
+        if (textSpan) {
+            textSpan.innerText = selectedTime ? selectedTime : "시간 선택";
+        }
+
+        filterClassesByMapBounds();
+    });
+
+    // -------------------------------------------------------------
+    // 6. 내 위치 버튼 이벤트
+    // -------------------------------------------------------------
     const btnMyLocation = document.getElementById('btn-my-location');
     btnMyLocation?.addEventListener('click', function() {
+        if (!confirm("현재 위치를 기반으로 가까운 클래스를 찾으시겠습니까?\n(위치 정보 제공 동의 필요)")) {
+            return;
+        }
+
         if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(function(position) {
-                const locPosition = new kakao.maps.LatLng(position.coords.latitude, position.coords.longitude);
-                map.setCenter(locPosition);
-                map.setLevel(4);
-            });
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const locPosition = new kakao.maps.LatLng(position.coords.latitude, position.coords.longitude);
+                    map.setCenter(locPosition);
+                    map.setLevel(4);
+                },
+                function(error) {
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            alert("위치 권한 요청이 거부되었습니다. 브라우저 설정에서 위치 권한을 허용해 주세요.");
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            alert("현재 위치 정보를 가져올 수 없습니다.");
+                            break;
+                        case error.TIMEOUT:
+                            alert("위치 정보 요청 시간이 초과되었습니다.");
+                            break;
+                        default:
+                            alert("위치 정보를 가져오는 중 오류가 발생했습니다.");
+                            break;
+                    }
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 5000
+                }
+            );
+        } else {
+            alert("현재 사용 중인 브라우저에서는 위치 서비스를 지원하지 않습니다.");
         }
     });
 
     // -------------------------------------------------------------
-    // 5. 카테고리 선택 모달 이벤트 (2단계 연동)
+    // 7. 카테고리 선택 모달 이벤트
     // -------------------------------------------------------------
     const btnCategoryToggle = document.getElementById('btn-category-toggle');
     const categoryModal = document.getElementById('category-modal');
@@ -347,10 +515,11 @@ document.addEventListener("DOMContentLoaded", function() {
     const listParentCategory = document.getElementById('list-parent-category');
     const listChildCategory = document.getElementById('list-child-category');
 
-    // 1) 모달 열기/닫기
     btnCategoryToggle?.addEventListener('click', (e) => {
         e.stopPropagation();
         regionModal?.classList.add('hidden');
+        dateModal?.classList.add('hidden');
+        timeModal?.classList.add('hidden');
         categoryModal?.classList.toggle('hidden');
     });
 
@@ -359,7 +528,6 @@ document.addEventListener("DOMContentLoaded", function() {
         categoryModal?.classList.add('hidden');
     });
 
-    // 2) 대분류 클릭 시 -> 소분류 목록 바인딩
     listParentCategory?.addEventListener('click', function(e) {
         const target = e.target.closest('li');
         if (!target) return;
@@ -367,7 +535,7 @@ document.addEventListener("DOMContentLoaded", function() {
         listParentCategory.querySelectorAll('li').forEach(el => el.classList.remove('active'));
         target.classList.add('active');
 
-        const parentCode = target.getAttribute('data-code'); // 예: "1" (공예), "2" (요리)
+        const parentCode = target.getAttribute('data-code');
         const parentName = target.innerText.trim();
         
         listChildCategory.innerHTML = `<li class="active" data-code="${parentCode || ''}" data-name="${parentName}">전체</li>`;
@@ -388,7 +556,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
-    // 3) 소분류 클릭 시 선택값 저장
     listChildCategory?.addEventListener('click', function(e) {
         const target = e.target.closest('li');
         if (!target) return;
@@ -400,7 +567,6 @@ document.addEventListener("DOMContentLoaded", function() {
         selectedCategoryName = target.getAttribute('data-name') || target.innerText.trim();
     });
 
-    // 4) 검색(확인) 버튼 클릭 시 적용
     btnCategorySearch?.addEventListener('click', function(e) {
         e.stopPropagation();
         categoryModal?.classList.add('hidden');
@@ -410,11 +576,10 @@ document.addEventListener("DOMContentLoaded", function() {
             textSpan.innerText = selectedCategoryCode ? selectedCategoryName : "카테고리 전체";
         }
 
-        // 🔥 지도 범위 + 선택한 카테고리로 필터링 실행!
         filterClassesByMapBounds();
     });
 
-    // 바깥 영역 클릭 시 모달 닫기
+    // 외부 영역 클릭 시 전체 모달 닫기
     document.addEventListener('click', function(e) {
         if (regionModal && !regionModal.contains(e.target) && !btnRegionToggle.contains(e.target)) {
             regionModal.classList.add('hidden');
@@ -422,13 +587,16 @@ document.addEventListener("DOMContentLoaded", function() {
         if (categoryModal && !categoryModal.contains(e.target) && !btnCategoryToggle.contains(e.target)) {
             categoryModal.classList.add('hidden');
         }
+        if (dateModal && !dateModal.contains(e.target) && !btnDateToggle.contains(e.target)) {
+            dateModal.classList.add('hidden');
+        }
+        if (timeModal && !timeModal.contains(e.target) && !btnTimeToggle.contains(e.target)) {
+            timeModal.classList.add('hidden');
+        }
     });
 
-    // 초기 지도 범위 필터링 실행
-    filterClassesByMapBounds();
-
     // -------------------------------------------------------------
-    // 6. 카드 클릭 시 상세 페이지 이동 이벤트
+    // 8. 카드 클릭 시 상세 페이지 이동 이벤트 및 초기 실행
     // -------------------------------------------------------------
     const cardContainer = document.getElementById('card-list-container');
 
@@ -452,4 +620,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
+
+    // 초기 지도 범위 필터링 실행
+    filterClassesByMapBounds();
 });

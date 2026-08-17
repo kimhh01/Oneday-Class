@@ -128,7 +128,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     r.input_date    AS inputDate,
     r.reply_content AS replyContent,
     r.reply_date    AS replyDate,
-    ri.revjew_img   AS reviewImg
+    ri.review_img   AS reviewImg
 FROM review r
 JOIN member m ON r.member_code = m.member_code
 JOIN class cl ON r.class_code = cl.class_code
@@ -150,5 +150,14 @@ WHERE r.class_code = #{classCode}
     FROM REVIEW
     WHERE CLASS_CODE = #{classCode}
 </select>
-
+<select id="selectClassImageList" resultType="kr.co.oneclass.common.ClassImageDTO">
+    SELECT class_img_code AS classImgCode,
+           class_code     AS classCode,
+           type,
+           image,
+           sort_order     AS sortOrder
+      FROM class_img
+     WHERE class_code = #{classCode}
+  ORDER BY sort_order ASC
+</select>
 </mapper>

@@ -4,46 +4,17 @@
 
 <mapper namespace="kr.co.oneclass.payment.ReservationDAO">
 
-    <!-- 예약 정보 조회 -->
-    <select id="selectReservation" parameterType="int" resultType="kr.co.oneclass.payment.ReservationDTO">
-        SELECT 
-            reservation_code AS reservationCode,
-            class_code       AS classCode,
-            member_code      AS memberCode,
-            schedule_code    AS scheduleCode,
-            reservation_date AS reservationDate,
-            people_number    AS peopleNumber,
-            status,
-            total_price      AS totalPrice
-        FROM reservation
-        WHERE reservation_code = #{reservationCode}
-    </select>
-
-    <!-- 예약 인원수 수정 -->
-    <update id="updatePersonCount">
-        UPDATE reservation
-        SET people_number = #{count}
-        WHERE reservation_code = #{reservationCode}
-    </update>
-
-    <!-- 총 금액 수정 -->
-    <update id="updateTotalPrice">
-        UPDATE reservation
-        SET total_price = #{totalPrice}
-        WHERE reservation_code = #{reservationCode}
-    </update>
-
 <select id="selectClassDetailByScheduleCode" parameterType="int" resultType="kr.co.oneclass.common.ClassDTO">
-    SELECT c.name as name,
-        address,
-         address2,
-         price
-FROM class c
-JOIN class_repeat_rule crr
-  ON c.class_code = crr.class_code
-JOIN schedule s
-  ON s.repeat_rule_code = crr.repeat_rule_code
-WHERE s.schedule_code = #{scheduleCode}
+    SELECT 
+        c.class_code    AS classCode,   <!-- 👈 이 줄을 반드시 추가해주세요! -->
+        c.name          AS name,
+        c.address       AS address,
+        c.address2      AS address2,
+        c.price         AS price
+    FROM class c
+    JOIN class_repeat_rule crr ON c.class_code = crr.class_code
+    JOIN schedule s ON s.repeat_rule_code = crr.repeat_rule_code
+    WHERE s.schedule_code = #{scheduleCode}
 </select>
 <select id="selectClassDetailByScheduleCode2" parameterType="int" resultType="kr.co.oneclass.common.ScheduleDTO">
 select    class_date as classDate,
@@ -68,11 +39,31 @@ JOIN schedule s
   ON s.repeat_rule_code = crr.repeat_rule_code
 WHERE s.schedule_code = #{scheduleCode}
 </select>
-<!--예약 정보 추가-->
+<!-- 예약 정보 추가 (수정본) -->
 <insert id="insertReservation" parameterType="kr.co.oneclass.payment.ReservationDTO">
-insert into reservation(reservation_code, class_code, member_code,
-			 schedule_code, reservation_date, people_number, status, price)
-value(seq_reservation_code.nextval, #{classCode}, #{memberCode}, #{scheduleCode},
-		 sysdate, #{peopleNumber}, || '예약' ||, #{price})
+    <selectKey keyProperty="reservationCode" resultType="int" order="BEFORE">
+        SELECT seq_reservation_code.NEXTVAL FROM dual
+    </selectKey>
+    
+    INSERT INTO reservation (
+        reservation_code, 
+        class_code, 
+        member_code,
+        schedule_code, 
+        reservation_date, 
+        people_number, 
+        status, 
+        price
+    )
+    VALUES (
+        #{reservationCode}, 
+        #{classCode}, 
+        #{memberCode}, 
+        #{scheduleCode},
+        SYSDATE, 
+        #{peopleNumber}, 
+        '예약', 
+        #{totalPrice}
+    )
 </insert>
 </mapper>

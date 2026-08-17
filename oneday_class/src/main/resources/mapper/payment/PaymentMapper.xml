@@ -17,12 +17,12 @@
             refund,
             refund_date
         ) VALUES (
-            payment_seq.NEXTVAL, <!-- Oracle 기준 시퀀스 사용 예시 -->
+            seq_payment_code.NEXTVAL, <!-- Oracle 기준 시퀀스 사용 예시 -->
             #{reservationCode},
             #{amount},
             #{means},
             SYSDATE,
-            'COMPLETED',
+            '결제완료',
             #{pgCode},
             #{refund},
             #{refundDate}

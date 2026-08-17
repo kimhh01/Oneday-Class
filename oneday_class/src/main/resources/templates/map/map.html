@@ -133,6 +133,25 @@
 				<button id="btn-date-toggle" class="filter-select">
 					<span class="select-text">날짜 선택</span> <span class="arrow">∨</span>
 				</button>
+
+				<!-- 날짜 선택 모달 -->
+				<div id="date-modal" class="region-modal-container hidden"
+					style="width: 220px;">
+					<div class="region-columns-header"
+						style="grid-template-columns: 1fr;">
+						<div>날짜 선택 (오늘부터 7일)</div>
+					</div>
+					<div class="region-columns-body"
+						style="grid-template-columns: 1fr; max-height: 250px; overflow-y: auto;">
+						<ul id="list-date" class="region-list">
+							<!-- JS에서 오늘부터 일주일 치 날짜 동적 생성 -->
+						</ul>
+					</div>
+					<div class="region-modal-footer">
+						<button id="btn-date-cancel" class="btn-cancel">취소</button>
+						<button id="btn-date-search" class="btn-search">검색</button>
+					</div>
+				</div>
 			</div>
 
 			<!-- 4) 시간 선택 드롭다운 -->
@@ -140,6 +159,25 @@
 				<button id="btn-time-toggle" class="filter-select">
 					<span class="select-text">시간 선택</span> <span class="arrow">∨</span>
 				</button>
+
+				<!-- 시간 선택 모달 -->
+				<div id="time-modal" class="region-modal-container hidden"
+					style="width: 200px;">
+					<div class="region-columns-header"
+						style="grid-template-columns: 1fr;">
+						<div>시간 선택 (1시간 단위)</div>
+					</div>
+					<div class="region-columns-body"
+						style="grid-template-columns: 1fr; max-height: 250px; overflow-y: auto;">
+						<ul id="list-time" class="region-list">
+							<!-- JS에서 00:00 ~ 23:00 동적 생성 -->
+						</ul>
+					</div>
+					<div class="region-modal-footer">
+						<button id="btn-time-cancel" class="btn-cancel">취소</button>
+						<button id="btn-time-search" class="btn-search">검색</button>
+					</div>
+				</div>
 			</div>
 
 			<!-- 5) 내 위치 중심 버튼 -->
