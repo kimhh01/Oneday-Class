@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>작가 상세</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" th:href="@{/admin/css/admin-common.css}">
+<link rel="stylesheet" th:href="@{/admin/css/admin-layout.css}">
+<link rel="stylesheet" th:href="@{/admin/css/writer-class.css}">
+</head>
+<body>
+	<div class="shell">
+		<aside th:replace="~{admin/fragments/sideMenu :: sideMenu('writer')}"></aside>
+		<main>
+			<div class="detail-head">
+				<h1 class="page-title">작가 상세 정보</h1>
+				<div class="toolbar"><a th:href="@{/admin/writers}">목록으로</a></div>
+			</div>
+			<section class="detail-section">
+				<h2>기본 정보</h2>
+				<div class="detail-body">
+				<div class="profile">
+					<div class="writer-avatar">
+						<img th:if="${writer.profileImage!=null}"
+							th:src="${writer.profileImage}"><span
+							th:unless="${writer.profileImage!=null}"
+							th:text="${#strings.substring(writer.writerName,0,1)}">작</span>
+					</div>
+					<div class="grid">
+						<div class="info">
+							<small>작가명</small><b th:text="${writer.writerName}"></b>
+						</div>
+						<div class="info">
+							<small>활동명</small><b th:text="${writer.workshopName}"></b>
+						</div>
+						<div class="info">
+							<small>이메일</small><b th:text="${writer.email}"></b>
+						</div>
+						<div class="info">
+							<small>연락처</small><b th:text="${writer.mobilePhone}"></b>
+						</div>
+						<div class="info">
+							<small>활동지역</small><b th:text="${writer.activityRegion}"></b>
+						</div>
+						<div class="info">
+							<small>가입일</small><b
+								th:text="${writer.joinDate!=null?#dates.format(writer.joinDate,'yyyy.MM.dd'):'-'}"></b>
+						</div>
+						<div class="info full">
+							<small>SNS</small><b th:text="${writer.snsUrl}"></b>
+						</div>
+					</div>
+				</div>
+			
+				</div></section>
+			<section class="detail-section">
+				<h2>작가 소개</h2>
+				<div class="detail-body">
+				<p class="text" th:text="${writer.introduction}"></p>
+			
+				</div></section>
+			<section class="detail-section">
+				<h2>정산 정보</h2>
+				<div class="detail-body">
+				<div class="grid">
+					<div class="info">
+						<small>정산 계좌</small><b th:text="${writer.settlementAccount}"></b>
+					</div>
+					<div class="info">
+						<small>계좌 이미지</small><a
+							th:if="${writer.settlementAccountImg!=null}"
+							th:href="${writer.settlementAccountImg}" target="_blank">확인</a>
+					</div>
+				</div>
+			
+				</div></section>
+			<section class="detail-section">
+				<h2>작가 통계</h2>
+				<div class="detail-body">
+				<div class="stats">
+					<div>
+						<small>운영 클래스</small><b th:text="${statistics.classCount}+'개'"></b>
+					</div>
+					<div>
+						<small>예약</small><b th:text="${statistics.reservationCount}+'건'"></b>
+					</div>
+					<div>
+						<small>정산액</small><b
+							th:text="${#numbers.formatInteger(statistics.settlementAmount,0,'COMMA')}+'원'"></b>
+					</div>
+				</div>
+			
+				</div></section>
+			<section class="detail-section">
+				<h2>개설 클래스</h2>
+				<div class="detail-body">
+				<table>
+					<thead>
+						<tr>
+							<th>클래스명</th>
+							<th>반복 타입</th>
+							<th>모집 기간</th>
+							<th>인원</th>
+							<th>가격</th>
+							<th>상태</th>
+							<th>관리</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="c:${classes}">
+							<td th:text="${c.className}"></td>
+							<td th:text="${c.periodType}"></td>
+							<td><span
+								th:text="${c.recruitmentStartDate!=null?#dates.format(c.recruitmentStartDate,'yyyy.MM.dd'):'-'}"></span>
+								~ <span
+								th:text="${c.recruitmentEndDate!=null?#dates.format(c.recruitmentEndDate,'yyyy.MM.dd'):'-'}"></span></td>
+							<td th:text="${c.minimumPeople}+' ~ '+${c.maximumPeople}+'명'"></td>
+							<td th:text="${#numbers.formatInteger(c.price,0,'COMMA')}+'원'"></td>
+							<td th:text="${c.classStatus}"></td>
+							<td><a class="action"
+								th:href="@{/admin/onedayclass/{id}(id=${c.classCode})}">상세</a></td>
+						</tr>
+						<tr th:if="${#lists.isEmpty(classes)}">
+							<td colspan="7" class="empty">개설 클래스가 없습니다.</td>
+						</tr>
+					</tbody>
+				</table>
+			
+				</div></section>
+		</main>
+	</div>
+</body>
+</html>

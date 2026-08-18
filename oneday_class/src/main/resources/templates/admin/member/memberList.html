@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+<title>회원관리</title>
+
+<link rel="stylesheet" th:href="@{/admin/css/admin-common.css}">
+<link rel="stylesheet" th:href="@{/admin/css/admin-layout.css}">
+<link rel="stylesheet" th:href="@{/admin/css/admin-member.css}">
+</head>
+
+<body>
+
+	<div th:replace="~{admin/fragments/sideMenu :: sideMenu('member')}"></div>
+
+	<main class="main">
+
+		<div class="page-head">
+			<h1>회원관리</h1>
+		</div>
+
+		<form class="search-box" th:action="@{/admin/members}"
+			th:object="${searchDTO}" method="get">
+
+			<input type="text" th:field="*{keyword}" placeholder="이름, 이메일 검색">
+
+			<select th:field="*{status}">
+				<option value="">전체 상태</option>
+				<option value="정상">정상</option>
+				<option value="휴면">휴면</option>
+				<option value="정지">정지</option>
+				<option value="탈퇴">탈퇴</option>
+			</select>
+
+			<button class="btn btn-primary" type="submit">검색</button>
+
+			<a class="btn btn-secondary" th:href="@{/admin/members}"> 초기화 </a>
+
+		</form>
+
+		<section class="table-panel">
+
+			<div class="table-summary">
+				전체 <strong th:text="${page.totalCount}">0</strong>건
+			</div>
+
+			<table>
+
+				<thead>
+					<tr>
+						<th>회원번호</th>
+						<th>이름</th>
+						<th>이메일</th>
+						<th>휴대폰</th>
+						<th>가입일</th>
+						<th>상태</th>
+						<th>관리</th>
+					</tr>
+				</thead>
+
+				<tbody>
+
+					<tr th:if="${#lists.isEmpty(members)}">
+						<td colspan="7" class="empty">조회된 회원이 없습니다.</td>
+					</tr>
+
+					<tr th:each="member : ${members}">
+
+						<td th:text="${member.memberCode}"></td>
+
+						<td th:text="${member.name}"></td>
+
+						<td th:text="${member.email}"></td>
+
+						<td th:text="${member.phone}"></td>
+
+						<td
+							th:text="${member.inputDate != null
+								? #dates.format(member.inputDate, 'yyyy-MM-dd')
+								: '-'}">
+						</td>
+
+						<td th:text="${member.status}"></td>
+
+						<td><a class="detail-link"
+							th:href="@{/admin/members/{code}(code=${member.memberCode})}">
+								상세 </a></td>
+
+					</tr>
+
+				</tbody>
+
+			</table>
+			<!-- 회원 목록 페이징 -->
+			<div class="pagination" th:if="${page.totalPage > 1}">
+
+				<!-- 이전 페이지 블록 -->
+				<a th:if="${page.startPage > 1}"
+					th:href="@{/admin/members(
+			page=${page.startPage - 1},
+			keyword=${searchDTO.keyword},
+			status=${searchDTO.status}
+		)}">
+					이전 </a>
+
+				<!-- 페이지 번호 -->
+				<a
+					th:each="pageNum :
+			${#numbers.sequence(
+				page.startPage,
+				page.endPage
+			)}"
+					th:href="@{/admin/members(
+			page=${pageNum},
+			keyword=${searchDTO.keyword},
+			status=${searchDTO.status}
+		)}"
+					th:text="${pageNum}"
+					th:classappend="${pageNum == page.currentPage}
+			? ' active'
+			: ''">
+				</a>
+
+				<!-- 다음 페이지 블록 -->
+				<a th:if="${page.endPage < page.totalPage}"
+					th:href="@{/admin/members(
+			page=${page.endPage + 1},
+			keyword=${searchDTO.keyword},
+			status=${searchDTO.status}
+		)}">
+					다음 </a>
+
+			</div>
+		</section>
+
+	</main>
+
+</body>
+
+</html>

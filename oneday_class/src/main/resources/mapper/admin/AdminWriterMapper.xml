@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.oneclass.admin.writer.AdminWriterDAO">
+
+	<select id="selectWriterCount" resultType="int">
+
+		SELECT COUNT(*)
+
+		FROM CREATOR CR
+
+		JOIN MEMBER M
+		ON CR.MEMBER_CODE =
+		M.MEMBER_CODE
+
+		WHERE 1 = 1
+
+		<if
+			test="search.keyword != null
+                  and search.keyword != ''">
+			AND (
+			M.NAME LIKE '%' || #{search.keyword} || '%'
+			OR
+			CR.ACTIVITY_NAME LIKE '%' || #{search.keyword} || '%'
+			OR M.EMAIL LIKE
+			'%' || #{search.keyword} || '%'
+			OR M.PHONE LIKE '%' ||
+			#{search.keyword} || '%'
+			)
+		</if>
+	</select>
+
+	<select id="selectWriterList"
+		resultType="kr.co.oneclass.admin.writer.AdminWriterSummaryDTO">
+
+		SELECT *
+		FROM (
+		SELECT
+		CR.OPERATOR_CODE AS WRITER_CODE,
+		M.NAME AS
+		WRITER_NAME,
+		CR.ACTIVITY_NAME AS WORKSHOP_NAME,
+		CR.ACTIVITY_REGION AS
+		REGION,
+		M.PHONE,
+
+		(
+		SELECT COUNT(*)
+		FROM CLASS C
+		WHERE C.OPERATOR_CODE =
+		CR.OPERATOR_CODE
+		) AS CLASS_COUNT,
+
+		ROW_NUMBER() OVER (
+		ORDER BY
+		CR.OPERATOR_CODE DESC
+		) AS RN
+
+		FROM CREATOR CR
+
+		JOIN MEMBER M
+		ON
+		CR.MEMBER_CODE = M.MEMBER_CODE
+
+		WHERE 1 = 1
+
+		<if
+			test="search.keyword != null
+                      and search.keyword != ''">
+			AND (
+			M.NAME LIKE '%' || #{search.keyword} || '%'
+			OR
+			CR.ACTIVITY_NAME LIKE '%' || #{search.keyword} || '%'
+			OR M.EMAIL LIKE
+			'%' || #{search.keyword} || '%'
+			OR M.PHONE LIKE '%' ||
+			#{search.keyword} || '%'
+			)
+		</if>
+		)
+
+		WHERE RN BETWEEN #{search.startRow}
+		AND #{search.endRow}
+	</select>
+
+	<select id="selectWriterDetail"
+		resultType="kr.co.oneclass.admin.writer.AdminWriterDetailDTO">
+
+		SELECT
+		CR.OPERATOR_CODE AS WRITER_CODE,
+
+		M.NAME AS
+		WRITER_NAME,
+
+		CR.ACTIVITY_NAME AS WORKSHOP_NAME,
+
+		M.EMAIL,
+		M.PHONE AS
+		MOBILE_PHONE,
+
+		CR.PROFILE_IMAGE,
+
+		CR.ACTIVITY_REGION,
+		CR.SNS_URL,
+
+		CR.JOIN_DATE,
+
+		CR.SETTLEMENT_ACCOUNT,
+		CR.SETTLEMENT_ACCOUNT_IMG,
+
+		CR.CREATOR_INTRODUCTION
+		AS INTRODUCTION
+
+		FROM CREATOR CR
+
+		JOIN MEMBER M
+		ON
+		CR.MEMBER_CODE = M.MEMBER_CODE
+
+		WHERE CR.OPERATOR_CODE =
+		#{writerCode}
+	</select>
+
+	<select id="selectWriterStatistics"
+		resultType="kr.co.oneclass.admin.writer.AdminWriterStatisticsDTO">
+
+		SELECT
+		#{writerCode} AS WRITER_CODE,
+
+		(
+		SELECT COUNT(*)
+		FROM
+		CLASS C
+		WHERE C.OPERATOR_CODE =
+		#{writerCode}
+		) AS CLASS_COUNT,
+
+		(
+		SELECT
+		COUNT(*)
+
+		FROM RESERVATION R
+
+		JOIN CLASS C
+		ON R.CLASS_CODE = C.CLASS_CODE
+
+		WHERE C.OPERATOR_CODE =
+		#{writerCode}
+		) AS RESERVATION_COUNT,
+
+		(
+		SELECT
+		NVL(
+		SUM(CA.AMOUNT),
+		0
+		)
+		FROM CALCULATE CA
+		WHERE CA.OPERATOR_CODE =
+		#{writerCode}
+		) AS SETTLEMENT_AMOUNT
+
+		FROM DUAL
+	</select>
+
+	<select id="selectWriterClassList"
+		resultType="kr.co.oneclass.admin.writer.AdminWriterClassDTO">
+
+		SELECT
+		C.CLASS_CODE,
+		C.NAME AS CLASS_NAME,
+
+		(
+		SELECT LISTAGG(
+		CO.OFFERING_NAME,
+		', '
+		)
+		WITHIN GROUP (
+		ORDER BY
+		CO.CLASS_OFFERING_CODE
+		)
+
+		FROM CLASS_OFFERING_MAP COM
+
+		JOIN CLASS_OFFERING CO
+		ON
+		COM.CLASS_OFFERING_CODE =
+		CO.CLASS_OFFERING_CODE
+
+		WHERE COM.CLASS_CODE =
+		C.CLASS_CODE
+		) AS PERIOD_TYPE,
+
+		(
+		SELECT MIN(
+		CRR.OPERATION_START_DATE
+		)
+		FROM CLASS_REPEAT_RULE CRR
+		WHERE CRR.CLASS_CODE =
+		C.CLASS_CODE
+		) AS
+		RECRUITMENT_START_DATE,
+
+		(
+		SELECT MAX(
+		CRR.OPERATION_END_DATE
+		)
+		FROM
+		CLASS_REPEAT_RULE CRR
+		WHERE CRR.CLASS_CODE =
+		C.CLASS_CODE
+		) AS
+		RECRUITMENT_END_DATE,
+
+		(
+		SELECT MIN(
+		S.MIN_PEOPLE
+		)
+
+		FROM SCHEDULE S
+
+		JOIN
+		CLASS_REPEAT_RULE CRR
+		ON S.REPEAT_RULE_CODE =
+		CRR.REPEAT_RULE_CODE
+
+		WHERE
+		CRR.CLASS_CODE =
+		C.CLASS_CODE
+		) AS MINIMUM_PEOPLE,
+
+		(
+		SELECT MAX(
+		S.MAX_PEOPLE
+		)
+
+		FROM SCHEDULE S
+
+		JOIN CLASS_REPEAT_RULE CRR
+		ON
+		S.REPEAT_RULE_CODE =
+		CRR.REPEAT_RULE_CODE
+
+		WHERE CRR.CLASS_CODE =
+		C.CLASS_CODE
+		) AS MAXIMUM_PEOPLE,
+
+		C.PRICE,
+		C.STATUS AS CLASS_STATUS
+
+		FROM
+		CLASS C
+
+		WHERE C.OPERATOR_CODE =
+		#{writerCode}
+
+		ORDER BY C.WRITE_DATE DESC,
+		C.CLASS_CODE DESC
+	</select>
+
+</mapper>

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>클래스 관리</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" th:href="@{/admin/css/admin-common.css}">
+<link rel="stylesheet" th:href="@{/admin/css/admin-layout.css}">
+<link rel="stylesheet" th:href="@{/admin/css/writer-class.css}">
+</head>
+<body>
+	<div class="shell">
+		<aside
+			th:replace="~{admin/fragments/sideMenu :: sideMenu('ondayclass')}"></aside>
+		<main>
+			<h1 class="page-title">클래스 관리</h1>
+			<form class="search" th:action="@{/admin/onedayclass}" method="get">
+				<input name="keyword" th:value="${searchDTO.keyword}"
+					placeholder="클래스명, 작가명, 활동명 검색"><select name="periodType"><option
+						value="">전체 반복 타입</option>
+					<option value="개별일정" th:selected="${searchDTO.periodType=='개별일정'}">개별일정</option>
+					<option value="요일반복" th:selected="${searchDTO.periodType=='요일반복'}">요일반복</option></select><select
+					name="classStatus"><option value="">전체 상태</option>
+					<option value="모집중" th:selected="${searchDTO.classStatus=='모집중'}">모집중</option>
+					<option value="판매중지" th:selected="${searchDTO.classStatus=='판매중지'}">판매중지</option></select>
+				<button>검색</button>
+				<a th:href="@{/admin/onedayclass}">초기화</a>
+			</form>
+			<section class="panel">
+				<div class="summary">
+					전체 클래스 <b th:text="${classCount}+'개'">0개</b>
+				</div>
+				<table>
+					<thead>
+						<tr>
+							<th>클래스</th>
+							<th>작가 / 활동명</th>
+							<th>카테고리</th>
+							<th>반복 타입</th>
+							<th>모집 기간</th>
+							<th>가격</th>
+							<th>상태</th>
+							<th>관리</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="c:${classes}">
+							<td><b th:text="${c.className}"></b><small
+								th:text="${c.region}+' · '+${c.runningTime}+'분'"></small></td>
+							<td><b th:text="${c.writerName}"></b><small
+								th:text="${c.workshopName}"></small></td>
+							<td th:text="${c.categoryName}"></td>
+							<td th:text="${c.periodType}"></td>
+							<td><span
+								th:text="${c.recruitmentStartDate!=null?#dates.format(c.recruitmentStartDate,'yyyy.MM.dd'):'-'}"></span>
+								~ <span
+								th:text="${c.recruitmentEndDate!=null?#dates.format(c.recruitmentEndDate,'yyyy.MM.dd'):'-'}"></span></td>
+							<td
+								th:text="${#numbers.formatInteger(c.salePrice,0,'COMMA')}+'원'"></td>
+							<td><span class="status-badge" th:text="${c.classStatus}"></span></td>
+							<td><a class="action"
+								th:href="@{/admin/onedayclass/{id}(id=${c.classCode})}">상세</a></td>
+						</tr>
+						<tr th:if="${#lists.isEmpty(classes)}">
+							<td colspan="8" class="empty">조회된 클래스가 없습니다.</td>
+						</tr>
+					</tbody>
+				</table>
+			</section>
+		</main>
+	</div>
+</body>
+</html>
