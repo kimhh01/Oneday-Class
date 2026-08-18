@@ -14,7 +14,7 @@
             <strong th:text="${session.loginMember.name}">회원</strong>님 환영합니다! 
             (아이디: <span th:text="${session.loginMember.email}">id</span>)
         </p>
-        <a th:href="@{/member/logout}">로그아웃</a>
+        <a th:href="@{/logout}">로그아웃</a>
         <a th:href="@{/mypage}">마이페이지</a>
         <a th:href="@{/profile}">프로필수정</a>
     </div>

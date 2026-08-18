@@ -16,4 +16,9 @@ public class MypageServiceImpl implements MypageService {
     public NoticeDTO getRecentNotice() {
         return mypageDAO.selectRecentNotice();
     }
+    
+ // 💡 추가: 로그인 회원의 작가 등록/승인 여부 확인
+    public boolean isAuthor(int memberCode) {
+        return mypageDAO.selectAuthorCount(memberCode) > 0;
+    }
 }

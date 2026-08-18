@@ -292,4 +292,21 @@ public class MemberController {
     public String withdrawSuccess() {
         return "withdraw/withdraw_success"; // src/main/resources/templates/withdraw/withdraw_success.html 뷰 반환
     }
+    
+    /**
+     * 로그아웃 처리
+     */
+    @GetMapping("/logout")
+    public String logout(HttpSession session, RedirectAttributes rttr) {
+        // 1. 현재 세션에 저장된 모든 정보 제거 (loginMember 포함)
+        if (session != null) {
+            session.invalidate();
+        }
+
+        // 2. 로그아웃 완료 메시지 전달 (선택 사항)
+        rttr.addFlashAttribute("msg", "성공적으로 로그아웃되었습니다.");
+
+        // 3. 메인 페이지로 리다이렉트
+        return "redirect:/";
+    }
 }

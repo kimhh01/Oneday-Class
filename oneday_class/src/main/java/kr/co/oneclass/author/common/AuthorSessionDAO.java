@@ -18,4 +18,11 @@ public class AuthorSessionDAO {
     public AuthorSessionDTO selectByMemberCode(int memberCode) {
         return sqlSession.selectOne(NAMESPACE + "selectByMemberCode", memberCode);
     }
+    
+    /**
+     * 💡 추가: 작가 미등록 회원의 기본 승인 데이터 등록 (INSERT)
+     */
+    public int insertInitialAuthor(int memberCode) {
+        return sqlSession.insert(NAMESPACE + "insertInitialAuthor", memberCode);
+    }
 }

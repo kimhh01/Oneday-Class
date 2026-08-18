@@ -20,5 +20,13 @@
           ORDER BY input_date DESC
         ) WHERE ROWNUM = 1
     </select>
+    
+    <!-- 💡 추가: 로그인한 회원의 작가(승인 상태) 등록 건수 조회 -->
+    <select id="selectAuthorCount" parameterType="int" resultType="int">
+        SELECT COUNT(*)
+        FROM CREATOR
+        WHERE MEMBER_CODE = #{memberCode}
+          AND APPROVAL_STATUS = '승인'
+    </select>
 
 </mapper>

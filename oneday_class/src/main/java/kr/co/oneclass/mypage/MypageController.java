@@ -36,9 +36,13 @@ public class MypageController {
         // 3. 가장 최근 공지사항 1건 DB 조회
         NoticeDTO recentNotice = mps.getRecentNotice();
 
-        // 4. View로 데이터 전송 (DB 조회가 성공하면 member, 실패 시 loginMember 전송)
+        // 4. 💡 작가 승인/등록 여부 조회 추가
+        boolean isAuthor = mps.isAuthor(loginMember.getMemberCode());
+
+        // 5. View로 데이터 전송
         model.addAttribute("member", member != null ? member : loginMember);
         model.addAttribute("recentNotice", recentNotice);
+        model.addAttribute("isAuthor", isAuthor); // 💡 타임리프(isAuthor) 조건 연동용 데이터 전송
 
         return "mypage/mypage";
     }
