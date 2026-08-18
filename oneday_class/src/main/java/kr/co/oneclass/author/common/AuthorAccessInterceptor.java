@@ -32,7 +32,7 @@ public class AuthorAccessInterceptor implements HandlerInterceptor {
         HttpSession session = request.getSession(false);
         Member loginMember = session == null ? null : (Member) session.getAttribute("loginMember");
         if (loginMember == null) {
-            redirect(response, request.getContextPath() + "/member/login/general");
+            redirect(response, request.getContextPath() + "/member/login");
             return false;
         }
 
