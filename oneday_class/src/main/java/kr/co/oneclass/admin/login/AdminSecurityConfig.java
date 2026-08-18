@@ -14,7 +14,7 @@ public class AdminSecurityConfig {
 	SecurityFilterChain adminSecurityFilterChain(HttpSecurity http) throws Exception {
 
 		http.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/admin/login", "/css/**", "/js/**", "/images/**")
+				.requestMatchers("/admin/login", "/admin/css/**", "/admin/js/**", "/admin/images/**")
 				.permitAll()
 				.requestMatchers("/admin/**")
 				.hasRole("ADMIN")
