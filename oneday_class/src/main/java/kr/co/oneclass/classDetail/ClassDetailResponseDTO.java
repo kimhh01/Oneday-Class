@@ -19,12 +19,15 @@ public class ClassDetailResponseDTO {
     private ReviewSummaryDTO reviewSummary;
     private List<ScheduleDTO> representativeSchedule;
     private List<ScheduleDTO> scheduleList;
+    private List<MaterialDTO> materialList;
+    private List<OfferingDTO> offeringList;
 
     // 생성자, Getter, Setter 작성 (또는 Lombok @Data 사용)
     public ClassDetailResponseDTO(ClassDTO classDetail, OperatorDTO creator, 
                                   List<ClassDTO> sameCategoryList, List<CurriculumDTO> curriculumList, 
                                   List<ReviewDTO> reviewList, ReviewSummaryDTO reviewSummary, 
-                                  List<ScheduleDTO> representativeSchedule, List<ScheduleDTO> scheduleList) {
+                                  List<ScheduleDTO> representativeSchedule, List<ScheduleDTO> scheduleList,
+                                  List<MaterialDTO> materialList, List<OfferingDTO> offeringList) {
         this.classDetail = classDetail;
         this.creator = creator;
         this.sameCategoryList = sameCategoryList;
@@ -33,7 +36,8 @@ public class ClassDetailResponseDTO {
         this.reviewSummary = reviewSummary;
         this.representativeSchedule = representativeSchedule;
         this.scheduleList = scheduleList;
+        this.materialList = materialList;
+        this.offeringList = offeringList;
     }
     
-    // Getter 및 Setter 메서드 생략...
 }

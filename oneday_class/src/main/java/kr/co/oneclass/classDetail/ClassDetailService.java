@@ -5,6 +5,9 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import kr.co.oneclass.bookmark.BookmarkDAO;
 import kr.co.oneclass.common.ClassDTO;
@@ -28,7 +31,10 @@ public class ClassDetailService {
 		if (classDto == null) {
 			return null;
 		}
-
+		
+		if(!"승인".equals(classDto.getApprovalStatus())) {
+			return null;
+		}
 		// 💡 [추가] 이미지 리스트 조회 후 ClassDTO에 넣어주기!
 	    List<ClassImageDTO> imageList = classDetailDAO.selectClassImageList(classCode);
 	    classDto.setImageList(imageList);
@@ -44,11 +50,15 @@ public class ClassDetailService {
 	    ReviewSummaryDTO reviewSummaryDto = classDetailDAO.selectReviewSummary(classCode);
 	    List<ScheduleDTO> representativeSchedule = classDetailDAO.selectSchedule(classCode);
 	    List<ScheduleDTO> scheduleList = classDetailDAO.selectScheduleList(classCode);
-
+	    List<MaterialDTO> materialList = classDetailDAO.selectMaterialList(classCode);
+	    List<OfferingDTO> offeringList = classDetailDAO.selectOfferingList(classCode);
+		
 		// 4. 하나의 DTO로 결합하여 반환
 		return new ClassDetailResponseDTO(classDto, creatorDto, sameCategoryList, curriculumList, reviewList,
-				reviewSummaryDto, representativeSchedule, scheduleList);
+				reviewSummaryDto, representativeSchedule, scheduleList, materialList, offeringList);
 	}
+	
+	
 
 	//북마크 추가 or 제거
 	 @Transactional

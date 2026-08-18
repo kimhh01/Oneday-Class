@@ -42,4 +42,10 @@ public interface ClassDetailDAO {
 	
 	// 클래스 이미지 리스트 조회 메서드 추가
 	public List<ClassImageDTO> selectClassImageList(int classCode);
+	
+	//클래스 재료 조회
+	public List<MaterialDTO> selectMaterialList(int classCode);
+	
+	//제공사항 조회
+	public List<OfferingDTO> selectOfferingList(int classCode);
 }

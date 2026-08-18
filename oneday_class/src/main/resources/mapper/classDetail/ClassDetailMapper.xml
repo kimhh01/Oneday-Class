@@ -24,7 +24,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         INTRODUCE,
         FINISH_INTRODUCE    AS finishIntroduce,
         LAT,
-        LNG
+        LNG,
+        APPROVAL_STATUS AS approvalStatus
     FROM class
     WHERE class_code = #{classCode}
 </select>
@@ -159,5 +160,25 @@ WHERE r.class_code = #{classCode}
       FROM class_img
      WHERE class_code = #{classCode}
   ORDER BY sort_order ASC
+</select>
+
+<!-- 💡 [수정 후] WHERE 조건절 추가 -->
+<select id="selectMaterialList" parameterType="int" resultType="kr.co.oneclass.classDetail.MaterialDTO">
+    SELECT 
+        CLASS_MATERIAL_CODE    AS materialCode,
+        CLASS_CODE       AS classCode,
+        MATERIAL_NAME    AS materialName,
+        MATERIAL_CONTENT AS materialContent
+    FROM CLASS_MATERIAL
+    WHERE CLASS_CODE = #{classCode}
+</select>
+
+<!--제공사항 조회-->
+<select id="selectOfferingList" parameterType="int" resultType="kr.co.oneclass.classDetail.OfferingDTO">
+select com.class_offering_code, com.class_code, co.offering_name, co.use_yn
+from class_offering_map com
+join class_offering co
+on com.class_offering_code = co.class_offering_code
+where class_code=#{classCode}
 </select>
 </mapper>

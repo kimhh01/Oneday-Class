@@ -3,6 +3,7 @@
 	import java.sql.Date;
 	import java.util.List;
 
+import kr.co.oneclass.classDetail.MaterialDTO;
 import lombok.Getter;
 	import lombok.Setter;
 	import lombok.ToString;
@@ -39,4 +40,5 @@ import lombok.Getter;
 		private List<ClassImageDTO> imageList;
 		private List<TagDTO> tagList; 
 		private String registerStep;
+		private List<MaterialDTO> materialList;
 	}
