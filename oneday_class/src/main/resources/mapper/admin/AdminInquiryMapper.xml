@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.oneclass.admin.inquiry.AdminInquiryDAO">
+
+    <sql id="writerJoin">
+        LEFT JOIN MEMBER M ON I.MEMBER_CODE = M.MEMBER_CODE
+        LEFT JOIN CREATOR CR ON I.OPERATOR_CODE = CR.OPERATOR_CODE
+    </sql>
+
+    <select id="selectInquiryStatistics"
+            resultType="kr.co.oneclass.admin.inquiry.AdminInquiryStatisticsDTO">
+        SELECT
+            COUNT(*) AS TOTAL_COUNT,
+            SUM(CASE WHEN ANSWER IS NULL OR TRIM(ANSWER) IS NULL THEN 1 ELSE 0 END) AS WAITING_COUNT,
+            SUM(CASE WHEN ANSWER IS NOT NULL AND TRIM(ANSWER) IS NOT NULL THEN 1 ELSE 0 END) AS COMPLETED_COUNT
+        FROM INQUIRY
+    </select>
+
+    <select id="selectInquiryCount" resultType="int">
+        SELECT COUNT(*)
+        FROM INQUIRY I
+        JOIN INQUIRY_TYPE IT ON I.INQUIRY_TYPE_CODE = IT.INQUIRY_TYPE_CODE
+        <include refid="writerJoin"/>
+        WHERE 1 = 1
+        <if test="search.keyword != null and search.keyword != ''">
+            AND (
+                I.TITLE LIKE '%' || #{search.keyword} || '%'
+                OR NVL(M.NAME, CR.ACTIVITY_NAME) LIKE '%' || #{search.keyword} || '%'
+            )
+        </if>
+        <if test="search.inquiryTypeCode != null">
+            AND I.INQUIRY_TYPE_CODE = #{search.inquiryTypeCode}
+        </if>
+        <if test="search.answerStatus == 'WAITING'">
+            AND (I.ANSWER IS NULL OR TRIM(I.ANSWER) IS NULL)
+        </if>
+        <if test="search.answerStatus == 'COMPLETED'">
+            AND I.ANSWER IS NOT NULL AND TRIM(I.ANSWER) IS NOT NULL
+        </if>
+    </select>
+
+    <select id="selectInquiryList"
+            resultType="kr.co.oneclass.admin.inquiry.AdminInquirySummaryDTO">
+        SELECT *
+        FROM (
+            SELECT
+                I.INQUIRY_CODE,
+                IT.INQUIRY_TYPE_NAME,
+                I.TITLE,
+                CASE
+                    WHEN I.OPERATOR_CODE IS NOT NULL THEN CR.ACTIVITY_NAME
+                    ELSE M.NAME
+                END AS WRITER_NAME,
+                I.WRITER_TYPE,
+                I.INQUIRY_DATE,
+                CASE
+                    WHEN I.ANSWER IS NULL OR TRIM(I.ANSWER) IS NULL THEN '답변대기'
+                    ELSE '답변완료'
+                END AS ANSWER_STATUS,
+                ROW_NUMBER() OVER (
+                    ORDER BY I.INQUIRY_DATE DESC, I.INQUIRY_CODE DESC
+                ) AS RN
+            FROM INQUIRY I
+            JOIN INQUIRY_TYPE IT ON I.INQUIRY_TYPE_CODE = IT.INQUIRY_TYPE_CODE
+            <include refid="writerJoin"/>
+            WHERE 1 = 1
+            <if test="search.keyword != null and search.keyword != ''">
+                AND (
+                    I.TITLE LIKE '%' || #{search.keyword} || '%'
+                    OR NVL(M.NAME, CR.ACTIVITY_NAME) LIKE '%' || #{search.keyword} || '%'
+                )
+            </if>
+            <if test="search.inquiryTypeCode != null">
+                AND I.INQUIRY_TYPE_CODE = #{search.inquiryTypeCode}
+            </if>
+            <if test="search.answerStatus == 'WAITING'">
+                AND (I.ANSWER IS NULL OR TRIM(I.ANSWER) IS NULL)
+            </if>
+            <if test="search.answerStatus == 'COMPLETED'">
+                AND I.ANSWER IS NOT NULL AND TRIM(I.ANSWER) IS NOT NULL
+            </if>
+        )
+        WHERE RN BETWEEN #{search.startRow} AND #{search.endRow}
+    </select>
+
+    <select id="selectInquiryDetail"
+            resultType="kr.co.oneclass.admin.inquiry.AdminInquiryDetailDTO">
+        SELECT
+            I.INQUIRY_CODE,
+            I.INQUIRY_TYPE_CODE,
+            IT.INQUIRY_TYPE_NAME,
+            I.MANAGER_CODE,
+            I.OPERATOR_CODE,
+            I.MEMBER_CODE,
+            CASE
+                WHEN I.OPERATOR_CODE IS NOT NULL THEN CR.ACTIVITY_NAME
+                ELSE M.NAME
+            END AS WRITER_NAME,
+            I.WRITER_TYPE,
+            I.TITLE,
+            I.CONTENT,
+            I.INQUIRY_IMG,
+            I.INQUIRY_DATE,
+            I.ANSWER,
+            I.ANSWER_DATE,
+            CASE
+                WHEN I.ANSWER IS NULL OR TRIM(I.ANSWER) IS NULL THEN '답변대기'
+                ELSE '답변완료'
+            END AS ANSWER_STATUS
+        FROM INQUIRY I
+        JOIN INQUIRY_TYPE IT ON I.INQUIRY_TYPE_CODE = IT.INQUIRY_TYPE_CODE
+        <include refid="writerJoin"/>
+        WHERE I.INQUIRY_CODE = #{inquiryCode}
+    </select>
+
+    <select id="selectInquiryTypeList"
+            resultType="kr.co.oneclass.admin.inquiry.AdminInquiryTypeDTO">
+        SELECT INQUIRY_TYPE_CODE, INQUIRY_TYPE_NAME
+        FROM INQUIRY_TYPE
+        ORDER BY INQUIRY_TYPE_CODE
+    </select>
+
+    <update id="updateInquiryAnswer">
+        UPDATE INQUIRY
+        SET ANSWER = #{answer},
+            ANSWER_DATE = SYSDATE
+        <if test="managerCode != null">
+            , MANAGER_CODE = #{managerCode}
+        </if>
+        WHERE INQUIRY_CODE = #{inquiryCode}
+    </update>
+
+</mapper>

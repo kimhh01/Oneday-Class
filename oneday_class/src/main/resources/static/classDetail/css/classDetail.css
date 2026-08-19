@@ -1035,17 +1035,19 @@ body.map-page-body {
     font-weight: bold;
     margin-left: 4px;
 }
-/* 리뷰 첨부 이미지 스타일 */
+/* 리뷰 첨부 이미지 가로 배치 */
 .review-img-box {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
     margin-bottom: 12px;
 }
 
 .review-attached-img {
-    max-width: 200px;     /* 필요 시 크기 조절 (예: 120px~250px) */
-    max-height: 200px;
-    border-radius: 8px;   /* 둥근 모서리 */
-    object-fit: cover;    /* 비율 유지하며 꽉 차게 */
-    display: block;
+    width: 100px;         /* 여러 장이므로 적절한 크기로 조정 */
+    height: 100px;
+    border-radius: 8px;   
+    object-fit: cover;    
     cursor: pointer;
 }
 /* =========================================
@@ -1299,4 +1301,214 @@ a.btn-info-detail {
     font-weight: bold;
     cursor: pointer;
     margin-top: 15px;
+}
+/* =========================================
+   [섹션 3] 클래스 소개 (#intro) 스타일
+   ========================================= */
+
+/* 1. 태그 목록 */
+.tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.tag-item {
+    display: inline-block;
+    background-color: #f1f5f9;
+    color: var(--brand-green);
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.3rem 0.7rem;
+    border-radius: 20px;
+    transition: background-color 0.2s ease;
+}
+
+.tag-item:hover {
+    background-color: #e2e8f0;
+}
+
+/* 2. 클래스 30초 요약 뱃지 */
+.green-check-badge {
+    display: inline-flex;
+    align-items: center;
+    background-color: #f0fdf4;
+    color: var(--brand-green);
+    font-size: 0.9rem;
+    font-weight: 800;
+    padding: 0.5rem 0.9rem;
+    border-radius: 6px;
+    border: 1px solid #bbf7d0;
+    margin-bottom: 1.5rem;
+}
+
+/* 3. 추천대상 & 장점 섹션 (카드형 박스) */
+.recommend-section,
+.advantage-section {
+    background-color: var(--gray-bg);
+    border: 1px solid var(--border-line);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+}
+
+.recommend-section h3,
+.advantage-section h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-black);
+    margin: 0 0 0.75rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.recommend-section h3::before {
+    content: "💡";
+    font-size: 1rem;
+}
+
+.advantage-section h3::before {
+    content: "✨";
+    font-size: 1rem;
+}
+
+.recommend-section ul,
+.advantage-section ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.recommend-section li,
+.advantage-section li {
+    font-size: 0.875rem;
+    color: #495057;
+    line-height: 1.5;
+    position: relative;
+    padding-left: 1.25rem;
+}
+
+.recommend-section li::before,
+.advantage-section li::before {
+    content: "•";
+    position: absolute;
+    left: 0.25rem;
+    top: 0;
+    color: var(--brand-green);
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+/* 4. 본문 소개 글 (한 줄 소개 / 메인 소개 / 마무리) */
+.db-text-content {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-black);
+    line-height: 1.6;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    word-break: keep-all;
+}
+
+.intro-main {
+    font-size: 0.95rem;
+    color: #374151;
+    line-height: 1.75;
+    white-space: pre-line; /* DB 엔터값(줄바꿈) 유지 */
+    margin-bottom: 1.5rem;
+    word-break: keep-all;
+}
+
+.intro-finish {
+    font-size: 0.925rem;
+    font-weight: 600;
+    color: var(--brand-green);
+    background-color: #f0fdf4;
+    padding: 1rem 1.25rem;
+    border-radius: 8px;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    white-space: pre-line;
+}
+
+/* 5. 재료 / 기타 제공사항 테이블 및 리스트 */
+.material-info,
+.offering-info {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-line);
+}
+
+.material-info h4,
+.offering-info h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-black);
+    margin: 0 0 1rem 0;
+}
+
+/* 재료 안내 테이블 */
+.material-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border-line);
+    font-size: 0.875rem;
+}
+
+.material-table tr {
+    border-bottom: 1px solid var(--border-line);
+}
+
+.material-table tr:last-child {
+    border-bottom: none;
+}
+
+.material-table td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+}
+
+.material-table td:first-child {
+    width: 30%;
+    background-color: var(--gray-bg);
+    font-weight: 600;
+    color: #343a40;
+}
+
+.material-table td:last-child {
+    background-color: #ffffff;
+    color: #495057;
+}
+
+/* 기타 제공사항 리스트 */
+.offering-info ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.offering-info li {
+    font-size: 0.875rem;
+    color: #495057;
+    padding-left: 1.25rem;
+    position: relative;
+}
+
+.offering-info li::before {
+    content: "✔";
+    position: absolute;
+    left: 0;
+    top: 0;
+    font-size: 0.75rem;
+    color: var(--brand-green);
 }

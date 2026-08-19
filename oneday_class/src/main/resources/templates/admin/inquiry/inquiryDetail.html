@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1:1 문의 상세</title>
+<link rel="stylesheet" th:href="@{/admin/css/admin-common.css}">
+<link rel="stylesheet" th:href="@{/admin/css/admin-layout.css}">
+<link rel="stylesheet" th:href="@{/admin/css/admin-inquiry.css}">
+</head>
+<body>
+
+	<div th:replace="~{admin/fragments/sideMenu :: sideMenu('inquiry')}"></div>
+
+	<main class="main inquiry-detail-page">
+		<div class="detail-back-area">
+			<a class="btn btn-secondary" th:href="@{/admin/inquiries}">← 목록으로</a>
+		</div>
+
+		<div class="page-head">
+			<h1>1:1 문의 상세</h1>
+		</div>
+
+		<div class="flash-message" th:if="${message}" th:text="${message}"></div>
+
+		<section class="inquiry-detail-panel">
+			<div class="inquiry-section-title">문의 정보</div>
+			<dl class="inquiry-info-list">
+				<div class="inquiry-info-row">
+					<dt>문의 제목</dt>
+					<dd th:text="${inquiry.title}"></dd>
+					<dt>등록일</dt>
+					<dd
+						th:text="${inquiry.inquiryDate != null ? #dates.format(inquiry.inquiryDate,'yyyy.MM.dd HH:mm') : '-'}"></dd>
+				</div>
+				<div class="inquiry-info-row">
+					<dt>작성자</dt>
+					<dd th:text="${inquiry.writerName}"></dd>
+					<dt>상태</dt>
+					<dd>
+						<span class="answer-status"
+							th:classappend="${inquiry.answerStatus == '답변완료'} ? ' answer-complete' : ' answer-waiting'"
+							th:text="${inquiry.answerStatus}"></span>
+					</dd>
+				</div>
+				<div class="inquiry-info-row">
+					<dt>문의 유형</dt>
+					<dd class="inquiry-info-wide">
+						<span class="type-badge" th:text="${inquiry.inquiryTypeName}"></span>
+					</dd>
+				</div>
+			</dl>
+		</section>
+
+		<section class="inquiry-detail-panel">
+			<div class="inquiry-section-title">문의 내용</div>
+			<div class="inquiry-content" th:text="${inquiry.content}"></div>
+			<div class="inquiry-image"
+				th:if="${inquiry.inquiryImg != null and inquiry.inquiryImg != ''}">
+				<img th:src="${inquiry.inquiryImg}" alt="문의 첨부 이미지">
+			</div>
+		</section>
+
+		<section class="inquiry-detail-panel">
+			<div class="inquiry-section-title"
+				th:text="${inquiry.answerStatus == '답변완료'} ? '답변 내용' : '답변 작성'">답변
+				작성</div>
+
+			<div th:if="${inquiry.answerStatus == '답변완료'}"
+				class="answer-completed-box">
+				<div class="answer-date" th:if="${inquiry.answerDate != null}">
+					답변일 <span
+						th:text="${#dates.format(inquiry.answerDate,'yyyy.MM.dd HH:mm')}"></span>
+				</div>
+				<div class="inquiry-content" th:text="${inquiry.answer}"></div>
+			</div>
+
+			<form th:if="${inquiry.answerStatus != '답변완료'}"
+				th:action="@{/admin/inquiries/{code}/answer(code=${inquiry.inquiryCode})}"
+				method="post" class="answer-form">
+
+				<label for="answer">답변 내용 <span class="required">*</span></label>
+				<textarea id="answer" name="answer" maxlength="500" required
+					placeholder="답변 내용을 입력해주세요."></textarea>
+
+				<div class="answer-meta">최대 500자</div>
+
+				<div class="answer-actions">
+					<button type="submit" class="btn btn-primary">답변 등록</button>
+					<a class="btn btn-secondary" th:href="@{/admin/inquiries}">취소</a>
+				</div>
+			</form>
+		</section>
+	</main>
+</body>
+</html>

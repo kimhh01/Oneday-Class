@@ -16,6 +16,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         ZIPCODE,
         ADDRESS,
         OLD_ADDRESS         AS oldAddress,
+        address2,
         STATUS,
         REVIEW_SUM          AS reviewSum,
         STAR_RATING_AVG     AS starRatingAvg,
@@ -117,9 +118,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     ORDER BY CURRICULUM_CODE ASC  <!-- 필요 시 순서 정렬 -->
 </select>
 
-<!-- 7. 리뷰 리스트 조회 -->
+<!-- 7. 리뷰 리스트 조회(추천순, 조회순) -->
 <select id="selectReviewList" parameterType="int" resultType="kr.co.oneclass.classDetail.ReviewDTO">
     SELECT
+    r.review_code as reviewCode,
     m.name          AS userName,
     m.image         AS userImg,
     c.activity_name AS operatorName,
@@ -128,14 +130,20 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     r.content       AS content,
     r.input_date    AS inputDate,
     r.reply_content AS replyContent,
-    r.reply_date    AS replyDate,
-    ri.review_img   AS reviewImg
+    r.reply_date    AS replyDate
 FROM review r
 JOIN member m ON r.member_code = m.member_code
 JOIN class cl ON r.class_code = cl.class_code
 JOIN creator c ON cl.operator_code = c.operator_code
-LEFT JOIN review_img ri ON r.review_code = ri.review_code
 WHERE r.class_code = #{classCode}
+</select>
+
+<select id="selectReviewImgList" parameterType="int" resultType="kr.co.oneclass.classDetail.ReviewImgDTO">
+select review_img_code as reviewImgCode,
+		review_code as reviewCode,
+		review_img as reviewImg
+from review_img
+where review_code=#{reviewCode}
 </select>
 
 <!-- 10. 리뷰 별점 요약 -->
@@ -179,6 +187,35 @@ select com.class_offering_code, com.class_code, co.offering_name, co.use_yn
 from class_offering_map com
 join class_offering co
 on com.class_offering_code = co.class_offering_code
+where class_code=#{classCode}
+</select>
+
+<!--추가 제공사항 조회-->
+<select id="selectAdditionalInfo" parameterType="int" resultType="kr.co.oneclass.classDetail.AdditionalInfoDTO">
+select ADDITIONAL_INFO_CODE as additionalInfoCode,
+	CLASS_CODE as classCode,
+		ADDITIONAL_INFO_CONTENT as additionalInfoContent
+from class_additional_info
+where class_code=#{classCode}	
+
+</select>
+
+<!-- 태그 조회 -->
+<select id="selectTagList" parameterType="int" resultType="kr.co.oneclass.common.TagDTO">
+select tag_code as tagCode,
+		class_code as classCode,
+		tag_name as tagName
+from tag
+where class_code=#{classCode} 
+</select>
+
+<!--상세정보 조회-->
+<select id="selectDetailInfoList" parameterType="int" resultType="kr.co.oneclass.classDetail.DetailInfoDTO">
+select detail_info_code as detailInfoCode,
+		class_code as classCode,
+		character,
+		ingredients
+from detail_info
 where class_code=#{classCode}
 </select>
 </mapper>

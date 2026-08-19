@@ -85,34 +85,77 @@
 
 			<!-- (3) 클래스 소개 -->
 			<section id="intro" class="content-section">
-				<div class="green-check-badge">✔클래스 30초 요약</div>
-				<!-- 💡 [수정 후] detail.materialList 로 경로 수정 -->
+
+				<!-- 1. 태그 목록 -->
+				<div class="tag-list"
+					th:if="${detail?.tagList != null and !#lists.isEmpty(detail.tagList)}">
+					<span class="tag-item" th:each="tag : ${detail.tagList}"
+						th:text="'#' + ${tag.tagName}">#태그</span>
+				</div>
+				<!-- 클래스 위치 -->
+				<div class="class-address">
+					<h3>클래스 위치</h3>
+					<span th:text="${detail?.classDetail?.address}"></span>
+					<span th:text="${detail?.classDetail?.address2}"></span>
+				</div>
+				<!-- 2. 클래스 30초 요약 -->
+				<div class="green-check-badge">✔ 클래스 30초 요약</div>
+
+				<!-- 3. 이런 분들에게 추천드려요 -->
+				<div class="recommend-section"
+					th:if="${detail?.detailInfoList != null}">
+					<h3>이런 분들에게 추천해요!</h3>
+					<ul>
+						<li th:each="item : ${detail.detailInfoList}"
+							th:if="${item.character eq '추천'}" th:text="${item.ingredients}">평소
+							손으로 만드는 것을 좋아하시는 분</li>
+					</ul>
+				</div>
+				<!-- 4. 이런 점이 좋아요 (클래스 특징) -->
+				<div class="advantage-section"
+					th:if="${detail?.detailInfoList != null}">
+					<h3>이런 점이 좋아요</h3>
+					<ul>
+						<li th:each="item : ${detail.detailInfoList}"
+							th:if="${item.character eq '장점'}" th:text="${item.ingredients}">소규모
+							인원으로 꼼꼼한 피드백 제공</li>
+					</ul>
+				</div>
+
+				<!-- 5. 상세 소개 글 -->
+				<div class="db-text-content"
+					th:text="${detail.classDetail.singleIntroduce}">한 줄 소개</div>
+				<div class="intro-main" th:text="${detail.classDetail.introduce}">본문
+					소개</div>
+				<div class="intro-finish"
+					th:text="${detail.classDetail.finishIntroduce}">마무리 소개</div>
+
+				<!-- 6. 재료 및 기타 제공사항 -->
 				<div class="material-info"
 					th:if="${detail?.materialList != null and !#lists.isEmpty(detail.materialList)}">
-					<th:block th:each="material : ${detail.materialList}">
-						<table class="material-table">
-							<tbody>
-								<tr>
-									<td th:text="${material.materialName}"></td>
-									<td th:text="${material.materialContent}"></td>
-								</tr>
-							</tbody>
-						</table>
-					</th:block>
+					<h4>준비물 / 재료 안내</h4>
+					<table class="material-table">
+						<tbody>
+							<tr th:each="material : ${detail.materialList}">
+								<td th:text="${material.materialName}"></td>
+								<td th:text="${material.materialContent}"></td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
-				<!-- 제공사항 -->
-				<div th:if="${detail?.offeringList != null and !#lists.isEmpty(detail.offeringList)}">
-					<div>기타 제공사항</div>
-					<th:block th:each="offering : ${detail.offeringList}">
-						<ul>
-							<li th:text="${offering.offeringName}"></li>
-						</ul>
-					</th:block>
+
+				<div class="offering-info"
+					th:if="${detail?.offeringList != null and !#lists.isEmpty(detail.offeringList)}">
+					<h4>기타 제공사항</h4>
+					<ul>
+						<li th:each="offering : ${detail.offeringList}"
+							th:text="${offering.offeringName}"></li>
+						<li th:each="additinalInfo : ${detail.additionalInfoList}"
+							th:if="${detail?.additionalInfoList != null and !#lists.isEmpty(detail.additionalInfoList)}"
+							th:text="${additinalInfo.additionalInfoContent}">
+					</ul>
 				</div>
-				<div class="db-text-content"
-					th:text="${detail.classDetail.singleIntroduce}"></div>
-				<div th:text="${detail.classDetail.introduce}"></div>
-				<div th:text="${detail.classDetail.finishIntroduce}"></div>
+
 			</section>
 
 			<!-- (4) 커리큘럼 -->
@@ -259,16 +302,19 @@
 								th:text="${review.content != null ? review.content : ''}">
 								원하는 시간대에 맞춰주신 덕에 편하게 잘 배우고 왔습니다! 유화는 처음이라 걱정했지만 쉽고 즐겁게 할 수 있도록
 								많이 도와주셔서 유화의 재미를 제대로 느꼈습니다...!!!</p>
+							<!-- 리뷰 첨부 이미지 박스 -->
 							<div class="review-img-box"
-								th:if="${review.reviewImg != null and !#strings.isEmpty(review.reviewImg)}">
-								<img th:src="${review.reviewImg}" class="review-attached-img"
-									alt="리뷰 사진">
+								th:if="${review.reviewImg != null and !#lists.isEmpty(review.reviewImg)}">
+								<th:block th:each="imgObj : ${review.reviewImg}">
+									<img th:if="${imgObj != null and imgObj.reviewImg != null}"
+										th:src="${imgObj.reviewImg}" class="review-attached-img"
+										alt="리뷰 사진">
+								</th:block>
 							</div>
 							<!-- 3. 리뷰 하단 (날짜 / 신고 버튼) -->
 							<div class="review-card-footer">
 								<span class="review-date"
 									th:text="${review.inputDate != null ? review.inputDate : ''}">2022.03.03</span>
-								<button type="button" class="report-btn">신고</button>
 							</div>
 
 							<!-- 4. 튜터 답글 박스 (답글이 존재할 때만 출력) -->
@@ -508,6 +554,7 @@
 <script th:inline="javascript">
 //백엔드 데이터 선언
 const scheduleDataList = /*[[${detail?.scheduleList}]]*/ [];
+
 
 let selectedScheduleId = null;
 
@@ -772,5 +819,7 @@ function renderCalendarDaysBar() {
             overlay.style.display = 'none';
         }
     }
+
+
 </script>
 </html>

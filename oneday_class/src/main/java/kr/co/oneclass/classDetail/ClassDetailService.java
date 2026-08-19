@@ -13,6 +13,7 @@ import kr.co.oneclass.bookmark.BookmarkDAO;
 import kr.co.oneclass.common.ClassDTO;
 import kr.co.oneclass.common.ClassImageDTO;
 import kr.co.oneclass.common.ScheduleDTO;
+import kr.co.oneclass.common.TagDTO;
 
 @Service
 public class ClassDetailService {
@@ -35,6 +36,8 @@ public class ClassDetailService {
 		if(!"승인".equals(classDto.getApprovalStatus())) {
 			return null;
 		}
+		
+		
 		// 💡 [추가] 이미지 리스트 조회 후 ClassDTO에 넣어주기!
 	    List<ClassImageDTO> imageList = classDetailDAO.selectClassImageList(classCode);
 	    classDto.setImageList(imageList);
@@ -47,15 +50,27 @@ public class ClassDetailService {
 	    List<ClassDTO> sameCategoryList = classDetailDAO.selectSameCategoryList(classCode, categoryCode);
 	    List<CurriculumDTO> curriculumList = classDetailDAO.selectCurriculum(classCode);
 	    List<ReviewDTO> reviewList = classDetailDAO.selectReviewList(classCode);
+	    // 2. 리뷰 리스트를 반복문 돌리며 각 reviewCode로 이미지를 조회해 세팅합니다.
+	    if (reviewList != null && !reviewList.isEmpty()) {
+	        for (ReviewDTO review : reviewList) {
+	            int reviewCode = review.getReviewCode(); // 리뷰 DTO에서 reviewCode 추출
+	            List<ReviewImgDTO> imgList = classDetailDAO.selectReviewImgList(reviewCode);
+	            review.setReviewImg(imgList); // 리뷰 DTO 내부의 List<ReviewImgDTO>에 세팅
+	        }
+	    }
 	    ReviewSummaryDTO reviewSummaryDto = classDetailDAO.selectReviewSummary(classCode);
 	    List<ScheduleDTO> representativeSchedule = classDetailDAO.selectSchedule(classCode);
 	    List<ScheduleDTO> scheduleList = classDetailDAO.selectScheduleList(classCode);
 	    List<MaterialDTO> materialList = classDetailDAO.selectMaterialList(classCode);
 	    List<OfferingDTO> offeringList = classDetailDAO.selectOfferingList(classCode);
-		
+	    List<TagDTO> tagList = classDetailDAO.selectTagList(classCode);
+	    List<DetailInfoDTO> detailInfoList = classDetailDAO.selectDetailInfoList(classCode);
+	    List<AdditionalInfoDTO> additionalInfoList = classDetailDAO.selectAdditionalInfo(classCode);
+	    
 		// 4. 하나의 DTO로 결합하여 반환
 		return new ClassDetailResponseDTO(classDto, creatorDto, sameCategoryList, curriculumList, reviewList,
-				reviewSummaryDto, representativeSchedule, scheduleList, materialList, offeringList);
+				reviewSummaryDto, representativeSchedule, scheduleList, materialList,
+				offeringList, tagList, detailInfoList, additionalInfoList);
 	}
 	
 	

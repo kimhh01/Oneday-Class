@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -37,16 +36,6 @@ public class ClassDetailController {
         return "classDetail/classDetail";
     }
     
-	/*
-	 * @GetMapping("/classCode/{classCode}") public String
-	 * getClassDetail(@PathVariable int classCode,Model model) {
-	 * ClassDetailResponseDTO response = cdService.getClassDetail(classCode);
-	 * 
-	 * // 승인되지 않았거나 데이터가 없어 null이 반환된 경우 if (response == null) { // 방법 1) 에러 페이지로 이동
-	 * 또는 메인으로 리다이렉트 return "redirect:/"; }
-	 * 
-	 * model.addAttribute("detail", response); return "classDetail/classDetail"; }
-	 */
     
  // 💡 상세페이지 전용 찜하기 토글 URL
     @PostMapping("/classDetail/bookmark/toggle")

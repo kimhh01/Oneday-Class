@@ -2,7 +2,7 @@
  * 맵 자바스크립트 (동그라미 커스텀 오버레이 마커 + 지도 영역 & 카테고리 필터 연동)
  */
 document.addEventListener("DOMContentLoaded", function() {
-    
+
     // -------------------------------------------------------------
     // 1. 카카오 지도 생성 및 전역 변수 선언
     // -------------------------------------------------------------
@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function() {
     let allClassData = typeof classListData !== 'undefined' ? classListData : [];
     let allCategories = typeof categoryListData !== 'undefined' ? categoryListData : [];
     console.log("allClassData 개수:", allClassData.length);
-    
+
     let markers = []; // 생성된 커스텀 오버레이 객체 저장 배열
 
     // 필터용 전역 변수
@@ -41,9 +41,9 @@ document.addEventListener("DOMContentLoaded", function() {
     // -------------------------------------------------------------
     const CATEGORY_STYLE = {
         '1': { icon: '/map/images/free.png', name: '요리/베이킹' },
-        '2': { icon: '/map/images/craft.png',   name: '공예' },
-        '3': { icon: '/images/category/flower.png',  name: '플라워' },
-        '4': { icon: '/images/category/candle.png',  name: '캔들' },
+        '2': { icon: '/map/images/craft.png', name: '공예' },
+        '3': { icon: '/images/category/flower.png', name: '플라워' },
+        '4': { icon: '/images/category/candle.png', name: '캔들' },
         '5': { icon: '/images/category/beverage.png', name: '음료' },
         'DEFAULT': { icon: '/map/images/cook-marker.png', name: '클래스' }
     };
@@ -119,24 +119,31 @@ document.addEventListener("DOMContentLoaded", function() {
         const minLng = swLatLng.getLng();
         const maxLng = neLatLng.getLng();
 
+        // 오늘 날짜 구하기 (YYYY-MM-DD)
+        const todayStr = new Date().toISOString().split('T')[0];
+
         const filteredClasses = allClassData.filter(item => {
             if (!item.lat || !item.lng) return false;
 
             // 조건 A: 지도 화면 영역 범위 내
             const isInMapBounds = (item.lat >= minLat && item.lat <= maxLat && item.lng >= minLng && item.lng <= maxLng);
-            
-            // 조건 B: 카테고리 일치
-            const isMatchingCategory = !selectedCategoryCode || 
-                (String(item.categoryCode) === String(selectedCategoryCode) || 
-                 String(item.parentCategoryCode) === String(selectedCategoryCode));
 
-            // 조건 C: 날짜 일치
+            // 조건 B: 카테고리 일치
+            const isMatchingCategory = !selectedCategoryCode ||
+                (String(item.categoryCode) === String(selectedCategoryCode) ||
+                    String(item.parentCategoryCode) === String(selectedCategoryCode));
+
+            // 조건 C-1: 오늘 이전(과거) 데이터 자동 제외
+            const itemDate = item.writeDate ? item.writeDate.substring(0, 10) : '';
+            const isUpcomingOrToday = itemDate >= todayStr;
+
+            // 조건 C-2: 선택된 날짜 필터링
             const isMatchingDate = !selectedDate || (item.writeDate && item.writeDate.includes(selectedDate));
 
-            // 조건 D: 시간 일치
+            // 조건 D: 선택된 시간 필터링
             const isMatchingTime = !selectedTime || (item.writeDate && item.writeDate.includes(selectedTime));
 
-            return isInMapBounds && isMatchingCategory && isMatchingDate && isMatchingTime;
+            return isInMapBounds && isMatchingCategory && isUpcomingOrToday && isMatchingDate && isMatchingTime;
         });
 
         renderMarkersAndSidebar(filteredClasses);
@@ -350,11 +357,11 @@ document.addEventListener("DOMContentLoaded", function() {
     function initDateList() {
         if (!listDate) return;
         listDate.innerHTML = '<li class="active" data-date="">전체 날짜</li>';
-        
+
         const weekDays = ['일', '월', '화', '수', '목', '금', '토'];
         const today = new Date();
 
-        for (let i = 0; i < 7; i++) {
+        for (let i = 0;i < 7;i++) {
             const d = new Date();
             d.setDate(today.getDate() + i);
 
@@ -364,8 +371,8 @@ document.addEventListener("DOMContentLoaded", function() {
             const dayName = weekDays[d.getDay()];
 
             const formattedValue = `${year}-${month}-${date}`;
-            const displayText = i === 0 
-                ? `오늘 (${month}.${date} ${dayName})` 
+            const displayText = i === 0
+                ? `오늘 (${month}.${date} ${dayName})`
                 : `${month}.${date} (${dayName})`;
 
             const li = document.createElement('li');
@@ -379,7 +386,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (!listTime) return;
         listTime.innerHTML = '<li class="active" data-time="">전체 시간</li>';
 
-        for (let hour = 0; hour < 24; hour++) {
+        for (let hour = 0;hour < 24;hour++) {
             const formattedHour = String(hour).padStart(2, '0') + ':00';
             const li = document.createElement('li');
             li.setAttribute('data-time', formattedHour);
@@ -479,7 +486,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     map.setLevel(4);
                 },
                 function(error) {
-                    switch(error.code) {
+                    switch (error.code) {
                         case error.PERMISSION_DENIED:
                             alert("위치 권한 요청이 거부되었습니다. 브라우저 설정에서 위치 권한을 허용해 주세요.");
                             break;
@@ -511,7 +518,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const categoryModal = document.getElementById('category-modal');
     const btnCategoryCancel = document.getElementById('btn-category-cancel');
     const btnCategorySearch = document.getElementById('btn-category-search');
-    
+
     const listParentCategory = document.getElementById('list-parent-category');
     const listChildCategory = document.getElementById('list-child-category');
 
@@ -537,7 +544,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         const parentCode = target.getAttribute('data-code');
         const parentName = target.innerText.trim();
-        
+
         listChildCategory.innerHTML = `<li class="active" data-code="${parentCode || ''}" data-name="${parentName}">전체</li>`;
 
         selectedCategoryCode = parentCode || "";

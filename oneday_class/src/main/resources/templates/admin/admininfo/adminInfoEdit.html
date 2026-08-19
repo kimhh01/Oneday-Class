@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>관리자 정보</title>
+
+<link rel="stylesheet" th:href="@{/admin/css/admin-common.css}">
+
+<link rel="stylesheet" th:href="@{/admin/css/admin-layout.css}">
+
+<link rel="stylesheet" th:href="@{/admin/css/admin-info.css}">
+</head>
+
+<body>
+
+	<div th:replace="~{admin/fragments/sideMenu :: sideMenu('info')}">
+	</div>
+
+	<main class="main admin-info-page">
+
+		<div class="page-head">
+			<h1>관리자 정보</h1>
+		</div>
+
+		<div class="info-error" th:if="${error}" th:text="${error}"></div>
+
+		<section class="admin-info-panel">
+
+			<div class="admin-info-panel-head">
+
+				<div class="admin-avatar">A</div>
+
+				<strong> 계정 정보 수정 </strong>
+
+			</div>
+
+			<form th:action="@{/admin/info/edit}" method="post"
+				th:object="${updateDTO}" class="admin-info-form">
+
+				<div class="info-form-row full">
+
+					<label>아이디</label> <input type="text" th:value="${adminInfo.id}"
+						readonly>
+
+					<p class="input-help">아이디는 변경할 수 없습니다.</p>
+
+				</div>
+
+
+				<div class="info-form-grid">
+
+					<div class="info-form-row">
+
+						<label for="name"> 관리자명 </label> <input id="name" type="text"
+							th:field="*{name}" maxlength="100" required>
+
+					</div>
+
+
+					<div class="info-form-row">
+
+						<label for="email"> 이메일 </label> <input id="email" type="email"
+							th:field="*{email}" maxlength="100" required>
+
+					</div>
+
+				</div>
+
+
+				<div class="info-form-grid password-grid">
+
+					<div class="info-form-row">
+
+						<label for="newPassword"> 새 비밀번호 </label>
+
+						<div class="password-field">
+
+							<input id="newPassword" type="password" th:field="*{newPassword}"
+								maxlength="100" autocomplete="new-password"
+								placeholder="새 비밀번호 입력">
+
+							<button type="button" class="password-toggle"
+								data-target="newPassword">보기</button>
+
+						</div>
+
+						<p class="input-help">변경하지 않으려면 비워두세요.</p>
+
+					</div>
+
+
+					<div class="info-form-row">
+
+						<label for="confirmPassword"> 비밀번호 확인 </label>
+
+						<div class="password-field">
+
+							<input id="confirmPassword" type="password"
+								th:field="*{confirmPassword}" maxlength="100"
+								autocomplete="new-password" placeholder="새 비밀번호 다시 입력">
+
+							<button type="button" class="password-toggle"
+								data-target="confirmPassword">보기</button>
+
+						</div>
+
+					</div>
+
+				</div>
+
+
+				<div class="admin-info-actions">
+
+					<a class="info-btn secondary" th:href="@{/admin/dashboard}"> 취소
+					</a>
+
+					<button type="submit" class="info-btn primary">수정</button>
+
+				</div>
+
+			</form>
+
+		</section>
+
+	</main>
+
+
+	<script>
+		document.querySelectorAll('.password-toggle').forEach(function(button) {
+
+			button.addEventListener('click', function() {
+
+				const input = document.getElementById(button.dataset.target);
+
+				const visible = input.type === 'text';
+
+				input.type = visible ? 'password' : 'text';
+
+				button.textContent = visible ? '보기' : '숨기기';
+			});
+		});
+	</script>
+
+</body>
+</html>

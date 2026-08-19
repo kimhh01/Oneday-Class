@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" th:href="@{/admin/css/admin-common.css}">
+<link rel="stylesheet" th:href="@{/admin/css/admin-layout.css}">
+<link rel="stylesheet" th:href="@{/admin/css/admin-notice.css}">
+<title>공지사항 상세</title>
+</head>
+<body>
+	<div th:replace="~{admin/fragments/sideMenu :: sideMenu('notice')}"></div>
+	<main class="main notice-page">
+		<div class="page-top">
+			<a class="btn" th:href="@{/admin/notices}">← 목록으로</a><a
+				class="btn primary"
+				th:href="@{/admin/notices/{c}/edit(c=${notice.noticeCode})}">수정</a>
+		</div>
+		<h1>공지사항 상세</h1>
+		<p class="flash" th:if="${message}" th:text="${message}"></p>
+		<section class="panel">
+			<h3>공지 기본 정보</h3>
+			<dl class="info">
+				<dt>제목</dt>
+				<dd th:text="${notice.noticeTitle}"></dd>
+				<dt>구분</dt>
+				<dd th:text="${notice.noticeType}"></dd>
+				<dt>등록일</dt>
+				<dd
+					th:text="${#dates.format(notice.registeredDate,'yyyy.MM.dd HH:mm')}"></dd>
+				<dt>작성자</dt>
+				<dd th:text="${notice.writerId}"></dd>
+				<dt>공개 여부</dt>
+				<dd>
+					<span class="badge"
+						th:classappend="${notice.status=='공개'}?' public':' private'"
+						th:text="${notice.status}"></span>
+				</dd>
+			</dl>
+		</section>
+		<section class="panel content">
+			<h3>공지 내용</h3>
+			<div th:text="${notice.noticeContent}"></div>
+		</section>
+	</main>
+</body>
+</html>

@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import kr.co.oneclass.common.ClassDTO;
 import kr.co.oneclass.common.ClassImageDTO;
 import kr.co.oneclass.common.ScheduleDTO;
+import kr.co.oneclass.common.TagDTO;
 
 
 @Mapper
@@ -37,6 +38,9 @@ public interface ClassDetailDAO {
 	//리뷰 리스트 조회
 	public List<ReviewDTO> selectReviewList(int classCode);
 	
+	//리뷰 이미지 리스트 조회
+	public List<ReviewImgDTO> selectReviewImgList(int reviewCode);
+	
 	//리뷰별점, 리뷰 점수 조회
 	public ReviewSummaryDTO selectReviewSummary(int classCode);
 	
@@ -48,4 +52,13 @@ public interface ClassDetailDAO {
 	
 	//제공사항 조회
 	public List<OfferingDTO> selectOfferingList(int classCode);
+	
+	//추가 제공사항 조회
+	public List<AdditionalInfoDTO> selectAdditionalInfo(int classCode);
+	
+	//태그 조회
+	public List<TagDTO> selectTagList(int classCode);
+	
+	//상세정보 조회
+	public List<DetailInfoDTO> selectDetailInfoList(int classCode);
 }
