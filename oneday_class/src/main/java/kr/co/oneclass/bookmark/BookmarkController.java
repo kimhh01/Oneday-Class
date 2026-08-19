@@ -2,8 +2,9 @@ package kr.co.oneclass.bookmark;
 
 import kr.co.oneclass.board.BoardUtil;
 import kr.co.oneclass.member.Member;
-import kr.co.oneclass.profile.ProfileService; // ProfileService 임포트
+import kr.co.oneclass.profile.ProfileService;
 import kr.co.oneclass.board.RangeDTO;
+import kr.co.oneclass.common.CategoryDTO;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -24,7 +25,7 @@ public class BookmarkController {
     private BookmarkService bs;
 
     @Autowired
-    private ProfileService ps; // 최신 프로필 정보 조회를 위해 주입 추가
+    private ProfileService ps;
 
     @GetMapping("/bookmark")
     public String bookmarkList(@RequestParam(value = "category", required = false, defaultValue = "ALL") String category,
@@ -39,11 +40,14 @@ public class BookmarkController {
 
         int memberCode = loginMember.getMemberCode();
 
-        // 1. [핵심] DB에서 최신 회원/프로필 정보 조회 (사이드바 프로필 이미지 표시용)
+        // 1. DB에서 최신 회원/프로필 정보 조회 (사이드바 프로필 이미지 표시용)
         Member member = ps.getProfile(String.valueOf(memberCode));
         model.addAttribute("member", member != null ? member : loginMember);
 
-        // 2. 페이징 및 관심 클래스 목록 조회
+        // 2. 💡 [추가] 로그인한 회원이 찜한 클래스들의 부모 카테고리 목록 동적 조회
+        List<CategoryDTO> categoryList = bs.getBookmarkCategories(memberCode); 
+ 
+        // 3. 페이징 및 관심 클래스 목록 조회
         int pageScale = bs.pageScale();
         int startNum = bs.startNum(nowPage, pageScale);
         int endNum = bs.endNum(nowPage, pageScale);
@@ -56,9 +60,11 @@ public class BookmarkController {
 
         int totalCnt = bs.totalCnt(String.valueOf(memberCode), rDTO);
         List<Bookmark> bookmarkList = bs.getBookmarkList(memberCode, rDTO);
-
+ 
         String pagination = BoardUtil.pagination(totalCnt, nowPage, "category=" + category);
 
+        // 4. View로 데이터 전송
+        model.addAttribute("categoryList", categoryList); // 💡 HTML 상단 필터 탭 출력용 카테고리 리스트
         model.addAttribute("bookmarkList", bookmarkList);
         model.addAttribute("selectedCategory", category);
         model.addAttribute("totalCnt", totalCnt);

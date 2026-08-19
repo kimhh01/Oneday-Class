@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.HashMap;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
+@RequestMapping("/mypage")
 public class NoticeController {
 
     @Autowired
@@ -32,12 +34,15 @@ public class NoticeController {
                              Model model,
                              HttpSession session) {
 
-        // 사이드바 프로필 데이터 (로그인 시)
+        // 💡 [핵심] 비로그인 사용자 접근 차단 및 로그인 페이지 이동
         Member loginMember = (Member) session.getAttribute("loginMember");
-        if (loginMember != null) {
-            Member member = ps.getProfile(String.valueOf(loginMember.getMemberCode()));
-            model.addAttribute("member", member != null ? member : loginMember);
+        if (loginMember == null) {
+            return "redirect:/member/login";
         }
+
+        // 사이드바 프로필 데이터 조회
+        Member member = ps.getProfile(String.valueOf(loginMember.getMemberCode()));
+        model.addAttribute("member", member != null ? member : loginMember);
 
         // 페이지네이션 범위 계산
         int pageScale = ns.pageScale();
@@ -58,7 +63,7 @@ public class NoticeController {
 
         // BoardUtil을 통한 하단 페이지네이션 생성
         int totalPage = ns.totalPage(totalCnt, pageScale);
-        String pagination = BoardUtil.pagination(currentPage, totalPage, "/notice?category=" + type);
+        String pagination = BoardUtil.pagination(currentPage, totalPage, "/mypage/notice?category=" + type);
         model.addAttribute("pagination", pagination);
 
         return "notice/notice";
@@ -72,12 +77,15 @@ public class NoticeController {
                                Model model,
                                HttpSession session) {
 
-        // 사이드바 프로필 데이터 (로그인 시)
+        // 💡 [핵심] 비로그인 사용자 접근 차단 및 로그인 페이지 이동
         Member loginMember = (Member) session.getAttribute("loginMember");
-        if (loginMember != null) {
-            Member member = ps.getProfile(String.valueOf(loginMember.getMemberCode()));
-            model.addAttribute("member", member != null ? member : loginMember);
+        if (loginMember == null) {
+            return "redirect:/member/login";
         }
+
+        // 사이드바 프로필 데이터 조회
+        Member member = ps.getProfile(String.valueOf(loginMember.getMemberCode()));
+        model.addAttribute("member", member != null ? member : loginMember);
 
         NoticeDTO notice = ns.getNoticeDetail(noticeCode);
         model.addAttribute("notice", notice);

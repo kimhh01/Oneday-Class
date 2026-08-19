@@ -9,8 +9,9 @@
         SELECT COUNT(*)
         FROM NOTICE
         <where>
+        	STATUS='공개'
             <if test="category != null and category != '' and category != 'ALL'">
-                NOTICE_TYPE = #{category}
+                AND NOTICE_TYPE = #{category}
             </if>
         </where>
     </select>
@@ -30,8 +31,9 @@
                     TO_CHAR(INPUT_DATE, 'YYYY.MM.DD') AS noticeDate
                 FROM NOTICE
                 <where>
+                    STATUS='공개'
                     <if test="category != null and category != '' and category != 'ALL'">
-                        NOTICE_TYPE = #{category}
+                        AND NOTICE_TYPE = #{category}
                     </if>
                 </where>
                 ORDER BY NOTICE_CODE DESC
@@ -54,6 +56,7 @@
 	            LAG(NOTICE_CODE, 1) OVER (ORDER BY NOTICE_CODE DESC) AS prevNoticeCode,
 	            LEAD(NOTICE_CODE, 1) OVER (ORDER BY NOTICE_CODE DESC) AS nextNoticeCode
 	        FROM NOTICE
+	        WHERE STATUS = '공개'
 	    )
 	    WHERE noticeCode = TO_NUMBER(#{noticeCode})
 	</select>

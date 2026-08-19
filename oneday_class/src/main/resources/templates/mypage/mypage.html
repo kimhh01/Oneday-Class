@@ -6,6 +6,7 @@
     <title>마이페이지 | 숨쉬당</title>
     <link rel="stylesheet" th:href="@{/mypage/css/mypage.css}">
     <link rel="stylesheet" th:href="@{/fragments/css/header.css}">
+    <link rel="stylesheet" th:href="@{/fragments/css/footer.css}">
 </head>
 <body>
 
@@ -14,7 +15,7 @@
     <div class="mypage-container">
 
         <!-- 1. 상단 공지사항 배너 -->
-        <a th:href="@{/notice}" class="notice-banner">
+        <a th:href="@{mypage/notice}" class="notice-banner">
             <div class="notice-left">
                 <span class="notice-badge" 
                       th:text="${recentNotice != null ? recentNotice.noticeType : '공지'}">공지</span>
@@ -134,7 +135,7 @@
                         <p class="card-sub">궁금한 점이 있으신가요? 문의 접수하기 <span class="arrow">&gt;</span></p>
                     </a>
 
-                    <a th:href="@{/notice}" class="menu-card">
+                    <a th:href="@{mypage/notice}" class="menu-card">
                         <div class="icon-box icon-orange">
                             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2">
                                 <path d="M22 12A10 10 0 0 0 12 2v10z"/>
@@ -153,6 +154,7 @@
 
     </div>
 </div>
+<div th:replace="~{fragments/footer :: footer}"></div>
 
 <!-- 💡 커스텀 모달 팝업 구조 -->
 <div id="authorModal" class="custom-modal-overlay">

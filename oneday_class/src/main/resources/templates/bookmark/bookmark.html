@@ -30,17 +30,20 @@
                 <p class="page-subtitle">찜한 클래스를 모아보고 원하는 수업을 빠르게 예약하세요.</p>
             </div>
 
-            <!-- 카테고리 필터 탭 (URL 파라미터 연동) -->
-            <div class="filter-tabs">
-                <a th:href="@{/mypage/bookmark(category='ALL')}" 
-                   class="tab-btn" th:classappend="${selectedCategory == 'ALL' or selectedCategory == null} ? 'active'">전체</a>
-                <a th:href="@{/mypage/bookmark(category='베이킹')}" 
-                   class="tab-btn" th:classappend="${selectedCategory == '베이킹'} ? 'active'">베이킹</a>
-                <a th:href="@{/mypage/bookmark(category='공예')}" 
-                   class="tab-btn" th:classappend="${selectedCategory == '공예'} ? 'active'">공예</a>
-                <a th:href="@{/mypage/bookmark(category='뷰티')}" 
-                   class="tab-btn" th:classappend="${selectedCategory == '뷰티'} ? 'active'">뷰티</a>
-            </div>
+			<!-- 카테고리 필터 탭 (동적 출력) -->
+			<div class="filter-tabs">
+			    <!-- '전체' 탭 -->
+			    <a th:href="@{/mypage/bookmark(category='ALL')}" 
+			       class="tab-btn" 
+			       th:classappend="${selectedCategory == 'ALL' or selectedCategory == null or selectedCategory == ''} ? 'active'">전체</a>
+			    
+			    <!-- 💡 DB에서 조회한 찜한 클래스의 부모 카테고리 목록 동적 출력 -->
+			    <a th:each="cat : ${categoryList}"
+			       th:href="@{/mypage/bookmark(category=${cat.categoryName})}" 
+			       class="tab-btn" 
+			       th:classappend="${selectedCategory == cat.categoryName} ? 'active'"
+			       th:text="${cat.categoryName}">카테고리명</a>
+			</div>
 
             <!-- DB 조회 데이터 반복 출력 영역 (데이터가 있을 때) -->
             <div class="class-grid" th:if="${bookmarkList != null and !#lists.isEmpty(bookmarkList)}">

@@ -29,12 +29,12 @@
 
             <!-- 카테고리 필터 탭 -->
             <div class="filter-tabs">
-                <a th:href="@{/notice(category='ALL')}" 
+                <a th:href="@{/mypage/notice(category='ALL')}" 
                    class="tab-btn" th:classappend="${selectedCategory == 'ALL' or selectedCategory == null or selectedCategory == ''} ? 'active'">전체</a>
-                <a th:href="@{/notice(category='서비스')}" 
+                <a th:href="@{/mypage/notice(category='서비스')}" 
                    class="tab-btn" th:classappend="${selectedCategory == '서비스'} ? 'active'">서비스</a>
-                <a th:href="@{/notice(category='이용 안내')}" 
-                   class="tab-btn" th:classappend="${selectedCategory == '이용 안내'} ? 'active'">이용 안내</a>
+                <a th:href="@{/mypage/notice(category='안내')}" 
+                   class="tab-btn" th:classappend="${selectedCategory == '안내'} ? 'active'">안내</a>
             </div>
 
             <!-- 공지사항 목록 테이블 (데이터가 존재할 경우) -->
@@ -50,11 +50,11 @@
                     </thead>
                     <tbody>
                         <tr th:each="item : ${noticeList}" 
-                            th:onclick="|location.href='@{/notice/detail(noticeCode=${item.noticeCode})}'|"
+                            th:onclick="|location.href='@{/mypage/notice/detail(noticeCode=${item.noticeCode})}'|"
                             class="clickable-row">
                             <td class="col-num" th:text="${item.noticeCode}">32</td>
                             <td class="col-title">
-                                <a th:href="@{/notice/detail(noticeCode=${item.noticeCode})}" 
+                                <a th:href="@{/mypage/notice/detail(noticeCode=${item.noticeCode})}" 
                                    th:text="${item.title}" class="title-link">공지사항 제목입니다.</a>
                             </td>
                             <td class="col-type">

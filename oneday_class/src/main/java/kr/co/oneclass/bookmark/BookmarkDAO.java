@@ -1,6 +1,8 @@
 package kr.co.oneclass.bookmark;
 
 import kr.co.oneclass.board.RangeDTO;
+import kr.co.oneclass.common.CategoryDTO;
+
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -37,4 +39,6 @@ public interface BookmarkDAO {
      */
     
     int checkBookmark(@Param("memberCode") String memberCode, @Param("classCode") String classCode);
+    
+    List<CategoryDTO> selectBookmarkCategories(int memberCode);
 }

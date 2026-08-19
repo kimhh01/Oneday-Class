@@ -1,6 +1,8 @@
 package kr.co.oneclass.bookmark;
 
 import kr.co.oneclass.board.RangeDTO;
+import kr.co.oneclass.common.CategoryDTO;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -59,5 +61,13 @@ public class BookmarkServiceImpl implements BookmarkService {
             bd.insertBookmark(mCode, cCode);
             return true;
         }
+    }
+    
+    /** 
+     * 로그인 회원이 찜한 클래스들의 부모 카테고리 목록 조회
+     */
+    @Override
+    public List<CategoryDTO> getBookmarkCategories(int memberCode) { 
+        return bd.selectBookmarkCategories(memberCode);
     }
 }
