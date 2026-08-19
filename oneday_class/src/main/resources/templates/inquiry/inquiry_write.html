@@ -3,14 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- 💡 [추가] CSRF 토큰 메타 태그 -->
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
     <title>문의하기 | 숨쉬당</title>
     <link rel="stylesheet" th:href="@{/profile/css/profile.css}">
     <link rel="stylesheet" th:href="@{/fragments/css/sidebar.css}">
     <link rel="stylesheet" th:href="@{/inquiry/css/inquiry_write.css}">
     <link rel="stylesheet" th:href="@{/fragments/css/modal.css}">
+    <link rel="stylesheet" th:href="@{/fragments/css/header.css}">
+    <link rel="stylesheet" th:href="@{/fragments/css/footer.css}">
 </head>
 <body>
 
+<div th:replace="~{fragments/header :: header}"></div>
 <div class="inquiry-wrapper">
     <div class="inquiry-container">
 
@@ -64,7 +72,7 @@
 
     </div>
 </div>
-
+<div th:replace="~{fragments/footer :: footer}"></div>
 <!-- 3. [분리한 공통 모달 불러오기] -->
 <div th:replace="~{fragments/success_modal :: successModal('inquiryModal')}"></div>
 
@@ -88,8 +96,18 @@
 
         const formData = new FormData(this);
 
+        // 💡 [추가] CSRF 토큰 및 헤더 명칭 읽기
+        const tokenMeta = document.querySelector("meta[name='_csrf']");
+        const headerMeta = document.querySelector("meta[name='_csrf_header']");
+        
+        const headers = {};
+        if (tokenMeta && headerMeta) {
+            headers[headerMeta.getAttribute('content')] = tokenMeta.getAttribute('content');
+        }
+
         fetch('/mypage/inquiry/write', {
             method: 'POST',
+            headers: headers, // 💡 [추가] CSRF 헤더 포함
             body: formData
         })
         .then(response => response.json())
@@ -107,6 +125,9 @@
                 document.getElementById('btnModalDetail').onclick = function() {
                     location.href = '/mypage/inquiry/detail?inquiryCode=' + data.inquiryCode;
                 };
+            } else if (data.status === 'LOGIN_REQUIRED') {
+                alert('로그인이 필요한 서비스입니다.');
+                location.href = '/member/login';
             } else {
                 alert('문의 등록 중 오류가 발생했습니다.');
             }

@@ -8,8 +8,12 @@
     <link rel="stylesheet" th:href="@{/profile/css/profile.css}">
     <link rel="stylesheet" th:href="@{/fragments/css/sidebar.css}">
     <link rel="stylesheet" th:href="@{/purchase/css/purchase.css}">
+    <link rel="stylesheet" th:href="@{/fragments/css/header.css}">
+    <link rel="stylesheet" th:href="@{/fragments/css/footer.css}">
 </head>
 <body>
+
+<div th:replace="~{fragments/header :: header}"></div>
 
 <!-- 메인 컨테이너 -->
 <div class="purchase-wrapper">
@@ -91,6 +95,7 @@
 
     </div>
 </div>
+<div th:replace="~{fragments/footer :: footer}"></div>
 
 </body>
 </html>

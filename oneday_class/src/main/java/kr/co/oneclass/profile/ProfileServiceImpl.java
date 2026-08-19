@@ -55,7 +55,13 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     @Transactional
     public boolean changePassword(PassChangeDTO pdto) {
-        // 새 비밀번호 암호화 처리 (PasswordEncoder 사용 시)
+        // 💡 [필수] 1. 현재 비밀번호 검증 (틀리면 UPDATE를 실행하지 않고 즉시 false 반환)
+        boolean isMatched = verifyPassword(String.valueOf(pdto.getMemberCode()), pdto.getCurrentPass());
+        if (!isMatched) {
+            return false; 
+        }
+
+        // 2. 새 비밀번호 암호화 후 DB 저장
         if (passwordEncoder != null) {
             pdto.setNewPass(passwordEncoder.encode(pdto.getNewPass()));
         }
