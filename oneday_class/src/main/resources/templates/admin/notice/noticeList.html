@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" th:href="@{/admin/css/admin-common.css}">
+<link rel="stylesheet" th:href="@{/admin/css/admin-layout.css}">
+<link rel="stylesheet" th:href="@{/admin/css/admin-notice.css}">
+<title>공지사항 관리</title>
+</head>
+<body>
+	<div th:replace="~{admin/fragments/sideMenu :: sideMenu('notice')}"></div>
+	<main class="main notice-page">
+		<div class="page-top">
+			<h1>공지사항 관리</h1>
+			<a class="btn primary" th:href="@{/admin/notices/register}">공지 등록</a>
+		</div>
+		<form class="search-box" th:action="@{/admin/notices}" method="get">
+			<input name="keyword" th:value="${searchDTO.keyword}"
+				placeholder="공지 제목 검색"> <select name="noticeType"><option
+					value="">전체 구분</option>
+				<option value="서비스" th:selected="${searchDTO.noticeType=='서비스'}">서비스</option>
+				<option value="이용안내" th:selected="${searchDTO.noticeType=='이용안내'}">이용안내</option></select>
+			<select name="status"><option value="">전체 상태</option>
+				<option value="공개" th:selected="${searchDTO.status=='공개'}">공개</option>
+				<option value="비공개" th:selected="${searchDTO.status=='비공개'}">비공개</option></select>
+			<button class="btn dark">검색</button>
+			<a class="btn" th:href="@{/admin/notices}">초기화</a>
+		</form>
+		<section class="panel">
+			<div class="summary">
+				전체 공지 <b th:text="${page.totalCount}">0</b>건
+			</div>
+			<table>
+				<thead>
+					<tr>
+						<th>번호</th>
+						<th>제목</th>
+						<th>구분</th>
+						<th>등록일</th>
+						<th>작성자</th>
+						<th>상태</th>
+						<th>관리</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="n:${notices}">
+						<td th:text="${n.noticeCode}"></td>
+						<td class="title" th:text="${n.noticeTitle}"></td>
+						<td><span class="badge" th:text="${n.noticeType}"></span></td>
+						<td th:text="${#dates.format(n.registeredDate,'yyyy.MM.dd')}"></td>
+						<td th:text="${n.writerId}"></td>
+						<td><span class="badge"
+							th:classappend="${n.status=='공개'}?' public':' private'"
+							th:text="${n.status}"></span></td>
+						<td><a class="detail"
+							th:href="@{/admin/notices/{c}(c=${n.noticeCode})}">상세</a></td>
+					</tr>
+					<tr th:if="${#lists.isEmpty(notices)}">
+						<td colspan="7">등록된 공지사항이 없습니다.</td>
+					</tr>
+				</tbody>
+			</table>
+			<div class="pagination">
+				<a th:each="p:${#numbers.sequence(page.startPage,page.endPage)}"
+					th:text="${p}" th:classappend="${p==page.currentPage}?' active'"
+					th:href="@{/admin/notices(page=${p},keyword=${searchDTO.keyword},noticeType=${searchDTO.noticeType},status=${searchDTO.status})}"></a>
+			</div>
+		</section>
+	</main>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.oneclass.admin.notice.AdminNoticeDAO">
+
+	<select id="selectNoticeTotalCount" resultType="int">
+		SELECT COUNT(*) FROM NOTICE N WHERE 1=1
+		<if test="search.keyword != null and search.keyword != ''">
+			AND N.TITLE LIKE '%' || #{search.keyword} || '%'
+		</if>
+		<if test="search.noticeType != null and search.noticeType != ''">
+			AND N.NOTICE_TYPE=#{search.noticeType}
+		</if>
+		<if test="search.status != null and search.status != ''">
+			AND N.STATUS=#{search.status}
+		</if>
+	</select>
+
+	<select id="selectNoticeList"
+		resultType="kr.co.oneclass.admin.notice.AdminNoticeSummaryDTO">
+		SELECT * FROM (
+		SELECT N.NOTICE_CODE,N.MANAGER_CODE,N.TITLE AS NOTICE_TITLE,
+		N.NOTICE_TYPE,N.INPUT_DATE AS REGISTERED_DATE,M.ID AS
+		WRITER_ID,N.STATUS,
+		ROW_NUMBER() OVER(ORDER BY N.INPUT_DATE DESC,N.NOTICE_CODE DESC) RN
+		FROM NOTICE N JOIN MANAGER M ON N.MANAGER_CODE=M.MANAGER_CODE
+		WHERE 1=1
+		<if test="search.keyword != null and search.keyword != ''">
+			AND N.TITLE LIKE '%' || #{search.keyword} || '%'
+		</if>
+		<if test="search.noticeType != null and search.noticeType != ''">
+			AND N.NOTICE_TYPE=#{search.noticeType}
+		</if>
+		<if test="search.status != null and search.status != ''">
+			AND N.STATUS=#{search.status}
+		</if>
+		)
+		WHERE RN BETWEEN #{search.startRow} AND #{search.endRow}
+	</select>
+
+	<select id="selectNoticeDetail"
+		resultType="kr.co.oneclass.admin.notice.AdminNoticeDetailDTO">
+		SELECT N.NOTICE_CODE,N.MANAGER_CODE,N.TITLE AS NOTICE_TITLE,N.NOTICE_TYPE,
+		N.CONTENT AS NOTICE_CONTENT,M.ID AS WRITER_ID,N.INPUT_DATE AS
+		REGISTERED_DATE,N.STATUS
+		FROM NOTICE N JOIN MANAGER M ON N.MANAGER_CODE=M.MANAGER_CODE
+		WHERE N.NOTICE_CODE=#{noticeCode}
+	</select>
+
+	<insert id="insertNotice">
+		INSERT INTO
+		NOTICE(NOTICE_CODE,MANAGER_CODE,TITLE,CONTENT,INPUT_DATE,NOTICE_TYPE,STATUS)
+		VALUES(NOTICE_SEQ.NEXTVAL,#{managerCode},#{noticeTitle},#{noticeContent},SYSDATE,#{noticeType},#{status})
+	</insert>
+
+	<update id="updateNotice">
+		UPDATE NOTICE SET TITLE=#{noticeTitle},CONTENT=#{noticeContent},
+		NOTICE_TYPE=#{noticeType},STATUS=#{status}
+		WHERE NOTICE_CODE=#{noticeCode}
+	</update>
+</mapper>
