@@ -231,10 +231,25 @@
         WHERE member_code = #{memberCode}
     </update>
     
-    <!-- 로그인 이력 저장 쿼리 -->
-    <insert id="insertLoginHistory">
-        INSERT INTO login_history (member_code, operator_code, member_type, ip_address, login_date) 
-        VALUES (#{memberCode}, NULL, '회원', #{ipAddress}, SYSDATE)
-    </insert>
+	<!-- 로그인 이력 저장 쿼리 (CREATOR 테이블 존재 여부에 따라 작가/회원 자동 구분) -->
+	<insert id="insertLoginHistory">
+	    INSERT INTO login_history (
+	        member_code, 
+	        operator_code, 
+	        member_type, 
+	        ip_address, 
+	        login_date
+	    ) VALUES (
+	        #{memberCode}, 
+	        NULL, 
+	        (
+	            SELECT CASE WHEN COUNT(*) > 0 THEN '작가' ELSE '회원' END 
+	            FROM creator 
+	            WHERE member_code = #{memberCode}
+	        ), 
+	        #{ipAddress}, 
+	        SYSDATE
+	    )
+	</insert>
 
 </mapper>

@@ -15,6 +15,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Controller
@@ -105,22 +107,59 @@ public class ProfileController {
     }
 
     @PostMapping("/changePassword")
-    public String changePassword(PassChangeDTO pdto, HttpSession session, RedirectAttributes rttr) {
+    @ResponseBody // 💡 페이지 이동 대신 JSON 데이터를 반환합니다.
+    public Map<String, Object> changePassword(PassChangeDTO pdto, 
+                                             @RequestParam(value = "newPassConfirm", required = false) String newPassConfirm,
+                                             HttpSession session) {
+        
+        Map<String, Object> result = new HashMap<>();
+
         Member loginMember = (Member) session.getAttribute("loginMember");
         if (loginMember == null) {
-            return "redirect:/member/login";
+            result.put("success", false);
+            result.put("message", "로그인이 필요합니다.");
+            return result;
         }
 
+        String currentPass = pdto.getCurrentPass();
+        String newPass = pdto.getNewPass();
+
+        // 1. 기존 비밀번호와 새 비밀번호 동일 여부 체크
+        if (currentPass != null && currentPass.equals(newPass)) {
+            result.put("success", false);
+            result.put("message", "기존 비밀번호와 동일한 비밀번호는 사용할 수 없습니다.");
+            return result;
+        }
+
+        // 2. 새 비밀번호 확인 일치 여부 체크
+        if (newPassConfirm != null && !newPass.equals(newPassConfirm)) {
+            result.put("success", false);
+            result.put("message", "새 비밀번호와 확인용 비밀번호가 일치하지 않습니다.");
+            return result;
+        }
+
+        // 3. 새 비밀번호 조건(영문+숫자+특수문자 조합 8~16자) 정규식 체크
+        String passRegex = "^(?=.*[a-zA-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]).{8,16}$";
+        if (newPass == null || !newPass.matches(passRegex)) {
+            result.put("success", false);
+            result.put("message", "새 비밀번호는 8~16자의 영문, 숫자, 특수문자 조합이어야 합니다.");
+            return result;
+        }
+
+        // 4. DB 검증 및 업데이트 (서비스에서 현재 비밀번호 비교)
         pdto.setMemberCode(loginMember.getMemberCode());
         boolean isChanged = ps.changePassword(pdto);
 
         if (isChanged) {
-            rttr.addFlashAttribute("msg", "비밀번호가 성공적으로 변경되었습니다.");
+            result.put("success", true);
+            result.put("message", "비밀번호가 성공적으로 변경되었습니다.");
         } else {
-            rttr.addFlashAttribute("msg", "비밀번호 변경에 실패했습니다. 현재 비밀번호를 확인해주세요.");
+            // 💡 현재 비밀번호가 틀린 경우
+            result.put("success", false);
+            result.put("message", "현재 비밀번호가 올바르지 않습니다.");
         }
 
-        return "redirect:/profile";
+        return result;
     }
 
     @PostMapping("/updateProfile")
