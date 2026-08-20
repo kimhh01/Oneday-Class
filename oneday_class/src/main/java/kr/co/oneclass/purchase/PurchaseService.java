@@ -1,6 +1,7 @@
 package kr.co.oneclass.purchase;
 
 import java.util.List;
+import java.util.Map;
 
 public interface PurchaseService {
 
@@ -14,13 +15,7 @@ public interface PurchaseService {
      */
     Purchase getPurchaseDetail(String reservationCode);
 
-    /**
-     * 3. 리뷰 작성
-     */
-    boolean writeReview(Object rdto);
-
-    /**
-     * 4. 작성한 리뷰 조회
-     */
-    Object reviewView(int memberCode, int classCode);
+    // 💡 [추가] 예약 취소 메서드
+    Map<String, Object> cancelPurchase(String reservationCode, int memberCode);
+    
 }

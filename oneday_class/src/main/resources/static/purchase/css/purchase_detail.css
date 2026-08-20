@@ -1,0 +1,461 @@
+@charset "UTF-8";
+
+/* 전체 기본 레이아웃 */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #f2f5f2;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #222222;
+}
+
+.order-detail-wrapper {
+    width: 100%;
+    padding: 40px 20px 60px;
+    display: flex;
+    justify-content: center;
+}
+
+.order-detail-container {
+    width: 100%;
+    max-width: 1100px;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.order-detail-main {
+    width: 100%;
+}
+
+/* 상단 경로 및 헤더 */
+.page-header {
+    margin-bottom: 20px;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #888888;
+    margin-bottom: 12px;
+}
+
+.breadcrumb .current {
+    color: #356846;
+    font-weight: 600;
+}
+
+.breadcrumb .chevron {
+    font-size: 11px;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #111111;
+    margin-bottom: 6px;
+}
+
+.page-subtitle {
+    font-size: 13.5px;
+    color: #777777;
+}
+
+/* 메인 카드를 감싸는 흰색 대형 컨테이너 */
+.detail-card-container {
+    background-color: #ffffff;
+    border-radius: 20px;
+    padding: 32px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+/* [1] 상단 클래스 요약 영역 */
+.class-summary-card {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+}
+
+.summary-thumb {
+    width: 180px;
+    height: 125px;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #f4f6f4;
+    flex-shrink: 0;
+}
+
+.summary-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.summary-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-grow: 1;
+}
+
+.category-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    background-color: #eaf3ec;
+    color: #356846;
+    font-size: 11.5px;
+    font-weight: 600;
+    width: fit-content;
+}
+
+.class-name {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111111;
+}
+
+.summary-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13.5px;
+    color: #444444;
+    font-weight: 500;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.summary-sub-meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 13px;
+    color: #777777;
+}
+
+.meta-icon-text {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* 예약 완료 상태 알약 형태 배지 */
+.status-pill {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: #eef6f0;
+    color: #356846;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 20px;
+}
+
+/* 취소 상태일 때 배지 디자인 회색/연빨강 변경 */
+.status-pill.status-cancelled {
+    background-color: #fbeae9;
+    color: #d32f2f;
+}
+
+/* [2 & 3] 상세 정보 개별 사각형 테두리 박스 */
+.info-section-box {
+    border: 1px solid #ebf0eb;
+    border-radius: 16px;
+    padding: 24px;
+    background-color: #ffffff;
+}
+
+.section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #222222;
+    margin-bottom: 20px;
+}
+
+/* 좌우 2열 컬럼 그리드 */
+.info-grid-container {
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 24px;
+}
+
+.info-grid-left, .info-grid-right {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    font-size: 13.5px;
+    line-height: 1.5;
+}
+
+.info-grid-left .info-row {
+    justify-content: flex-start;
+}
+
+.info-label {
+    width: 100px;
+    color: #222222;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.info-value {
+    color: #444444;
+}
+
+.info-value.bold {
+    font-weight: 700;
+    color: #111111;
+}
+
+.intro-text {
+    color: #666666;
+    max-width: 420px;
+}
+
+/* 오른쪽 결제 내역 요약 스타일 */
+.payment-summary .info-label {
+    width: auto;
+    color: #555555;
+    font-weight: 500;
+}
+
+.payment-summary .info-value {
+    font-weight: 600;
+    color: #222222;
+}
+
+.discount-text {
+    color: #356846 !important;
+}
+
+.divider-dashed {
+    border-bottom: 1px dashed #e0e6e0;
+    margin: 4px 0;
+}
+
+.total-row {
+    margin-top: 2px;
+}
+
+.total-row .info-label {
+    font-size: 14px;
+    color: #111111;
+}
+
+.total-price {
+    font-size: 18px !important;
+    font-weight: 800 !important;
+    color: #356846 !important;
+}
+
+.status-text {
+    color: #356846 !important;
+    font-weight: 700 !important;
+}
+
+/* 하단 버튼 배치 영역 (양쪽 정렬) */
+.action-btn-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+}
+
+.btn-list-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 42px;
+    padding: 0 24px;
+    border: 1px solid #d0d7d0;
+    border-radius: 8px;
+    background-color: #ffffff;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #444444;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.btn-list-back:hover {
+    border-color: #356846;
+    color: #356846;
+    background-color: #f7faf7;
+}
+
+/* 빨간색 예약 취소 버튼 */
+.btn-cancel-reservation {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 42px;
+    padding: 0 24px;
+    border: 1px solid #e53935;
+    border-radius: 8px;
+    background-color: #ffffff;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #e53935;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-cancel-reservation:hover {
+    background-color: #e53935;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(229, 57, 53, 0.25);
+}
+
+/* ===================================================
+   커스텀 취소 확인 모달 스타일
+   =================================================== */
+.custom-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.custom-modal-card {
+    background-color: #ffffff;
+    width: 100%;
+    max-width: 380px;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+    animation: modalFadeIn 0.2s ease-out;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.custom-modal-header {
+    margin-bottom: 12px;
+}
+
+.custom-modal-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #111111;
+}
+
+.custom-modal-body {
+    margin-bottom: 24px;
+}
+
+.confirm-message {
+    font-size: 14.5px;
+    font-weight: 600;
+    color: #222222;
+    margin-bottom: 6px;
+}
+
+.confirm-sub-message {
+    font-size: 13px;
+    color: #888888;
+}
+
+.custom-modal-footer {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.btn-modal-close {
+    height: 38px;
+    padding: 0 18px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #666666;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.btn-modal-close:hover {
+    background-color: #f5f5f5;
+}
+
+.btn-modal-confirm-red {
+    height: 38px;
+    padding: 0 20px;
+    border: none;
+    border-radius: 8px;
+    background-color: #e53935;
+    color: #ffffff;
+    font-size: 13.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.btn-modal-confirm-red:hover {
+    background-color: #d32f2f;
+}
+
+/* 반응형 모바일 처리 */
+@media (max-width: 850px) {
+    .info-grid-container {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    .class-summary-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .summary-thumb {
+        width: 100%;
+        height: 180px;
+    }
+    .status-pill {
+        position: static;
+        margin-top: 4px;
+    }
+}
+
+@media (max-width: 768px) {
+    .order-detail-container {
+        grid-template-columns: 1fr;
+    }
+}
