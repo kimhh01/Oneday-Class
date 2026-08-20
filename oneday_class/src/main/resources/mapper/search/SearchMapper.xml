@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="kr.co.oneclass.search.SearchDAO">
+
+    <!-- 1. 통합검색 작가 프리뷰 (최신 3명) -->
+    <select id="selectCreatorPreview" parameterType="string" resultType="kr.co.oneclass.search.CreatorDTO">
+        SELECT * FROM (
+            SELECT 
+                OPERATOR_CODE as operatorCode,
+                MEMBER_CODE as memberCode,
+                ACTIVITY_NAME as activityName,
+                PROFILE_IMAGE as profileImage,
+                CREATOR_INTRODUCTION as creatorIntroduction,
+                ACTIVITY_REGION as activityRegion
+            FROM CREATOR
+            WHERE ACTIVITY_NAME LIKE '%' || #{keyword} || '%'
+               OR CREATOR_INTRODUCTION LIKE '%' || #{keyword} || '%'
+            ORDER BY OPERATOR_CODE DESC
+        ) WHERE ROWNUM &lt;= 3
+    </select>
+
+    <!-- 2. 통합검색 클래스 프리뷰 (최신 4개) -->
+    <select id="selectClassPreview" parameterType="string" resultType="kr.co.oneclass.main.ClassDTO">
+        SELECT * FROM (
+            SELECT 
+                CLASS_CODE as classCode,
+                OPERATOR_CODE as operatorCode,
+                CATEGORY_CODE as categoryCode,
+                NAME as name,
+                PRICE as price,
+                ADDRESS as address,
+                SINGLE_INTRODUCE as singleIntroduce,
+                STAR_RATING_AVG as starRatingAvg
+            FROM CLASS
+            
+            WHERE NAME LIKE '%' || #{keyword} || '%'
+               OR INTRODUCE LIKE '%' || #{keyword} || '%'
+               OR CLASS_CODE IN (
+                   SELECT CLASS_CODE 
+                   FROM TAG 
+                   WHERE TAG_NAME LIKE '%' || #{keyword} || '%'
+               )
+               
+            ORDER BY CLASS_CODE DESC
+        ) WHERE ROWNUM &lt;= 4
+    </select>
+
+    <!-- 3. 작가 더보기 목록 (오라클 페이징) -->
+    <select id="selectCreatorList" resultType="kr.co.oneclass.search.CreatorDTO">
+        SELECT * FROM (
+            SELECT ROWNUM rnum, c.* FROM (
+                SELECT 
+                    OPERATOR_CODE as operatorCode,
+                    MEMBER_CODE as memberCode,
+                    ACTIVITY_NAME as activityName,
+                    PROFILE_IMAGE as profileImage,
+                    CREATOR_INTRODUCTION as creatorIntroduction,
+                    ACTIVITY_REGION as activityRegion
+                FROM CREATOR
+                WHERE ACTIVITY_NAME LIKE '%' || #{keyword} || '%'
+                   OR CREATOR_INTRODUCTION LIKE '%' || #{keyword} || '%'
+                ORDER BY OPERATOR_CODE DESC
+            ) c WHERE ROWNUM &lt;= #{endNum}
+        ) WHERE rnum &gt;= #{startNum}
+    </select>
+
+    <!-- 4. 클래스 더보기 목록 (오라클 페이징) -->
+    <select id="selectClassList" resultType="kr.co.oneclass.main.ClassDTO">
+        SELECT * FROM (
+            SELECT ROWNUM rnum, c.* FROM (
+                SELECT 
+                    CLASS_CODE as classCode,
+                    OPERATOR_CODE as operatorCode,
+                    CATEGORY_CODE as categoryCode,
+                    NAME as name,
+                    PRICE as price,
+                    ADDRESS as address,
+                    SINGLE_INTRODUCE as singleIntroduce,
+                    STAR_RATING_AVG as starRatingAvg
+                FROM CLASS
+                WHERE NAME LIKE '%' || #{keyword} || '%'
+                   OR INTRODUCE LIKE '%' || #{keyword} || '%'
+                   OR CLASS_CODE IN (
+                       SELECT CLASS_CODE 
+                       FROM TAG 
+                       WHERE TAG_NAME LIKE '%' || #{keyword} || '%'
+                   )
+                ORDER BY CLASS_CODE DESC
+            ) c WHERE ROWNUM &lt;= #{endNum}
+        ) WHERE rnum &gt;= #{startNum}
+    </select>
+
+    <!-- 5. 작가별 보유 클래스 목록 조회 -->
+    <select id="selectClassByCreator" parameterType="int" resultType="kr.co.oneclass.main.ClassDTO">
+        SELECT 
+            CLASS_CODE as classCode,
+            NAME as name,
+            PRICE as price,
+            ADDRESS as address
+        FROM CLASS
+        WHERE OPERATOR_CODE = #{operatorCode}
+        ORDER BY CLASS_CODE DESC
+    </select>
+
+    <!-- 6. 검색어에 해당하는 클래스 전체 개수 -->
+    <select id="selectClassCount" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM CLASS
+        WHERE NAME LIKE '%' || #{keyword} || '%'
+           OR INTRODUCE LIKE '%' || #{keyword} || '%'
+           OR CLASS_CODE IN (
+               SELECT CLASS_CODE 
+               FROM TAG 
+               WHERE TAG_NAME LIKE '%' || #{keyword} || '%'
+           )
+    </select>
+
+    <!-- 7. 검색어에 해당하는 작가 전체 개수 -->
+    <select id="selectCreatorCount" parameterType="string" resultType="int">
+        SELECT COUNT(*)
+        FROM CREATOR
+        WHERE ACTIVITY_NAME LIKE '%' || #{keyword} || '%'
+           OR CREATOR_INTRODUCTION LIKE '%' || #{keyword} || '%'
+    </select>
+
+    <!-- 8. 클래스 이미지 목록 조회 -->
+    <select id="selectImage" parameterType="int" resultType="kr.co.oneclass.main.ClassImageDTO">
+        SELECT 
+            CLASS_IMG_CODE as classImgCode,
+            CLASS_CODE as classCode,
+            TYPE as type,
+            IMAGE as image,
+            SORT_ORDER as sortOrder
+        FROM CLASS_IMAGE
+        WHERE CLASS_CODE = #{classCode}
+        ORDER BY SORT_ORDER ASC
+    </select>
+
+</mapper>

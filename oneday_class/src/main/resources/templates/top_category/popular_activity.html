@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>인기 액티비티 클래스</title>
+     
+ <link rel="stylesheet" th:href="@{/css/top_category/top_category.css}">
+  
+  <style>
+    :root{
+      --main-color:#f3b51b;
+      --soft-color:#fff3c7;
+      --banner-light:#ffe49a;
+      --banner-dark:#f5bf3d;
+    }
+  </style>
+  
+</head>
+<body>
+     <div th:replace="~{common/header :: headerFragment}"></div>
+  <div class="page">
+  
+
+
+
+    <div class="search-wrap">
+      <div class="search-box">
+        <span class="search-icon">⌕</span>
+        <input class="search-input" type="text" placeholder="원하는 키워드를 검색해보세요.">
+        <button class="search-btn">검색</button>
+      </div>
+    </div>
+
+    <section class="visual-copy">
+      <div class="main-copy">실패없는 <span class="point">인기 액티비티</span> 추천!</div>
+      <div class="sub-copy">몸도 마음도 건강해지는 특별한 하루</div>
+    </section>
+
+      <section class="hero">
+       <img src="../images/banner/activity_mainbanner.png" alt="">
+    </section>
+
+    <section class="section">
+      <div class="section-top">
+        <h2 class="section-title">지금 가장 인기있는 액티비티 클래스</h2>
+        <a href="#" class="more-link">전체보기 〉</a>
+      </div>
+
+      <div class="class-list">
+        <article class="class-card">
+          <div class="class-thumb-wrap">
+            <span class="rank-badge">1</span>
+            <div class="class-thumb">
+			<img src="../images/banner/activity_mainbanner.png" alt="">
+			</div>
+          </div>
+          <div class="class-info">
+            <div class="location">홍천군 서면</div>
+            <div class="class-name">[홍천] 초보도 OK! 감성 캠핑 원데이 클래스</div>
+            <div class="hash-tags">
+              <span>#캠핑</span><span>#불멍</span><span>#여행무드</span>
+            </div>
+            <div class="meta">
+              <span class="star">★ 4.9 (128)</span>
+              <span class="bar">|</span>
+              <span>후기 248개</span>
+            </div>
+          </div>
+          <div class="price-box">
+            <span class="discount-badge">최대 30% 할인</span>
+            <div class="price-row">
+              <span class="discount-rate">30%</span>
+              <span class="final-price">125,000원</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="class-card">
+          <div class="class-thumb-wrap">
+            <span class="rank-badge">2</span>
+            <div class="class-thumb">
+						<img src="../images/banner/activity_mainbanner.png" alt="">
+						</div>
+          </div>
+          <div class="class-info">
+            <div class="location">제주 서귀포시</div>
+            <div class="class-name">[제주] 푸른 바다에서 배우는 서핑 입문 클래스</div>
+            <div class="hash-tags">
+              <span>#서핑</span><span>#바다</span><span>#초보가능</span>
+            </div>
+            <div class="meta">
+              <span class="star">★ 4.8 (96)</span>
+              <span class="bar">|</span>
+              <span>후기 189개</span>
+            </div>
+          </div>
+          <div class="price-box">
+            <span class="discount-badge">최대 25% 할인</span>
+            <div class="price-row">
+              <span class="discount-rate">25%</span>
+              <span class="final-price">150,000원</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="class-card">
+          <div class="class-thumb-wrap">
+            <span class="rank-badge">3</span>
+			<div class="class-thumb">
+						<img src="../images/banner/activity_mainbanner.png" alt="">
+						</div>
+          </div>
+          <div class="class-info">
+            <div class="location">서울 송파구</div>
+            <div class="class-name">[잠실] 러닝의 즐거움! 러닝 크루와 함께하는 클래스</div>
+            <div class="hash-tags">
+              <span>#러닝</span><span>#야외운동</span><span>#러닝크루</span>
+            </div>
+            <div class="meta">
+              <span class="star">★ 4.9 (201)</span>
+              <span class="bar">|</span>
+              <span>후기 312개</span>
+            </div>
+          </div>
+          <div class="price-box">
+            <span class="discount-badge">최대 20% 할인</span>
+            <div class="price-row">
+              <span class="discount-rate">20%</span>
+              <span class="final-price">100,000원</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="class-card">
+          <div class="class-thumb-wrap">
+            <span class="rank-badge">4</span>
+            <div class="class-thumb">
+						<img src="../images/banner/activity_mainbanner.png" alt="">
+						</div>
+          </div>
+          <div class="class-info">
+            <div class="location">성동구 성수동 2가</div>
+            <div class="class-name">[성수] 도예로 만드는 나만의 그릇 클래스</div>
+            <div class="hash-tags">
+              <span>#도예</span><span>#물레</span><span>#도자기</span>
+            </div>
+            <div class="meta">
+              <span class="star">★ 4.8 (150)</span>
+              <span class="bar">|</span>
+              <span>후기 267개</span>
+            </div>
+          </div>
+          <div class="price-box">
+            <span class="discount-badge">최대 22% 할인</span>
+            <div class="price-row">
+              <span class="discount-rate">22%</span>
+              <span class="final-price">120,000원</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="class-card">
+          <div class="class-thumb-wrap">
+            <span class="rank-badge">5</span>
+<div class="class-thumb">
+						<img src="../images/banner/activity_mainbanner.png" alt="">
+						</div>
+          </div>
+          <div class="class-info">
+            <div class="location">마포구 연남동</div>
+            <div class="class-name">[연남] 식물과 함께하는 플랜테리어 클래스</div>
+            <div class="hash-tags">
+              <span>#식물</span><span>#가드닝</span><span>#플랜테리어</span>
+            </div>
+            <div class="meta">
+              <span class="star">★ 4.9 (177)</span>
+              <span class="bar">|</span>
+              <span>후기 291개</span>
+            </div>
+          </div>
+          <div class="price-box">
+            <span class="discount-badge">최대 18% 할인</span>
+            <div class="price-row">
+              <span class="discount-rate">18%</span>
+              <span class="final-price">90,000원</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="class-card">
+          <div class="class-thumb-wrap">
+            <span class="rank-badge">6</span>
+<div class="class-thumb">
+						<img src="../images/banner/activity_mainbanner.png" alt="">
+						</div>            
+          </div>
+          <div class="class-info">
+            <div class="location">강남구 역삼동</div>
+            <div class="class-name">[역삼] 필라테스 기구 체험 원데이 클래스</div>
+            <div class="hash-tags">
+              <span>#필라테스</span><span>#기구필라테스</span><span>#체형교정</span>
+            </div>
+            <div class="meta">
+              <span class="star">★ 4.8 (116)</span>
+              <span class="bar">|</span>
+              <span>후기 198개</span>
+            </div>
+          </div>
+          <div class="price-box">
+            <span class="discount-badge">최대 20% 할인</span>
+            <div class="price-row">
+              <span class="discount-rate">20%</span>
+              <span class="final-price">110,000원</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="class-card">
+          <div class="class-thumb-wrap">
+            <span class="rank-badge">7</span>
+            <div class="class-thumb">
+						<img src="../images/banner/activity_mainbanner.png" alt="">
+						</div>
+          </div>
+          <div class="class-info">
+            <div class="location">부산 해운대구</div>
+            <div class="class-name">[해운대] 바다를 달리는 패들보드 클래스</div>
+            <div class="hash-tags">
+              <span>#패들보드</span><span>#SUP</span><span>#해양스포츠</span>
+            </div>
+            <div class="meta">
+              <span class="star">★ 4.9 (132)</span>
+              <span class="bar">|</span>
+              <span>후기 223개</span>
+            </div>
+          </div>
+          <div class="price-box">
+            <span class="discount-badge">최대 25% 할인</span>
+            <div class="price-row">
+              <span class="discount-rate">25%</span>
+              <span class="final-price">130,000원</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="class-card">
+          <div class="class-thumb-wrap">
+            <span class="rank-badge">8</span>
+            <div class="class-thumb">
+						<img src="../images/banner/activity_mainbanner.png" alt="">
+						</div>
+          </div>
+          <div class="class-info">
+            <div class="location">대전 유성구</div>
+            <div class="class-name">[대전] 나만의 향초 만들기 클래스</div>
+            <div class="hash-tags">
+              <span>#향초</span><span>#캔들</span><span>#아로마</span>
+            </div>
+            <div class="meta">
+              <span class="star">★ 4.8 (109)</span>
+              <span class="bar">|</span>
+              <span>후기 176개</span>
+            </div>
+          </div>
+          <div class="price-box">
+            <span class="discount-badge">최대 18% 할인</span>
+            <div class="price-row">
+              <span class="discount-rate">18%</span>
+              <span class="final-price">80,000원</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="class-card">
+          <div class="class-thumb-wrap">
+            <span class="rank-badge">9</span>
+            <div class="class-thumb">
+						<img src="../images/banner/activity_mainbanner.png" alt="">
+						</div>
+          </div>
+          <div class="class-info">
+            <div class="location">광주 북구</div>
+            <div class="class-name">[광주] 신나는 케이팝 댄스 원데이 클래스</div>
+            <div class="hash-tags">
+              <span>#댄스</span><span>#케이팝</span><span>#방송댄스</span>
+            </div>
+            <div class="meta">
+              <span class="star">★ 4.9 (88)</span>
+              <span class="bar">|</span>
+              <span>후기 145개</span>
+            </div>
+          </div>
+          <div class="price-box">
+            <span class="discount-badge">최대 22% 할인</span>
+            <div class="price-row">
+              <span class="discount-rate">22%</span>
+              <span class="final-price">100,000원</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="class-card">
+          <div class="class-thumb-wrap">
+            <span class="rank-badge">10</span>
+<div class="class-thumb">
+						<img src="../images/banner/activity_mainbanner.png" alt="">
+						</div>            
+          </div>
+          <div class="class-info">
+            <div class="location">인천 중구</div>
+            <div class="class-name">[인천] 가벼운 트레킹과 식물 & 힐링 클래스</div>
+            <div class="hash-tags">
+              <span>#트레킹</span><span>#등산</span><span>#자연체험</span>
+            </div>
+            <div class="meta">
+              <span class="star">★ 4.8 (94)</span>
+              <span class="bar">|</span>
+              <span>후기 161개</span>
+            </div>
+          </div>
+          <div class="price-box">
+            <span class="discount-badge">최대 20% 할인</span>
+            <div class="price-row">
+              <span class="discount-rate">20%</span>
+              <span class="final-price">95,000원</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+
+  </div>
+  
+<div th:replace="~{common/footer :: footerFragment}"></div>
+</body>
+</html>
