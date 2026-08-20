@@ -19,52 +19,8 @@ body {
 }
 a { text-decoration: none; color: inherit; }
 ul, li { list-style: none; }
-/* ================= 헤더 공통 (본문/푸터와 너비 일치) ================= */
-.site-header {
-    width: 100%;
-    border-bottom: 1px solid var(--border-light, #eaeaea);
-    background-color: #ffffff;
-    padding: 20px 0;
-}
 
-.header-inner {
-    max-width: 1000px; /* 본문 컨테이너(.main-container)의 max-width와 동일한 값으로 설정 */
-    margin: 0 auto;
-    padding: 0 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-sizing: border-box;
-}
-/* ================= 푸터 공통 ================= */
-/* .site-footer { border-top: 1px solid var(--border-light); padding: 40px 20px; font-size: 12px; color: #999; line-height: 1.6; background: #fff; margin-top: 80px; }
-.footer-inner { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; }
-.footer-info p { margin-bottom: 4px; }
-.footer-social { display: flex; gap: 10px; width: 30px; margin-left:10px;
-    height: 30px;}
- */
  
- /* 푸터 전체 틀 (배경색 등 필요시 설정) */
-.site-footer {
-    width: 100%;
-    border-top: 1px solid #eaeaea;
-    padding: 40px 0;
-    background-color: #ffffff; /* 필요시 배경색 지정 */
-    font-size: 12px;
-    color: #888888;
-    line-height: 1.6;
-}
-
-/* 본문과 폭을 맞추는 내부 래퍼 */
-.site-footer .footer-inner {
-    max-width: 1000px; /* 본문 max-width와 동일하게 설정 (1200px인 경우 1200px로 변경) */
-    margin: 0 auto;
-    padding: 0 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
 /* ================= 메인 레이아웃 및 검색바 ================= */
 .main-container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
   
@@ -227,7 +183,7 @@ ul, li { list-style: none; }
     visibility: hidden;
     position: absolute;
     top: 100%;
-    left: 0;
+    left: 200px;
     width: 180px;
     padding-top: 10px; 
     z-index: 100;

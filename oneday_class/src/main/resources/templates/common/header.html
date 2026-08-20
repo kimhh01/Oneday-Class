@@ -1,16 +1,53 @@
-<header th:fragment="headerFragment" class="site-header" xmlns:th="http://www.thymeleaf.org">
-    <div class="header-inner">
-        
-        <div class="logo"> 
-            <a th:href="@{/main}">Class 101</a>
+<div th:fragment="headerFragment" xmlns:th="http://www.thymeleaf.org">
+    <style>
+    
+    .site-header {
+    width: 100%;
+/*     border-bottom: 1px solid var(--border-light, #eaeaea); */
+    background-color: #ffffff;
+    padding: 20px 0;
+}
+
+    .header-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+    }
+    .logo{
+      font-family:Georgia,serif;
+      font-size:27px;
+    }
+    .header-menu{
+      display:flex;
+      gap:20px;
+      font-size:12px;
+    }
+    
+  .header-inner {
+    max-width: 1000px; /* 본문 컨테이너(.main-container)의 max-width와 동일한 값으로 설정 */
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+    </style>
+
+    <header class="site-header">
+        <div class="header-inner">
+            <div class="logo"> 
+                <a th:href="@{/main}">Class 101</a>
+            </div>
+            
+            <nav class="header-menu">
+                <a href="#">로그아웃</a>
+                <a href="#">고객센터</a>
+                <a href="#">마이페이지</a>
+                <a href="#">예약내역</a>
+                <a href="#">관심목록</a>
+            </nav>
         </div>
-        
-        <nav class="top-nav">
-            <a href="#">로그아웃</a>
-            <a href="#">고객센터</a>
-            <a href="#">마이페이지</a>
-            <a href="#">예약내역</a>
-            <a href="#">관심목록</a>
-        </nav>
-    </div>
-</header>
+    </header>
+</div>

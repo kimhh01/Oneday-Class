@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>인기 베이킹 클래스</title>
-     <div th:replace="~{common/header :: headerFragment}"></div>
      
  <link rel="stylesheet" th:href="@{/css/top_category/top_category.css}">
   
@@ -19,11 +18,11 @@
   
 </head>
 <body>
+     <div th:replace="~{common/header :: headerFragment}"></div>
   <div class="page">
   
 
 
-    <hr class="top-line">
 
     <div class="search-wrap">
       <div class="search-box">
@@ -312,8 +311,9 @@
       </div>
     </section>
 
-<div th:replace="~{common/footer :: footerFragment}"></div>
 
   </div>
+  
+<div th:replace="~{common/footer :: footerFragment}"></div>
 </body>
 </html>

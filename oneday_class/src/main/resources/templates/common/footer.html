@@ -1,4 +1,28 @@
-<footer th:fragment="footerFragment" class="site-footer" xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="footerFragment" xmlns:th="http://www.thymeleaf.org">
+
+<style>
+.site-footer {
+    width: 100%;
+    border-top: 1px solid #eaeaea;
+    padding: 40px 0;
+    background-color: #ffffff; /* 필요시 배경색 지정 */
+    font-size: 12px;
+    color: #888888;
+    line-height: 1.6;
+}
+
+/* 본문과 폭을 맞추는 내부 래퍼 */
+.site-footer .footer-inner {
+    max-width: 1000px; /* 본문 max-width와 동일하게 설정 (1200px인 경우 1200px로 변경) */
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+</style>
+
+<footer class="site-footer">
     <div class="footer-inner">
     
         <div class="footer-info">
@@ -16,7 +40,5 @@
     </div>
 </footer>
 
-
+</div>
     
-</head>
-<body>

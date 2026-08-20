@@ -4,30 +4,27 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>인기 액티비티 클래스</title>
-  <link rel="stylesheet" href="../css/top_category.css">
+     
+ <link rel="stylesheet" th:href="@{/css/top_category/top_category.css}">
+  
+  
   <style>
-    :root{
-      --main-color:#58ad4f;
-      --soft-color:#e5f5e2;
-      --banner-light:#cceabf;
-      --banner-dark:#93ce83;
+    :root {
+      --main-color: #2e8b57;
+      --soft-color: #e8f5e9;
+      --banner-light: #a5d6a7;
+      --banner-dark: #66bb6a;
     }
   </style>
+  
+  
 </head>
 <body>
+     <div th:replace="~{common/header :: headerFragment}"></div>
   <div class="page">
-    <header class="header">
-      <div class="logo">Class 101</div>
-      <nav class="top-menu">
-        <a href="#">로그아웃</a>
-        <a href="#">고객센터</a>
-        <a href="#">마이페이지</a>
-        <a href="#">예약내역</a>
-        <a href="#">관심목록</a>
-      </nav>
-    </header>
+  
 
-    <hr class="top-line">
+
 
     <div class="search-wrap">
       <div class="search-box">
@@ -42,7 +39,7 @@
       <div class="sub-copy">몸도 마음도 건강해지는 특별한 하루</div>
     </section>
 
-    <section class="hero">
+      <section class="hero">
        <img src="../images/banner/activity_mainbanner.png" alt="">
     </section>
 
@@ -335,22 +332,9 @@
       </div>
     </section>
 
-    <footer class="footer">
-      <hr class="footer-line">
-      <div class="footer-inner">
-        <div class="footer-left">
-          <div class="footer-title">원데이예약플랫폼 주식회사</div>
-          <div>주소:06043 서울특별시 강남구 강남대로 586, 제이빌딩 | 대표이사:무무리 | 사업자 등록번호:1441-811254</div>
-          <div>1588-7822 | classreservation.co.kr | 통신판매업 신고번호: 제 23656-서울 강남 046566호 | 사업자 정보 확인 | 개인정보보호 책임자 : 서성훈</div>
-        </div>
-        <div class="footer-right">
-          <span>Ⓕ</span>
-          <span>in</span>
-          <span>◼</span>
-          <span>◎</span>
-        </div>
-      </div>
-    </footer>
+
   </div>
+  
+<div th:replace="~{common/footer :: footerFragment}"></div>
 </body>
 </html>
