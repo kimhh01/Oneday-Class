@@ -49,7 +49,7 @@ public class AdminInfoController {
 			return "redirect:/admin/info/verify";
 		}
 
-		session.setAttribute(VERIFIED_MANAGER_CODE, managerCode);
+		session.setAttribute(AdminInfoVerifyInterceptor.VERIFIED_MANAGER_CODE, managerCode);
 
 		return "redirect:/admin/info/edit";
 	}
@@ -86,32 +86,24 @@ public class AdminInfoController {
 
 	@PostMapping("/edit")
 	public String updateAdminInfo(@AuthenticationPrincipal AdminUserDetails loginAdmin,
-			@ModelAttribute("updateDTO") AdminInfoUpdateDTO updateDTO, HttpSession session,
-			RedirectAttributes redirectAttributes) {
+			@ModelAttribute AdminInfoUpdateDTO updateDTO, HttpSession session, RedirectAttributes redirectAttributes) {
 
 		int managerCode = loginAdmin.toDomain().getManagerCode();
 
-		if (!isVerified(session, managerCode)) {
+		boolean result = adminInfoService.updateAdminInfo(managerCode, updateDTO);
 
-			return "redirect:/admin/info/verify";
-		}
-
-		try {
-
-			boolean result = adminInfoService.updateAdminInfo(managerCode, updateDTO);
-
-			session.removeAttribute(VERIFIED_MANAGER_CODE);
-
-			redirectAttributes.addFlashAttribute("message", result ? "관리자 정보가 수정되었습니다." : "관리자 정보 수정에 실패했습니다.");
-
-			return "redirect:/admin/dashboard";
-
-		} catch (IllegalArgumentException e) {
-
-			redirectAttributes.addFlashAttribute("error", e.getMessage());
+		if (!result) {
+			redirectAttributes.addFlashAttribute("error", "관리자 정보 수정에 실패했습니다.");
 
 			return "redirect:/admin/info/edit";
 		}
+
+		// 비밀번호 재확인 인증 상태 제거
+		session.removeAttribute(AdminInfoVerifyInterceptor.VERIFIED_MANAGER_CODE);
+
+		redirectAttributes.addFlashAttribute("message", "관리자 정보가 수정되었습니다.");
+
+		return "redirect:/admin/dashboard";
 	}
 
 	private boolean isVerified(HttpSession session, int managerCode) {
