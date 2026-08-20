@@ -23,7 +23,7 @@
             c.ADDRESS as address,
             c.STAR_RATING_AVG as starRatingAvg,
             (SELECT ci.IMAGE 
-             FROM CLASS_IMAGE ci 
+             FROM CLASS_IMG ci 
              WHERE ci.CLASS_CODE = c.CLASS_CODE 
                AND ROWNUM = 1) as mainImage
         FROM CLASS c

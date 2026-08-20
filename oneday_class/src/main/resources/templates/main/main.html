@@ -4,24 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>클래스101 메인</title>
-    <link rel="stylesheet" th:href="@{/css/main/main.css}">
+    <link rel="stylesheet" th:href="@{/main/css/main.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
 <body>
 <div th:replace="~{common/header :: headerFragment}"></div>
     
     <main class="main-container">
-        <!-- 1. 메인 검색바 (form 적용) -->
+        <!-- 1. 메인 검색바 -->
         <div class="search-wrap">
             <form th:action="@{/search}" method="get" class="search-box">
                 <div class="search-icon">
-                    <img src="/images/icon/search_icon.svg" alt="아이콘" style="width: 20px; height: 20px;">
+                    <img th:src="@{/images/icon/search_icon.svg}" alt="아이콘" style="width: 20px; height: 20px;">
                 </div>
                 <input class="search-input" type="text" name="keyword" placeholder="원하는 키워드를 검색해보세요.">
                 <button type="submit" class="search-btn">검색</button>
             </form>
         </div>
 
+        <!-- 2. 히어로 섹션 및 히어로 검색 바 -->
         <section class="hero-section">
             <div class="hero-text">
                 <h1><span>솜씨당</span>에서<br>당신의 취미를 찾아보세요</h1>
@@ -29,7 +30,7 @@
             </div>
             
             <div class="hero-banner">
-                <img src="/images/banner/main_banner.jpg" alt="메인배너">
+                <img th:src="@{/images/banner/main_banner.jpg}" alt="메인배너">
                 
                 <form th:action="@{/main/search-available}" method="get" class="hero-floating-search">
                     <input type="hidden" name="categoryCode" id="selectedCategoryInput" value="0">
@@ -37,7 +38,7 @@
                     <div class="float-input-group hover-dropdown-container">
                         <div class="category-flex-wrapper">
                             <div class="search-icon">
-                                <img src="/images/icon/search_icon.svg" alt="아이콘" style="width: 20px; height: 20px;">
+                                <img th:src="@{/images/icon/search_icon.svg}" alt="아이콘" style="width: 20px; height: 20px;">
                             </div>
                             <span class="group-label">카테고리 |</span>
                             <span class="selected-text" id="selectedCategoryText">전체 카테고리</span>
@@ -60,7 +61,7 @@
 
                     <div class="float-input-group schedule-group">
                         <span class="calendar-icon">
-                            <img src="/images/icon/calendar_icon.svg" alt="아이콘" style="width: 20px; height: 20px;">
+                            <img th:src="@{/images/icon/calendar_icon.svg}" alt="아이콘" style="width: 20px; height: 20px;">
                         </span>
                         <span class="group-label">일정 |</span>
                         <input type="date" name="classDate" class="search-date-input" required>
@@ -71,58 +72,59 @@
             </div>
         </section>
    
+        <!-- 3. Quick 퀵 메뉴 아이콘 탭 -->
         <section class="category-nav">
             <a th:href="@{/category}" class="category-item">
                 <div class="category-icon">
-                    <img src="/images/icon/category_icon.svg" alt="아이콘" style="width: 36px; height: 36px;">
+                    <img th:src="@{/images/icon/category_icon.svg}" alt="아이콘" style="width: 36px; height: 36px;">
                 </div>
                 <span class="category-name">카테고리 전체</span>
             </a>
             
-            <a href="#" class="category-item">
+            <a th:href="@{/category/class}" class="category-item">
                 <div class="category-icon">
-                    <img src="/images/icon/map_icon.svg" alt="아이콘" style="width: 36px; height: 36px;">
+                    <img th:src="@{/images/icon/map_icon.svg}" alt="아이콘" style="width: 36px; height: 36px;">
                 </div>
                 <span class="category-name">지역별 찾기</span>
             </a>
 
-            <a th:href="@{/top_category/beauty}" class="category-item">
+            <a th:href="@{/top_category/beauty(categoryCode=1)}" class="category-item">
                 <div class="category-icon">
-                    <img src="/images/icon/beauty_icon.svg" alt="아이콘" style="width: 36px; height: 36px;">
+                    <img th:src="@{/images/icon/beauty_icon.svg}" alt="아이콘" style="width: 36px; height: 36px;">
                 </div>
                 <span class="category-name">인기 뷰티</span>
             </a>
 
-            <a th:href="@{/top_category/baking}" class="category-item">
+            <a th:href="@{/top_category/baking(categoryCode=2)}" class="category-item">
                 <div class="category-icon">
-                    <img src="/images/icon/baking_icon.svg" alt="아이콘" style="width: 36px; height: 36px;">
+                    <img th:src="@{/images/icon/baking_icon.svg}" alt="아이콘" style="width: 36px; height: 36px;">
                 </div>
                 <span class="category-name">인기 베이킹</span>
             </a>
             
-            <a th:href="@{/top_category/activity}" class="category-item">
+            <a th:href="@{/top_category/activity(categoryCode=3)}" class="category-item">
                 <div class="category-icon">
-                    <img src="/images/icon/activity_icon.svg" alt="아이콘" style="width: 36px; height: 36px;">
+                    <img th:src="@{/images/icon/activity_icon.svg}" alt="아이콘" style="width: 36px; height: 36px;">
                 </div>
                 <span class="category-name">인기 액티비티</span>
             </a>
             
-            <a th:href="@{/main/search-available(categoryCode=0)}" class="category-item">
+            <a th:href="@{/category/class(sort='신규순')}" class="category-item">
                 <div class="category-icon">
-                    <img src="/images/icon/today_icon.svg" alt="아이콘" style="width: 42px; height: 42px;">
+                    <img th:src="@{/images/icon/today_icon.svg}" alt="아이콘" style="width: 42px; height: 42px;">
                 </div>
                 <span class="category-name">당일 예약</span>
             </a>
             
-            <a th:href="@{/main/search-available(categoryCode=0)}" class="category-item">
+            <a th:href="@{/category/class(sort='추천순')}" class="category-item">
                 <div class="category-icon">
-                    <img src="/images/icon/weekend_icon.svg" alt="아이콘" style="width: 36px; height: 36px;">      
+                    <img th:src="@{/images/icon/weekend_icon.svg}" alt="아이콘" style="width: 36px; height: 36px;">      
                 </div>
                 <span class="category-name">주말 예약</span>
             </a>
         </section>
 
-        <!-- 솜씨당이 검증한 이달의 인기클래스! -->
+        <!-- 4. 이달의 인기클래스 (상위 3개) -->
         <section class="content-section">
             <div class="section-header">
                 <h2 class="section-title">솜씨당이 검증한 이달의 인기클래스!</h2>
@@ -133,76 +135,112 @@
             
             <div class="grid-3">
                 <div class="class-card" th:each="cls : ${topRatedList}">
-                    <img th:src="${cls.singleIntroduce}" th:alt="${cls.name}">
-                    <div class="class-info">
-                        <div class="class-loc" th:text="${cls.address}">지역</div>
-                        <div class="class-name" th:text="${cls.name}">클래스명</div>
-                        <div class="class-price-row">
-                            <span class="discount">8%</span>
-                            <span class="final" th:text="${#numbers.formatInteger(cls.price, 3, 'COMMA') + '원'}">48,600</span>
+                    <a th:href="@{/class/detail(classCode=${cls.classCode})}">
+                        <img th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}" 
+                             th:alt="${cls.name}"
+                             onerror="this.src='/images/class/dessert1.jpg';">
+                        <div class="class-info">
+                            <div class="class-loc" th:text="${cls.address}">지역</div>
+                            <div class="class-name" th:text="${cls.name}">클래스명</div>
+                            
+                            <div class="class-price-row">
+                                <!-- 빨간색 할인율 (%) -->
+                                <span class="discount" 
+                                      th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}" 
+                                      th:text="${cls.discountRate + '%'}"></span>
+                                <!-- 회색 정가 (desiredPrice) -->
+                                <span class="original" 
+                                      th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}" 
+                                      th:text="${#numbers.formatInteger(cls.desiredPrice, 0, 'COMMA')}"></span>
+                                <!-- 최종 판매가 (price) -->
+                                <span class="final" 
+                                      th:text="${#numbers.formatInteger(cls.price, 0, 'COMMA') + '원'}"></span>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </section>
 
-        <!-- 어디에서 놀까요? -->
+        <!-- 5. 어디에서 놀까요? -->
         <section class="content-section">
             <div class="section-header">
                 <h2 class="section-title">어디에서 놀까요?</h2>
             </div>
             <div class="location-circles">
-                <div class="loc-circle" style="background-image: url('/images/mokup_1.jpg');"><span>홍대</span></div>
-                <div class="loc-circle" style="background-image: url('/images/mokup_2.jpg');"><span>강남</span></div>
-                <div class="loc-circle"><span>성수</span></div>
-                <div class="loc-circle"><span>송파</span></div>
-                <div class="loc-circle"><span>마포</span></div>
+                <a th:href="@{/category/class(keyword='홍대')}" class="loc-circle" style="background-image: url('/images/mokup_1.jpg');"><span>홍대</span></a>
+                <a th:href="@{/category/class(keyword='강남')}" class="loc-circle" style="background-image: url('/images/mokup_2.jpg');"><span>강남</span></a>
+                <a th:href="@{/category/class(keyword='성수')}" class="loc-circle"><span>성수</span></a>
+                <a th:href="@{/category/class(keyword='송파')}" class="loc-circle"><span>송파</span></a>
+                <a th:href="@{/category/class(keyword='마포')}" class="loc-circle"><span>마포</span></a>
             </div>
         </section>
 
-        <!-- 인기 디저트 클래스 -->
+        <!-- 6. 인기 디저트 클래스 (상위 5개) -->
         <section class="content-section">
             <div class="section-header">
                 <h2 class="section-title">인기 디저트 클래스 🍰</h2>
                 <span class="view-all">
-                    <a th:href="@{/category}">전체보기 &gt;</a>
+                    <a th:href="@{/top_category/baking(categoryCode=2)}">전체보기 &gt;</a>
                 </span>
             </div>
             
             <div class="grid-5">
                 <div class="class-card" th:each="cls : ${bakingList}">
-                    <img th:src="${cls.singleIntroduce}" th:alt="${cls.name}">
-                    <div class="class-info">
-                        <div class="class-loc" th:text="${cls.address}">지역</div>
-                        <div class="class-name" th:text="${cls.name}">클래스명</div>
-                        <div class="class-price-row">
-                            <span class="discount">8%</span>
-                            <span class="final" th:text="${#numbers.formatInteger(cls.price, 3, 'COMMA') + '원'}">48,600</span>
+                    <a th:href="@{/class/detail(classCode=${cls.classCode})}">
+                        <img th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}" 
+                             th:alt="${cls.name}"
+                             onerror="this.src='/images/class/dessert1.jpg';">
+                        <div class="class-info">
+                            <div class="class-loc" th:text="${cls.address}">지역</div>
+                            <div class="class-name" th:text="${cls.name}">클래스명</div>
+                            
+                            <div class="class-price-row">
+                                <span class="discount" 
+                                      th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}" 
+                                      th:text="${cls.discountRate + '%'}"></span>
+                                <span class="original" 
+                                      th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}" 
+                                      th:text="${#numbers.formatInteger(cls.desiredPrice, 0, 'COMMA')}"></span>
+                                <span class="final" 
+                                      th:text="${#numbers.formatInteger(cls.price, 0, 'COMMA') + '원'}"></span>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </section>
 
-        <!-- 메이크업 찾기 -->
+        <!-- 7. 인기 메이크업/뷰티 클래스 (상위 3개) -->
         <section class="content-section">
             <div class="section-header">
                 <h2 class="section-title">휴가 전 이미지 변신!<br>나에게 어울리는 메이크업 찾기 💄✨</h2>
                 <span class="view-all">
-                    <a th:href="@{/category}">전체보기 &gt;</a>
+                    <a th:href="@{/top_category/beauty(categoryCode=1)}">전체보기 &gt;</a>
                 </span>
             </div>
             <div class="grid-3">
                 <div class="class-card" th:each="cls : ${beautyList}">
-                    <img th:src="${cls.singleIntroduce}" th:alt="${cls.name}">
-                    <div class="class-info">
-                        <div class="class-loc" th:text="${cls.address}">지역</div>
-                        <div class="class-name" th:text="${cls.name}">클래스명</div>
-                        <div class="class-price-row">
-                            <span class="discount">8%</span>
-                            <span class="final" th:text="${#numbers.formatInteger(cls.price, 3, 'COMMA') + '원'}">48,600</span>
+                    <a th:href="@{/class/detail(classCode=${cls.classCode})}">
+                        <img th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}" 
+                             th:alt="${cls.name}"
+                             onerror="this.src='/images/class/dessert1.jpg';">
+                        <div class="class-info">
+                            <div class="class-loc" th:text="${cls.address}">지역</div>
+                            <div class="class-name" th:text="${cls.name}">클래스명</div>
+                            
+                            <div class="class-price-row">
+                                <span class="discount" 
+                                      th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}" 
+                                      th:text="${cls.discountRate + '%'}"></span>
+                                <span class="original" 
+                                      th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}" 
+                                      th:text="${#numbers.formatInteger(cls.desiredPrice, 0, 'COMMA')}"></span>
+                                <span class="final" 
+                                      th:text="${#numbers.formatInteger(cls.price, 0, 'COMMA') + '원'}"></span>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
         </section>

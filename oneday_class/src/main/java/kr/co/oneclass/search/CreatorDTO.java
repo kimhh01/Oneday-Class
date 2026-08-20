@@ -12,8 +12,8 @@ import java.util.List;
 @Setter
 @ToString
 public class CreatorDTO {
-    private int operatorCode;
-    private int memberCode;
+    private long operatorCode;
+    private long memberCode;
     private String approvalStatus;
     private String activityName;        // 작가/활동명
     private String profileImage;

@@ -21,24 +21,24 @@ public class MainController {
     @GetMapping("/main")
     public String mainPage(HttpSession session, Model model) {
 
-        // 로그인 회원 정보 세션 확인
+        // 팀원 코드 반영: 로그인 회원 정보 세션 확인
         Member loginMember = (Member) session.getAttribute("loginMember");
         if (loginMember != null) {
             model.addAttribute("loginMember", loginMember);
         }
 
-        // 당일 / 주말 예약 가능 클래스 데이터
+        // 기존 메인 데이터 바인딩
         model.addAttribute("todayClasses", ms.searchTodayClass());
         model.addAttribute("weekendClasses", ms.searchWeekendClass());
 
-        // 1-1. 이달의 인기 클래스 상위 3개 (전체 카테고리 = 0)
+        // 1-1. 이달의 인기 클래스 상위 3개
         model.addAttribute("topRatedList", ms.searchTopRatedClass(0, 3)); 
 
-        // 1-2. 인기 디저트/베이킹 클래스 상위 5개 (베이킹 카테고리 코드 = 2)
-        model.addAttribute("bakingList", ms.searchTopRatedClass(2, 5)); 
+        // 1-2. 인기 디저트/베이킹 클래스 상위 5개
+        model.addAttribute("bakingList", ms.searchTopRatedClass(0, 5)); 
 
-        // 1-3. 인기 뷰티 클래스 상위 3개 (뷰티 카테고리 코드 = 1)
-        model.addAttribute("beautyList", ms.searchTopRatedClass(1, 3)); 
+        // 1-3. 인기 뷰티 클래스 상위 3개
+        model.addAttribute("beautyList", ms.searchTopRatedClass(0, 3)); 
 
         return "main/main"; 
     }
