@@ -66,36 +66,37 @@
       </button>
     </div>
 
-    <!-- 5. 클래스 카드 그리드 (순수 DB 데이터 반영) -->
+    <!-- 5. 클래스 카드 그리드 -->
     <section class="class-grid">
       <div th:if="${#lists.isEmpty(classList)}" style="grid-column: 1/-1; text-align: center; padding: 60px 0; color: #888;">
         검색 조건에 맞는 클래스가 없습니다.
       </div>
 
-      <article class="class-card" th:each="cls : ${classList}">
-        <a th:href="@{/class/detail(classCode=${cls.classCode})}">
+    <article class="class-card" th:each="cls : ${classList}">
+        <a th:href="@{/class/detail(classCode=${cls.classCode})}"> 
           <!-- 순수 DB 이미지 데이터 -->
-          <img th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}" 
-               th:alt="${cls.name}">
+          <img th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}"
+               th:alt="${cls.name}"> 
           
           <!-- 순수 DB 위치/지역 정보 -->
           <div class="class-meta" th:text="${cls.address}">위치 정보</div>
           <div class="class-title" th:text="${cls.name}">클래스명</div>
-          
+
+          <!-- 메인 스타일 적용 가격/할인율 영역 -->
           <div class="class-price">
-            <!-- 1) 할인율 (%) : desiredPrice가 있고 price보다 작을 때만 계산하여 표시 -->
-            <span class="sale" 
-                  th:if="${cls.desiredPrice > 0 and cls.price > cls.desiredPrice}" 
-                  th:text="${cls.discountRate + '%'}"></span>
+            <!-- 1) 할인율 (%) -->
+            <span class="sale"
+                  th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.price > cls.desiredPrice}"
+                  th:text="${cls.discountRate + '%'}"></span> 
             
-            <!-- 2) 정가 (취소선) : desiredPrice가 있을 때 원가(price) 노출 -->
-            <span class="old" 
-                  th:if="${cls.desiredPrice > 0 and cls.price > cls.desiredPrice}" 
-                  th:text="${#numbers.formatInteger(cls.price, 0, 'COMMA')}"></span>
+            <!-- 2) 정가 (취소선) -->
+            <span class="old"
+                  th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.price > cls.desiredPrice}"
+                  th:text="${#numbers.formatInteger(cls.price, 0, 'COMMA') + '원'}"></span>
             
-            <!-- 3) 최종 판매가 : desiredPrice가 있으면 desiredPrice, 없으면 price 노출 -->
-            <span class="now" 
-                  th:text="${#numbers.formatInteger((cls.desiredPrice > 0 and cls.price > cls.desiredPrice) ? cls.desiredPrice : cls.price, 0, 'COMMA') + '원'}"></span>
+            <!-- 3) 최종 판매가 (할인 시 희망가, 미할인 시 정가) -->
+            <span class="now"
+                  th:text="${#numbers.formatInteger((cls.desiredPrice != null and cls.desiredPrice > 0 and cls.price > cls.desiredPrice) ? cls.desiredPrice : cls.price, 0, 'COMMA') + '원'}"></span>
           </div>
         </a>
       </article>

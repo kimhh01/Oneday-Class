@@ -1,6 +1,7 @@
 package kr.co.oneclass.category;
 
 import kr.co.oneclass.main.ClassDTO;
+
 import kr.co.oneclass.main.ClassImageDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
