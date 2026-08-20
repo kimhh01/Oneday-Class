@@ -30,12 +30,13 @@
 				<p class="page-subtitle">지도에서 원하는 원데이 클래스를 찾아보세요!</p>
 			</div>
 			<!-- 검색바 -->
-			<div class="search-box">
-				<span class="search-icon">🔍</span> <input type="text"
-					id="keyword-search-input" placeholder="원하는 지역, 클래스명을 검색해보세요."
-					class="search-input">
-				<button id="btn-keyword-search" class="search-btn">검색</button>
-			</div>
+            <form th:action="@{/search}" method="get" class="search-box">
+                <div class="search-icon">
+                    <img th:src="@{/images/icon/search_icon.svg}" alt="아이콘" style="width: 20px; height: 20px;">
+                </div>
+                <input class="search-input" type="text" name="keyword" placeholder="원하는 키워드를 검색해보세요.">
+                <button type="submit" class="search-btn">검색</button>
+            </form>
 		</div>
 
 		<!-- 필터 선택줄 1 (드롭다운 & 내 위치) -->

@@ -17,4 +17,6 @@ public interface ReservationDAO {
 	public CategoryDTO selectCategory(int scheduleCode);
 	
 	public int insertReservation(ReservationDTO rDTO);
+	
+	int updateRemaining(@Param("scheduleCode") int scheduleCode, @Param("count") int count);
 }

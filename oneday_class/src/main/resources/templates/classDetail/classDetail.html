@@ -9,34 +9,9 @@
 	href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 <link rel="stylesheet" th:href="@{/classDetail/css/classDetail.css}">
 </head>
+<div th:replace="~{common/header :: headerFragment}"></div>
 <body class="map-page-body">
 
-	<!-- 1. 최상단 카테고리 헤더 -->
-	<header class="main-header">
-		<div class="header-top-bar">
-			<div class="logo">CLASS 101</div>
-			<div class="header-right-menu">
-				<a href="#">로그인</a> <a href="#">회원가입</a> <a href="#">고객센터</a> <a
-					href="#">장바구니</a>
-			</div>
-		</div>
-		<div class="category-bar-wrapper">
-			<div class="category-inner">
-				<h1 class="page-title">원데이클래스</h1>
-				<div class="category-tabs">
-					<a href="#" class="cat-item active">전체</a> <a href="#"
-						class="cat-item">요리</a> <a href="#" class="cat-item">수공예</a> <a
-						href="#" class="cat-item">미술</a> <a href="#" class="cat-item">베이킹</a>
-					<a href="#" class="cat-item">플라워·조경</a> <a href="#"
-						class="cat-item">음악</a>
-				</div>
-				<div class="header-search-input">
-					<input type="text" placeholder="원하는 원데이클래스를 찾아보세요!">
-					<button type="button">🔍</button>
-				</div>
-			</div>
-		</div>
-	</header>
 
 	<!-- 2. 메인 2컬럼 본문 영역 -->
 	<main class="main-container">
@@ -433,7 +408,7 @@
 				<div class="similar-class-grid"
 					th:if="${detail?.sameCategoryList != null and !#lists.isEmpty(detail.sameCategoryList)}">
 					<th:block th:each="item : ${detail.sameCategoryList}">
-						<div class="similar-card" th:if="${item != null}">
+						<a class="similar-card" th:if="${item != null}" th:href="@{/classDetail(classCode=${item.classCode})}">
 							<div class="thumb-box">
 								<img
 									th:src="${item.finishImg != null ? item.finishImg : 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=300'}"
@@ -446,7 +421,7 @@
 								<div class="class-price"
 									th:text="${item.price != null and item.price > 0} ? |${#numbers.formatInteger(item.price, 0, 'COMMA')}원| : '가격 문의'">45,000원</div>
 							</div>
-						</div>
+						</a>
 					</th:block>
 				</div>
 				<a th:href="@{#}" class="btn-more-similar"> <span>비슷한 클래스
@@ -539,14 +514,6 @@
 
 	</main>
 
-	<!-- 3. 푸터 -->
-	<footer class="main-footer">
-		<div class="footer-inner">
-			<p class="company-name">CLASS 101</p>
-			<p class="info">서울특별시 강남구 테헤란로 | 고객센터: 1800-0000</p>
-			<p class="copy">Copyright © CLASS101. All rights reserved.</p>
-		</div>
-	</footer>
 
 </body>
 <script

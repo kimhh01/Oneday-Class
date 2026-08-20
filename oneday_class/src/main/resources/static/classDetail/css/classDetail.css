@@ -551,6 +551,15 @@ body.map-page-body {
     border: 1px solid var(--border-line);
     border-radius: 4px;
     overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.similar-card:hover {
+	background-color: #f8f9fa;
+    border-color: #ced4da;
+    color: #212529;
 }
 
 .similar-card img {

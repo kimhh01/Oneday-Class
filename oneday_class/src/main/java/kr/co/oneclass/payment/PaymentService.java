@@ -101,6 +101,13 @@ public class PaymentService {
 
             pDAO.insertPayment(pDTO);
 
+            // 결제 후 좌석 수 변경
+            ScheduleDTO sDTO = new ScheduleDTO();
+            if(sDTO.getRemainingPeople()-peopleCount >= 0) {
+            	sDTO.setRemainingPeople(sDTO.getRemainingPeople()-peopleCount);
+            	
+            }
+            
         } catch (org.springframework.web.client.HttpClientErrorException e) {
             if (e.getResponseBodyAsString().contains("ALREADY_PROCESSED_PAYMENT")) {
                 System.out.println("이미 승인 완료된 결제 건입니다. (새로고침 대응)");
@@ -109,4 +116,6 @@ public class PaymentService {
             throw e; 
         }
     }
+    
+
 }

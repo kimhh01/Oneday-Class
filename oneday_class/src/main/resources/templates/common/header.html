@@ -42,11 +42,20 @@
             </div>
             
             <nav class="header-menu">
-                <a href="#">로그아웃</a>
-                <a href="#">고객센터</a>
-                <a href="#">마이페이지</a>
-                <a href="#">예약내역</a>
-                <a href="#">관심목록</a>
+            
+	            	<!-- 비로그인 상태일 때 -->
+	            <a th:if="${session.loginMember == null}" 
+	               th:href="@{/member/login}" 
+	               class="site-header__link">로그인</a>
+	
+	            <!-- 로그인 상태일 때 -->
+	            <a th:if="${session.loginMember != null}" 
+	               th:href="@{/logout}" 
+	               class="site-header__link">로그아웃</a>
+                <!-- 마이페이지 -->
+           		<a th:href="@{/mypage}" class="site-header__link">마이페이지</a>
+                <a th:href="@{/mypage/purchase}">예약내역</a>
+                <a th:href="@{/mypage/bookmark}">관심목록</a>
             </nav>
         </div>
     </header>

@@ -118,7 +118,7 @@
 
 							<!-- 신용/체크카드 -->
 							<label class="payment-option active" id="cardLabel"> <input
-								type="radio" name="paymentMethod" value="CARD" checked
+								type="radio" name="paymentMethod" value="신용카드" checked
 								onclick="togglePayment(this)"> <span
 								class="radio-circle"></span> <span class="pay-icon">💳</span> <span
 								class="pay-text"> <span class="pay-title">신용/체크카드</span>
@@ -128,7 +128,7 @@
 
 							<!-- 네이버페이 -->
 							<label class="payment-option" id="naverLabel"> <input
-								type="radio" name="paymentMethod" value="NAVERPAY"
+								type="radio" name="paymentMethod" value="네이버페이"
 								onclick="togglePayment(this)"> <span
 								class="radio-circle"></span> <span class="pay-icon npay">N Pay</span> 
 								<span class="pay-text"> <span class="pay-title">네이버페이</span>
@@ -306,24 +306,41 @@
 		    const orderName = className + (currentCount > 1 ? ` 외 ${currentCount - 1}명` : "");
 
 		    // 성공/실패 URL 설정
-		    const successUrl = `${window.location.origin}/payment/paymentComplete?scheduleCode=${scheduleCode}&peopleCount=${currentCount}&paymentMethod=${selectedMethod}`;
+		    const successUrl = `${window.location.origin}/payment/paymentComplete?scheduleCode=${scheduleCode}&peopleCount=${currentCount}&paymentMethod=${encodeURIComponent(selectedMethod)}`;
 		    const failUrl = `${window.location.origin}/payment/fail`;
 
+		    // 공통 결제 정보 객체
+		    const basePaymentData = {
+		        amount: { currency: "KRW", value: totalPrice },
+		        orderId: orderId,
+		        orderName: orderName,
+		        successUrl: successUrl,
+		        failUrl: failUrl,
+		    };
+
 		    try {
-		        // 통합 결제창 호출 (신용카드 및 네이버페이 등 간편결제 포함)
-		        await payment.requestPayment({
-		            method: "CARD",
-		            amount: { currency: "KRW", value: totalPrice },
-		            orderId: orderId,
-		            orderName: orderName,
-		            successUrl: successUrl,
-		            failUrl: failUrl,
-		            card: {
-		                flowMode: "DEFAULT",
-		                useCardPoint: false,
-		                useAppCardOnly: false
-		            }
-		        });
+		        if (selectedMethod === '신용카드') {
+		            // 1) 일반 신용/체크카드 결제창 호출
+		            await payment.requestPayment({
+		                ...basePaymentData,
+		                method: "CARD", 
+		                card: {
+		                    flowMode: "DEFAULT",
+		                    useCardPoint: false,
+		                    useAppCardOnly: false
+		                }
+		            });
+		        } else if (selectedMethod === '네이버페이') {
+		            // 2) 네이버페이 결제창 호출 (SDK v2 표준 규칙)
+		            await payment.requestPayment({
+		                ...basePaymentData,
+		                method: "CARD", 
+		                card: {
+		                    flowMode: "DIRECT", // 간편결제 창으로 바로 이동
+		                    easyPay: "NAVERPAY" // 문자열 형태로 네이버페이 지정
+		                }
+		            });
+		        }
 		    } catch (error) {
 		        if (error.code === 'USER_CANCEL') {
 		            console.log('사용자가 결제창을 닫았습니다.');
