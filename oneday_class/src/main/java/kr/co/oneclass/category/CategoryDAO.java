@@ -1,6 +1,7 @@
 package kr.co.oneclass.category;
 
 import kr.co.oneclass.main.ClassDTO;
+
 import kr.co.oneclass.main.ClassImageDTO;
 import org.apache.ibatis.annotations.Mapper;
 
