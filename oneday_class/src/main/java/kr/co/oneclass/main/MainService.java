@@ -7,16 +7,14 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class MainService {
-	
-    // @RequiredArgsConstructor가 생성자 주입을 처리하므로 @Autowired 제거
+
     private final MainDAO mDAO;
 
     // 대표 이미지 세팅 로직
     private void setMainImages(List<ClassDTO> classList) {
-        if (classList == null) return;
+        if (classList == null || classList.isEmpty()) return;
         
         for (ClassDTO dto : classList) {
-            // [수정] MainDAO -> mDAO (주입받은 변수 사용)
             List<ClassImageDTO> imgList = mDAO.selectImage(dto.getClassCode());
             
             if (imgList != null && !imgList.isEmpty()) {
@@ -34,28 +32,38 @@ public class MainService {
             }
         }
     }
-	
+
     public List<ClassDTO> searchTopRatedClass(int categoryCode, int limitCount) {
-        return mDAO.selectTopRatedClass(categoryCode, limitCount);
+        List<ClassDTO> list = mDAO.selectTopRatedClass(categoryCode, limitCount);
+        setMainImages(list); 
+        return list;
     }
     
     public List<ClassDTO> searchTopRatedClassList(int categoryCode) {
-        return mDAO.selectTopRatedClassList(categoryCode);
+        List<ClassDTO> list = mDAO.selectTopRatedClassList(categoryCode);
+        setMainImages(list);
+        return list;
     }
 
     public List<ClassDTO> searchTodayClass() {
-        return mDAO.selectTodayClass();
+        List<ClassDTO> list = mDAO.selectTodayClass();
+        setMainImages(list); 
+        return list;
     }
 
     public List<ClassDTO> searchWeekendClass() {
-        return mDAO.selectWeekendClass();
+        List<ClassDTO> list = mDAO.selectWeekendClass();
+        setMainImages(list); 
+        return list;
     }
 
     public List<ClassDTO> searchAvailableClass(int categoryCode, ScheduleDTO scheduleDTO) {
-        return mDAO.selectAvailableClass(categoryCode, scheduleDTO);
+        List<ClassDTO> list = mDAO.selectAvailableClass(categoryCode, scheduleDTO);
+        setMainImages(list); 
+        return list;
     }
 
-    public List<ClassImageDTO> searchImage(int classCode) {
+    public List<ClassImageDTO> searchImage(long classCode) { // 👈 int -> long 수정 (DTO 타입 통일)
         return mDAO.selectImage(classCode);
     }
 }

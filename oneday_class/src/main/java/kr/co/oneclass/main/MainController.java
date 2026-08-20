@@ -45,9 +45,14 @@ public class MainController {
         return "main/main"; 
     }
 
-    // 2. 인기 뷰티 랭킹 페이지
+ // 2. 인기 뷰티 랭킹 페이지
     @GetMapping("/top_category/beauty")
-    public String beautyPage(@RequestParam(value = "categoryCode", defaultValue = "1") int categoryCode, Model model) {
+    public String beautyPage(HttpSession session, 
+                             @RequestParam(value = "categoryCode", defaultValue = "1") int categoryCode, 
+                             Model model) {
+        Member loginMember = (Member) session.getAttribute("loginMember");
+        if (loginMember != null) model.addAttribute("loginMember", loginMember);
+        
         List<ClassDTO> beautyList = ms.searchTopRatedClassList(categoryCode);
         model.addAttribute("classList", beautyList);
         return "top_category/popular_beauty";
@@ -55,7 +60,12 @@ public class MainController {
 
     // 3. 인기 베이킹 랭킹 페이지
     @GetMapping("/top_category/baking")
-    public String bakingPage(@RequestParam(value = "categoryCode", defaultValue = "2") int categoryCode, Model model) {
+    public String bakingPage(HttpSession session, 
+                             @RequestParam(value = "categoryCode", defaultValue = "2") int categoryCode, 
+                             Model model) {
+        Member loginMember = (Member) session.getAttribute("loginMember");
+        if (loginMember != null) model.addAttribute("loginMember", loginMember);
+        
         List<ClassDTO> bakingList = ms.searchTopRatedClassList(categoryCode);
         model.addAttribute("classList", bakingList);
         return "top_category/popular_baking";
@@ -63,7 +73,12 @@ public class MainController {
 
     // 4. 인기 액티비티 랭킹 페이지
     @GetMapping("/top_category/activity")
-    public String activityPage(@RequestParam(value = "categoryCode", defaultValue = "3") int categoryCode, Model model) {
+    public String activityPage(HttpSession session, 
+                               @RequestParam(value = "categoryCode", defaultValue = "3") int categoryCode, 
+                               Model model) {
+        Member loginMember = (Member) session.getAttribute("loginMember");
+        if (loginMember != null) model.addAttribute("loginMember", loginMember);
+        
         List<ClassDTO> activityList = ms.searchTopRatedClassList(categoryCode);
         model.addAttribute("classList", activityList);
         return "top_category/popular_activity";

@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>인기 베이킹 클래스</title>
      
- <link rel="stylesheet" th:href="@{/css/top_category/top_category.css}">
+  <link rel="stylesheet" th:href="@{/top_category/css/top_category.css}">
   
   <style>
     :root{
@@ -15,23 +15,21 @@
       --banner-dark:#f5bf3d;
     }
   </style>
-  
 </head>
 <body>
-     <div th:replace="~{common/header :: headerFragment}"></div>
+<div th:replace="~{common/header :: headerFragment}"></div>
+
   <div class="page">
-  
-
-
     <hr class="top-line">
 
-    <div class="search-wrap">
+    <!-- 검색바 -->
+    <form th:action="@{/search}" method="get" class="search-wrap">
       <div class="search-box">
         <span class="search-icon">⌕</span>
-        <input class="search-input" type="text" placeholder="원하는 키워드를 검색해보세요.">
-        <button class="search-btn">검색</button>
+        <input class="search-input" type="text" name="keyword" placeholder="원하는 키워드를 검색해보세요.">
+        <button type="submit" class="search-btn">검색</button>
       </div>
-    </div>
+    </form>
 
     <section class="visual-copy">
       <div class="main-copy">실패없는 <span class="point">인기 베이킹</span> 추천!</div>
@@ -39,279 +37,58 @@
     </section>
 
     <section class="hero">
-     
-         <img src="../images/banner/baking_mainbanner.png" alt="">
+      <img th:src="@{/images/banner/baking_mainbanner.png}" alt="베이킹 메인배너">
     </section>
 
     <section class="section">
       <div class="section-top">
         <h2 class="section-title">지금 가장 인기있는 베이킹 클래스</h2>
-        <a href="#" class="more-link">전체보기 〉</a>
+        <a th:href="@{/category}" class="more-link">전체보기 〉</a>
       </div>
 
-      <div class="class-list">
-        <article class="class-card">
-          <div class="class-thumb-wrap">
-            <span class="rank-badge">1</span>
-            <div class="class-thumb"><img src="../images/banner/baking_mainbanner.png" alt=""></div>
-          </div>
-          <div class="class-info">
-            <div class="location">마포구 연남동</div>
-            <div class="class-name">[연남] 겉바속촉 소금빵 원데이 클래스</div>
-            <div class="hash-tags">
-              <span>#소금빵</span><span>#발효빵</span><span>#초보가능</span>
-            </div>
-            <div class="meta">
-              <span class="star">★ 4.9 (312)</span>
-              <span class="bar">|</span>
-              <span>후기 486개</span>
-            </div>
-          </div>
-          <div class="price-box">
-            <span class="discount-badge">최대 25% 할인</span>
-            <div class="price-row">
-              <span class="discount-rate">25%</span>
-              <span class="final-price">45,000원</span>
-            </div>
-          </div>
-        </article>
+      <!-- DB 조회 데이터 없음 -->
+      <div th:if="${#lists.isEmpty(classList)}" style="text-align: center; padding: 60px 0; color: #888;">
+        등록된 인기 베이킹 클래스가 없습니다.
+      </div>
 
-        <article class="class-card">
-          <div class="class-thumb-wrap">
-            <span class="rank-badge">2</span>
-               <div class="class-thumb"><img src="../images/banner/baking_mainbanner.png" alt=""></div>
-          </div>
-          <div class="class-info">
-            <div class="location">성동구 성수동</div>
-            <div class="class-name">[성수] 나만의 레터링 케이크 만들기</div>
-            <div class="hash-tags">
-              <span>#레터링케이크</span><span>#디자인케이크</span><span>#기념일</span>
+      <!-- DB 동적 리스트 반복 -->
+      <div class="class-list" th:if="${!#lists.isEmpty(classList)}">
+        <article class="class-card" th:each="cls, stat : ${classList}">
+          <a th:href="@{/class/detail(classCode=${cls.classCode})}" style="display: flex; width: 100%; text-decoration: none; color: inherit;">
+            <div class="class-thumb-wrap">
+              <span class="rank-badge" th:text="${stat.count}">1</span>
+              <div class="class-thumb">
+                <img th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}" 
+                     th:alt="${cls.name}">
+              </div>
             </div>
-            <div class="meta">
-              <span class="star">★ 4.9 (278)</span>
-              <span class="bar">|</span>
-              <span>후기 421개</span>
-            </div>
-          </div>
-          <div class="price-box">
-            <span class="discount-badge">최대 20% 할인</span>
-            <div class="price-row">
-              <span class="discount-rate">20%</span>
-              <span class="final-price">52,000원</span>
-            </div>
-          </div>
-        </article>
 
-        <article class="class-card">
-          <div class="class-thumb-wrap">
-            <span class="rank-badge">3</span>
-               <div class="class-thumb"><img src="../images/banner/baking_mainbanner.png" alt=""></div>
-          </div>
-          <div class="class-info">
-            <div class="location">강남구 신사동</div>
-            <div class="class-name">[신사] 쫀득한 르뱅쿠키 베이킹 클래스</div>
-            <div class="hash-tags">
-              <span>#르뱅쿠키</span><span>#초코칩쿠키</span><span>#홈베이킹</span>
+            <div class="class-info">
+              <div class="location" th:text="${cls.address}">위치</div>
+              <div class="class-name" th:text="${cls.name}">클래스 제목</div>
+              <div class="meta">
+                <span class="star" th:text="'★ ' + ${cls.starRatingAvg}">★ 5.0</span>
+                <span class="bar">|</span>
+                <span th:text="'조회수 ' + ${cls.viewsCnt}">조회수 0</span>
+              </div>
             </div>
-            <div class="meta">
-              <span class="star">★ 4.8 (245)</span>
-              <span class="bar">|</span>
-              <span>후기 367개</span>
-            </div>
-          </div>
-          <div class="price-box">
-            <span class="discount-badge">최대 18% 할인</span>
-            <div class="price-row">
-              <span class="discount-rate">18%</span>
-              <span class="final-price">39,000원</span>
-            </div>
-          </div>
-        </article>
 
-        <article class="class-card">
-          <div class="class-thumb-wrap">
-            <span class="rank-badge">4</span>
-               <div class="class-thumb"><img src="../images/banner/baking_mainbanner.png" alt=""></div>
-          </div>
-          <div class="class-info">
-            <div class="location">송파구 잠실동</div>
-            <div class="class-name">[잠실] 바삭한 크루아상과 페이스트리</div>
-            <div class="hash-tags">
-              <span>#크루아상</span><span>#페이스트리</span><span>#버터향</span>
+            <div class="price-box">
+              <span class="discount-badge" 
+                    th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}"
+                    th:text="${cls.discountRate + '% 할인'}">할인</span>
+              <div class="price-row">
+                <span class="discount-rate" 
+                      th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}"
+                      th:text="${cls.discountRate + '%'}"></span>
+                <span class="final-price" 
+                      th:text="${#numbers.formatInteger(cls.price, 0, 'COMMA') + '원'}">가격</span>
+              </div>
             </div>
-            <div class="meta">
-              <span class="star">★ 4.9 (224)</span>
-              <span class="bar">|</span>
-              <span>후기 351개</span>
-            </div>
-          </div>
-          <div class="price-box">
-            <span class="discount-badge">최대 22% 할인</span>
-            <div class="price-row">
-              <span class="discount-rate">22%</span>
-              <span class="final-price">58,000원</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="class-card">
-          <div class="class-thumb-wrap">
-            <span class="rank-badge">5</span>
-               <div class="class-thumb"><img src="../images/banner/baking_mainbanner.png" alt=""></div>
-          </div>
-          <div class="class-info">
-            <div class="location">용산구 한남동</div>
-            <div class="class-name">[한남] 촉촉한 시그니처 컵케이크 클래스</div>
-            <div class="hash-tags">
-              <span>#컵케이크</span><span>#버터크림</span><span>#데코</span>
-            </div>
-            <div class="meta">
-              <span class="star">★ 4.8 (198)</span>
-              <span class="bar">|</span>
-              <span>후기 302개</span>
-            </div>
-          </div>
-          <div class="price-box">
-            <span class="discount-badge">최대 15% 할인</span>
-            <div class="price-row">
-              <span class="discount-rate">15%</span>
-              <span class="final-price">42,000원</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="class-card">
-          <div class="class-thumb-wrap">
-            <span class="rank-badge">6</span>
-               <div class="class-thumb"><img src="../images/banner/baking_mainbanner.png" alt=""></div>
-          </div>
-          <div class="class-info">
-            <div class="location">종로구 익선동</div>
-            <div class="class-name">[익선] 프랑스식 마들렌과 휘낭시에</div>
-            <div class="hash-tags">
-              <span>#마들렌</span><span>#휘낭시에</span><span>#구움과자</span>
-            </div>
-            <div class="meta">
-              <span class="star">★ 4.9 (187)</span>
-              <span class="bar">|</span>
-              <span>후기 286개</span>
-            </div>
-          </div>
-          <div class="price-box">
-            <span class="discount-badge">최대 20% 할인</span>
-            <div class="price-row">
-              <span class="discount-rate">20%</span>
-              <span class="final-price">47,000원</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="class-card">
-          <div class="class-thumb-wrap">
-            <span class="rank-badge">7</span>
-               <div class="class-thumb"><img src="../images/banner/baking_mainbanner.png" alt=""></div>
-          </div>
-          <div class="class-info">
-            <div class="location">서초구 반포동</div>
-            <div class="class-name">[반포] 상큼한 과일 타르트 만들기</div>
-            <div class="hash-tags">
-              <span>#과일타르트</span><span>#커스터드</span><span>#디저트</span>
-            </div>
-            <div class="meta">
-              <span class="star">★ 4.8 (176)</span>
-              <span class="bar">|</span>
-              <span>후기 265개</span>
-            </div>
-          </div>
-          <div class="price-box">
-            <span class="discount-badge">최대 17% 할인</span>
-            <div class="price-row">
-              <span class="discount-rate">17%</span>
-              <span class="final-price">55,000원</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="class-card">
-          <div class="class-thumb-wrap">
-            <span class="rank-badge">8</span>
-               <div class="class-thumb"><img src="../images/banner/baking_mainbanner.png" alt=""></div>
-          </div>
-          <div class="class-info">
-            <div class="location">광진구 건대입구</div>
-            <div class="class-name">[건대] 쫀득한 수제 베이글 클래스</div>
-            <div class="hash-tags">
-              <span>#베이글</span><span>#브런치</span><span>#발효</span>
-            </div>
-            <div class="meta">
-              <span class="star">★ 4.9 (165)</span>
-              <span class="bar">|</span>
-              <span>후기 251개</span>
-            </div>
-          </div>
-          <div class="price-box">
-            <span class="discount-badge">최대 20% 할인</span>
-            <div class="price-row">
-              <span class="discount-rate">20%</span>
-              <span class="final-price">44,000원</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="class-card">
-          <div class="class-thumb-wrap">
-            <span class="rank-badge">9</span>
-               <div class="class-thumb"><img src="../images/banner/baking_mainbanner.png" alt=""></div>
-          </div>
-          <div class="class-info">
-            <div class="location">수원시 팔달구</div>
-            <div class="class-name">[수원] 알록달록 마카롱 원데이 클래스</div>
-            <div class="hash-tags">
-              <span>#마카롱</span><span>#필링</span><span>#컬러디저트</span>
-            </div>
-            <div class="meta">
-              <span class="star">★ 4.8 (154)</span>
-              <span class="bar">|</span>
-              <span>후기 238개</span>
-            </div>
-          </div>
-          <div class="price-box">
-            <span class="discount-badge">최대 18% 할인</span>
-            <div class="price-row">
-              <span class="discount-rate">18%</span>
-              <span class="final-price">49,000원</span>
-            </div>
-          </div>
-        </article>
-
-        <article class="class-card">
-          <div class="class-thumb-wrap">
-            <span class="rank-badge">10</span>
-               <div class="class-thumb"><img src="../images/banner/baking_mainbanner.png" alt=""></div>
-          </div>
-          <div class="class-info">
-            <div class="location">부산 해운대구</div>
-            <div class="class-name">[해운대] 촉촉한 바스크 치즈케이크</div>
-            <div class="hash-tags">
-              <span>#바스크치즈케이크</span><span>#치즈케이크</span><span>#카페디저트</span>
-            </div>
-            <div class="meta">
-              <span class="star">★ 4.9 (143)</span>
-              <span class="bar">|</span>
-              <span>후기 219개</span>
-            </div>
-          </div>
-          <div class="price-box">
-            <span class="discount-badge">최대 20% 할인</span>
-            <div class="price-row">
-              <span class="discount-rate">20%</span>
-              <span class="final-price">53,000원</span>
-            </div>
-          </div>
+          </a>
         </article>
       </div>
     </section>
-
 
   </div>
   

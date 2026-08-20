@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>인기 뷰티 클래스</title>
- <link rel="stylesheet" th:href="@{/css/top_category/top_category.css}">
+<link rel="stylesheet" th:href="@{/top_category/css/top_category.css}">
 <style>
 :root {
 	--main-color: #ef78a8;
@@ -15,24 +15,19 @@
 </style>
 </head>
 <body>
+
+<div th:replace="~{common/header :: headerFragment}"></div>
+
 	<div class="page">
-		<header class="header">
-			<div class="logo">Class 101</div>
-			<nav class="top-menu">
-				<a href="#">로그아웃</a> <a href="#">고객센터</a> <a href="#">마이페이지</a> <a
-					href="#">예약내역</a> <a href="#">관심목록</a>
-			</nav>
-		</header>
 
-		<hr class="top-line">
-
-		<div class="search-wrap">
+		<!-- 검색바 -->
+		<form th:action="@{/search}" method="get" class="search-wrap">
 			<div class="search-box">
-				<span class="search-icon">⌕</span> <input class="search-input"
-					type="text" placeholder="원하는 키워드를 검색해보세요.">
-				<button class="search-btn">검색</button>
+				<span class="search-icon">⌕</span> 
+				<input class="search-input" type="text" name="keyword" placeholder="원하는 키워드를 검색해보세요.">
+				<button type="submit" class="search-btn">검색</button>
 			</div>
-		</div>
+		</form>
 
 		<section class="visual-copy">
 			<div class="main-copy">
@@ -42,283 +37,60 @@
 		</section>
 
 		<section class="hero">
-				<img src="../images/banner/makeup_mainbanner.png" alt="">
+			<img th:src="@{/images/banner/makeup_mainbanner.png}" alt="뷰티 메인배너">
 		</section>
 
 		<section class="section">
 			<div class="section-top">
 				<h2 class="section-title">지금 가장 인기있는 뷰티 클래스</h2>
-				<a href="#" class="more-link">전체보기 〉</a>
+				<a th:href="@{/category}" class="more-link">전체보기 〉</a>
 			</div>
 
-			<div class="class-list">
-				<article class="class-card">
-					<div class="class-thumb-wrap">
-						<span class="rank-badge">1</span>
-						
-						<div class="class-thumb">
-						<img src="../images/banner/makeup_mainbanner.png" alt="">
-						</div>
-						
-					</div>
-					<div class="class-info">
-						<div class="location">강남구 신사동</div>
-						<div class="class-name">[강남] 데일리 3분 메이크업, 나를 빛내는 메이크업 클래스</div>
-						<div class="hash-tags">
-							<span>#데일리메이크업</span><span>#초보환영</span><span>#퍼스널뷰티</span>
-						</div>
-						<div class="meta">
-							<span class="star">★ 4.9 (128)</span> <span class="bar">|</span>
-							<span>후기 248개</span>
-						</div>
-					</div>
-					<div class="price-box">
-						<span class="discount-badge">최대 30% 할인</span>
-						<div class="price-row">
-							<span class="discount-rate">30%</span> <span class="final-price">125,000원</span>
-						</div>
-					</div>
-				</article>
+			<!-- DB 조회 데이터 없음 -->
+			<div th:if="${#lists.isEmpty(classList)}" style="text-align: center; padding: 60px 0; color: #888;">
+				등록된 인기 뷰티 클래스가 없습니다.
+			</div>
 
-				<article class="class-card">
-					<div class="class-thumb-wrap">
-						<span class="rank-badge">2</span>
-					<div class="class-thumb">
-						<img src="../images/banner/makeup_mainbanner.png" alt="">
+			<!-- DB 동적 리스트 반복 -->
+			<div class="class-list" th:if="${!#lists.isEmpty(classList)}">
+				<article class="class-card" th:each="cls, stat : ${classList}">
+					<a th:href="@{/class/detail(classCode=${cls.classCode})}" style="display: flex; width: 100%; text-decoration: none; color: inherit;">
+						<div class="class-thumb-wrap">
+							<span class="rank-badge" th:text="${stat.count}">1</span>
+							<div class="class-thumb">
+								<img th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}" 
+								     th:alt="${cls.name}">
+							</div>
 						</div>
-					</div>
-					<div class="class-info">
-						<div class="location">성동구 성수동 2가</div>
-						<div class="class-name">[성수] 퍼스널 컬러 진단 & 인생 메이크업 클래스</div>
-						<div class="hash-tags">
-							<span>#퍼스널컬러</span><span>#톤진단</span><span>#메이크업레슨</span>
-						</div>
-						<div class="meta">
-							<span class="star">★ 4.8 (96)</span> <span class="bar">|</span> <span>후기
-								189개</span>
-						</div>
-					</div>
-					<div class="price-box">
-						<span class="discount-badge">최대 20% 할인</span>
-						<div class="price-row">
-							<span class="discount-rate">20%</span> <span class="final-price">160,000원</span>
-						</div>
-					</div>
-				</article>
 
-				<article class="class-card">
-					<div class="class-thumb-wrap">
-						<span class="rank-badge">3</span>
-						
-						<div class="class-thumb">
-						<img src="../images/banner/makeup_mainbanner.png" alt="">
+						<div class="class-info">
+							<div class="location" th:text="${cls.address}">위치</div>
+							<div class="class-name" th:text="${cls.name}">클래스 제목</div>
+							<div class="meta">
+								<span class="star" th:text="'★ ' + ${cls.starRatingAvg}">★ 5.0</span> 
+								<span class="bar">|</span>
+								<span th:text="'조회수 ' + ${cls.viewsCnt}">조회수 0</span>
+							</div>
 						</div>
-						
-					</div>
-					<div class="class-info">
-						<div class="location">마포구 연남동</div>
-						<div class="class-name">[연남] 손끝까지 빛나는 젤 네일 아트 클래스</div>
-						<div class="hash-tags">
-							<span>#젤네일</span><span>#셀프네일</span><span>#아트디자인</span>
-						</div>
-						<div class="meta">
-							<span class="star">★ 4.9 (201)</span> <span class="bar">|</span>
-							<span>후기 312개</span>
-						</div>
-					</div>
-					<div class="price-box">
-						<span class="discount-badge">최대 25% 할인</span>
-						<div class="price-row">
-							<span class="discount-rate">25%</span> <span class="final-price">120,000원</span>
-						</div>
-					</div>
-				</article>
 
-				<article class="class-card">
-					<div class="class-thumb-wrap">
-						<span class="rank-badge">4</span>
-						<div class="class-thumb">
-						<img src="../images/banner/makeup_mainbanner.png" alt="">
+						<div class="price-box">
+							<span class="discount-badge" 
+								  th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}"
+								  th:text="${cls.discountRate + '% 할인'}">할인</span>
+							<div class="price-row">
+								<span class="discount-rate" 
+									  th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}"
+									  th:text="${cls.discountRate + '%'}"></span>
+								<span class="final-price" 
+									  th:text="${#numbers.formatInteger(cls.price, 0, 'COMMA') + '원'}">가격</span>
+							</div>
 						</div>
-					</div>
-					<div class="class-info">
-						<div class="location">서초구 서초동</div>
-						<div class="class-name">[서초] 손상모 케어! 찰랑이는 헤어 드라이 & 스타일링</div>
-						<div class="hash-tags">
-							<span>#헤어스타일링</span><span>#드라이</span><span>#손상모케어</span>
-						</div>
-						<div class="meta">
-							<span class="star">★ 4.8 (150)</span> <span class="bar">|</span>
-							<span>후기 267개</span>
-						</div>
-					</div>
-					<div class="price-box">
-						<span class="discount-badge">최대 20% 할인</span>
-						<div class="price-row">
-							<span class="discount-rate">20%</span> <span class="final-price">110,000원</span>
-						</div>
-					</div>
-				</article>
-
-				<article class="class-card">
-					<div class="class-thumb-wrap">
-						<span class="rank-badge">5</span>
-						<div class="class-thumb">
-						<img src="../images/banner/makeup_mainbanner.png" alt="">
-						</div>
-					</div>
-					<div class="class-info">
-						<div class="location">강남구 역삼동</div>
-						<div class="class-name">[역삼] 피부 속부터 빛나는 스킨케어 루틴 클래스</div>
-						<div class="hash-tags">
-							<span>#스킨케어</span><span>#피부관리</span><span>#홈케어</span>
-						</div>
-						<div class="meta">
-							<span class="star">★ 4.9 (177)</span> <span class="bar">|</span>
-							<span>후기 291개</span>
-						</div>
-					</div>
-					<div class="price-box">
-						<span class="discount-badge">최대 28% 할인</span>
-						<div class="price-row">
-							<span class="discount-rate">28%</span> <span class="final-price">115,000원</span>
-						</div>
-					</div>
-				</article>
-
-				<article class="class-card">
-					<div class="class-thumb-wrap">
-						<span class="rank-badge">6</span>
-						<div class="class-thumb">
-						<img src="../images/banner/makeup_mainbanner.png" alt="">
-						</div>
-					</div>
-					<div class="class-info">
-						<div class="location">종로구 종로3가</div>
-						<div class="class-name">[종로] 나만의 향을 찾는 니치향수 클래스</div>
-						<div class="hash-tags">
-							<span>#니치향수</span><span>#향수만들기</span><span>#향브랜딩</span>
-						</div>
-						<div class="meta">
-							<span class="star">★ 4.8 (116)</span> <span class="bar">|</span>
-							<span>후기 198개</span>
-						</div>
-					</div>
-					<div class="price-box">
-						<span class="discount-badge">최대 22% 할인</span>
-						<div class="price-row">
-							<span class="discount-rate">22%</span> <span class="final-price">128,000원</span>
-						</div>
-					</div>
-				</article>
-
-				<article class="class-card">
-					<div class="class-thumb-wrap">
-						<span class="rank-badge">7</span>
-						<div class="class-thumb">
-						<img src="../images/banner/makeup_mainbanner.png" alt="">
-						</div>
-					</div>
-					<div class="class-info">
-						<div class="location">부산 해운대구</div>
-						<div class="class-name">[해운대] 화보 메이크업 & 헤어 메이크업 집중 클래스</div>
-						<div class="hash-tags">
-							<span>#아이돌메이크업</span><span>#촬영메이크업</span><span>#헤어스타일</span>
-						</div>
-						<div class="meta">
-							<span class="star">★ 4.9 (132)</span> <span class="bar">|</span>
-							<span>후기 223개</span>
-						</div>
-					</div>
-					<div class="price-box">
-						<span class="discount-badge">최대 25% 할인</span>
-						<div class="price-row">
-							<span class="discount-rate">25%</span> <span class="final-price">110,000원</span>
-						</div>
-					</div>
-				</article>
-
-				<article class="class-card">
-					<div class="class-thumb-wrap">
-						<span class="rank-badge">8</span>
-						<div class="class-thumb">
-						<img src="../images/banner/makeup_mainbanner.png" alt="">
-						</div>
-					</div>
-					<div class="class-info">
-						<div class="location">대구 수성구</div>
-						<div class="class-name">[대구] 트렌디한 아트 네일 디자인 클래스</div>
-						<div class="hash-tags">
-							<span>#아트네일</span><span>#웨딩네일</span><span>#유니크네일</span>
-						</div>
-						<div class="meta">
-							<span class="star">★ 4.8 (109)</span> <span class="bar">|</span>
-							<span>후기 176개</span>
-						</div>
-					</div>
-					<div class="price-box">
-						<span class="discount-badge">최대 18% 할인</span>
-						<div class="price-row">
-							<span class="discount-rate">18%</span> <span class="final-price">100,000원</span>
-						</div>
-					</div>
-				</article>
-
-				<article class="class-card">
-					<div class="class-thumb-wrap">
-						<span class="rank-badge">9</span>
-						<div class="class-thumb">
-						<img src="../images/banner/makeup_mainbanner.png" alt="">
-						</div>
-					</div>
-					<div class="class-info">
-						<div class="location">광주 서구</div>
-						<div class="class-name">[광주] 나에게 맞는 퍼스널 컬러 & 스타일링 클래스</div>
-						<div class="hash-tags">
-							<span>#퍼스널컬러</span><span>#스타일링</span><span>#이미지컨설팅</span>
-						</div>
-						<div class="meta">
-							<span class="star">★ 4.9 (88)</span> <span class="bar">|</span> <span>후기
-								145개</span>
-						</div>
-					</div>
-					<div class="price-box">
-						<span class="discount-badge">최대 20% 할인</span>
-						<div class="price-row">
-							<span class="discount-rate">20%</span> <span class="final-price">120,000원</span>
-						</div>
-					</div>
-				</article>
-
-				<article class="class-card">
-					<div class="class-thumb-wrap">
-						<span class="rank-badge">10</span>
-						<div class="class-thumb">
-						<img src="../images/banner/makeup_mainbanner.png" alt="">
-						</div>
-					</div>
-					<div class="class-info">
-						<div class="location">인천 연수구</div>
-						<div class="class-name">[인천] 데일리 메이크업부터 촬영 메이크업까지</div>
-						<div class="hash-tags">
-							<span>#면접메이크업</span><span>#촬영메이크업</span><span>#데일리메이크업</span>
-						</div>
-						<div class="meta">
-							<span class="star">★ 4.8 (94)</span> <span class="bar">|</span> <span>후기
-								161개</span>
-						</div>
-					</div>
-					<div class="price-box">
-						<span class="discount-badge">최대 23% 할인</span>
-						<div class="price-row">
-							<span class="discount-rate">23%</span> <span class="final-price">115,000원</span>
-						</div>
-					</div>
+					</a>
 				</article>
 			</div>
 		</section>
 
-  </div>
+	</div>
   
 <div th:replace="~{common/footer :: footerFragment}"></div>
 </body>
