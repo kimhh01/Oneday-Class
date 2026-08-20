@@ -1,0 +1,251 @@
+@charset "UTF-8";
+
+/* 기본 초기화 */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #f2f5f2;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #222222;
+}
+
+/* 감싸는 컨테이너 */
+.inquiry-wrapper {
+    width: 100%;
+    padding: 40px 20px 60px;
+    display: flex;
+    justify-content: center;
+}
+
+.inquiry-container {
+    width: 100%;
+    max-width: 1100px;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+/* 우측 메인 카드 */
+.inquiry-main {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 32px 28px 40px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.page-header {
+    margin-bottom: 28px;
+}
+
+.page-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #111111;
+    margin-bottom: 6px;
+}
+
+.page-subtitle {
+    font-size: 13.5px;
+    color: #777777;
+}
+
+/* 폼 레이아웃 */
+.inquiry-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-label {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #222222;
+}
+
+/* 문의 유형 라디오 버튼 */
+.category-radio-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.category-radio-btn input[type="radio"] {
+    display: none;
+}
+
+.category-radio-btn span {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #555555;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+/* 선택된 라디오 상태 */
+.category-radio-btn input[type="radio"]:checked + span {
+    border-color: #356846;
+    color: #356846;
+    font-weight: 600;
+    background-color: #f4f8f4;
+}
+
+.category-radio-btn span:hover {
+    border-color: #356846;
+}
+
+/* 입력 필드 & 텍스트 영역 */
+.form-input {
+    width: 100%;
+    height: 48px;
+    padding: 0 16px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    font-size: 14px;
+    color: #222222;
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+
+.form-textarea {
+    width: 100%;
+    height: 180px;
+    padding: 16px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    font-size: 14px;
+    color: #222222;
+    resize: none;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.15s ease;
+}
+
+.form-input::placeholder,
+.form-textarea::placeholder {
+    color: #aaaaaa;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    border-color: #356846;
+}
+
+/* 파일 업로드 */
+.file-upload-box {
+    position: relative;
+    width: 100%;
+}
+
+.file-input {
+    display: none;
+}
+
+.file-upload-label {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 48px;
+    padding: 0 16px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+}
+
+.file-upload-label:hover {
+    border-color: #356846;
+}
+
+.plus-icon {
+    font-size: 18px;
+    color: #666666;
+    margin-right: 8px;
+}
+
+.upload-text {
+    font-size: 13.5px;
+    color: #888888;
+}
+
+/* 하단 버튼 그룹 */
+.form-btn-group {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+}
+
+.btn-cancel {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    color: #555555;
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.btn-cancel:hover {
+    background-color: #f8faf8;
+    border-color: #cccccc;
+}
+
+.btn-submit {
+    flex: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+    border-radius: 8px;
+    border: none;
+    background-color: #356846;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.btn-submit:hover {
+    background-color: #2a5237;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .inquiry-container {
+        grid-template-columns: 1fr;
+    }
+
+    .form-btn-group {
+        flex-direction: column;
+    }
+
+    .btn-cancel, .btn-submit {
+        width: 100%;
+    }
+}

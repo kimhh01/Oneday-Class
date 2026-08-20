@@ -10,5 +10,5 @@ import lombok.ToString;
 public class CategoryDTO {
     private long categoryCode;
     private Long parentCategoryCode; 
-    private String categoryName;      
+    private String categoryName;  
 }

@@ -1,0 +1,21 @@
+# Local AI coding assistants
+/AGENTS.md
+/.agents/
+/.claude/
+/.codex/
+
+# Design exports and AI reference material
+/docs/
+/oneday_class/docs/
+/ChatGPT Image*.png
+
+# Local build and runtime artifacts
+/oneday_class/target/
+/oneday_class/uploads/
+*.log
+*.tmp
+*.bak
+
+# Local operating-system files
+Thumbs.db
+.DS_Store

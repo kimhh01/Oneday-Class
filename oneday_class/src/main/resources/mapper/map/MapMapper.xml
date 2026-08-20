@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.oneclass.map.MapDAO">
+
+    <!-- 통합 메인 조회 쿼리 -->
+    <select id="selectClassList" parameterType="kr.co.oneclass.map.MapSearchDTO" resultType="kr.co.oneclass.common.ClassDTO">
+        SELECT 
+            c.class_code AS classCode,
+    c.operator_code AS operatorCode,
+    c.category_code AS categoryCode,
+    cat.parents_category AS parentCategoryCode,
+	cat.name as categoryName,
+    c.name as name,
+    c.price,
+    c.desired_price AS desiredPrice,
+    c.zipcode,
+    c.address,
+    c.old_address AS oldAddress,
+    c.address2,
+    c.ingredients_include AS ingredientsInclude,
+    c.status,
+    c.review_sum AS reviewSum,
+    c.star_rating_avg AS starRatingAvg,
+    c.views_cnt AS viewsCnt,
+    c.single_introduce AS singleIntroduce,
+    c.introduce,
+    c.finish_introduce AS finishIntroduce,
+    c.lat,
+    c.lng,
+    c.approval_status AS approvalStatus,
+    c.approval_memo AS approvalMemo,
+    c.write_date AS writeDate,
+    c.register_step AS registerStep
+            <!-- 💡 오라클 수식: radians 함수 대신 (각도 * 3.141592653589793 / 180) 적용 -->
+            <if test="lat != null and lng != null">
+                , ( 6371 * ACOS( COS( #{lat} * 3.141592653589793 / 180 ) * COS( lat * 3.141592653589793 / 180 ) 
+                * COS( (lng * 3.141592653589793 / 180) - (#{lng} * 3.141592653589793 / 180) ) 
+                + SIN( #{lat} * 3.141592653589793 / 180 ) * SIN( lat * 3.141592653589793 / 180 ) ) ) AS distance
+            </if>
+        FROM class c
+		LEFT JOIN category cat ON c.category_code = cat.category_code
+        <where>
+            <!-- 1) 내 위치 기준 N km 반경 내 검색 -->
+            <if test="lat != null and lng != null">
+                AND ( 6371 * ACOS( COS( #{lat} * 3.141592653589793 / 180 ) * COS( lat * 3.141592653589793 / 180 ) 
+                    * COS( (lng * 3.141592653589793 / 180) - (#{lng} * 3.141592653589793 / 180) ) 
+                    + SIN( #{lat} * 3.141592653589793 / 180 ) * SIN( lat * 3.141592653589793 / 180 ) ) ) &lt;= #{distance}
+            </if>
+
+            <!-- 2) '동' 이름 기준 검색 (CONCAT -> || 연산자로 변경) -->
+            <if test="(lat == null or lng == null) and (dong != null and dong != '')">
+                AND address LIKE '%' || #{dong} || '%'
+            </if>
+
+            <!-- 3) 영역(Bounds: minLat ~ maxLat) 기준 검색 -->
+            <if test="minLat != null and minLat != 0 and maxLat != null and maxLat != 0">
+                AND lat BETWEEN #{minLat} AND #{maxLat}
+            </if>
+            <if test="minLng != null and minLng != 0 and maxLng != null and maxLng != 0">
+                AND lng BETWEEN #{minLng} AND #{maxLng}
+            </if>
+
+            <!-- 4) 카테고리 필터 -->
+            <if test="category != null and category != ''">
+                AND category_code = #{category}
+            </if>
+
+            <!-- 5) 키워드 검색 (CONCAT -> || 연산자로 변경) -->
+            <if test="keyword != null and keyword != ''">
+                AND (name LIKE '%' || #{keyword} || '%' OR address LIKE '%' || #{keyword} || '%')
+            </if>
+        </where>
+        <choose>
+            <when test="lat != null and lng != null">
+                ORDER BY distance ASC
+            </when>
+            <otherwise>
+                ORDER BY class_code DESC
+            </otherwise>
+        </choose>
+    </select>
+
+    <!-- 클래스 상세 정보 조회 -->
+    <select id="selectClassDetail" parameterType="int" resultType="kr.co.oneclass.common.ClassDTO">
+        SELECT * FROM class WHERE class_code = #{classCode}
+    </select>
+<!-- 카테고리 전체 목록 조회 -->
+    <select id="selectCategoryList" resultType="kr.co.oneclass.common.CategoryDTO">
+        SELECT 
+            category_code AS categoryCode,
+            name AS categoryName,        <!-- CategoryDTO의 categoryName 필드와 매핑 -->
+            parents_category AS parentCategoryCode
+        FROM category
+        ORDER BY category_code ASC
+    </select>
+</mapper>

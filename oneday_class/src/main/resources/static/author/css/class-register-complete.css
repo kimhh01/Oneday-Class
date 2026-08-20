@@ -1,0 +1,355 @@
+@charset "UTF-8";
+
+/* =============================================================
+   클래스 등록 07 · 등록 신청 완료
+   ============================================================= */
+
+.register-complete-page .register-page-head {
+	margin-bottom: 18px;
+}
+
+.register-complete-page .step-nav-wrap {
+	margin-bottom: 22px;
+}
+
+.registration-result {
+	width: min(100%, 900px);
+	margin: 0 auto;
+	padding: 28px 88px 22px;
+	border: 1px solid #E5E7E2;
+	border-radius: 13px;
+	background: #FFF;
+	box-shadow: 0 6px 22px rgba(43, 57, 48, .075);
+	text-align: center;
+}
+
+.registration-result__success {
+	position: relative;
+	width: 64px;
+	height: 58px;
+	margin: 0 auto 9px;
+}
+
+.registration-result__success > span {
+	position: absolute;
+	left: 8px;
+	top: 0;
+	display: grid;
+	place-items: center;
+	width: 52px;
+	height: 52px;
+	border: 1px solid #CBE4D1;
+	border-radius: 50%;
+	background: #EAF7ED;
+	color: #199248;
+}
+
+.registration-result__success span svg {
+	width: 25px;
+	height: 25px;
+	stroke-width: 2.2;
+}
+
+.registration-result__success i {
+	position: absolute;
+	width: 5px;
+	height: 5px;
+	border-radius: 50%;
+	background: #4CB970;
+}
+
+.registration-result__success i:nth-of-type(1) { left: 1px; top: 22px; }
+.registration-result__success i:nth-of-type(2) { left: 8px; top: 5px; width: 3px; height: 3px; }
+.registration-result__success i:nth-of-type(3) { right: 0; top: 25px; }
+.registration-result__success i:nth-of-type(4) { right: 8px; top: 7px; width: 3px; height: 3px; }
+
+.registration-result > h2 {
+	margin: 0;
+	font-size: 23px;
+	font-weight: 750;
+	line-height: 1.4;
+	letter-spacing: -.025em;
+	color: #2B302C;
+}
+
+.registration-result > p {
+	margin: 6px 0 0;
+	font-size: 10px;
+	line-height: 1.6;
+	color: #858A84;
+}
+
+/* ---------- 접수 클래스 요약 ---------- */
+.registration-class {
+	display: grid;
+	grid-template-columns: 210px minmax(0, 1fr);
+	gap: 21px;
+	margin-top: 18px;
+	padding: 11px;
+	border: 1px solid #CEE2D2;
+	border-radius: 10px;
+	background: linear-gradient(105deg, #FBFDFB, #F5FAF6);
+	text-align: left;
+}
+
+.registration-class__image {
+	position: relative;
+	height: 138px;
+	overflow: hidden;
+	border-radius: 8px;
+}
+
+.registration-class__image img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.registration-class__image span {
+	position: absolute;
+	left: 8px;
+	top: 8px;
+	padding: 4px 7px;
+	border-radius: 5px;
+	background: rgba(35, 145, 74, .92);
+	font-size: 9px;
+	font-weight: 700;
+	color: #FFF;
+}
+
+.registration-class__info {
+	display: flex;
+	min-width: 0;
+	align-items: flex-start;
+	justify-content: center;
+	flex-direction: column;
+}
+
+.registration-class__info h3 {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 750;
+	line-height: 1.45;
+	letter-spacing: -.015em;
+	color: #343A35;
+}
+
+.registration-class__meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 15px;
+	margin-top: 10px;
+}
+
+.registration-class__meta span,
+.registration-class__info > p {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 9px;
+	color: #687069;
+}
+
+.registration-class__meta svg,
+.registration-class__info > p svg {
+	width: 13px;
+	height: 13px;
+	color: #569068;
+}
+
+.registration-class__info > p {
+	margin: 8px 0 0;
+}
+
+.registration-class__info > p span {
+	color: #898E88;
+}
+
+.registration-class__info > p b {
+	margin-left: 3px;
+	font-weight: 650;
+	color: #5A615B;
+}
+
+.registration-class__badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	margin-top: 10px;
+	padding: 5px 8px;
+	border-radius: 999px;
+	background: #E7F7EB;
+	font-size: 9px;
+	font-weight: 700;
+	color: #23914B;
+}
+
+.registration-class__badge svg {
+	width: 13px;
+	height: 13px;
+}
+
+/* ---------- 검수 진행 단계 ---------- */
+.registration-progress {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	margin: 15px 0 0;
+	padding: 14px 18px 12px;
+	border: 1px solid #E5E7E2;
+	border-radius: 9px;
+	background: #FFF;
+	list-style: none;
+}
+
+.registration-progress li {
+	position: relative;
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+	gap: 7px;
+}
+
+.registration-progress li + li::before {
+	content: "";
+	position: absolute;
+	right: 50%;
+	top: 12px;
+	width: 100%;
+	height: 1px;
+	background: #D9DCD7;
+}
+
+.registration-progress li:nth-child(2)::before {
+	background: linear-gradient(90deg, #2CA055 0 50%, #D9DCD7 50%);
+}
+
+.registration-progress li span {
+	position: relative;
+	z-index: 1;
+	display: grid;
+	place-items: center;
+	width: 25px;
+	height: 25px;
+	border-radius: 50%;
+	background: #B7BBB7;
+	box-shadow: 0 0 0 5px #FFF;
+	font-size: 10px;
+	font-weight: 750;
+	color: #FFF;
+}
+
+.registration-progress li.is-current span {
+	background: #249A4D;
+}
+
+.registration-progress li b {
+	font-size: 9px;
+	font-weight: 650;
+	color: #777D77;
+}
+
+.registration-progress li.is-current b {
+	color: #249A4D;
+}
+
+/* ---------- 버튼과 안내 ---------- */
+.registration-actions {
+	display: flex;
+	justify-content: center;
+	gap: 12px;
+	margin-top: 15px;
+}
+
+.registration-actions .btn {
+	width: 184px;
+	height: 42px;
+	border-radius: 7px;
+}
+
+.registration-actions .btn--primary {
+	width: 198px;
+}
+
+.registration-note {
+	display: grid;
+	grid-template-columns: 32px minmax(0, 1fr);
+	align-items: center;
+	gap: 10px;
+	margin-top: 14px;
+	padding: 10px 14px;
+	border: 1px solid #DBE9DE;
+	border-radius: 8px;
+	background: #F4F9F5;
+	text-align: left;
+}
+
+.registration-note > span {
+	display: grid;
+	place-items: center;
+	width: 28px;
+	height: 28px;
+	border: 1px solid #CEE5D3;
+	border-radius: 50%;
+	background: #E5F3E8;
+	color: #249A4D;
+}
+
+.registration-note svg {
+	width: 14px;
+	height: 14px;
+}
+
+.registration-note ul {
+	margin: 0;
+	padding-left: 15px;
+}
+
+.registration-note li {
+	font-size: 9px;
+	line-height: 1.65;
+	color: #737A73;
+}
+
+.registration-note b {
+	color: #28944D;
+}
+
+@media (max-width: 760px) {
+	.registration-result {
+		padding: 25px 20px 20px;
+	}
+
+	.registration-class {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.registration-class__image {
+		height: 210px;
+	}
+
+	.registration-class__info {
+		padding: 4px 3px 7px;
+	}
+}
+
+@media (max-width: 520px) {
+	.registration-result > h2 {
+		font-size: 20px;
+	}
+
+	.registration-progress {
+		padding-right: 7px;
+		padding-left: 7px;
+	}
+
+	.registration-actions {
+		display: grid;
+		grid-template-columns: 1fr;
+	}
+
+	.registration-actions .btn,
+	.registration-actions .btn--primary {
+		width: 100%;
+	}
+}

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문의 내역 | 숨쉬당</title>
+    <!-- CSS 연결 -->
+    <link rel="stylesheet" th:href="@{/profile/css/profile.css}">
+    <link rel="stylesheet" th:href="@{/fragments/css/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/inquiry/css/inquiry.css}">
+    <link rel="stylesheet" th:href="@{/fragments/css/header.css}">
+    <link rel="stylesheet" th:href="@{/fragments/css/footer.css}">
+</head>
+<body>
+
+<div th:replace="~{fragments/header :: header}"></div>
+<!-- 메인 컨테이너 -->
+<div class="inquiry-wrapper">
+    <div class="inquiry-container">
+
+        <!-- 1. 좌측 사이드바 Fragment 불러오기 (현재 메뉴: 'inquiry') -->
+        <aside th:replace="~{fragments/sidebar :: sidebar('inquiry')}"></aside>
+
+        <!-- 2. 우측 메인 문의 내역 콘텐츠 영역 -->
+        <main class="inquiry-main">
+            
+            <!-- 페이지 헤더 -->
+            <div class="page-header">
+                <h1 class="page-title">문의 내역</h1>
+                <p class="page-subtitle">등록하신 문의 내역을 확인하실 수 있습니다.</p>
+            </div>
+
+            <!-- 카테고리 필터 탭 (DB INQUIRY_TYPE 동적 출력) -->
+            <div class="filter-tabs">
+                <a th:href="@{/mypage/inquiry(category='ALL')}" 
+                   class="tab-btn" th:classappend="${selectedCategory == 'ALL' or selectedCategory == null or selectedCategory == ''} ? 'active'">전체</a>
+                
+                <a th:each="type : ${typeList}"
+                   th:href="@{/mypage/inquiry(category=${type.inquiryTypeName})}" 
+                   class="tab-btn" 
+                   th:classappend="${selectedCategory == type.inquiryTypeName} ? 'active'"
+                   th:text="${type.inquiryTypeName}">카테고리명</a>
+            </div>
+
+            <!-- 문의 내역 테이블 (데이터가 존재할 경우) -->
+            <div class="table-responsive" th:if="${inquiryList != null and !#lists.isEmpty(inquiryList)}">
+                <table class="inquiry-table">
+                    <thead>
+                        <tr>
+                            <th class="col-num">번호</th>
+                            <th class="col-type">문의 유형</th>
+                            <th class="col-title">제목</th>
+                            <th class="col-date">등록일</th>
+                            <th class="col-status">답변 상태</th>
+                            <th class="col-arrow"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="item : ${inquiryList}" 
+                            th:onclick="|location.href='@{/mypage/inquiry/detail(inquiryCode=${item.inquiryCode})}'|"
+                            class="clickable-row">
+                            <td class="col-num" th:text="${item.inquiryCode}">1</td>
+                            <td class="col-type">
+                                <span class="badge-type" th:text="${item.inquiryTypeName}">서비스 문의</span>
+                            </td>
+                            <td class="col-title">
+                                <a th:href="@{/mypage/inquiry/detail(inquiryCode=${item.inquiryCode})}" 
+                                   th:text="${item.title}" class="title-link">문의 제목</a>
+                            </td>
+                            <td class="col-date" th:text="${item.inquiryDate}">2026.08.11</td>
+                            <td class="col-status">
+                                <span class="badge-status" 
+                                      th:classappend="${item.status == 'COMPLETED' or item.status == '답변 완료'} ? 'status-completed' : 'status-waiting'"
+                                      th:text="${item.status == 'COMPLETED' or item.status == '답변 완료' ? '답변 완료' : '답변 대기'}">
+                                    답변 대기
+                                </span>
+                            </td>
+                            <td class="col-arrow">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999999" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 문의 내역이 존재하지 않을 경우 표시 -->
+            <div class="empty-inquiry" th:if="${inquiryList == null or #lists.isEmpty(inquiryList)}">
+                <p class="empty-text">등록된 문의 내역이 없습니다.</p>
+            </div>
+
+            <!-- 하단 영역: 페이지네이션 및 신규 문의하기 버튼 -->
+            <div class="inquiry-bottom-section">
+                <!-- BoardUtil 페이지네이션 -->
+                <div class="pagination-container" th:utext="${pagination}"></div>
+
+                <!-- 하단 가이드 및 작성 버튼 -->
+                <div class="action-row">
+                    <p class="guide-text">
+                        <span class="icon">💡</span> 궁금한 내용이 있으신가요? 신규 문의하기 버튼을 통해 문의를 등록해주세요.
+                    </p>
+                    <a th:href="@{/mypage/inquiry/write}" class="btn-write">신규 문의하기</a>
+                </div>
+            </div>
+
+        </main>
+
+    </div>
+</div>
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+</body>
+</html>

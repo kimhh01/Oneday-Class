@@ -13,12 +13,19 @@
 	--banner-dark: #f6a7c8;
 }
 </style>
-
 </head>
 <body>
-   <div th:replace="~{common/header :: headerFragment}"></div>
-  <div class="page">
-  
+	<div class="page">
+		<header class="header">
+			<div class="logo">Class 101</div>
+			<nav class="top-menu">
+				<a href="#">로그아웃</a> <a href="#">고객센터</a> <a href="#">마이페이지</a> <a
+					href="#">예약내역</a> <a href="#">관심목록</a>
+			</nav>
+		</header>
+
+		<hr class="top-line">
+
 		<div class="search-wrap">
 			<div class="search-box">
 				<span class="search-icon">⌕</span> <input class="search-input"

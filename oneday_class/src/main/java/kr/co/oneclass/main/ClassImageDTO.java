@@ -8,9 +8,9 @@ import lombok.ToString;
 @Setter
 @ToString
 public class ClassImageDTO {
-    private int classImgCode; 
-    private int classCode;     
-    private String type;       
-    private String image;     
-    private int sortOrder;    
+    private int classImgCode;
+    private int classCode;
+    private String type;
+    private String image;
+    private int sortOrder;
 }

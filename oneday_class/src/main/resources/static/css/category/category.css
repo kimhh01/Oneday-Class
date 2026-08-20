@@ -186,7 +186,7 @@ button { cursor: pointer; }
     left: 18px;
     right: 18px;
     bottom: 0px;
-    height:2px;
+    height:3px;
     background-color: var(--primary-green);
 }
 

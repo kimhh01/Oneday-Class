@@ -1,48 +1,44 @@
 <!DOCTYPE html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>솜씨당 - 검색 결과</title>
-    <link rel="stylesheet" th:href="@{/css/main/main.css}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+<meta charset="UTF-8">
+<title>Insert title here</title>
+
+<link rel="shortcut icon" href="../images/favicon.ico">
+<!-- Bootstrap CDN -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js" integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y" crossorigin="anonymous"></script>
+
+<style type="text/css">
+
+#wrap {width:1000px; height:900px;;
+margin:0px auto;}
+#header {height:200px; }
+#container { height:600px;}
+#footer { height:100px;}
+
+</style>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<script type="text/javascript">
+
+$(function () {
+			
+});//ready
+		
+</script>
+
 </head>
 <body>
-<div th:replace="~{common/header :: headerFragment}"></div>
 
-    <main class="main-container" style="padding: 40px 0;">
-        <section class="content-section">
-            <div class="section-header">
-                <h2 class="section-title">🔍 선택한 조건으로 예약 가능한 클래스</h2>
-            </div>
-
-            <!-- 검색 결과가 없는 경우 -->
-            <div th:if="${availableList == null or #lists.isEmpty(availableList)}" 
-                 style="text-align: center; padding: 80px 0; color: #888;">
-                <i class="bi bi-exclamation-circle" style="font-size: 48px; display: block; margin-bottom: 16px;"></i>
-                <p style="font-size: 18px; font-weight: bold;">선택하신 조건에 해당하는 클래스가 없습니다.</p>
-                <p style="font-size: 14px; margin-top: 8px;">다른 날짜나 카테고리를 선택해 검색해 보세요.</p>
-                <a th:href="@{/main}" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background: #ff4b5c; color: #fff; border-radius: 6px; text-decoration: none;">메인으로 돌아가기</a>
-            </div>
-
-            <!-- 검색 결과가 있는 경우 Grid 노출 -->
-            <div class="grid-3" th:if="${availableList != null and !#lists.isEmpty(availableList)}">
-                <div class="class-card" th:each="cls : ${availableList}">
-                    <a th:href="@{/class/detail(classCode=${cls.classCode})}">
-                        <img th:src="${cls.mainImage}" th:alt="${cls.name}">
-                        <div class="class-info">
-                            <div class="class-loc" th:text="${cls.address}">지역</div>
-                            <div class="class-name" th:text="${cls.name}">클래스명</div>
-                            <div class="class-price-row">
-                                <span class="final" th:text="${cls.price != null ? #numbers.formatInteger(cls.price, 0, 'COMMA') + '원' : '0원'}">48,600원</span>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </section>
-    </main>
-
-<div th:replace="~{common/footer :: footerFragment}"></div>
+<div id="wrap">
+<div id="header"></div>
+<div id="container">
+</div>
+<div id="footer"></div>
+</div>
+ 
 </body>
 </html>

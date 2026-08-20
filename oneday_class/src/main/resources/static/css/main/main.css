@@ -183,7 +183,7 @@ ul, li { list-style: none; }
     visibility: hidden;
     position: absolute;
     top: 100%;
-    left: 200px;
+    left: 50px;
     width: 180px;
     padding-top: 10px; 
     z-index: 100;

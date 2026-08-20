@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>클래스 관리 | 숨비당 원데이 클래스</title>
+<link rel="stylesheet" href="/author/css/common.css" th:href="@{/author/css/common.css}">
+<link rel="stylesheet" href="/author/css/header.css" th:href="@{/author/css/header.css}">
+<link rel="stylesheet" href="/author/css/sidebar.css" th:href="@{/author/css/sidebar.css}">
+<link rel="stylesheet" href="/author/css/management.css" th:href="@{/author/css/management.css}">
+<link rel="stylesheet" href="/author/css/class-manage.css" th:href="@{/author/css/class-manage.css}">
+<script src="/author/js/layout.js" th:src="@{/author/js/layout.js}" defer></script>
+</head>
+<!--
+	클래스 관리 : 등록 완료 후 운영 가능한 클래스를 관리한다.
+	승인된 클래스와 일정·예약·결제 정보를 실제 DB에서 조회한다.
+-->
+<body class="author-page management-page" data-menu="class-manage" data-page="클래스 관리">
+
+<div class="app">
+	<div th:replace="~{author/fragments/icons :: icons}"></div>
+	<div th:replace="~{author/fragments/header :: header}"></div>
+
+	<div class="app-body">
+		<div th:replace="~{author/fragments/sidebar :: sidebar}"></div>
+
+		<main class="content">
+			<div class="content__inner">
+
+				<!-- 페이지 머리 -->
+				<header class="mgmt-head">
+					<div>
+						<h1 class="page-title">클래스 관리</h1>
+						<p class="page-desc mgmt-head__desc">등록한 클래스를 운영하고 일정을 관리할 수 있어요.</p>
+					</div>
+					<div class="mgmt-head__actions">
+						<a href="class-register.html" th:href="@{/author/classes/register-guide}" class="btn btn--primary">
+							<svg aria-hidden="true"><use href="#icon-plus-box"></use></svg> 새 클래스 등록
+						</a>
+					</div>
+				</header>
+				<p class="form-error" th:if="${managementError}" th:text="${managementError}" role="alert"></p>
+
+				<!-- 주요 지표 -->
+				<section class="mgmt-stats" aria-label="클래스 운영 지표">
+					<div class="mgmt-stat">
+						<span class="mgmt-stat__icon"><svg aria-hidden="true"><use href="#icon-calendar-check"></use></svg></span>
+						<div class="mgmt-stat__body">
+							<p class="mgmt-stat__label">운영 중 클래스</p>
+							<p class="mgmt-stat__value"><th:block th:text="${summary.openClassCount}">0</th:block><small>개</small></p>
+							<p class="mgmt-stat__caption">승인된 클래스 기준</p>
+						</div>
+					</div>
+					<div class="mgmt-stat">
+						<span class="mgmt-stat__icon"><svg aria-hidden="true"><use href="#icon-calendar"></use></svg></span>
+						<div class="mgmt-stat__body">
+							<p class="mgmt-stat__label">이번 달 예정 일정</p>
+							<p class="mgmt-stat__value"><th:block th:text="${summary.monthlyScheduleCount}">0</th:block><small>건</small></p>
+							<p class="mgmt-stat__caption">이번 달 총 일정 기준</p>
+						</div>
+					</div>
+					<div class="mgmt-stat">
+						<span class="mgmt-stat__icon"><svg aria-hidden="true"><use href="#icon-users"></use></svg></span>
+						<div class="mgmt-stat__body">
+							<p class="mgmt-stat__label">전체 신청자</p>
+							<p class="mgmt-stat__value"><th:block th:text="${#numbers.formatInteger(summary.totalApplicantCount, 1, 'COMMA')}">0</th:block><small>명</small></p>
+							<p class="mgmt-stat__caption">누적 신청자 수</p>
+						</div>
+					</div>
+					<div class="mgmt-stat">
+						<span class="mgmt-stat__icon"><svg aria-hidden="true"><use href="#icon-won"></use></svg></span>
+						<div class="mgmt-stat__body">
+							<p class="mgmt-stat__label">이번 달 매출 금액</p>
+							<p class="mgmt-stat__value"><th:block th:text="${#numbers.formatInteger(summary.monthlySalesAmount, 1, 'COMMA')}">0</th:block><small>원</small></p>
+							<p class="mgmt-stat__caption">이번 달 결제 완료 금액</p>
+						</div>
+					</div>
+				</section>
+
+				<!-- 필터 -->
+				<form class="mgmt-filter class-filter" method="get" th:action="@{/author/classes}" aria-label="클래스 검색 조건">
+					<div class="mgmt-filter__field">
+						<label class="mgmt-filter__label" for="filterFrom">기간</label>
+						<div class="mgmt-daterange">
+							<input class="input" type="date" id="filterFrom" name="from" th:value="${fromDate}">
+							<span class="mgmt-daterange__sep" aria-hidden="true">~</span>
+							<input class="input" type="date" id="filterTo" name="to" th:value="${toDate}" aria-label="종료일">
+						</div>
+					</div>
+					<div class="mgmt-filter__field">
+						<label class="mgmt-filter__label" for="filterState">운영 상태</label>
+						<div class="select">
+							<select id="filterState" name="classStatus">
+								<option value="all" th:selected="${classStatus == null or classStatus == 'all'}">전체</option>
+								<option value="모집중" th:selected="${classStatus == '모집중'}">모집 중</option>
+								<option value="준비중" th:selected="${classStatus == '준비중'}">비공개</option>
+								<option value="폐강" th:selected="${classStatus == '폐강'}">폐강</option>
+							</select>
+							<svg class="select__arrow" aria-hidden="true"><use href="#icon-chevron-down"></use></svg>
+						</div>
+					</div>
+					<div class="mgmt-filter__field">
+						<label class="mgmt-filter__label" for="filterKeyword">키워드 검색</label>
+						<div class="mgmt-search">
+							<input class="input" type="search" id="filterKeyword" name="keyword" th:value="${keyword}" placeholder="클래스명, 숫자 코드 검색">
+							<svg class="mgmt-search__icon" aria-hidden="true"><use href="#icon-search"></use></svg>
+						</div>
+					</div>
+					<button type="submit" class="btn btn--primary mgmt-filter__submit"><svg aria-hidden="true"><use href="#icon-search"></use></svg>검색</button>
+				</form>
+
+				<!-- 상태 탭 -->
+				<div class="mgmt-tabs" role="tablist" aria-label="운영 상태별 보기">
+					<button type="button" role="tab" th:attr="aria-selected=${classStatus == null or classStatus == 'all'}" data-state="all">전체 <span th:text="${summary.openClassCount + summary.hiddenClassCount + summary.closedClassCount}">0</span></button>
+					<button type="button" role="tab" th:attr="aria-selected=${classStatus == '모집중'}" data-state="모집중">모집 중 <span th:text="${summary.openClassCount}">0</span></button>
+					<button type="button" role="tab" th:attr="aria-selected=${classStatus == '준비중'}" data-state="준비중">비공개 <span th:text="${summary.hiddenClassCount}">0</span></button>
+					<button type="button" role="tab" th:attr="aria-selected=${classStatus == '폐강'}" data-state="폐강">폐강 <span th:text="${summary.closedClassCount}">0</span></button>
+				</div>
+
+				<!-- 목록 -->
+				<section class="mgmt-panel" aria-label="클래스 목록">
+					<div class="mgmt-panel__scroll">
+						<table class="mgmt-table mgmt-table--list">
+							<thead>
+								<tr>
+									<th scope="col">대표 이미지</th>
+									<th scope="col">클래스명</th>
+									<th scope="col" class="col-right">가격</th>
+									<th scope="col" class="col-badge">일정 유형</th>
+									<th scope="col">모집기간</th>
+									<th scope="col" class="col-right">예정 일정</th>
+									<th scope="col" class="col-right">신청자</th>
+									<th scope="col" class="col-badge">상태</th>
+									<th scope="col" class="col-action">관리</th>
+								</tr>
+							</thead>
+							<tbody id="classRows">
+								<tr th:each="item : ${classes}" th:attr="data-state=${item.classStatus},data-name=${item.classTitle},data-code=${'CL' + item.classCode}">
+									<td><img class="mgmt-thumb" th:src="${#strings.isEmpty(item.thumbnailPath)} ? @{/author/images/photo/class-upload-placeholder.png} : ${item.thumbnailPath}" alt="" width="76" height="58" loading="lazy"></td>
+									<td class="col-name"><th:block th:text="${item.classTitle}">클래스명</th:block><span class="mgmt-table__sub" th:text="${'CL' + item.classCode}">CL260805-0001</span></td>
+									<td class="col-num" th:text="${#numbers.formatInteger(item.desiredPrice, 1, 'COMMA') + '원'}">65,000원</td>
+									<td class="col-badge"><span class="badge badge--gray" th:text="${item.scheduleType}">등록 일정</span></td>
+									<td class="col-muted" th:text="${item.recruitStartDate == null ? '-' : #dates.format(item.recruitStartDate,'yy.MM.dd') + (item.recruitEndDate == null ? '' : ' ~ ' + #dates.format(item.recruitEndDate,'yy.MM.dd'))}">-</td>
+									<td class="col-num" th:text="${item.upcomingScheduleCount + '건'}">0건</td>
+									<td class="col-num" th:text="${item.applicantCount + '명'}">0명</td>
+									<td class="col-badge"><span class="badge" th:classappend="${item.classStatus == '모집중'} ? ' badge--green' : (${item.classStatus == '폐강'} ? ' badge--red' : ' badge--gray')" th:text="${item.classStatus == '모집중' ? '모집 중' : (item.classStatus == '준비중' ? '비공개' : item.classStatus)}">모집 중</span></td>
+									<td class="mgmt-table__action col-action"><a class="btn btn--outline btn--sm" th:href="@{/author/classes/{id}(id=${item.classCode})}">관리하기</a></td>
+								</tr>
+								<tr th:remove="all" data-state="open" data-name="계절 꽃다발 원데이 클래스" data-code="CLS-2505-0012">
+									<td><img class="mgmt-thumb" src="/author/images/photo/class-flower.png" th:src="@{/author/images/photo/class-flower.png}" alt="" width="76" height="58" loading="lazy"></td>
+									<td class="col-name">계절 꽃다발 원데이 클래스<span class="mgmt-table__sub">CLS-2505-0012</span></td>
+									<td class="col-num">65,000원</td>
+									<td class="col-badge"><span class="badge badge--gray">요일 반복</span></td>
+									<td class="col-muted">2025.05.01 ~ 2025.05.15</td>
+									<td class="col-num">3건</td>
+									<td class="col-num">24명</td>
+									<td class="col-badge"><span class="badge badge--green">모집 중</span></td>
+									<td class="mgmt-table__action col-action">
+										<a class="btn btn--outline btn--sm" href="class-manage-detail.html?classCode=CLS-2505-0012" th:href="@{/author/classes/{classCode}(classCode='CLS-2505-0012')}">관리하기</a>
+									</td>
+								</tr>
+								<tr th:remove="all" data-state="open" data-name="홈카페 라떼 아트 클래스" data-code="CLS-2504-0008">
+									<td><img class="mgmt-thumb" src="/author/images/photo/class-upload-placeholder.png" th:src="@{/author/images/photo/class-upload-placeholder.png}" alt="" width="76" height="58" loading="lazy"></td>
+									<td class="col-name">홈카페 라떼 아트 클래스<span class="mgmt-table__sub">CLS-2504-0008</span></td>
+									<td class="col-num">55,000원</td>
+									<td class="col-badge"><span class="badge badge--gray">개별 일정</span></td>
+									<td class="col-muted">2025.05.20</td>
+									<td class="col-num col-muted">—</td>
+									<td class="col-num">16명</td>
+									<td class="col-badge"><span class="badge badge--green">모집 중</span></td>
+									<td class="mgmt-table__action col-action">
+										<a class="btn btn--outline btn--sm" href="class-manage-detail.html?classCode=CLS-2504-0008" th:href="@{/author/classes/{classCode}(classCode='CLS-2504-0008')}">관리하기</a>
+									</td>
+								</tr>
+								<tr th:remove="all" data-state="closed" data-name="도자기 핸드빌딩 클래스" data-code="CLS-2504-0003">
+									<td><img class="mgmt-thumb" src="/author/images/photo/curriculum-pottery-steps.png" th:src="@{/author/images/photo/curriculum-pottery-steps.png}" alt="" width="76" height="58" loading="lazy"></td>
+									<td class="col-name">도자기 핸드빌딩 클래스<span class="mgmt-table__sub">CLS-2504-0003</span></td>
+									<td class="col-num">70,000원</td>
+									<td class="col-badge"><span class="badge badge--gray">요일 반복</span></td>
+									<td class="col-muted">2025.04.01 ~ 2025.04.14</td>
+									<td class="col-num">4건</td>
+									<td class="col-num">32명</td>
+									<td class="col-badge"><span class="badge badge--blue">모집 마감</span></td>
+									<td class="mgmt-table__action col-action">
+										<a class="btn btn--outline btn--sm" href="class-manage-detail.html?classCode=CLS-2504-0003" th:href="@{/author/classes/{classCode}(classCode='CLS-2504-0003')}">관리하기</a>
+									</td>
+								</tr>
+								<tr th:remove="all" data-state="open" data-name="천연 소이캔들 만들기" data-code="CLS-2505-0015">
+									<td><img class="mgmt-thumb" src="/author/images/photo/class-candle.png" th:src="@{/author/images/photo/class-candle.png}" alt="" width="76" height="58" loading="lazy"></td>
+									<td class="col-name">천연 소이캔들 만들기<span class="mgmt-table__sub">CLS-2505-0015</span></td>
+									<td class="col-num">45,000원</td>
+									<td class="col-badge"><span class="badge badge--gray">개별 일정</span></td>
+									<td class="col-muted">2025.05.18</td>
+									<td class="col-num col-muted">—</td>
+									<td class="col-num">18명</td>
+									<td class="col-badge"><span class="badge badge--green">모집 중</span></td>
+									<td class="mgmt-table__action col-action">
+										<a class="btn btn--outline btn--sm" href="class-manage-detail.html?classCode=CLS-2505-0015" th:href="@{/author/classes/{classCode}(classCode='CLS-2505-0015')}">관리하기</a>
+									</td>
+								</tr>
+								<tr th:remove="all" data-state="ended" data-name="수제 티라미수 클래스" data-code="CLS-2504-0009">
+									<td><img class="mgmt-thumb" src="/author/images/photo/class-upload-placeholder.png" th:src="@{/author/images/photo/class-upload-placeholder.png}" alt="" width="76" height="58" loading="lazy"></td>
+									<td class="col-name">수제 티라미수 클래스<span class="mgmt-table__sub">CLS-2504-0009</span></td>
+									<td class="col-num">60,000원</td>
+									<td class="col-badge"><span class="badge badge--gray">요일 반복</span></td>
+									<td class="col-muted">2025.03.28 ~ 2025.04.11</td>
+									<td class="col-num">2건</td>
+									<td class="col-num">12명</td>
+									<td class="col-badge"><span class="badge badge--gray">운영 종료</span></td>
+									<td class="mgmt-table__action col-action">
+										<a class="btn btn--ghost btn--sm" href="class-manage-detail.html?classCode=CLS-2504-0009" th:href="@{/author/classes/{classCode}(classCode='CLS-2504-0009')}">관리하기</a>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<p class="mgmt-empty" id="classEmpty" th:hidden="${not #lists.isEmpty(classes)}">조건에 맞는 클래스가 없습니다.</p>
+				</section>
+
+				<nav class="mgmt-pager" th:if="${totalPages > 1}" aria-label="클래스 목록 페이지">
+					<a th:if="${currentPage > 1}" th:href="@{/author/classes(page=${currentPage - 1},classStatus=${classStatus},keyword=${keyword},from=${fromDate},to=${toDate})}" aria-label="이전 페이지">
+						<svg aria-hidden="true"><use href="#icon-chevron-left"></use></svg>
+					</a>
+					<a th:each="pageNumber : ${#numbers.sequence(1, totalPages)}"
+					   th:if="${pageNumber >= currentPage - 2 and pageNumber <= currentPage + 2}"
+					   th:href="@{/author/classes(page=${pageNumber},classStatus=${classStatus},keyword=${keyword},from=${fromDate},to=${toDate})}"
+					   th:attr="aria-current=${pageNumber == currentPage ? 'page' : null}" th:text="${pageNumber}">1</a>
+					<a th:if="${currentPage < totalPages}" th:href="@{/author/classes(page=${currentPage + 1},classStatus=${classStatus},keyword=${keyword},from=${fromDate},to=${toDate})}" aria-label="다음 페이지">
+						<svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
+					</a>
+				</nav>
+
+				<footer class="site-footer" th:replace="~{author/fragments/footer :: footer}">
+					<div class="site-footer__links">
+						<a href="#" aria-disabled="true" title="준비 중">작가 가이드</a>
+						<a href="#" aria-disabled="true" title="준비 중">공지사항</a>
+						<a href="#" aria-disabled="true" title="준비 중">사업자 문의</a>
+						<a href="#">이용약관</a>
+						<a href="#">개인정보처리방침</a>
+					</div>
+					<p class="site-footer__copy">
+						<b>숨비당 원데이 클래스</b> 작가센터 · 평일 10:00 ~ 18:00 (점심 12:00 ~ 13:00)<br>
+						© 2024 숨비당. All rights reserved.
+					</p>
+				</footer>
+
+			</div>
+		</main>
+	</div>
+</div>
+
+<script>
+/* 상태 탭은 검색 폼의 상태값을 바꿔 서버 조회를 다시 실행한다. */
+(function () {
+	'use strict';
+
+	var tabs = [].slice.call(document.querySelectorAll('.mgmt-tabs button'));
+	var form = document.querySelector('.class-filter');
+	var stateSelect = document.getElementById('filterState');
+
+	tabs.forEach(function (tab) {
+		tab.addEventListener('click', function () {
+			stateSelect.value = tab.dataset.state;
+			form.submit();
+		});
+	});
+}());
+</script>
+</body>
+</html>

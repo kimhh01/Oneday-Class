@@ -1,0 +1,333 @@
+/* ===========================
+   숨쉬당 일반 로그인(ID/PW) 화면 스타일
+   - 기존 login.css와 동일한 컬러/타이포 토큰 유지
+   =========================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap");
+
+:root {
+    --color-cream: #f1f5f0;
+    --color-cream-deep: #e2e9df;
+    --color-sage: #7c9070;
+    --color-sage-dark: #647a5a;
+    --color-clay: #c17a4e;
+    --color-ink: #33361f;
+    --color-ink-soft: #6f6a58;
+    --color-paper: #ffffff;
+    --color-line: #e6dfcd;
+    --color-error: #c0503f;
+
+    --font-display: "Gowun Batang", serif;
+    --font-body: "Noto Sans KR", sans-serif;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+body {
+    font-family: var(--font-body);
+}
+
+.login-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    min-height: 100vh;
+    padding: 56px 20px 80px;
+    box-sizing: border-box;
+    background:
+        radial-gradient(ellipse 620px 420px at 12% 15%, rgba(124, 144, 112, 0.16), transparent 60%),
+        radial-gradient(ellipse 560px 420px at 90% 85%, rgba(193, 122, 78, 0.14), transparent 60%),
+        linear-gradient(180deg, var(--color-cream) 0%, var(--color-cream-deep) 100%);
+    overflow: hidden;
+}
+
+.login-wrapper::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(51, 54, 31, 0.05) 1px, transparent 1px);
+    background-size: 22px 22px;
+    pointer-events: none;
+}
+
+/* 상단 미니 로고 */
+.login-mini-logo {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.login-mini-logo__tagline {
+    margin: 0 0 8px;
+    font-size: 12.5px;
+    color: var(--color-ink-soft);
+    letter-spacing: 1.5px;
+}
+
+.login-mini-logo__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--color-ink);
+    letter-spacing: 1px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.login-mini-logo__title::before {
+    content: "";
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--color-clay);
+}
+
+/* 로그인 카드 */
+.login-card {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 480px;
+    background: var(--color-paper);
+    border-radius: 24px;
+    padding: 40px 44px 36px;
+    box-shadow: 0 24px 60px -20px rgba(51, 54, 31, 0.22);
+    box-sizing: border-box;
+}
+
+.login-card__head {
+    text-align: center;
+    margin-bottom: 26px;
+}
+
+.login-card__title {
+    margin: 0 0 8px;
+    font-family: var(--font-display);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--color-ink);
+}
+
+.login-card__subtitle {
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--color-ink-soft);
+}
+
+/* 폼 */
+.login-form__field {
+    margin-bottom: 18px;
+}
+
+.login-form__label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--color-ink);
+}
+
+.login-form__input {
+    width: 100%;
+    padding: 13px 16px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--color-ink);
+    background: var(--color-cream);
+    border: 1px solid var(--color-line);
+    border-radius: 10px;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.login-form__input::placeholder {
+    color: #a8a397;
+}
+
+.login-form__input:focus {
+    outline: none;
+    border-color: var(--color-sage);
+    box-shadow: 0 0 0 3px rgba(124, 144, 112, 0.18);
+}
+
+.login-form__input-wrap {
+    position: relative;
+}
+
+.login-form__input-wrap .login-form__input {
+    padding-right: 44px;
+}
+
+.login-form__toggle-visibility {
+    position: absolute;
+    top: 50%;
+    right: 12px;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-form__toggle-visibility svg {
+    width: 100%;
+    height: 100%;
+}
+
+.login-form__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 4px 0 24px;
+    font-size: 13px;
+}
+
+.login-form__checkbox {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--color-ink-soft);
+    cursor: pointer;
+}
+
+.login-form__checkbox input {
+    accent-color: var(--color-sage);
+    width: 15px;
+    height: 15px;
+}
+
+.login-form__links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.login-form__links a {
+    color: var(--color-ink-soft);
+    text-decoration: none;
+}
+
+.login-form__links a:hover {
+    color: var(--color-ink);
+    text-decoration: underline;
+}
+
+.login-form__divider {
+    color: var(--color-line);
+}
+
+.login-form__error {
+    margin: 0 0 18px;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--color-error);
+    background: rgba(192, 80, 63, 0.08);
+    border: 1px solid rgba(192, 80, 63, 0.25);
+    border-radius: 10px;
+}
+
+/* 버튼 */
+.btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 0;
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn--primary {
+    background-color: var(--color-sage);
+    color: #ffffff;
+}
+
+.btn--primary:hover {
+    background-color: var(--color-sage-dark);
+    box-shadow: 0 8px 18px -8px rgba(100, 122, 90, 0.55);
+}
+
+/* 회원가입 안내 */
+.login-signup {
+    position: relative;
+    z-index: 1;
+    margin-top: 26px;
+    font-size: 13.5px;
+    color: var(--color-ink-soft);
+}
+
+.login-signup a {
+    margin-left: 4px;
+    color: var(--color-sage-dark);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.login-signup a:hover {
+    text-decoration: underline;
+}
+
+.login-card {
+            position: relative;
+        }
+
+        .page-close-x {
+            position: absolute;
+            top: 18px;
+            left: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            text-decoration: none;
+            transition: background-color 0.2s ease;
+        }
+
+        .page-close-x:hover {
+            background-color: #f0f4ee;
+        }
+
+        .page-close-x svg {
+            width: 20px;
+            height: 20px;
+        }
+
+/* 모바일 대응 */
+@media (max-width: 480px) {
+    .login-card {
+        padding: 32px 24px 28px;
+        border-radius: 18px;
+    }
+
+    .login-form__row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<!--
+  Spring Boot 프로젝트의 View 파일 (Thymeleaf HTML)
+  위치 예시   : src/main/resources/templates/member/login.html
+  매핑 예시   : @GetMapping("/member/login") -> return "member/login";
+  참고 사항   :
+    - 이 화면에는 공통 헤더/푸터를 포함하지 않았습니다. (추후 별도 include 예정)
+    - 우측 상단 닫기(X) 버튼은 요청에 따라 제거했습니다.
+    - css/이미지 등 정적 리소스는 src/main/resources/static/login/ 아래에 위치하며
+      Boot 기본 설정에 따라 "/login/**" 경로로 바로 서빙됩니다.
+    - th:href, th:src, th:action은 Thymeleaf의 @{...} URL 표현식으로 컨텍스트 경로를 자동 반영합니다.
+-->
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 | 숨쉬당</title>
+    <link rel="stylesheet" th:href="@{css/login.css}">
+</head>
+<body>
+
+<div class="login-wrapper">
+    <div class="login-card">
+
+        <div class="login-logo">
+            <p class="login-logo__tagline">일상을 배우는 취미공간</p>
+            <h1 class="login-logo__title">숨쉬당</h1>
+        </div>
+
+        <div class="login-visual">
+            <img th:src="@{images/login_visual.svg}" alt="숨쉬당 클래스 이미지">
+        </div>
+
+        <div class="login-actions">
+            <a th:href="@{/member/login/general}" class="btn btn--primary">
+                <span class="btn__icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12Z" fill="#ffffff"/>
+                        <path d="M12 14.3c-4.4 0-8 2.6-8 5.8v0.7c0 0.5 0.4 1 1 1h14c0.5 0 1-0.4 1-1v-0.7c0-3.2-3.6-5.8-8-5.8Z" fill="#ffffff"/>
+                    </svg>
+                </span>
+                일반 로그인으로 계속하기
+            </a>
+
+            <a th:href="@{/oauth2/authorization/google}" class="btn btn--oauth">
+                <span class="btn__icon">
+                    <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                        <path fill="#FFC107" d="M43.6 20.5H42V20.4H24v7.2h11.3C33.9 31.6 29.4 34.6 24 34.6c-6 0-10.9-4.9-10.9-10.9S18 12.8 24 12.8c2.6 0 5 .9 6.9 2.5l5.4-5.4C32.6 6.7 28.5 5 24 5 13.5 5 5 13.5 5 24s8.5 19 19 19 19-8.5 19-19c0-1.2-.1-2.3-.4-3.5Z"/>
+                        <path fill="#FF3D00" d="M8.3 14.6l5.9 4.3C15.8 15.5 19.6 12.8 24 12.8c2.6 0 5 .9 6.9 2.5l5.4-5.4C32.6 6.7 28.5 5 24 5c-7 0-13.1 3.9-16.2 9.6Z"/>
+                        <path fill="#4CAF50" d="M24 43c5.3 0 10.1-2 13.7-5.3l-6.3-5.4C29.4 34 26.8 34.9 24 34.9c-5.4 0-9.9-3.6-11.6-8.5l-6.2 4.8C9.6 38.9 16.2 43 24 43Z"/>
+                        <path fill="#1976D2" d="M43.6 20.5H42V20.4H24v7.2h11.3c-.7 2-2 3.7-3.6 4.9l6.3 5.4C41.5 35.2 43 30 43 24c0-1.2-.1-2.3-.4-3.5Z"/>
+                    </svg>
+                </span>
+                구글로 계속하기
+            </a>
+        </div>
+
+    </div>
+</div>
+
+</body>
+</html>

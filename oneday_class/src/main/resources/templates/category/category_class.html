@@ -82,22 +82,21 @@
           <div class="class-meta" th:text="${cls.address}">위치 정보</div>
           <div class="class-title" th:text="${cls.name}">클래스명</div>
           
-        <div class="class-price">
-  <!-- 1) 빨간색 할인율 (%) -->
-  <span class="sale" 
-        th:if="${cls.desiredPrice > 0 and cls.desiredPrice > cls.price}" 
-        th:text="${cls.discountRate + '%'}">8%</span>
-  
-  <!-- 2) 회색 취소선 희망가 (desiredPrice) -->
-  <span class="old" 
-        th:if="${cls.desiredPrice > 0 and cls.desiredPrice > cls.price}" 
-        th:text="${#numbers.formatInteger(cls.desiredPrice, 0, 'COMMA')}">51,000</span>
-  
-  <!-- 3) 검정색 최종 가격 (price) -->
-  <span class="now" 
-        th:text="${#numbers.formatInteger(cls.price, 0, 'COMMA')}">48,600</span>
-</div>
-
+          <div class="class-price">
+            <!-- 1) 할인율 (%) : desiredPrice가 있고 price보다 작을 때만 계산하여 표시 -->
+            <span class="sale" 
+                  th:if="${cls.desiredPrice > 0 and cls.price > cls.desiredPrice}" 
+                  th:text="${cls.discountRate + '%'}"></span>
+            
+            <!-- 2) 정가 (취소선) : desiredPrice가 있을 때 원가(price) 노출 -->
+            <span class="old" 
+                  th:if="${cls.desiredPrice > 0 and cls.price > cls.desiredPrice}" 
+                  th:text="${#numbers.formatInteger(cls.price, 0, 'COMMA')}"></span>
+            
+            <!-- 3) 최종 판매가 : desiredPrice가 있으면 desiredPrice, 없으면 price 노출 -->
+            <span class="now" 
+                  th:text="${#numbers.formatInteger((cls.desiredPrice > 0 and cls.price > cls.desiredPrice) ? cls.desiredPrice : cls.price, 0, 'COMMA') + '원'}"></span>
+          </div>
         </a>
       </article>
     </section>

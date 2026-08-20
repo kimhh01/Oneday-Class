@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>일정 관리 | 숨비당 원데이 클래스</title>
+<link rel="stylesheet" href="/author/css/common.css" th:href="@{/author/css/common.css}">
+<link rel="stylesheet" href="/author/css/header.css" th:href="@{/author/css/header.css}">
+<link rel="stylesheet" href="/author/css/sidebar.css" th:href="@{/author/css/sidebar.css}">
+<link rel="stylesheet" href="/author/css/management.css" th:href="@{/author/css/management.css}">
+<link rel="stylesheet" href="/author/css/class-manage.css" th:href="@{/author/css/class-manage.css}">
+<link rel="stylesheet" href="/author/css/schedule-manage.css" th:href="@{/author/css/schedule-manage.css}">
+<script src="/author/js/layout.js" th:src="@{/author/js/layout.js}" defer></script>
+</head>
+<body class="author-page management-page" data-menu="schedule" data-page="일정 관리">
+
+<div class="app">
+	<div th:replace="~{author/fragments/icons :: icons}"></div>
+	<div th:replace="~{author/fragments/header :: header}"></div>
+
+	<div class="app-body">
+		<div th:replace="~{author/fragments/sidebar :: sidebar}"></div>
+
+		<main class="content">
+			<div class="content__inner">
+				<header class="mgmt-head">
+					<div>
+						<h1 class="page-title">일정 관리</h1>
+						<p class="page-desc mgmt-head__desc">승인된 내 클래스 일정을 한곳에서 확인하고 모집 인원을 관리할 수 있어요.</p>
+					</div>
+					<div class="mgmt-head__actions">
+						<a class="btn btn--outline" th:href="@{/author/classes}">
+							<svg aria-hidden="true"><use href="#icon-list"></use></svg> 클래스 관리
+						</a>
+					</div>
+				</header>
+
+				<p class="form-error" th:if="${managementError}" th:text="${managementError}" role="alert"></p>
+
+				<section class="mgmt-stats" aria-label="조회된 일정 운영 지표">
+					<div class="mgmt-stat">
+						<span class="mgmt-stat__icon"><svg aria-hidden="true"><use href="#icon-calendar"></use></svg></span>
+						<div class="mgmt-stat__body">
+							<p class="mgmt-stat__label">조회된 일정</p>
+							<p class="mgmt-stat__value"><th:block th:text="${summary.scheduleCount}">0</th:block><small>건</small></p>
+							<p class="mgmt-stat__caption">현재 검색 조건 기준</p>
+						</div>
+					</div>
+					<div class="mgmt-stat">
+						<span class="mgmt-stat__icon"><svg aria-hidden="true"><use href="#icon-calendar-check"></use></svg></span>
+						<div class="mgmt-stat__body">
+							<p class="mgmt-stat__label">모집 중 일정</p>
+							<p class="mgmt-stat__value"><th:block th:text="${summary.recruitingScheduleCount}">0</th:block><small>건</small></p>
+							<p class="mgmt-stat__caption">현재 모집 가능한 일정</p>
+						</div>
+					</div>
+					<div class="mgmt-stat">
+						<span class="mgmt-stat__icon"><svg aria-hidden="true"><use href="#icon-users"></use></svg></span>
+						<div class="mgmt-stat__body">
+							<p class="mgmt-stat__label">활성 신청 인원</p>
+							<p class="mgmt-stat__value"><th:block th:text="${#numbers.formatInteger(summary.reservedCount, 1, 'COMMA')}">0</th:block><small>명</small></p>
+							<p class="mgmt-stat__caption">취소되지 않은 예약 기준</p>
+						</div>
+					</div>
+					<div class="mgmt-stat">
+						<span class="mgmt-stat__icon"><svg aria-hidden="true"><use href="#icon-plus-box"></use></svg></span>
+						<div class="mgmt-stat__body">
+							<p class="mgmt-stat__label">남은 자리</p>
+							<p class="mgmt-stat__value"><th:block th:text="${#numbers.formatInteger(summary.remainingSeatCount, 1, 'COMMA')}">0</th:block><small>석</small></p>
+							<p class="mgmt-stat__caption">모집 중 일정 합계</p>
+						</div>
+					</div>
+				</section>
+
+				<form class="mgmt-filter schedule-filter" method="get" th:action="@{/author/schedules}" aria-label="일정 검색 조건">
+					<div class="mgmt-filter__field">
+						<label class="mgmt-filter__label" for="scheduleFrom">수업 기간</label>
+						<div class="mgmt-daterange">
+							<input class="input" type="date" id="scheduleFrom" name="from" th:value="${fromDate}">
+							<span class="mgmt-daterange__sep" aria-hidden="true">~</span>
+							<input class="input" type="date" id="scheduleTo" name="to" th:value="${toDate}" aria-label="종료일">
+						</div>
+					</div>
+					<div class="mgmt-filter__field">
+						<label class="mgmt-filter__label" for="scheduleStatus">일정 상태</label>
+						<div class="select">
+							<select id="scheduleStatus" name="scheduleStatus">
+								<option value="all" th:selected="${scheduleStatus == null or scheduleStatus == 'all'}">전체</option>
+								<option value="모집중" th:selected="${scheduleStatus == '모집중'}">모집 중</option>
+								<option value="모집 마감" th:selected="${scheduleStatus == '모집 마감'}">모집 마감</option>
+								<option value="진행 완료" th:selected="${scheduleStatus == '진행 완료'}">진행 완료</option>
+							</select>
+							<svg class="select__arrow" aria-hidden="true"><use href="#icon-chevron-down"></use></svg>
+						</div>
+					</div>
+					<div class="mgmt-filter__field">
+						<label class="mgmt-filter__label" for="scheduleKeyword">키워드 검색</label>
+						<div class="mgmt-search">
+							<input class="input" type="search" id="scheduleKeyword" name="keyword" th:value="${keyword}" placeholder="클래스명, 클래스·일정 코드 검색">
+							<svg class="mgmt-search__icon" aria-hidden="true"><use href="#icon-search"></use></svg>
+						</div>
+					</div>
+					<button type="submit" class="btn btn--primary mgmt-filter__submit"><svg aria-hidden="true"><use href="#icon-search"></use></svg>검색</button>
+				</form>
+
+				<div class="schedule-guide" role="note">
+					<svg aria-hidden="true"><use href="#icon-info"></use></svg>
+					<p>일정 취소시에 자동 알림이 되지 않으니 수강생들에게 연락해 주세요.</p>
+				</div>
+
+				<section class="mgmt-panel" aria-label="일정 목록">
+					<div class="mgmt-panel__scroll">
+						<table class="mgmt-table mgmt-table--schedules">
+							<thead>
+								<tr>
+									<th scope="col" class="col-right">일정 코드</th>
+									<th scope="col">클래스</th>
+									<th scope="col">수업일</th>
+									<th scope="col">시간</th>
+									<th scope="col" class="col-right">최소/최대</th>
+									<th scope="col" class="col-right">신청</th>
+									<th scope="col" class="col-right">남은 자리</th>
+									<th scope="col" class="col-badge">상태</th>
+									<th scope="col" class="col-action">관리</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="schedule : ${schedules}" th:classappend="${schedule.scheduleStatus == '진행 완료'} ? ' schedule-row--past'">
+									<td class="col-num" th:text="${schedule.scheduleCode}">1</td>
+									<td class="schedule-class">
+										<a th:href="@{/author/classes/{classCode}(classCode=${schedule.classCode})}" th:text="${schedule.classTitle}">클래스명</a>
+										<span><th:block th:text="${'CL' + schedule.classCode}">CL1</th:block> · <th:block th:text="${schedule.classStatus == '모집중' ? '공개' : (schedule.classStatus == '준비중' ? '비공개' : schedule.classStatus)}">공개</th:block></span>
+									</td>
+									<td th:text="${#dates.format(schedule.scheduleDate, 'yyyy.MM.dd')}">2026.08.11</td>
+									<td class="col-muted" th:text="${schedule.startTime + ' ~ ' + schedule.endTime}">14:00 ~ 16:00</td>
+									<td class="col-num" th:text="${schedule.minPeople + ' / ' + schedule.maxPeople + '명'}">2 / 6명</td>
+									<td class="col-num" th:text="${schedule.reservedCount + '명'}">0명</td>
+									<td class="col-num" th:text="${schedule.remainingPeople + '석'}">6석</td>
+									<td class="col-badge"><span class="badge" th:classappend="${schedule.scheduleStatus == '모집중'} ? ' badge--green' : (${schedule.scheduleStatus == '모집 마감'} ? ' badge--blue' : ' badge--gray')" th:text="${schedule.scheduleStatus == '모집중' ? '모집 중' : schedule.scheduleStatus}">모집 중</span></td>
+									<td class="schedule-actions col-action">
+										<div th:if="${schedule.scheduleStatus != '진행 완료' and schedule.classStatus != '폐강'}">
+											<form class="schedule-capacity-form" method="post" th:action="@{/author/classes/schedules/{scheduleCode}/people(scheduleCode=${schedule.scheduleCode})}">
+												<input type="hidden" name="classCode" th:value="${schedule.classCode}">
+												<input type="hidden" name="source" value="schedules">
+												<label class="sr-only" th:for="${'remaining-' + schedule.scheduleCode}">남은 자리</label>
+												<input class="input schedule-capacity-input" type="number" name="remainingPeople" th:id="${'remaining-' + schedule.scheduleCode}" min="0" th:max="${schedule.maxPeople - schedule.reservedCount}" th:value="${schedule.remainingPeople}" required>
+												<button type="submit" class="btn btn--outline btn--sm">저장</button>
+											</form>
+											<form class="schedule-cancel-form" method="post" th:action="@{/author/classes/schedules/{scheduleCode}/cancel(scheduleCode=${schedule.scheduleCode})}" th:attr="data-reserved=${schedule.reservedCount}">
+												<input type="hidden" name="classCode" th:value="${schedule.classCode}">
+												<input type="hidden" name="source" value="schedules">
+												<button type="submit" class="btn btn--danger btn--sm" th:disabled="${schedule.remainingPeople == 0 and schedule.reservedCount == 0}">일정 취소</button>
+											</form>
+										</div>
+										<span class="col-muted" th:unless="${schedule.scheduleStatus != '진행 완료' and schedule.classStatus != '폐강'}">변경 불가</span>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<p class="mgmt-empty" th:hidden="${not #lists.isEmpty(schedules)}">조건에 맞는 일정이 없습니다.</p>
+				</section>
+
+				<footer class="site-footer" th:replace="~{author/fragments/footer :: footer}"></footer>
+			</div>
+		</main>
+	</div>
+</div>
+
+<script>
+(function () {
+	'use strict';
+	document.querySelectorAll('.schedule-cancel-form').forEach(function (form) {
+		form.addEventListener('submit', function (event) {
+			var reserved = Number(form.dataset.reserved || 0);
+			var message = reserved > 0
+				? '이 일정을 취소하면 예약 ' + reserved + '명의 예약·결제 상태가 취소·환불완료로 변경됩니다.\n자동 메시지는 발송되지 않으므로 카카오톡 안내가 필요합니다. 계속하시겠습니까?'
+				: '이 일정을 취소하고 모집을 마감하시겠습니까?';
+			if (!window.confirm(message)) { event.preventDefault(); }
+		});
+	});
+}());
+</script>
+</body>
+</html>

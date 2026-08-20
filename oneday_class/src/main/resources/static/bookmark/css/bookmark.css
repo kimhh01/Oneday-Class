@@ -1,0 +1,251 @@
+@charset "UTF-8";
+
+/* 기본 설정 */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #f2f5f2;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #222222;
+}
+
+/* 메인 감싸는 컨테이너 */
+.bookmark-wrapper {
+    width: 100%;
+    padding: 40px 20px 60px;
+    display: flex;
+    justify-content: center;
+}
+
+.bookmark-container {
+    width: 100%;
+    max-width: 1100px;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+/* 우측 메인 카드 */
+.bookmark-main {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 32px 28px 40px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    min-height: 520px;
+    display: flex;
+    flex-direction: column;
+}
+
+.page-header {
+    margin-bottom: 20px;
+}
+
+.page-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #111111;
+    margin-bottom: 6px;
+}
+
+.page-subtitle {
+    font-size: 13.5px;
+    color: #777777;
+}
+
+/* 카테고리 필터 탭 */
+.filter-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    padding: 0 18px;
+    border-radius: 18px;
+    border: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #555555;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.tab-btn.active {
+    background-color: #356846;
+    border-color: #356846;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.tab-btn:hover:not(.active) {
+    border-color: #356846;
+    color: #356846;
+}
+
+/* 동적 클래스 카드 그리드 (3열) */
+.class-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.class-card {
+    border: 1px solid #eef2ee;
+    border-radius: 12px;
+    padding: 12px;
+    background-color: #ffffff;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.class-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* 카드 섬네일 이미지 */
+.card-thumb {
+    width: 100%;
+    height: 140px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    background-color: #f4f6f4;
+}
+
+.card-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* 카드 정보 */
+.card-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.card-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.class-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111111;
+    line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.btn-heart {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.class-location {
+    font-size: 12px;
+    color: #888888;
+    margin-bottom: 8px;
+}
+
+.class-price {
+    font-size: 15px;
+    font-weight: 700;
+    color: #356846;
+}
+
+/* 데이터 없음 처리 */
+.empty-bookmark {
+    padding: 80px 0;
+    text-align: center;
+    color: #888888;
+    font-size: 14.5px;
+}
+
+/* 페이지네이션 컨테이너 스타일 */
+.pagination-container {
+    margin-top: auto;
+    padding-top: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+.pagination-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.page-btn, .page-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    min-width: 36px;
+    padding: 0 10px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #444444;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.page-number:hover, .page-btn:not(.disabled):hover {
+    border-color: #356846;
+    color: #356846;
+    background-color: #f4f8f4;
+}
+
+.page-number.active {
+    background-color: #356846;
+    border-color: #356846;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.page-btn.disabled {
+    color: #cccccc;
+    border-color: #eeeeee;
+    cursor: not-allowed;
+    background-color: #fafafa;
+}
+
+/* 반응형 */
+@media (max-width: 900px) {
+    .class-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .bookmark-container {
+        grid-template-columns: 1fr;
+    }
+}

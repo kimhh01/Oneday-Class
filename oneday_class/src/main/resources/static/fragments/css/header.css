@@ -1,0 +1,87 @@
+@import url("https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap");
+
+:root {
+    --header-bg: #ffffff;
+    --header-border: #e6dfcd;
+    --text-color: #33361f;
+    --text-hover: #7c9070;
+    
+    --font-logo: "Gowun Batang", serif;
+    --font-nav: "Noto Sans KR", sans-serif;
+}
+
+/* 헤더 전체 컨테이너 */
+.site-header {
+    width: 100%;
+    background-color: var(--header-bg);
+    border-bottom: 1px solid var(--header-border);
+    box-sizing: border-box;
+}
+
+/* 내부 레이아웃 (좌우 정렬) */
+.site-header__inner {
+    max-width: 1200px;
+    height: 72px;
+    margin: 0 auto;
+    padding: 0 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+/* 1. 로고 스타일 */
+.site-header__logo {
+    text-decoration: none;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+}
+
+.site-header__logo-text {
+    font-family: var(--font-logo);
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+/* 2. 네비게이션 메뉴 스타일 */
+.site-header__nav {
+    display: flex;
+    align-items: center;
+    gap: 28px; /* 메뉴 간 간격 */
+}
+
+.site-header__link {
+    font-family: var(--font-nav);
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text-color);
+    text-decoration: none;
+    transition: color 0.15s ease;
+    white-space: nowrap;
+}
+
+.site-header__link:hover {
+    color: var(--text-hover);
+}
+
+/* 모바일 화면 대응 */
+@media (max-width: 768px) {
+    .site-header__inner {
+        height: 60px;
+        padding: 0 16px;
+    }
+
+    .site-header__logo-text {
+        font-size: 22px;
+    }
+
+    .site-header__nav {
+        gap: 16px;
+    }
+
+    .site-header__link {
+        font-size: 12.5px;
+    }
+}

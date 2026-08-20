@@ -75,7 +75,7 @@
     </select>
 
     <!-- 클래스 이미지 목록 조회 -->
-    <select id="selectImage" parameterType="long" resultType="kr.co.oneclass.main.ClassImageDTO">
+    <select id="selectImage" parameterType="int" resultType="kr.co.oneclass.main.ClassImageDTO">
         SELECT class_img_code, class_code, type, image, sort_order
         FROM CLASS_IMG
         WHERE class_code = #{classCode}

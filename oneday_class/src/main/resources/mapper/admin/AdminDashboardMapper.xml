@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="kr.co.oneclass.admin.dashboard.AdminDashboardDAO">
+
+	<select id="selectMemberCount" resultType="int">
+		SELECT COUNT(*)
+		FROM
+		MEMBER
+	</select>
+
+	<select id="selectWriterCount" resultType="int">
+		SELECT COUNT(*)
+		FROM
+		CREATOR
+	</select>
+
+	<select id="selectClassCount" resultType="int">
+		SELECT COUNT(*)
+		FROM
+		CLASS
+	</select>
+
+	<select id="selectMonthlySales" resultType="int">
+		SELECT
+		NVL(SUM(AMOUNT), 0)
+		FROM PAYMENT
+		WHERE PAYMENT_DATE >= TRUNC(SYSDATE,
+		'MM')
+		AND PAYMENT_DATE &lt; ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1)
+	</select>
+
+	<select id="selectMonthlyReservationList"
+		resultType="kr.co.oneclass.admin.dashboard.AdminMonthlyReservationDTO">
+
+		SELECT
+		M.MONTH AS month,
+		NVL(R.RESERVATION_COUNT, 0) AS
+		reservationCount
+		FROM (
+		SELECT
+		TO_CHAR(
+		ADD_MONTHS(TRUNC(SYSDATE, 'MM'),
+		-5 + LEVEL - 1),
+		'YYYY-MM'
+		) AS MONTH
+		FROM DUAL
+		CONNECT BY LEVEL &lt;= 6
+		)
+		M
+		LEFT JOIN (
+		SELECT
+		TO_CHAR(RESERVATION_DATE, 'YYYY-MM') AS MONTH,
+		COUNT(*) AS RESERVATION_COUNT
+		FROM RESERVATION
+		WHERE RESERVATION_DATE >=
+		ADD_MONTHS(TRUNC(SYSDATE, 'MM'), -5)
+		AND RESERVATION_DATE &lt;
+		ADD_MONTHS(TRUNC(SYSDATE, 'MM'), 1)
+		GROUP BY TO_CHAR(RESERVATION_DATE,
+		'YYYY-MM')
+		) R
+		ON M.MONTH = R.MONTH
+		ORDER BY M.MONTH
+
+	</select>
+
+</mapper>

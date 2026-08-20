@@ -1,0 +1,25 @@
+@charset "UTF-8";
+
+.approval-filter { grid-template-columns: 220px minmax(260px, 1fr) auto; align-items: end; }
+.approval-alert { margin-bottom: 16px; padding: 13px 16px; border-radius: var(--radius-sm); font-size: 13px; }
+.approval-alert--error { background: var(--red-100); color: var(--red-600); }
+.approval-table { min-width: 920px; }
+.approval-table th:nth-child(1) { width: 24%; }
+.approval-table th:nth-child(2) { width: 12%; }
+.approval-table th:nth-child(3) { width: 12%; }
+.approval-table th:nth-child(4) { width: 12%; }
+.approval-table th:nth-child(5) { width: 10%; }
+.approval-table th:nth-child(6) { width: 30%; }
+.approval-table .table__name small { display: block; margin-top: 5px; font-size: 11px; font-weight: 500; color: var(--text-muted); }
+.approval-table__action > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.approval-table__action p { overflow: hidden; max-width: 230px; color: var(--red-600); text-overflow: ellipsis; white-space: nowrap; }
+.approval-table__action .btn { flex: none; }
+.rejection-card { max-width: 720px; margin-top: 24px; padding: 28px; }
+.rejection-card h2 { font-size: 18px; color: var(--text-strong); }
+.rejection-card > p { margin-top: 16px; padding: 18px; border-radius: var(--radius-sm); background: var(--red-100); color: var(--text-body); line-height: 1.7; white-space: pre-wrap; }
+.rejection-card__actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; }
+
+@media (max-width: 768px) {
+	.approval-filter { grid-template-columns: 1fr; }
+	.approval-filter .btn { width: 100%; }
+}

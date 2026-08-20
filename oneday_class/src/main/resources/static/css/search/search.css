@@ -252,17 +252,15 @@ ul, li {
     gap: 8px;
 }
 
-
 .sub-class-img {
-    width: 135px;
-    height: 135px;
+    width: 100px;
+    height: 100px;
+    aspect-ratio: 1;
     border-radius: 8px;
     object-fit: cover;
     background-color: #f4f4f4;
-    flex-shrink: 0;
     border: 1px solid var(--border-light);
 }
-
 
 .sub-class-title {
     font-size: 13px;

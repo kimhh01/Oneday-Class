@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아이디 찾기 | 숨쉬당</title>
+    <!-- [수정] 절대 경로 형태로 경로 통일 -->
+    <link rel="stylesheet" th:href="@{/member/css/findId.css}">
+</head>
+<body>
+
+<div class="login-wrapper">
+
+    <div th:replace="~{member/fragments/common :: miniLogo}"></div>
+
+    <div class="login-card">
+
+        <div class="login-card__head">
+            <h2 class="login-card__title">아이디 찾기</h2>
+            <p class="login-card__subtitle">
+                이름과 이메일 주소를 입력하고 인증을 완료하면<br>
+                아이디를 확인하실 수 있습니다.
+            </p>
+        </div>
+
+        <form th:action="@{/member/findId}" th:object="${findIdDTO}" method="post" class="login-form" id="findIdForm">
+
+            <!-- 1. 이름 -->
+            <div class="login-form__field">
+                <label for="name" class="login-form__label">이름</label>
+                <input type="text" id="name" th:field="*{name}" class="login-form__input"
+                       placeholder="이름을 입력해주세요" required>
+            </div>
+
+            <!-- 2. 이메일 주소 -->
+            <div class="login-form__field">
+                <label for="email" class="login-form__label">이메일 주소</label>
+                <input type="email" id="email" th:field="*{email}" class="login-form__input"
+                       placeholder="이메일 주소를 입력해주세요" required>
+            </div>
+
+            <!-- 3. 인증번호 -->
+            <div class="login-form__field">
+                <label for="authCode" class="login-form__label">인증번호</label>
+                <div class="login-form__control--with-button">
+                    <input type="text" id="authCode" th:field="*{authCode}" class="login-form__input"
+                           placeholder="인증코드를 입력해주세요" required>
+                    <button type="button" id="btnSendAuthCode" class="btn btn--outline">인증번호 발송</button>
+                </div>
+                <p class="login-form__hint">입력하신 이메일로 인증번호가 발송됩니다.</p>
+            </div>
+
+            <button type="submit" class="btn btn--primary">아이디 찾기</button>
+
+        </form>
+
+    </div>
+
+    <p class="login-signup">
+        아직 계정이 없으신가요?
+        <a th:href="@{/member/signUp}">회원가입</a>
+    </p>
+    <p class="login-general">
+        계정이 있으신가요?
+        <a th:href="@{/member/login/general}">로그인</a>
+    </p>
+
+</div>
+
+<!-- 커스텀 모달 팝업 구조 -->
+<div id="customModal" class="modal-overlay">
+    <div class="modal-card">
+        <div class="modal-body" id="modalMessage">
+            <!-- 자바스크립트로 메시지 주입 -->
+        </div>
+        <button type="button" id="btnModalClose" class="btn--modal">확인</button>
+    </div>
+</div>
+
+<!-- 자바스크립트 -->
+<script th:inline="javascript">
+document.addEventListener('DOMContentLoaded', function () {
+    const btnSendAuthCode = document.getElementById('btnSendAuthCode');
+    const emailInput = document.getElementById('email');
+    const nameInput = document.getElementById('name');
+    
+    // 모달 요소를 위한 변수
+    const customModal = document.getElementById('customModal');
+    const modalMessage = document.getElementById('modalMessage');
+    const btnModalClose = document.getElementById('btnModalClose');
+
+    // 1. 모달 띄우기 함수
+    function showModal(message) {
+        modalMessage.innerHTML = message;
+        customModal.classList.add('active');
+    }
+
+    // 2. 모달 닫기 이벤트
+    btnModalClose.addEventListener('click', function () {
+        customModal.classList.remove('active');
+    });
+
+    // 3. 서버에서 전달된 FlashAttribute 에러 메시지가 있을 경우 모달 띄우기 (인증번호 오답 등)
+    const serverErrorMsg = /*[[${errorMsg}]]*/ null;
+    if (serverErrorMsg) {
+        showModal(serverErrorMsg);
+    }
+
+    // 4. 인증번호 발송 / 재발송 AJAX
+    btnSendAuthCode.addEventListener('click', function () {
+        const email = emailInput.value.trim();
+        const name = nameInput.value.trim();
+
+        if (!name) {
+            showModal('이름을 입력해 주세요.');
+            nameInput.focus();
+            return;
+        }
+
+        if (!email) {
+            showModal('이메일 주소를 입력해 주세요.');
+            emailInput.focus();
+            return;
+        }
+
+        // 발송 대기 표시
+        btnSendAuthCode.disabled = true;
+
+        fetch('/member/sendAuthCode', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'email=' + encodeURIComponent(email) + '&name=' + encodeURIComponent(name)
+        })
+        .then(response => response.text())
+        .then(data => {
+            btnSendAuthCode.disabled = false;
+
+            if (data === 'OK') {
+                // [요청 사항 반영] 버튼 텍스트 변경
+                btnSendAuthCode.textContent = '인증번호 재발송';
+                showModal('인증번호가 이메일로 발송되었습니다.<br>(5분 이내 입력)');
+            } else if (data === 'NOT_FOUND') {
+                showModal('입력하신 정보와 일치하는 회원이 없습니다.');
+            } else {
+                showModal('메일 발송에 실패했습니다.<br>이메일 주소를 다시 확인해 주세요.');
+            }
+        })
+        .catch(error => {
+            btnSendAuthCode.disabled = false;
+            console.error('Error:', error);
+            showModal('통신 중 오류가 발생했습니다.<br>잠시 후 다시 시도해 주세요.');
+        });
+    });
+});
+</script>
+
+</body>
+</html>

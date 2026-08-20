@@ -54,11 +54,11 @@ public class SearchController {
         List<CreatorDTO> creatorList = ss.searchCreatorList(keyword, startNum, endNum);
         int totalCount = ss.searchCreatorCount(keyword);
 
-        model.addAttribute("creatorList", creatorList);
-        model.addAttribute("totalCount", totalCount);
+        model.addAttribute("creatorList", creatorList); // 👈 추가
+        model.addAttribute("totalCount", totalCount);  // 👈 추가
         model.addAttribute("keyword", keyword);
         model.addAttribute("currentPage", currentPage);
-        model.addAttribute("activeTab", "artist"); // 👈 작가 탭 지정
+        model.addAttribute("activeTab", "artist");    // 👈 작가 탭 활성화 indicator
         
         return "search/search_keyword_more";
     }
@@ -77,11 +77,11 @@ public class SearchController {
         List<ClassDTO> classList = ss.searchClassList(keyword, startNum, endNum);
         int totalCount = ss.searchClassCount(keyword);
 
-        model.addAttribute("classList", classList);
-        model.addAttribute("totalCount", totalCount);
+        model.addAttribute("classList", classList);   // 👈 추가
+        model.addAttribute("totalCount", totalCount);  // 👈 추가
         model.addAttribute("keyword", keyword);
         model.addAttribute("currentPage", currentPage);
-        model.addAttribute("activeTab", "class"); // 👈 클래스 탭 지정
+        model.addAttribute("activeTab", "class");     // 👈 클래스 탭 활성화 indicator
         
         return "search/search_keyword_more";
     }

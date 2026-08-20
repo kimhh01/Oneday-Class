@@ -1,0 +1,305 @@
+@charset "UTF-8";
+
+/* 기본 설정 */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #f2f5f2;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #222222;
+}
+
+/* 감싸는 컨테이너 */
+.inquiry-wrapper {
+    width: 100%;
+    padding: 40px 20px 60px;
+    display: flex;
+    justify-content: center;
+}
+
+.inquiry-container {
+    width: 100%;
+    max-width: 1100px;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+/* 우측 메인 카드 */
+.inquiry-main {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 32px 28px 40px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    min-height: 580px;
+    display: flex;
+    flex-direction: column;
+}
+
+.page-header {
+    margin-bottom: 20px;
+}
+
+.page-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #111111;
+    margin-bottom: 6px;
+}
+
+.page-subtitle {
+    font-size: 13.5px;
+    color: #777777;
+}
+
+/* 카테고리 필터 탭 */
+.filter-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.tab-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 18px;
+    border: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #555555;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.tab-btn.active {
+    background-color: #356846;
+    border-color: #356846;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.tab-btn:hover:not(.active) {
+    border-color: #356846;
+    color: #356846;
+}
+
+/* 테이블 레이아웃 */
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.inquiry-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 13.5px;
+}
+
+.inquiry-table th {
+    padding: 14px 12px;
+    background-color: #fcfdfc;
+    color: #666666;
+    font-weight: 700;
+    border-bottom: 1px solid #eee;
+    text-align: center;
+}
+
+.inquiry-table td {
+    padding: 16px 12px;
+    border-bottom: 1px solid #f4f4f4;
+    vertical-align: middle;
+    text-align: center;
+}
+
+.inquiry-table th.col-title,
+.inquiry-table td.col-title {
+    text-align: left;
+}
+
+.clickable-row {
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.clickable-row:hover {
+    background-color: #f9fbf9;
+}
+
+/* 열 별 너비 및 스타일 */
+.col-num { width: 60px; color: #888888; }
+.col-type { width: 120px; }
+.col-title { width: auto; font-weight: 500; }
+.col-date { width: 110px; color: #888888; font-size: 13px; }
+.col-status { width: 100px; }
+.col-arrow { width: 40px; }
+
+.title-link {
+    color: #222222;
+    text-decoration: none;
+}
+
+.title-link:hover {
+    text-decoration: underline;
+    color: #356846;
+}
+
+/* 배지 스타일 */
+.badge-type {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    background-color: #f0f4f1;
+    color: #555555;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.badge-status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* 답변 완료: 연한 초록 배지 */
+.badge-status.status-completed {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+/* 답변 대기: 연한 주황 배지 */
+.badge-status.status-waiting {
+    background-color: #fff8e1;
+    color: #f57f17;
+}
+
+/* 문의 내역 없음 표시 */
+.empty-inquiry {
+    padding: 90px 0;
+    text-align: center;
+    color: #888888;
+    font-size: 14.5px;
+}
+
+/* 하단 영역 설정 */
+.inquiry-bottom-section {
+    margin-top: auto;
+    padding-top: 20px;
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 28px;
+}
+
+.pagination-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.page-btn, .page-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 36px;
+    min-width: 36px;
+    padding: 0 10px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #444444;
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+
+.page-number:hover, .page-btn:not(.disabled):hover {
+    border-color: #356846;
+    color: #356846;
+    background-color: #f4f8f4;
+}
+
+.page-number.active {
+    background-color: #356846;
+    border-color: #356846;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.page-btn.disabled {
+    color: #cccccc;
+    border-color: #eeeeee;
+    cursor: not-allowed;
+    background-color: #fafafa;
+}
+
+/* 하단 알림 가이드 및 작성 버튼 영역 */
+.action-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding-top: 20px;
+    border-top: 1px dashed #e5e8e5;
+}
+
+.guide-text {
+    font-size: 13px;
+    color: #777777;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-write {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 42px;
+    padding: 0 20px;
+    border-radius: 8px;
+    background-color: #356846;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 0.15s ease;
+    flex-shrink: 0;
+}
+
+.btn-write:hover {
+    background-color: #2a5237;
+}
+
+/* 반응형 */
+@media (max-width: 768px) {
+    .inquiry-container {
+        grid-template-columns: 1fr;
+    }
+
+    .action-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .btn-write {
+        width: 100%;
+    }
+}

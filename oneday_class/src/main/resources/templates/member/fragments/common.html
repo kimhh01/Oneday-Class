@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<!--
+  공통 fragment 모음
+  위치 예시 : src/main/resources/templates/member/fragments/common.html
+  사용 예시 : <div th:replace="~{member/fragments/common :: miniLogo}"></div>
+
+  이 파일 자체는 렌더링되는 화면이 아니라 다른 뷰에서 조각(fragment)만 가져다 쓰는 용도입니다.
+-->
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="miniLogo" class="login-mini-logo">
+    <p class="login-mini-logo__tagline">일상을 배우는 취미공간</p>
+    <h1 class="login-mini-logo__title">숨쉬당</h1>
+</div>
+
+</body>
+</html>

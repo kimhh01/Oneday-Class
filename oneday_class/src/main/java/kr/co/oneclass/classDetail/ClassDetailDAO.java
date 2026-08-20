@@ -1,0 +1,64 @@
+package kr.co.oneclass.classDetail;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import kr.co.oneclass.common.ClassDTO;
+import kr.co.oneclass.common.ClassImageDTO;
+import kr.co.oneclass.common.ScheduleDTO;
+import kr.co.oneclass.common.TagDTO;
+
+
+@Mapper
+public interface ClassDetailDAO {
+	
+	//클래스 정보 조회
+	public ClassDTO selectClass(int classCode);
+	
+	//비슷한 클래스 조회
+	public List<ClassDTO> selectSameCategoryList( 
+			@Param("classCode") int classCode,
+	        @Param("categoryCode") int categoryCode
+	        );
+	
+	//작가 조회
+	public OperatorDTO selectCreator(long operatorCode);
+
+	//클래스 스케쥴 조회
+	public List<ScheduleDTO> selectSchedule(int classCode);
+	
+	//클래스 스케쥴 리스트 조회
+	public List<ScheduleDTO> selectScheduleList(int classCode);
+	
+	//커리큘럼 조회
+	public List<CurriculumDTO> selectCurriculum(int classCode);
+	
+	//리뷰 리스트 조회
+	public List<ReviewDTO> selectReviewList(int classCode);
+	
+	//리뷰 이미지 리스트 조회
+	public List<ReviewImgDTO> selectReviewImgList(int reviewCode);
+	
+	//리뷰별점, 리뷰 점수 조회
+	public ReviewSummaryDTO selectReviewSummary(int classCode);
+	
+	// 클래스 이미지 리스트 조회 메서드 추가
+	public List<ClassImageDTO> selectClassImageList(int classCode);
+	
+	//클래스 재료 조회
+	public List<MaterialDTO> selectMaterialList(int classCode);
+	
+	//제공사항 조회
+	public List<OfferingDTO> selectOfferingList(int classCode);
+	
+	//추가 제공사항 조회
+	public List<AdditionalInfoDTO> selectAdditionalInfo(int classCode);
+	
+	//태그 조회
+	public List<TagDTO> selectTagList(int classCode);
+	
+	//상세정보 조회
+	public List<DetailInfoDTO> selectDetailInfoList(int classCode);
+}

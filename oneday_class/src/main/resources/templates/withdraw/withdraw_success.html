@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원탈퇴 완료 | 숨쉬당</title>
+    <!-- CSS 연결 -->
+    <link rel="stylesheet" th:href="@{/withdraw/css/withdraw_success.css}">
+</head>
+<body>
+
+<div class="success-wrapper">
+    <div class="success-card">
+        
+        <!-- 완료 체크 아이콘 (SVG) -->
+        <div class="check-icon-box">
+            <svg class="check-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 12L10 17L20 7" stroke="#356846" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </div>
+
+        <!-- 메인 메시지 -->
+        <h1 class="success-title">회원 탈퇴가 완료되었습니다</h1>
+        
+        <p class="success-desc">
+            그동안 함께해 주셔서 감사합니다.<br>
+            다음에 더 좋은 인연으로 만나 뵙기를 바랍니다.
+        </p>
+
+        <!-- 중앙 일러스트 그래픽 영역 -->
+        <div class="illustration-area">
+            <img th:src="@{/images/withdraw_illustration.png}" 
+                 alt="탈퇴 완료 일러스트" 
+                 onError="this.style.display='none'; document.getElementById('placeholder-illustration').style.display='flex';">
+            
+            <!-- 이미지 경로가 없을 때 대체 노출되는 이쁜 아이콘 영역 -->
+            <div id="placeholder-illustration" class="placeholder-graphic" style="display: none;">
+                <span class="graphic-item">🌿</span>
+                <span class="graphic-item">📖</span>
+                <span class="graphic-item">🎨</span>
+            </div>
+        </div>
+
+        <!-- 하단 홈으로 이동 버튼 -->
+        <a th:href="@{/}" class="btn-home">
+            <svg class="home-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <span>홈으로 이동</span>
+        </a>
+
+    </div>
+</div>
+
+</body>
+</html>

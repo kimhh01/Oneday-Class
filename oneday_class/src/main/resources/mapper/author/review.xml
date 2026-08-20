@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	작가센터 리뷰 Mapper.
+
+	작가가 건드릴 수 있는 것은 자기 답글뿐이다.
+	리뷰 원문(STAR_RATING / CONTENT)은 수강생의 콘텐츠이므로 수정·삭제 문장을 두지 않는다.
+	이 Mapper 의 UPDATE 3개는 REPLY_CONTENT / REPLY_DATE 두 컬럼만 건드린다.
+
+	답글 전용 테이블이 없어 REVIEW.REPLY_CONTENT / REPLY_DATE 를 직접 쓴다.
+	그래서 답글 "등록" 도 INSERT 가 아니라 UPDATE 다.
+
+	소유자 검증은 별도 조회 없이 WHERE 의 OPERATOR_CODE 조건이 겸한다.
+	남의 리뷰를 건드리면 변경 행수가 0 으로 돌아온다.
+-->
+<mapper namespace="kr.co.oneclass.author.review.ReviewDAO">
+
+	<!-- 목록·건수가 공유하는 검색 조건 -->
+	<sql id="reviewSearchWhere">
+		WHERE c.OPERATOR_CODE = #{authorCode}
+		<if test="classCode > 0">
+			AND r.CLASS_CODE = #{classCode}
+		</if>
+		<if test="replyStatus == 'replied'">
+			AND r.REPLY_CONTENT IS NOT NULL
+		</if>
+		<if test="replyStatus == 'pending'">
+			AND r.REPLY_CONTENT IS NULL
+		</if>
+	</sql>
+
+	<!--
+		정렬 포함 리뷰 목록 본문.
+		리뷰 공개·숨김 상태는 작가 소관이 아니므로 내려보내지 않는다.
+	-->
+	<sql id="reviewListBase">
+		SELECT
+			r.REVIEW_CODE,
+			r.CLASS_CODE,
+			c.NAME AS CLASS_TITLE,
+			(
+				SELECT MIN(ci.IMAGE) KEEP (DENSE_RANK FIRST ORDER BY ci.SORT_ORDER)
+				FROM CLASS_IMG ci
+				WHERE ci.CLASS_CODE = c.CLASS_CODE
+				  AND ci.TYPE = '대표'
+			) AS THUMBNAIL_PATH,
+			m.NAME AS MEMBER_NAME,
+			r.STAR_RATING AS RATING,
+			r.CONTENT AS REVIEW_CONTENT,
+			r.INPUT_DATE AS REVIEW_DATE,
+			CASE WHEN r.REPLY_CONTENT IS NULL THEN 'pending' ELSE 'replied' END AS REPLY_STATUS,
+			r.REPLY_CONTENT,
+			r.REPLY_DATE
+		FROM REVIEW r
+		JOIN CLASS c ON r.CLASS_CODE = c.CLASS_CODE
+		JOIN MEMBER m ON r.MEMBER_CODE = m.MEMBER_CODE
+		<include refid="reviewSearchWhere"/>
+		<choose>
+			<when test="sortType == 'oldest'">
+				ORDER BY r.INPUT_DATE ASC, r.REVIEW_CODE ASC
+			</when>
+			<when test="sortType == 'ratingDesc'">
+				ORDER BY r.STAR_RATING DESC, r.INPUT_DATE DESC
+			</when>
+			<when test="sortType == 'ratingAsc'">
+				ORDER BY r.STAR_RATING ASC, r.INPUT_DATE DESC
+			</when>
+			<otherwise>
+				ORDER BY r.INPUT_DATE DESC, r.REVIEW_CODE DESC
+			</otherwise>
+		</choose>
+	</sql>
+
+	<!-- 전체 리뷰 수, 답글 완료 수, 답글 미작성 수를 집계한다 -->
+	<select id="selectReviewSummary" parameterType="long"
+		resultType="kr.co.oneclass.author.review.ReviewSummaryDTO">
+		SELECT
+			COUNT(*) AS TOTAL_REVIEW_COUNT,
+			COUNT(r.REPLY_CONTENT) AS REPLIED_REVIEW_COUNT,
+			NVL(SUM(CASE WHEN r.REPLY_CONTENT IS NULL THEN 1 ELSE 0 END), 0) AS UNANSWERED_REVIEW_COUNT
+		FROM REVIEW r
+		JOIN CLASS c ON r.CLASS_CODE = c.CLASS_CODE
+		WHERE c.OPERATOR_CODE = #{authorCode}
+	</select>
+
+	<!-- 클래스별 필터용 목록. 리뷰가 없는 클래스도 0건으로 함께 내려보낸다 -->
+	<select id="selectReviewClassList" parameterType="long"
+		resultType="kr.co.oneclass.author.review.ReviewClassDTO">
+		SELECT
+			c.CLASS_CODE,
+			c.NAME AS CLASS_TITLE,
+			COUNT(r.REVIEW_CODE) AS REVIEW_COUNT
+		FROM CLASS c
+		LEFT JOIN REVIEW r ON r.CLASS_CODE = c.CLASS_CODE
+		WHERE c.OPERATOR_CODE = #{authorCode}
+		GROUP BY c.CLASS_CODE, c.NAME
+		ORDER BY c.NAME
+	</select>
+
+	<!--
+		필터·정렬·페이지 조건에 맞는 리뷰 목록.
+		endRow 가 0 이면(컨트롤러가 페이지를 넘기지 않는 현재 상태) 전체를 반환한다.
+	-->
+	<select id="selectReviewList"
+		parameterType="kr.co.oneclass.author.review.ReviewSearchDTO"
+		resultType="kr.co.oneclass.author.review.ReviewListDTO">
+		<choose>
+			<when test="endRow > 0">
+				SELECT * FROM (
+					SELECT ROWNUM AS RN, base.* FROM (
+						<include refid="reviewListBase"/>
+					) base
+					WHERE ROWNUM &lt;= #{endRow}
+				)
+				WHERE RN &gt;= #{startRow}
+			</when>
+			<otherwise>
+				<include refid="reviewListBase"/>
+			</otherwise>
+		</choose>
+	</select>
+
+	<!-- 현재 필터 조건의 전체 리뷰 수 -->
+	<select id="selectReviewCount"
+		parameterType="kr.co.oneclass.author.review.ReviewSearchDTO"
+		resultType="int">
+		SELECT COUNT(*)
+		FROM REVIEW r
+		JOIN CLASS c ON r.CLASS_CODE = c.CLASS_CODE
+		<include refid="reviewSearchWhere"/>
+	</select>
+
+	<!-- 작가 소유 클래스의 리뷰인지 확인하면서 상세정보를 조회한다 -->
+	<select id="selectReviewDetail" parameterType="map"
+		resultType="kr.co.oneclass.author.review.ReviewDetailDTO">
+		SELECT
+			r.REVIEW_CODE,
+			r.CLASS_CODE,
+			c.NAME AS CLASS_TITLE,
+			m.NAME AS MEMBER_NAME,
+			m.IMAGE AS MEMBER_PROFILE_PATH,
+			r.STAR_RATING AS RATING,
+			r.CONTENT AS REVIEW_CONTENT,
+			r.INPUT_DATE AS REVIEW_DATE,
+			CASE WHEN r.REPLY_CONTENT IS NULL THEN 'pending' ELSE 'replied' END AS REPLY_STATUS,
+			r.REPLY_CONTENT,
+			r.REPLY_DATE
+		FROM REVIEW r
+		JOIN CLASS c ON r.CLASS_CODE = c.CLASS_CODE
+		JOIN MEMBER m ON r.MEMBER_CODE = m.MEMBER_CODE
+		WHERE r.REVIEW_CODE = #{reviewCode}
+		  AND c.OPERATOR_CODE = #{authorCode}
+	</select>
+
+	<!--
+		리뷰 이미지 목록.
+		REVIEW_IMG 에 순서 컬럼이 없어 REVIEW_IMG_CODE 순서를 출력 순서로 쓴다.
+		컬럼명 REVJEW_IMG 는 오타지만 실제 컬럼명이므로 그대로 둔다.
+	-->
+	<select id="selectReviewImageList" parameterType="int"
+		resultType="kr.co.oneclass.author.review.ReviewImageDTO">
+		SELECT
+			REVIEW_IMG_CODE AS REVIEW_IMAGE_CODE,
+			REVIEW_CODE,
+			REVJEW_IMG AS IMAGE_PATH,
+			ROW_NUMBER() OVER (ORDER BY REVIEW_IMG_CODE) AS IMAGE_ORDER
+		FROM REVIEW_IMG
+		WHERE REVIEW_CODE = #{reviewCode}
+		ORDER BY REVIEW_IMG_CODE
+	</select>
+
+	<!--
+		답글 등록. 전용 테이블이 없어 UPDATE 로 처리한다.
+		REPLY_CONTENT IS NULL 조건이 "이미 답글이 있으면 등록 불가" 검증을 겸한다.
+	-->
+	<update id="insertReviewReply"
+		parameterType="kr.co.oneclass.author.review.ReviewReplyDTO">
+		UPDATE REVIEW
+		SET REPLY_CONTENT = #{replyContent},
+			REPLY_DATE = SYSDATE
+		WHERE REVIEW_CODE = #{reviewCode}
+		  AND REPLY_CONTENT IS NULL
+		  AND CLASS_CODE IN (
+			  SELECT c.CLASS_CODE
+			  FROM CLASS c
+			  WHERE c.OPERATOR_CODE = #{authorCode}
+		  )
+	</update>
+
+	<!-- 답글 수정. REPLY_CONTENT IS NOT NULL 조건이 "답글이 있어야 수정 가능" 검증을 겸한다 -->
+	<update id="updateReviewReply"
+		parameterType="kr.co.oneclass.author.review.ReviewReplyDTO">
+		UPDATE REVIEW
+		SET REPLY_CONTENT = #{replyContent},
+			REPLY_DATE = SYSDATE
+		WHERE REVIEW_CODE = #{reviewCode}
+		  AND REPLY_CONTENT IS NOT NULL
+		  AND CLASS_CODE IN (
+			  SELECT c.CLASS_CODE
+			  FROM CLASS c
+			  WHERE c.OPERATOR_CODE = #{authorCode}
+		  )
+	</update>
+
+	<!-- 답글 삭제. 리뷰 자체는 남기고 답글 컬럼만 비운다 -->
+	<update id="deleteReviewReply" parameterType="map">
+		UPDATE REVIEW
+		SET REPLY_CONTENT = NULL,
+			REPLY_DATE = NULL
+		WHERE REVIEW_CODE = #{reviewCode}
+		  AND CLASS_CODE IN (
+			  SELECT c.CLASS_CODE
+			  FROM CLASS c
+			  WHERE c.OPERATOR_CODE = #{authorCode}
+		  )
+	</update>
+
+	<!--
+		리뷰 원문(STAR_RATING / CONTENT)을 바꾸는 문장은 이 Mapper 에 두지 않는다.
+		리뷰는 수강생의 콘텐츠이고 작가가 건드릴 수 있는 것은 자기 답글뿐이다.
+		다이어그램의 updateReviewStatus(숨김·삭제)는 정책상 제외했다.
+
+		위 UPDATE 3개가 REPLY_CONTENT / REPLY_DATE 두 컬럼만 건드리는 것이
+		이 정책의 실제 구현이다. 다른 컬럼은 SET 절에 절대 넣지 말 것.
+	-->
+
+</mapper>

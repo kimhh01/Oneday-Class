@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- 사이드바 Fragment (activeMenu 파라미터를 받아 해당 메뉴에 active 클래스 부여) -->
+<aside th:fragment="sidebar(activeMenu)" class="profile-sidebar">
+    <div class="sidebar-user-info">
+        <div class="sidebar-avatar">
+            <!-- 프로필 이미지 출력 -->
+            <img th:if="${member != null and member.profileImg != null and #strings.length(member.profileImg) > 0}"
+                 th:src="@{${member.profileImg}}" alt="프로필 이미지">
+            <svg th:unless="${member != null and member.profileImg != null and #strings.length(member.profileImg) > 0}"
+                 viewBox="0 0 100 100" class="default-avatar">
+                <circle cx="50" cy="50" r="50" fill="#E2EFCB"/>
+                <circle cx="50" cy="40" r="18" fill="#526848"/>
+                <path d="M20 82c0-16.5 13.5-30 30-30s30 13.5 30 30" fill="#526848"/>
+            </svg>
+        </div>
+        <h3 class="sidebar-user-name" th:text="${member != null ? member.name : ''}">홍길동</h3>
+        <span class="sidebar-login-type"
+              th:text="${member != null and member.loginType == 'GOOGLE' ? '구글 계정 연결중' : '일반 계정 연결중'}">
+            구글 계정 연결중
+        </span>
+    </div>
+
+    <!-- 네비게이션 메뉴 목록 -->
+    <nav class="sidebar-nav">
+
+        <!-- 프로필 수정 (상단 강조 그룹) -->
+        <div class="nav-group nav-group-profile">
+            <a th:href="@{/profile}" class="nav-item nav-profile-edit"
+               th:classappend="${activeMenu == 'profile'} ? 'active' : ''">프로필 수정</a>
+        </div>
+
+        <!-- 일반 메뉴 그룹 -->
+        <div class="nav-group nav-group-main">
+            <a th:href="@{/mypage/purchase}" class="nav-item"
+               th:classappend="${activeMenu == 'purchase'} ? 'active' : ''">구매 내역</a>
+
+            <a th:href="@{/mypage/bookmark}" class="nav-item"
+               th:classappend="${activeMenu == 'bookmark'} ? 'active' : ''">관심 클래스</a>
+
+            <a th:href="@{/mypage/inquiry}" class="nav-item"
+               th:classappend="${activeMenu == 'inquiry'} ? 'active' : ''">문의하기</a>
+
+            <a th:href="@{/mypage/notice}" class="nav-item"
+               th:classappend="${activeMenu == 'notice'} ? 'active' : ''">공지사항</a>
+
+            <a th:href="@{/mypage/withdraw}" class="nav-item nav-withdraw"
+               th:classappend="${activeMenu == 'withdraw'} ? 'active' : ''">회원탈퇴</a>
+        </div>
+
+    </nav>
+</aside>
+
+</body>
+</html>

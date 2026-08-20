@@ -20,11 +20,10 @@
             c.CATEGORY_CODE as categoryCode,
             c.NAME as name,
             c.PRICE as price,
-            c.DESIRED_PRICE as desiredPrice, <!-- 👈 이 부분 추가 -->
             c.ADDRESS as address,
             c.STAR_RATING_AVG as starRatingAvg,
             (SELECT ci.IMAGE 
-             FROM CLASS_IMG ci 
+             FROM CLASS_IMAGE ci 
              WHERE ci.CLASS_CODE = c.CLASS_CODE 
                AND ROWNUM = 1) as mainImage
         FROM CLASS c
@@ -62,7 +61,7 @@
             TYPE as type,
             IMAGE as image,
             SORT_ORDER as sortOrder
-        FROM CLASS_IMG
+        FROM CLASS_IMAGE
         WHERE CLASS_CODE = #{classCode}
         ORDER BY SORT_ORDER ASC
     </select>

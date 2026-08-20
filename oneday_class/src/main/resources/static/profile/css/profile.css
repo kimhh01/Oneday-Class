@@ -1,0 +1,262 @@
+@charset "UTF-8";
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #f6f7f5;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #1a1a1a;
+}
+
+/* 메인 레이아웃 감싸기 */
+.profile-wrapper {
+    width: 100%;
+    min-height: calc(100vh - 150px);
+    padding: 40px 16px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; 
+}
+
+.profile-container {
+    width: 100%;
+    max-width: 1020px;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+/* 하나의 큰 하얀색 카드 */
+.profile-main {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 36px 36px 40px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+/* 💡 수정: 제목 밑에 구분선(border-bottom)과 여백 추가 */
+.page-header {
+    padding-bottom: 24px;
+    border-bottom: 1px solid #f0f0f0; /* 제목 밑 구분선 */
+    margin-bottom: 0;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #111111;
+    margin-bottom: 6px;
+}
+
+.page-subtitle {
+    font-size: 13.5px;
+    color: #777777;
+}
+
+/* 내부 개별 카드는 하얀 배경을 풀고 하나의 카드로 어우러지게 만듭니다. */
+.card-section {
+    background-color: transparent;
+    border-radius: 0;
+    padding: 0;
+    box-shadow: none;
+    /* 프로필 이미지 박스와 폼 사이의 구분선 */
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 28px;
+}
+
+/* 폼 안에 있는 card-section은 밑줄을 제거합니다. (대신 버튼 위에 줄 생성) */
+form .card-section {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.section-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #356846;
+    margin-bottom: 20px;
+}
+
+/* 이미지 변경 박스 */
+.img-change-box {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.img-preview-wrapper {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background-color: #f4f6f4;
+}
+
+.img-preview-wrapper img,
+.img-preview-wrapper .default-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.img-info-text {
+    flex: 1;
+}
+
+.img-info-text h3 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111111;
+    margin-bottom: 4px;
+}
+
+.img-info-text p {
+    font-size: 12.5px;
+    color: #888888;
+}
+
+/* 폼 그룹 및 입력창 */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-label {
+    display: block;
+    font-size: 12.5px;
+    color: #666666;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.form-input {
+    width: 100%;
+    max-width: 320px;
+    height: 44px;
+    padding: 0 14px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #222222;
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+
+.form-input:focus {
+    border-color: #356846;
+}
+
+.form-input:disabled {
+    background-color: #f9f9f9;
+    color: #888888;
+}
+
+.password-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.password-row .form-input {
+    max-width: 320px;
+}
+
+/* 버튼 스타일 */
+.btn-primary {
+    background-color: #356846;
+    color: #ffffff;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-primary:hover {
+    background-color: #2a5337;
+}
+
+.btn-outline {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    color: #444444;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+    white-space: nowrap;
+}
+
+.btn-outline:hover {
+    background-color: #f5f5f5;
+}
+
+/* 💡 수정: 하단 버튼 위에 구분선(border-top)과 여백 추가 */
+.form-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 16px;
+    margin-top: 36px;       /* 폼과의 위쪽 간격 */
+    padding-top: 24px;      /* 선과 버튼 사이의 간격 */
+    border-top: 1px solid #f0f0f0; /* 하단 버튼 위 구분선 */
+}
+
+.btn-text {
+    font-size: 14px;
+    color: #666666;
+    text-decoration: none;
+    font-weight: 500;
+    padding: 8px 12px;
+}
+
+.btn-text:hover {
+    color: #111111;
+}
+
+.btn-submit {
+    min-width: 100px;
+    height: 44px;
+}
+
+/* 모바일 반응형 대응 */
+@media (max-width: 768px) {
+    .profile-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .profile-main {
+        padding: 24px 20px;
+    }
+
+    .form-input,
+    .password-row .form-input {
+        max-width: 100%;
+    }
+
+    .password-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}

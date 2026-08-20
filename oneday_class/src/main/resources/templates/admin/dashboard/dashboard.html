@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>관리자 대시보드</title>
+
+    <link rel="stylesheet"
+          th:href="@{/admin/css/admin-common.css}">
+
+    <link rel="stylesheet"
+          th:href="@{/admin/css/admin-layout.css}">
+
+    <link rel="stylesheet"
+          th:href="@{/admin/css/admin-dashboard.css}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div th:replace=
+     "~{admin/fragments/sideMenu :: sideMenu('dashboard')}">
+</div>
+
+<main class="main">
+
+    <div class="page-head">
+        <h1>대시보드</h1>
+    </div>
+
+    <section class="cards">
+
+        <article class="metric">
+            <div class="metric-label">전체 회원</div>
+            <div class="metric-value"
+                 th:text="${dashboard.memberCount}">
+                0
+            </div>
+        </article>
+
+        <article class="metric">
+            <div class="metric-label">등록 작가</div>
+            <div class="metric-value"
+                 th:text="${dashboard.writerCount}">
+                0
+            </div>
+        </article>
+
+        <article class="metric">
+            <div class="metric-label">운영 클래스</div>
+            <div class="metric-value"
+                 th:text="${dashboard.classCount}">
+                0
+            </div>
+        </article>
+
+        <article class="metric">
+            <div class="metric-label">이번 달 거래액</div>
+            <div class="metric-value">
+                <span th:text=
+                      "${#numbers.formatInteger(dashboard.monthlySales, 0, 'COMMA')}">
+                    0
+                </span>
+                <small>원</small>
+            </div>
+        </article>
+
+    </section>
+
+    <section class="panel">
+
+        <div class="panel-head">
+            월별 예약 현황
+        </div>
+
+        <div class="panel-body chart-area">
+            <canvas id="reservationChart"></canvas>
+        </div>
+
+    </section>
+
+</main>
+
+<script th:inline="javascript">
+
+    const reservationData =
+        /*[[${monthlyReservations}]]*/ [];
+
+    const labels =
+        reservationData.map(item => item.month);
+
+    const values =
+        reservationData.map(item => item.reservationCount);
+
+    new Chart(
+        document.getElementById("reservationChart"),
+        {
+            type: "bar",
+
+            data: {
+                labels: labels,
+
+                datasets: [{
+                    label: "예약 수",
+                    data: values,
+                    backgroundColor:
+                        "rgba(79, 127, 98, 0.28)",
+                    borderColor:
+                        "#4f7f62",
+                    borderWidth: 1,
+                    borderRadius: 7
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    },
+
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        }
+    );
+
+</script>
+
+</body>
+</html>

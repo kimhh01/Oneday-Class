@@ -1,0 +1,489 @@
+@charset "UTF-8";
+
+/* =============================================================
+   class-manage.css - 클래스 관리 목록 / 상세 전용
+   공통 목록 패턴(통계·필터·탭·표·모달)은 management.css 에 있다.
+   여기에는 이 두 화면에서만 쓰는 것만 둔다.
+   ============================================================= */
+
+/* ---------- 목록 : 필터 열 배치 ---------- */
+.class-filter {
+	grid-template-columns: minmax(300px, 1.15fr) 200px minmax(260px, 1fr) 112px;
+	align-items: end;
+}
+
+/* =============================================================
+   상세
+   ============================================================= */
+
+/* ---------- 1. 클래스 요약 ---------- */
+.class-hero {
+	display: grid;
+	grid-template-columns: 232px minmax(0, 1fr);
+	gap: 24px;
+	margin-bottom: 20px;
+	padding: 22px;
+	background: var(--bg-card);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+}
+.class-hero__photo {
+	width: 100%;
+	height: 168px;
+	border-radius: 10px;
+	object-fit: cover;
+	background: var(--bg-soft);
+}
+.class-hero__body {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+.class-hero__top {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 16px;
+}
+.class-hero__actions {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex: none;
+}
+.class-hero__title {
+	margin-top: 10px;
+	font-family: var(--font-body);
+	font-size: 26px;
+	font-weight: 700;
+	line-height: 1.3;
+	color: var(--text-strong);
+}
+
+/* 코드 / 카테고리 / 위치 / 가격 */
+.class-hero__meta {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+	gap: 10px 24px;
+	margin-top: 16px;
+}
+.class-hero__meta div {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	min-width: 0;
+	font-size: 13px;
+	color: var(--text-body);
+}
+.class-hero__meta svg {
+	width: 16px;
+	height: 16px;
+	flex: none;
+	margin-top: 2px;
+	color: var(--text-muted);
+}
+.class-hero__meta dt {
+	flex: none;
+	width: 66px;
+	color: var(--text-muted);
+}
+.class-hero__meta dd {
+	margin: 0;
+	min-width: 0;
+}
+.class-hero__price { font-weight: 700; color: var(--text-strong); }
+
+/* ---------- 2. 일정별 운영 현황 ---------- */
+.schedule-card { margin-bottom: 20px; }
+.schedule-card__head {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 22px 22px 16px;
+}
+.schedule-card__title {
+	font-family: var(--font-body);
+	font-size: var(--fs-title);
+	font-weight: 700;
+	color: var(--text-strong);
+}
+.schedule-card__note {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: var(--fs-meta);
+	color: var(--text-muted);
+}
+.schedule-card__note svg { width: 14px; height: 14px; flex: none; }
+
+/* 취소된 일정은 흐리게 — 목록에서 빠지지 않고 이력으로 남는다 */
+.schedule-row.is-cancelled td:not(.mgmt-table__action) { opacity: .55; }
+.schedule-row.is-cancelled .col-name { text-decoration: line-through; }
+
+/* ---------- 3. 정산 요약 ----------
+   취소 금액은 따로 세지 않는다. 판매 금액이 취소분까지 반영된 순액이다. */
+.settle {
+	margin-bottom: 20px;
+	background: var(--bg-card);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+}
+.settle__head {
+	padding: 22px 22px 0;
+	font-family: var(--font-body);
+	font-size: var(--fs-title);
+	font-weight: 700;
+	color: var(--text-strong);
+}
+.settle__grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 16px;
+	padding: 18px 22px 22px;
+}
+.settle__item {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 18px;
+	border: 1px solid var(--border-soft);
+	border-radius: 10px;
+}
+.settle__item--total {
+	border-color: var(--green-100);
+	background: var(--green-50);
+}
+.settle__icon {
+	display: grid;
+	place-items: center;
+	width: 42px;
+	height: 42px;
+	flex: none;
+	border-radius: 50%;
+	background: var(--bg-soft);
+	color: var(--text-muted);
+}
+.settle__item--total .settle__icon {
+	background: var(--green-100);
+	color: var(--green-600);
+}
+.settle__icon svg { width: 20px; height: 20px; }
+.settle__label {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	font-size: var(--fs-meta);
+	color: var(--text-muted);
+}
+.settle__label svg { width: 13px; height: 13px; }
+.settle__value {
+	margin-top: 3px;
+	font-size: 20px;
+	font-weight: 700;
+	color: var(--text-strong);
+	font-variant-numeric: tabular-nums;
+}
+.settle__item--total .settle__value { color: var(--green-700); }
+
+/* ---------- 4. 하단 액션 ---------- */
+.class-foot {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	padding: 4px 0 8px;
+}
+.class-foot .btn { min-width: 152px; }
+/* 폐쇄는 되돌릴 수 없다. 남은 일정이 없을 때만 열린다. */
+.btn--danger {
+	background: var(--red-600);
+	color: #fff;
+	border-color: var(--red-600);
+}
+.btn--danger:hover { background: var(--on-red); border-color: var(--on-red); }
+.btn[aria-disabled="true"] {
+	background: var(--bg-soft);
+	border-color: var(--border);
+	color: var(--text-muted);
+	cursor: not-allowed;
+	pointer-events: none;
+}
+.class-foot__reason {
+	margin-top: 10px;
+	font-size: var(--fs-meta);
+	line-height: 1.6;
+	color: var(--text-muted);
+	text-align: center;
+}
+.class-foot__reason b { font-weight: 700; color: var(--on-red); }
+
+/* =============================================================
+   일정 관리 모달
+   ============================================================= */
+
+/* 일정 번호 / 날짜 / 시간 */
+.sched-facts {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 10px;
+}
+.sched-facts div {
+	min-width: 0;
+	padding: 13px 14px;
+	border: 1px solid var(--border-soft);
+	border-radius: 10px;
+}
+.sched-facts dt {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	font-size: var(--fs-meta);
+	color: var(--text-muted);
+}
+.sched-facts dt svg { width: 13px; height: 13px; flex: none; }
+.sched-facts dd {
+	margin: 5px 0 0;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--text-strong);
+}
+
+/* 신청 인원 / 최소·최대 / 남은 자리 / 현재 상태 */
+.sched-figures {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 10px;
+	margin-top: 12px;
+	padding: 14px;
+	border-radius: 10px;
+	background: var(--bg-soft);
+}
+.sched-figures div { min-width: 0; text-align: center; }
+.sched-figures dt {
+	font-size: var(--fs-meta);
+	color: var(--text-muted);
+}
+.sched-figures dd {
+	margin: 5px 0 0;
+	font-size: 15px;
+	font-weight: 700;
+	color: var(--text-strong);
+	font-variant-numeric: tabular-nums;
+}
+
+/* 남은 자리 스테퍼 */
+.seat-stepper { margin-top: 20px; text-align: center; }
+.seat-stepper__label {
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--text-body);
+}
+.seat-stepper__control {
+	display: inline-flex;
+	align-items: center;
+	gap: 18px;
+	margin-top: 10px;
+}
+.seat-stepper__control button {
+	display: grid;
+	place-items: center;
+	width: 40px;
+	height: 40px;
+	border: 1px solid var(--border-strong, var(--border));
+	border-radius: 50%;
+	color: var(--text-body);
+}
+.seat-stepper__control button:hover:not([disabled]) {
+	border-color: var(--green-600);
+	color: var(--green-700);
+}
+.seat-stepper__control button[disabled] { opacity: .4; cursor: not-allowed; }
+.seat-stepper__control button svg { width: 16px; height: 16px; }
+.seat-stepper__value {
+	min-width: 92px;
+	font-size: 26px;
+	font-weight: 700;
+	color: var(--text-strong);
+	font-variant-numeric: tabular-nums;
+}
+.seat-stepper__value small {
+	margin-left: 3px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--text-muted);
+}
+.seat-stepper__hint {
+	margin-top: 8px;
+	font-size: var(--fs-meta);
+	color: var(--text-muted);
+}
+
+/* 0석으로 두면 어떻게 되는지 두 경우를 나란히 보여준다 */
+.seat-rules {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
+	margin-top: 18px;
+}
+.seat-rule {
+	display: flex;
+	align-items: flex-start;
+	gap: 9px;
+	padding: 13px 14px;
+	border-radius: 10px;
+	font-size: 12px;
+	line-height: 1.6;
+	color: var(--text-body);
+}
+.seat-rule svg { width: 16px; height: 16px; flex: none; margin-top: 1px; }
+.seat-rule b { display: block; margin-bottom: 3px; font-weight: 700; }
+.seat-rule--has { background: var(--green-50); }
+.seat-rule--has svg,
+.seat-rule--has b { color: var(--green-700); }
+.seat-rule--none { background: var(--amber-100); }
+.seat-rule--none svg,
+.seat-rule--none b { color: var(--on-amber); }
+
+/* 저장하면 상태가 어떻게 바뀌는지 미리 보여준다 */
+.state-preview {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin-top: 18px;
+	padding: 14px 16px;
+	border: 1px solid var(--border-soft);
+	border-radius: 10px;
+	font-size: var(--fs-meta);
+	color: var(--text-muted);
+}
+.state-preview__arrow { color: var(--text-muted); }
+.state-preview__arrow svg { width: 14px; height: 14px; }
+.state-preview__next { margin-left: auto; }
+
+/* =============================================================
+   폐쇄 모달 : 비밀번호 확인
+   ============================================================= */
+.password-field { margin-top: 16px; }
+.password-field__label {
+	display: block;
+	margin-bottom: 7px;
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--text-body);
+}
+.password-field__control { position: relative; }
+.password-field__control .input { padding-right: 46px; }
+.password-field__toggle {
+	position: absolute;
+	top: 50%;
+	right: 8px;
+	display: grid;
+	place-items: center;
+	width: 34px;
+	height: 34px;
+	transform: translateY(-50%);
+	border-radius: 50%;
+	color: var(--text-muted);
+}
+.password-field__toggle:hover { background: var(--bg-soft); color: var(--text-body); }
+.password-field__toggle svg { width: 17px; height: 17px; }
+.form-error {
+	margin-top: 7px;
+	font-size: var(--fs-meta);
+	color: var(--on-red);
+}
+.form-success {
+	margin-top: 7px;
+	font-size: var(--fs-meta);
+	color: var(--green-600);
+}
+
+/* =============================================================
+   반응형 — 1200 / 1024 / 768 / 560
+   ============================================================= */
+@media (max-width: 1200px) {
+	.class-filter { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+	.class-filter .mgmt-filter__field:first-child { grid-column: 1 / -1; }
+	.class-filter .mgmt-filter__submit { grid-column: 1 / -1; }
+	.settle__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+@media (max-width: 1024px) {
+	.class-hero { grid-template-columns: 180px minmax(0, 1fr); gap: 18px; }
+	.class-hero__photo { height: 140px; }
+	.class-hero__title { font-size: 22px; }
+	.class-hero__meta { grid-template-columns: minmax(0, 1fr); }
+	.settle__grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 768px) {
+	.class-filter { grid-template-columns: minmax(0, 1fr); }
+	.class-filter .mgmt-filter__field:first-child,
+	.class-filter .mgmt-filter__submit { grid-column: auto; }
+	.class-hero {
+		grid-template-columns: minmax(0, 1fr);
+		padding: 18px;
+	}
+	.class-hero__photo { height: 180px; }
+	.class-hero__top {
+		align-items: stretch;
+		flex-direction: column;
+	}
+	.class-hero__actions .btn { flex: 1; }
+	.sched-figures { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+	.class-foot { flex-direction: column-reverse; }
+	.class-foot .btn { width: 100%; }
+}
+@media (max-width: 560px) {
+	.sched-facts { grid-template-columns: minmax(0, 1fr); }
+	.seat-rules { grid-template-columns: minmax(0, 1fr); }
+	.state-preview { flex-wrap: wrap; }
+	.state-preview__next { margin-left: 0; }
+}
+
+/* =============================================================
+   표 열 폭
+   table-layout:fixed 라 첫 행(thead th)의 폭이 곧 열 폭이다. <colgroup> 은 필요 없다.
+   폭 = 각 열의 자연폭 + (남는 폭 / 열 개수). 여유를 열마다 똑같이 나눠 갖는다.
+   min-width 는 그 표의 자연폭이다. 화면이 더 좁아지면 열을 뭉개는 대신
+   패널 안에서 가로로 스크롤된다.
+   ============================================================= */
+
+/* 목록 : 여유를 열당 10.9px 씩 나눠 가진다 */
+.mgmt-table--list { min-width: 956px; }
+.mgmt-table--list th:nth-child(1) { width: 11.3%; }  /* 대표 이미지 */
+.mgmt-table--list th:nth-child(2) { width: 18.7%; }  /* 클래스명 */
+.mgmt-table--list th:nth-child(3) { width: 8.6%; }   /* 가격 */
+.mgmt-table--list th:nth-child(4) { width: 9.2%; }   /* 일정 유형 */
+.mgmt-table--list th:nth-child(5) { width: 17.2%; }  /* 모집기간 */
+.mgmt-table--list th:nth-child(6) { width: 7.7%; }   /* 예정 일정 */
+.mgmt-table--list th:nth-child(7) { width: 7.7%; }   /* 신청자 */
+.mgmt-table--list th:nth-child(8) { width: 9.2%; }   /* 상태 */
+.mgmt-table--list th:nth-child(9) { width: 10.4%; }  /* 관리 */
+
+/* 일정별 운영 현황 */
+.mgmt-table--schedule {
+	min-width: 740px;
+}
+
+/* 8개 열 너비 동일 */
+.mgmt-table--schedule th:nth-child(1),
+.mgmt-table--schedule th:nth-child(2),
+.mgmt-table--schedule th:nth-child(3),
+.mgmt-table--schedule th:nth-child(4),
+.mgmt-table--schedule th:nth-child(5),
+.mgmt-table--schedule th:nth-child(6),
+.mgmt-table--schedule th:nth-child(7),
+.mgmt-table--schedule th:nth-child(8) {
+	width: 12.5%;
+}
+
+/* 이 표에서만 가운데 정렬 */
+.mgmt-table--schedule th,
+.mgmt-table--schedule td,
+.mgmt-table--schedule .col-num,
+.mgmt-table--schedule .col-right,
+.mgmt-table--schedule .col-badge,
+.mgmt-table--schedule .col-action,
+.mgmt-table--schedule .mgmt-table__action {
+	text-align: center;
+}

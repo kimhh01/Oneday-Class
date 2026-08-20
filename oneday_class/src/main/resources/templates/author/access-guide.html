@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>작가 페이지 안내 | 숨비당 원데이 클래스</title>
+<link rel="stylesheet" th:href="@{/author/css/common.css}">
+</head>
+<body class="author-page">
+	<main class="content">
+		<section class="card empty-state">
+			<div class="empty-state__body">
+				<h1 class="page-title" th:text="${accessTitle}">작가 등록이 필요합니다</h1>
+				<p class="page-desc" th:text="${accessMessage}">현재 계정에 연결된 작가 정보가 없습니다.</p>
+				<a class="btn btn--primary" th:href="@{/}">일반 페이지로 돌아가기</a>
+			</div>
+		</section>
+	</main>
+</body>
+</html>

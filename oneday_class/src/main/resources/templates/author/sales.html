@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>매출 현황 | 숨비당 원데이 클래스</title>
+<link rel="stylesheet" th:href="@{/author/css/common.css}"><link rel="stylesheet" th:href="@{/author/css/header.css}">
+<link rel="stylesheet" th:href="@{/author/css/sidebar.css}"><link rel="stylesheet" th:href="@{/author/css/management.css}">
+<link rel="stylesheet" th:href="@{/author/css/sales.css}"><script th:src="@{/author/js/layout.js}" defer></script>
+</head>
+<body class="author-page sales-page" data-menu="sales" data-page="매출 현황">
+<div class="app"><div th:replace="~{author/fragments/icons :: icons}"></div><div th:replace="~{author/fragments/header :: header}"></div>
+<div class="app-body"><div th:replace="~{author/fragments/sidebar :: sidebar}"></div><main class="content">
+<div class="content__inner sales-shell">
+	<header class="sales-head"><div><h1 class="page-title">매출 현황</h1><p class="page-desc">결제 금액과 환불 내역, 정산 상태를 한눈에 확인해보세요.</p></div>
+		<div class="sales-head__actions"><a class="btn btn--ghost" th:href="@{/author/sales/excel(period=${period},status=${status},keyword=${keyword})}"><svg><use href="#icon-arrow-down"></use></svg> 매출 다운로드</a><a class="btn btn--primary" th:href="@{/author/settlements/new}">정산 신청</a></div></header>
+	<section class="sales-metrics" aria-label="매출 요약">
+		<article><span>총 결제금액</span><strong class="is-blue" th:text="|${#numbers.formatInteger(salesSummary.totalPaymentAmount, 1, 'COMMA')}원|">0원</strong><p >0건</p></article>
+		<article><span>환불 금액</span><strong class="is-red" th:text="|${#numbers.formatInteger(salesSummary.totalCancelAmount, 1, 'COMMA')}원|">0원</strong><p >0건</p></article>
+		<article><span>정산 예정액</span><strong class="is-green" th:text="|${#numbers.formatInteger(salesSummary.expectedSettlementAmount, 1, 'COMMA')}원|">0원</strong><p>저장된 정산액 기준</p></article>
+	</section>
+	<form class="sales-filter" method="get" th:action="@{/author/sales}" aria-label="매출 조회 조건">
+		<div class="sales-field sales-field--period"><label for="salesPeriod">조회 기간</label><div class="sales-select"><select id="salesPeriod" name="period"><option value="all" th:selected="${period == 'all'}">전체 기간</option><option value="week" th:selected="${period == 'week'}">최근 7일</option><option value="month" th:selected="${period == 'month'}">최근 30일</option><option value="quarter" th:selected="${period == 'quarter'}">최근 3개월</option></select><svg><use href="#icon-chevron-down"></use></svg></div></div>
+		<div class="sales-field sales-field--search"><label for="salesKeyword">결제·클래스 검색</label><div class="sales-search"><svg><use href="#icon-search"></use></svg><input id="salesKeyword" name="keyword" type="search" th:value="${keyword}" placeholder="결제 PK, 클래스명, 구매자명"></div></div>
+		<div class="sales-field sales-field--status"><label for="salesStatus">결제 상태</label><div class="sales-select"><select id="salesStatus" name="status"><option value="all" th:selected="${status == 'all'}">전체 상태</option><option value="paid" th:selected="${status == 'paid'}">결제 완료</option><option value="refunded" th:selected="${status == 'refunded'}">환불·취소</option></select><svg><use href="#icon-chevron-down"></use></svg></div></div>
+		<button class="btn btn--primary sales-filter__submit" type="submit"><svg><use href="#icon-search"></use></svg> 조회</button>
+	</form>
+	<section class="sales-table-card" aria-labelledby="salesListTitle"><div class="sales-table-head"><div><h2 id="salesListTitle">결제 내역</h2><p>총 <strong th:text="${salesCount}">0</strong>건의 결제 내역입니다.</p></div><span>금액 단위: 원</span></div>
+		<div class="sales-table-wrap"><table class="sales-table"><thead><tr><th>결제번호</th><th>결제일</th><th>클래스</th><th>구매자</th><th class="is-number">결제금액</th><th class="is-number">환불</th><th class="is-number">정산액</th><th>결제 상태</th><th><span class="sr-only">관리</span></th></tr></thead>
+		<tbody><tr th:each="sale : ${sales}"><td><a th:href="@{/author/sales/{id}(id=${sale.paymentCode})}" th:text="${'P-' + sale.paymentCode}">P-000000-00</a></td><td th:text="${sale.paymentDate == null ? '' : #dates.format(sale.paymentDate, 'yyyy.MM.dd')}">-</td>
+		<td><div class="sales-class"><img th:src="@{/author/images/photo/class-upload-placeholder.png}" alt=""><strong th:text="${sale.classTitle}">클래스</strong></div></td><td th:text="${sale.memberName}">구매자</td>
+		<td class="is-number" th:text="${#numbers.formatInteger(sale.paymentAmount,1,'COMMA')}">0</td><td class="is-number is-refund" th:text="${#numbers.formatInteger(sale.discountAmount,1,'COMMA')}">0</td><td class="is-number is-settlement" th:text="${#numbers.formatInteger(sale.settlementAmount,1,'COMMA')}">0</td>
+		<td><span class="sales-status" th:classappend="${sale.paymentStatus == '환불완료'} ? 'sales-status--refunded' : 'sales-status--paid'"><i></i><span th:text="${sale.paymentStatus}">상태</span></span></td><td><a class="sales-detail-link" th:href="@{/author/sales/{id}(id=${sale.paymentCode})}">상세</a></td></tr></tbody></table></div>
+		<p class="sales-empty" th:if="${#lists.isEmpty(sales)}">조건에 맞는 결제 내역이 없습니다.</p>
+		<nav class="sales-pagination" aria-label="매출 목록 페이지" th:if="${totalPages > 1}">
+			<a th:classappend="${currentPage == 1} ? 'is-disabled'" th:href="@{/author/sales(period=${period},status=${status},keyword=${keyword},page=${currentPage - 1})}" aria-label="이전 페이지">‹</a>
+			<a th:each="pageNo : ${#numbers.sequence(1, totalPages)}" th:href="@{/author/sales(period=${period},status=${status},keyword=${keyword},page=${pageNo})}" th:text="${pageNo}" th:attr="aria-current=${pageNo == currentPage ? 'page' : null}">1</a>
+			<a th:classappend="${currentPage == totalPages} ? 'is-disabled'" th:href="@{/author/sales(period=${period},status=${status},keyword=${keyword},page=${currentPage + 1})}" aria-label="다음 페이지">›</a>
+		</nav>
+	</section><div th:replace="~{author/fragments/footer :: footer}"></div>
+</div></main></div></div></body></html>

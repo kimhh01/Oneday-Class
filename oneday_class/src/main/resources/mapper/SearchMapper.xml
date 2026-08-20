@@ -91,7 +91,7 @@
     </select>
 
     <!-- 5. 작가별 보유 클래스 목록 조회 -->
-    <select id="selectClassByCreator" parameterType="long" resultType="kr.co.oneclass.main.ClassDTO">
+    <select id="selectClassByCreator" parameterType="int" resultType="kr.co.oneclass.main.ClassDTO">
         SELECT 
             CLASS_CODE as classCode,
             NAME as name,

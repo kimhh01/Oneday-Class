@@ -1,0 +1,63 @@
+<svg viewBox="0 0 460 320" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f7faf6"/>
+      <stop offset="100%" stop-color="#e7eee4"/>
+    </linearGradient>
+    <linearGradient id="wheel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c9a06a"/>
+      <stop offset="100%" stop-color="#a97e4c"/>
+    </linearGradient>
+    <radialGradient id="clay" cx="35%" cy="30%" r="75%">
+      <stop offset="0%" stop-color="#e3b491"/>
+      <stop offset="100%" stop-color="#c17a4e"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="460" height="320" rx="18" fill="url(#bg)"/>
+
+  <!-- soft background blobs (테마 컬러 계열) -->
+  <ellipse cx="70" cy="60" rx="70" ry="46" fill="#4f7a52" opacity="0.10"/>
+  <ellipse cx="400" cy="250" rx="90" ry="60" fill="#c17a4e" opacity="0.10"/>
+
+  <!-- shelf with small pots -->
+  <rect x="30" y="230" width="120" height="10" rx="4" fill="#d7ded2"/>
+  <ellipse cx="50" cy="222" rx="14" ry="16" fill="#7e9b7c"/>
+  <ellipse cx="80" cy="220" rx="11" ry="18" fill="#b98a5c"/>
+  <path d="M100 205 Q108 195 116 205 L116 224 Q108 232 100 224 Z" fill="#8f7a62"/>
+  <line x1="103" y1="196" x2="103" y2="204" stroke="#6b5c49" stroke-width="3" stroke-linecap="round"/>
+  <line x1="113" y1="196" x2="113" y2="204" stroke="#6b5c49" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- potter's wheel table -->
+  <ellipse cx="255" cy="235" rx="120" ry="18" fill="#00000010"/>
+  <rect x="205" y="200" width="100" height="45" rx="6" fill="#8a6a45"/>
+  <ellipse cx="255" cy="200" rx="60" ry="16" fill="url(#wheel)"/>
+  <ellipse cx="255" cy="198" rx="60" ry="16" fill="#d8b481"/>
+  <ellipse cx="255" cy="197" rx="48" ry="11" fill="#c9a06a"/>
+
+  <!-- clay pot being shaped -->
+  <path d="M232 150 C226 168 226 185 236 196 C246 205 264 205 274 196 C284 185 284 168 278 150 C270 140 240 140 232 150 Z" fill="url(#clay)"/>
+  <ellipse cx="255" cy="150" rx="23" ry="7" fill="#d99a6f"/>
+  <ellipse cx="255" cy="150" rx="16" ry="4.2" fill="#a8582e"/>
+
+  <!-- hands shaping the clay -->
+  <path d="M205 175 C195 168 190 178 194 190 C198 202 212 208 226 202 L232 178 C222 170 213 170 205 175 Z" fill="#f0c49c"/>
+  <path d="M305 175 C315 168 320 178 316 190 C312 202 298 208 284 202 L278 178 C288 170 297 170 305 175 Z" fill="#f0c49c"/>
+  <path d="M205 175 C200 172 196 174 195 179" stroke="#d99a6f" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M305 175 C310 172 314 174 315 179" stroke="#d99a6f" stroke-width="2" fill="none" stroke-linecap="round"/>
+
+  <!-- small tool jar -->
+  <rect x="345" y="185" width="26" height="42" rx="6" fill="#7e9b7c"/>
+  <line x1="352" y1="160" x2="352" y2="190" stroke="#6b5c49" stroke-width="3" stroke-linecap="round"/>
+  <line x1="360" y1="155" x2="360" y2="190" stroke="#8a6a45" stroke-width="3" stroke-linecap="round"/>
+  <line x1="368" y1="163" x2="368" y2="190" stroke="#6b5c49" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- flowers in vase, right -->
+  <ellipse cx="410" cy="215" rx="16" ry="24" fill="#dce6d8" opacity="0.9"/>
+  <circle cx="405" cy="178" r="9" fill="#f7faf6" stroke="#e3b491" stroke-width="2"/>
+  <circle cx="420" cy="170" r="8" fill="#f7faf6" stroke="#e3b491" stroke-width="2"/>
+  <circle cx="416" cy="188" r="7" fill="#f7faf6" stroke="#e3b491" stroke-width="2"/>
+  <line x1="410" y1="192" x2="405" y2="178" stroke="#4f7a52" stroke-width="2"/>
+  <line x1="410" y1="192" x2="420" y2="170" stroke="#4f7a52" stroke-width="2"/>
+  <line x1="410" y1="192" x2="416" y2="188" stroke="#4f7a52" stroke-width="2"/>
+</svg>

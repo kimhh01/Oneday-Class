@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- 💡 CSRF 토큰 메타 태그 추가 -->
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>관심 클래스 | 숨쉬당</title>
+    <!-- CSS 연결 -->
+    <link rel="stylesheet" th:href="@{/profile/css/profile.css}">
+    <link rel="stylesheet" th:href="@{/fragments/css/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/bookmark/css/bookmark.css}">
+    <link rel="stylesheet" th:href="@{/fragments/css/header.css}">
+    <link rel="stylesheet" th:href="@{/fragments/css/footer.css}">
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+
+<!-- 메인 컨테이너 -->
+<div class="bookmark-wrapper">
+    <div class="bookmark-container">
+
+        <!-- 1. 좌측 사이드바 Fragment 불러오기 -->
+        <aside th:replace="~{fragments/sidebar :: sidebar('bookmark')}"></aside>
+
+        <!-- 2. 우측 메인 관심 클래스 콘텐츠 영역 -->
+        <main class="bookmark-main">
+            
+            <!-- 페이지 헤더 -->
+            <div class="page-header">
+                <h1 class="page-title">관심 클래스</h1>
+                <p class="page-subtitle">찜한 클래스를 모아보고 원하는 수업을 빠르게 예약하세요.</p>
+            </div>
+
+			<!-- 카테고리 필터 탭 (동적 출력) -->
+			<div class="filter-tabs">
+			    <!-- '전체' 탭 -->
+			    <a th:href="@{/mypage/bookmark(category='ALL')}" 
+			       class="tab-btn" 
+			       th:classappend="${selectedCategory == 'ALL' or selectedCategory == null or selectedCategory == ''} ? 'active'">전체</a>
+			    
+			    <!-- 💡 DB에서 조회한 찜한 클래스의 부모 카테고리 목록 동적 출력 -->
+			    <a th:each="cat : ${categoryList}"
+			       th:href="@{/mypage/bookmark(category=${cat.categoryName})}" 
+			       class="tab-btn" 
+			       th:classappend="${selectedCategory == cat.categoryName} ? 'active'"
+			       th:text="${cat.categoryName}">카테고리명</a>
+			</div>
+
+            <!-- DB 조회 데이터 반복 출력 영역 (데이터가 있을 때) -->
+            <div class="class-grid" th:if="${bookmarkList != null and !#lists.isEmpty(bookmarkList)}">
+                
+                <!-- 💡 카드 클릭 시 클래스 상세 페이지로 이동 (cursor: pointer 추가) -->
+                <div class="class-card" 
+                     th:each="item : ${bookmarkList}"
+                     th:onclick="|location.href='@{/classDetail(classCode=${item.classCode})}'|"
+                     style="cursor: pointer;">
+                     
+                    <div class="card-thumb">
+                        <img th:src="${item.classImg != null and item.classImg != '' ? item.classImg : '/uploads/default_class.png'}" 
+                             th:alt="${item.className}"
+                             onError="this.src='/uploads/default_class.png';">
+                    </div>
+                    <div class="card-body">
+                        <div class="card-title-row">
+                            <h3 class="class-title" th:text="${item.className}">클래스명</h3>
+                            
+                            <!-- 💡 event 파라미터 전달 추가 (상세 페이지 이동 방지용) -->
+                            <button type="button" class="btn-heart active" aria-label="관심 해제" 
+                                    th:onclick="|toggleHeart(event, this, '${item.classCode}')|">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="#ff4d4f" stroke="#ff4d4f" stroke-width="2">
+                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="class-location" th:text="${item.classRegion != null and item.classRegion != '' ? item.classRegion : '지역 정보 없음'}">지역</p>
+                        <p class="class-price" th:text="${item.classPrice}">0원</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 관심 클래스가 존재하지 않을 때 표시 -->
+            <div class="empty-bookmark" th:if="${bookmarkList == null or #lists.isEmpty(bookmarkList)}">
+                <p class="empty-text">관심 등록된 클래스가 없습니다.</p>
+            </div>
+
+            <!-- BoardUtil 페이지네이션 HTML 동적 출력 -->
+            <div class="pagination-container" th:utext="${pagination}"></div>
+
+        </main>
+
+    </div>
+</div>
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script>
+//관심 클래스 해제 (비동기 AJAX)
+function toggleHeart(event, btn, classCode) {
+    event.stopPropagation();
+
+    // 💡 메타 태그에서 CSRF 토큰 및 헤더 이름 가져오기
+    const tokenMeta = document.querySelector("meta[name='_csrf']");
+    const headerMeta = document.querySelector("meta[name='_csrf_header']");
+    
+    const headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+    };
+
+    if (tokenMeta && headerMeta) {
+        headers[headerMeta.getAttribute("content")] = tokenMeta.getAttribute("content");
+    }
+
+    fetch('/mypage/bookmark/toggle', {
+        method: 'POST',
+        headers: headers, // CSRF 헤더가 포함된 headers 전달
+        body: 'classCode=' + encodeURIComponent(classCode)
+    })
+    .then(response => response.text())
+    .then(data => {
+        if (data === 'REMOVED' || data === 'false') {
+            const card = btn.closest('.class-card');
+            if (card) {
+                card.style.transition = 'opacity 0.2s ease, transform 0.2s ease';
+                card.style.opacity = '0';
+                card.style.transform = 'scale(0.9)';
+                setTimeout(() => {
+                    card.remove();
+                    const remainingCards = document.querySelectorAll('.class-card');
+                    if (remainingCards.length === 0) {
+                        location.reload();
+                    }
+                }, 200);
+            }
+        } else if (data === 'LOGIN_REQUIRED') {
+            alert('로그인이 필요한 서비스입니다.');
+            location.href = '/member/login';
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
+
+</body>
+</html>

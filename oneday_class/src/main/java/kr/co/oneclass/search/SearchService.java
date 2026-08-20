@@ -28,20 +28,10 @@ public class SearchService {
     }
 
     /**
-     * 작가 더보기 페이지 (작가별 보유 클래스 목록 포함)
+     * 작가 더보기 페이지
      */
     public List<CreatorDTO> searchCreatorList(String keyword, int startNum, int endNum) {
-        List<CreatorDTO> creatorList = sDAO.selectCreatorList(keyword, startNum, endNum);
-        
-        // 각 작가별로 개설된 클래스 목록을 조회하여 DTO에 세팅
-        if (creatorList != null) {
-            for (CreatorDTO creator : creatorList) {
-                List<ClassDTO> classList = sDAO.selectClassByCreator(creator.getOperatorCode());
-                creator.setClassList(classList);
-            }
-        }
-        
-        return creatorList;
+        return sDAO.selectCreatorList(keyword, startNum, endNum);
     }
 
     /**

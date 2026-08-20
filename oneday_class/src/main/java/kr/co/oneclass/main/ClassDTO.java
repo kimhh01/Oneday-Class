@@ -13,7 +13,7 @@ public class ClassDTO {
     private String name;
     
     private int price;//가격
-    private int desiredPrice;//희망가격
+    private int desiredPrice;//희망가격 ->(희망가격/가격)x100으로 할인율표기
     
 
  // 희망가(desiredPrice) 대비 가격(price)의 할인율 (%) 계산

@@ -1,0 +1,311 @@
+/* =========================================
+   비밀번호 재확인
+========================================= */
+.password-verify-body {
+	min-height: 100vh;
+	margin: 0;
+	background: radial-gradient(circle at top, #f6faf7 0%, #f3f7f4 35%, #eef4f0 100%);
+}
+
+.password-verify-page {
+	width: 100%;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 34px 20px 50px;
+}
+
+.verify-brand {
+	margin-bottom: 30px;
+	text-align: center;
+}
+
+.verify-brand h1 {
+	margin: 0;
+	color: #2f6e54;
+	font-size: 40px;
+	font-weight: 800;
+	letter-spacing: -1px;
+}
+
+.password-verify-card {
+	width: 100%;
+	max-width: 440px;
+	padding: 38px 32px 30px;
+	border-radius: 18px;
+	background: #fff;
+	box-shadow: 0 12px 34px rgba(49, 81, 63, 0.08);
+}
+
+.password-verify-card h2 {
+	margin: 0;
+	color: #14251c;
+	font-size: 27px;
+	font-weight: 800;
+	text-align: center;
+}
+
+.verify-description {
+	margin: 10px 0 30px;
+	color: #8b9590;
+	font-size: 13px;
+	line-height: 1.7;
+	text-align: center;
+}
+
+.verify-form-group {
+	margin-bottom: 18px;
+}
+
+.verify-form-group label {
+	display: block;
+	margin-bottom: 8px;
+	color: #16251d;
+	font-size: 14px;
+	font-weight: 700;
+}
+
+.verify-form-group input {
+	width: 100%;
+	height: 48px;
+	padding: 0 14px;
+	border: 1px solid #d9e2dc;
+	border-radius: 10px;
+	outline: none;
+	background: #fff;
+	color: #26332c;
+	font-size: 15px;
+	box-sizing: border-box;
+}
+
+.verify-form-group input::placeholder {
+	color: #9ca8a1;
+}
+
+.verify-form-group input:focus {
+	border-color: #4f896b;
+	box-shadow: 0 0 0 3px rgba(79, 137, 107, 0.10);
+}
+
+.verify-form-group input[readonly] {
+	color: #77837c;
+	background: #f7f9f7;
+}
+
+.verify-error {
+	margin: -5px 0 14px;
+	color: #d9534f;
+	font-size: 12px;
+}
+
+.verify-submit {
+	width: 100%;
+	height: 48px;
+	margin-top: 3px;
+	border: 0;
+	border-radius: 10px;
+	color: #fff;
+	background: #2f6e54;
+	cursor: pointer;
+	font-size: 15px;
+	font-weight: 800;
+}
+
+.verify-submit:hover {
+	background: #285e48;
+}
+
+.verify-submit:active {
+	transform: translateY(1px);
+}
+
+/* =========================================
+   관리자 정보 수정
+========================================= */
+.admin-info-page {
+	padding-bottom: 50px;
+}
+
+.admin-info-panel {
+	overflow: hidden;
+	border: 1px solid var(--line);
+	border-radius: 14px;
+	background: #fff;
+	box-shadow: var(--shadow);
+}
+
+.admin-info-panel-head {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 20px 24px;
+	border-bottom: 1px solid var(--line);
+}
+
+.admin-avatar {
+	width: 42px;
+	height: 42px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 11px;
+	color: #fff;
+	background: #20283a;
+	font-size: 18px;
+	font-weight: 800;
+}
+
+.admin-info-panel-head strong {
+	font-size: 16px;
+}
+
+.admin-info-form {
+	padding: 24px;
+}
+
+.info-form-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 16px;
+}
+
+.password-grid {
+	margin-top: 18px;
+}
+
+.info-form-row {
+	margin-bottom: 18px;
+}
+
+.info-form-row.full {
+	margin-bottom: 18px;
+}
+
+.info-form-row>label {
+	display: block;
+	margin-bottom: 8px;
+	color: #3e4654;
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.info-form-row input {
+	width: 100%;
+	height: 44px;
+	padding: 0 13px;
+	border: 1px solid #e1e5ea;
+	border-radius: 7px;
+	outline: none;
+	background: #fff;
+	box-sizing: border-box;
+}
+
+.info-form-row input:focus {
+	border-color: var(--primary);
+	box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.info-form-row input[readonly] {
+	color: #8b93a1;
+	background: #f3f4f6;
+}
+
+.input-help {
+	margin: 7px 0 0;
+	color: #9aa1ac;
+	font-size: 11px;
+}
+
+.password-field {
+	position: relative;
+}
+
+.password-field input {
+	padding-right: 54px;
+}
+
+.password-toggle {
+	position: absolute;
+	top: 50%;
+	right: 9px;
+	transform: translateY(-50%);
+	padding: 4px 5px;
+	border: 0;
+	color: #89919d;
+	background: transparent;
+	cursor: pointer;
+	font-size: 11px;
+}
+
+.admin-info-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 9px;
+	margin-top: 20px;
+	padding-top: 18px;
+	border-top: 1px solid #eef0f3;
+}
+
+.info-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 90px;
+	height: 42px;
+	padding: 0 15px;
+	border-radius: 8px;
+	cursor: pointer;
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.info-btn.secondary {
+	border: 1px solid var(--line);
+	color: #687080;
+	background: #fff;
+}
+
+.info-btn.primary {
+	border: 0;
+	color: #fff;
+	background: #ff6b5f;
+}
+
+.info-error {
+	padding: 12px 15px;
+	margin-bottom: 15px;
+	border: 1px solid #ffd2ce;
+	border-radius: 8px;
+	color: #c94a43;
+	background: #fff5f4;
+	font-size: 12px;
+}
+
+/* =========================================
+   반응형
+========================================= */
+@media ( max-width : 850px) {
+	.info-form-grid {
+		grid-template-columns: 1fr;
+		gap: 0;
+	}
+}
+
+@media ( max-width : 520px) {
+	.password-verify-page {
+		justify-content: flex-start;
+		padding-top: 48px;
+	}
+	.verify-brand h1 {
+		font-size: 36px;
+	}
+	.password-verify-card {
+		padding: 32px 24px 26px;
+		border-radius: 16px;
+	}
+	.password-verify-card h2 {
+		font-size: 24px;
+	}
+}

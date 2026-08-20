@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="steps(classCode, currentStep, editMode, editStep)" class="step-nav-wrap"
+	  th:attr="aria-label=${editMode == true ? '클래스 수정 단계' : '클래스 등록 단계'}">
+	<ol class="step-nav" th:unless="${editMode == true}">
+		<li class="step" th:classappend="${currentStep > 1} ? ' is-done' : (${currentStep == 1} ? ' is-active' : '')" th:attr="aria-current=${currentStep == 1} ? 'step' : null">
+			<a class="step__link" th:href="@{/author/classes/register-guide}" aria-label="1단계 등록 시작으로 이동"><span class="step__num">01</span><span class="step__label">등록 시작</span></a>
+		</li>
+		<li class="step" th:classappend="${currentStep > 2} ? ' is-done' : (${currentStep == 2} ? ' is-active' : '')" th:attr="aria-current=${currentStep == 2} ? 'step' : null">
+			<a class="step__link" th:href="@{/author/classes/register/basic(classCode=${classCode})}" aria-label="2단계 기본 정보로 이동"><span class="step__num">02</span><span class="step__label">기본 정보</span></a>
+		</li>
+		<li class="step" th:classappend="${currentStep > 3} ? ' is-done' : (${currentStep == 3} ? ' is-active' : '')" th:attr="aria-current=${currentStep == 3} ? 'step' : null">
+			<a class="step__link" th:href="@{/author/classes/register/schedule(classCode=${classCode})}" aria-label="3단계 일정 및 가격으로 이동"><span class="step__num">03</span><span class="step__label">일정 및 가격</span></a>
+		</li>
+		<li class="step" th:classappend="${currentStep > 4} ? ' is-done' : (${currentStep == 4} ? ' is-active' : '')" th:attr="aria-current=${currentStep == 4} ? 'step' : null">
+			<a class="step__link" th:href="@{/author/classes/register/detail(classCode=${classCode})}" aria-label="4단계 상세 정보로 이동"><span class="step__num">04</span><span class="step__label">상세 정보</span></a>
+		</li>
+		<li class="step" th:classappend="${currentStep > 5} ? ' is-done' : (${currentStep == 5} ? ' is-active' : '')" th:attr="aria-current=${currentStep == 5} ? 'step' : null">
+			<a class="step__link" th:href="@{/author/classes/register/curriculum(classCode=${classCode})}" aria-label="5단계 커리큘럼으로 이동"><span class="step__num">05</span><span class="step__label">커리큘럼</span></a>
+		</li>
+		<li class="step" th:classappend="${currentStep > 6} ? ' is-done' : (${currentStep == 6} ? ' is-active' : '')" th:attr="aria-current=${currentStep == 6} ? 'step' : null">
+			<a class="step__link" th:href="@{/author/classes/register/preview(classCode=${classCode})}" aria-label="6단계 미리보기로 이동"><span class="step__num">06</span><span class="step__label">미리보기</span></a>
+		</li>
+		<li class="step" th:classappend="${currentStep == 7} ? ' is-active'">
+			<a class="step__link" th:if="${currentStep == 7}" th:href="@{/author/classes/register/complete(classCode=${classCode})}" aria-current="step" aria-label="7단계 등록 완료"><span class="step__num">07</span><span class="step__label">등록 완료</span></a>
+			<span class="step__static" th:unless="${currentStep == 7}" aria-disabled="true"><span class="step__num">07</span><span class="step__label">등록 완료</span></span>
+		</li>
+	</ol>
+
+	<ol class="step-nav" th:if="${editMode == true}">
+		<li class="step"><a class="step__link" th:href="@{/author/classes/{classCode}(classCode=${classCode})}" aria-label="클래스 관리 상세로 이동"><span class="step__num">01</span><span class="step__label">관리 시작</span></a></li>
+		<li class="step" th:classappend="${editStep == 'basic'} ? ' is-active'" th:attr="aria-current=${editStep == 'basic'} ? 'step' : null"><a class="step__link" th:href="@{/author/classes/{classCode}/edit/basic(classCode=${classCode})}" aria-label="기본 정보 수정으로 이동"><span class="step__num">02</span><span class="step__label">기본 정보</span></a></li>
+		<li class="step" th:classappend="${editStep == 'pricing'} ? ' is-active'" th:attr="aria-current=${editStep == 'pricing'} ? 'step' : null"><a class="step__link" th:href="@{/author/classes/{classCode}/edit/pricing(classCode=${classCode})}" aria-label="가격 수정으로 이동"><span class="step__num">03</span><span class="step__label">가격</span></a></li>
+		<li class="step" th:classappend="${editStep == 'location'} ? ' is-active'" th:attr="aria-current=${editStep == 'location'} ? 'step' : null"><a class="step__link" th:href="@{/author/classes/{classCode}/edit/location(classCode=${classCode})}" aria-label="장소 수정으로 이동"><span class="step__num">04</span><span class="step__label">장소</span></a></li>
+		<li class="step" th:classappend="${editStep == 'detail'} ? ' is-active'" th:attr="aria-current=${editStep == 'detail'} ? 'step' : null"><a class="step__link" th:href="@{/author/classes/{classCode}/edit/detail(classCode=${classCode})}" aria-label="상세 정보 1 수정으로 이동"><span class="step__num">05</span><span class="step__label">상세 1/2</span></a></li>
+		<li class="step" th:classappend="${editStep == 'detail-extra'} ? ' is-active'" th:attr="aria-current=${editStep == 'detail-extra'} ? 'step' : null"><a class="step__link" th:href="@{/author/classes/{classCode}/edit/detail-extra(classCode=${classCode})}" aria-label="상세 정보 2 수정으로 이동"><span class="step__num">06</span><span class="step__label">상세 2/2</span></a></li>
+		<li class="step" th:classappend="${editStep == 'curriculum'} ? ' is-active'" th:attr="aria-current=${editStep == 'curriculum'} ? 'step' : null"><a class="step__link" th:href="@{/author/classes/{classCode}/edit/curriculum(classCode=${classCode})}" aria-label="커리큘럼 수정으로 이동"><span class="step__num">07</span><span class="step__label">커리큘럼</span></a></li>
+	</ol>
+</nav>
+</body>
+</html>

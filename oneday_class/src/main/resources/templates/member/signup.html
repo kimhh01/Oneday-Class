@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 | 숨쉬당</title>
+    <link rel="stylesheet" th:href="@{/member/css/signup.css}">
+    <!-- 카카오 주소 API -->
+    <script src="//t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+</head>
+<body>
+
+<div class="signup-wrapper">
+    <div class="signup-card">
+
+        <div class="signup-card__head">
+            <h2 class="signup-card__title">일반계정 회원가입</h2>
+            <p class="signup-card__subtitle">기본 정보를 입력하고 계정을 만들어보세요.</p>
+        </div>
+
+        <form th:action="@{/member/signUp}" th:object="${signUpDTO}" method="post" class="signup-form" id="signupForm">
+
+            <!-- 1. 아이디 & 중복확인 (id 바인딩) -->
+            <div class="signup-form__row">
+                <label for="id" class="signup-form__label">아이디</label>
+                <div class="signup-form__control signup-form__control--with-button">
+                    <input type="text" id="id" th:field="*{id}" class="signup-form__input"
+                           placeholder="아이디를 입력해주세요." required>
+                    <button type="button" id="btnIdCheck" class="btn btn--outline">중복확인</button>
+                </div>
+            </div>
+            <p id="idCheckMsg" class="signup-form__hint"></p>
+
+            <!-- 2. 이메일 주소 & 중복확인 (email 바인딩) -->
+            <div class="signup-form__row">
+                <label for="email" class="signup-form__label">이메일 주소</label>
+                <div class="signup-form__control signup-form__control--with-button">
+                    <input type="email" id="email" th:field="*{email}" class="signup-form__input"
+                           placeholder="example@email.com" required>
+                    <button type="button" id="btnEmailCheck" class="btn btn--outline">중복확인</button>
+                </div>
+            </div>
+            <p id="emailCheckMsg" class="signup-form__hint"></p>
+
+            <!-- 3. 이름 -->
+            <div class="signup-form__row">
+                <label for="name" class="signup-form__label">이름</label>
+                <div class="signup-form__control">
+                    <input type="text" id="name" th:field="*{name}" class="signup-form__input"
+                           placeholder="이름을 입력해주세요." required>
+                </div>
+            </div>
+
+            <!-- 4. 비밀번호 -->
+            <div class="signup-form__row">
+                <label for="pass" class="signup-form__label">비밀번호</label>
+                <div class="signup-form__control">
+                    <div class="signup-form__input-wrap">
+                        <input type="password" id="pass" th:field="*{pass}" class="signup-form__input"
+                               placeholder="영문, 숫자, 특수문자 조합 8자 이상" required>
+                        <button type="button" class="signup-form__toggle-visibility" aria-label="비밀번호 표시">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" stroke="#9a9a8f" stroke-width="1.6"/>
+                                <circle cx="12" cy="12" r="3.2" stroke="#9a9a8f" stroke-width="1.6"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. 비밀번호 확인 -->
+            <div class="signup-form__row">
+                <label for="passwordConfirm" class="signup-form__label">비밀번호 확인</label>
+                <div class="signup-form__control">
+                    <div class="signup-form__input-wrap">
+                        <input type="password" id="passwordConfirm" name="passwordConfirm" class="signup-form__input"
+                               placeholder="비밀번호를 다시 입력해주세요." required>
+                        <button type="button" class="signup-form__toggle-visibility" aria-label="비밀번호 표시">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z" stroke="#9a9a8f" stroke-width="1.6"/>
+                                <circle cx="12" cy="12" r="3.2" stroke="#9a9a8f" stroke-width="1.6"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <p id="passCheckMsg" class="signup-form__hint"></p>
+
+            <!-- 6. 휴대폰 번호 -->
+            <div class="signup-form__row">
+                <label for="phone" class="signup-form__label">휴대폰 번호</label>
+                <div class="signup-form__control">
+                    <input type="text" id="phone" th:field="*{phone}" class="signup-form__input"
+                           placeholder="010-0000-0000">
+                </div>
+            </div>
+
+            <!-- 7. 주소 영역 -->
+            <div class="signup-form__row signup-form__row--address">
+                <label class="signup-form__label">주소</label>
+                <div class="signup-form__control signup-form__address">
+
+                    <div class="signup-form__address-line">
+                        <input type="text" id="zipcode" th:field="*{zipcode}" class="signup-form__input" 
+                               placeholder="우편번호" readonly required>
+                        <button type="button" class="btn btn--outline" onclick="execKakaoPostcode()">우편번호 검색</button>
+                    </div>
+
+                    <div class="signup-form__address-line">
+                        <input type="text" id="address" th:field="*{address}" class="signup-form__input" 
+                               placeholder="기본 주소" readonly required>
+                    </div>
+
+                    <div class="signup-form__address-line">
+                        <input type="text" id="addressDetail" th:field="*{addressDetail}" class="signup-form__input" 
+                               placeholder="상세 주소를 입력해주세요.">
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 8. 약관 동의 -->
+            <div class="signup-terms">
+
+                <label class="signup-terms__row">
+                    <span class="signup-terms__check">
+                        <input type="checkbox" name="agreeTerms" value="Y" required>
+                        <span>[필수] 이용약관 동의</span>
+                    </span>
+                </label>
+
+                <label class="signup-terms__row">
+                    <span class="signup-terms__check">
+                        <input type="checkbox" name="agreePrivacy" value="Y" required>
+                        <span>[필수] 개인정보 수집 및 이용 동의</span>
+                    </span>
+                </label>
+
+                <label class="signup-terms__row">
+                    <span class="signup-terms__check">
+                        <input type="checkbox" id="agreeMarketing" name="agreeMarketing" value="Y">
+                        <span>[선택] 마케팅 정보 수신 동의</span>
+                    </span>
+                </label>
+
+                <div class="signup-terms__sub">
+                    <label class="signup-terms__sub-check">
+                        <input type="checkbox" id="smsReceiveYN" th:field="*{smsReceiveYN}" value="Y">
+                        <span>SMS</span>
+                    </label>
+                    <label class="signup-terms__sub-check">
+                        <input type="checkbox" id="emailReceiveYN" th:field="*{emailReceiveYN}" value="Y">
+                        <span>이메일</span>
+                    </label>
+                </div>
+
+            </div>
+
+            <button type="submit" class="btn btn--primary btn--full">회원가입</button>
+
+            <p class="signup-login-link">
+                이미 계정이 있으신가요?
+                <a th:href="@{/member/login/general}">로그인</a>
+            </p>
+
+        </form>
+
+    </div>
+</div>
+
+<script>
+// 1. 카카오 주소 API
+function execKakaoPostcode() {
+    new kakao.Postcode({
+        oncomplete: function(data) {
+            let roadAddr = data.roadAddress;
+            let extraRoadAddr = '';
+
+            if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+                extraRoadAddr += data.bname;
+            }
+            if (data.buildingName !== '' && data.apartment === 'Y') {
+                extraRoadAddr += (extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+            }
+            if (extraRoadAddr !== '') {
+                extraRoadAddr = ' (' + extraRoadAddr + ')';
+            }
+
+            document.getElementById('zipcode').value = data.zonecode;
+            document.getElementById('address').value = roadAddr + extraRoadAddr;
+            document.getElementById('addressDetail').focus();
+        }
+    }).open();
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+    const signupForm = document.getElementById('signupForm');
+    
+    // 아이디 관련
+    const btnIdCheck = document.getElementById('btnIdCheck');
+    const idInput = document.getElementById('id');
+    const idCheckMsg = document.getElementById('idCheckMsg');
+    
+    // 이메일 관련 (신규 추가)
+    const btnEmailCheck = document.getElementById('btnEmailCheck');
+    const emailInput = document.getElementById('email');
+    const emailCheckMsg = document.getElementById('emailCheckMsg');
+    
+    // 비밀번호 관련
+    const passInput = document.getElementById('pass');
+    const passConfirmInput = document.getElementById('passwordConfirm');
+    const passCheckMsg = document.getElementById('passCheckMsg');
+
+    // 마케팅 동의 관련
+    const agreeMarketing = document.getElementById('agreeMarketing');
+    const smsReceiveYN = document.getElementById('smsReceiveYN');
+    const emailReceiveYN = document.getElementById('emailReceiveYN');
+
+    let isIdChecked = false;
+    let isEmailChecked = false; // 이메일 중복 확인 여부 플래그
+
+    // 2. 아이디 중복확인 AJAX
+    idInput.addEventListener('input', function() {
+        isIdChecked = false;
+        idCheckMsg.textContent = '';
+        idCheckMsg.className = 'signup-form__hint';
+    });
+
+    btnIdCheck.addEventListener('click', function () {
+        const inputId = idInput.value.trim();
+
+        if (!inputId) {
+            idCheckMsg.textContent = '아이디를 입력해주세요.';
+            idCheckMsg.className = 'signup-form__hint signup-form__hint--error';
+            idInput.focus();
+            return;
+        }
+
+        fetch('/member/idDupCheck', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'id=' + encodeURIComponent(inputId)
+        })
+        .then(response => response.text())
+        .then(data => {
+            if (data === 'DUPLICATE') {
+                idCheckMsg.textContent = '이미 사용 중인 아이디입니다.';
+                idCheckMsg.className = 'signup-form__hint signup-form__hint--error';
+                isIdChecked = false;
+            } else if (data === 'OK') {
+                idCheckMsg.textContent = '사용 가능한 아이디입니다.';
+                idCheckMsg.className = 'signup-form__hint signup-form__hint--ok';
+                isIdChecked = true;
+            } else if (data === 'EMPTY') {
+                idCheckMsg.textContent = '아이디를 입력해주세요.';
+                idCheckMsg.className = 'signup-form__hint signup-form__hint--error';
+                isIdChecked = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            idCheckMsg.textContent = '중복 확인 처리 중 오류가 발생했습니다.';
+            idCheckMsg.className = 'signup-form__hint signup-form__hint--error';
+        });
+    });
+
+    // 3. 이메일 중복확인 AJAX (신규 구현)
+    emailInput.addEventListener('input', function() {
+        isEmailChecked = false;
+        emailCheckMsg.textContent = '';
+        emailCheckMsg.className = 'signup-form__hint';
+    });
+
+    btnEmailCheck.addEventListener('click', function () {
+        const inputEmail = emailInput.value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!inputEmail) {
+            emailCheckMsg.textContent = '이메일을 입력해주세요.';
+            emailCheckMsg.className = 'signup-form__hint signup-form__hint--error';
+            emailInput.focus();
+            return;
+        }
+
+        if (!emailRegex.test(inputEmail)) {
+            emailCheckMsg.textContent = '올바른 이메일 형식이 아닙니다.';
+            emailCheckMsg.className = 'signup-form__hint signup-form__hint--error';
+            emailInput.focus();
+            return;
+        }
+
+        fetch('/member/emailDupCheck', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'email=' + encodeURIComponent(inputEmail)
+        })
+        .then(response => response.text())
+        .then(data => {
+            if (data === 'DUPLICATE') {
+                emailCheckMsg.textContent = '이미 가입된 이메일 주소입니다.';
+                emailCheckMsg.className = 'signup-form__hint signup-form__hint--error';
+                isEmailChecked = false;
+            } else if (data === 'OK') {
+                emailCheckMsg.textContent = '사용 가능한 이메일입니다.';
+                emailCheckMsg.className = 'signup-form__hint signup-form__hint--ok';
+                isEmailChecked = true;
+            } else if (data === 'EMPTY') {
+                emailCheckMsg.textContent = '이메일을 입력해주세요.';
+                emailCheckMsg.className = 'signup-form__hint signup-form__hint--error';
+                isEmailChecked = false;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            emailCheckMsg.textContent = '중복 확인 처리 중 오류가 발생했습니다.';
+            emailCheckMsg.className = 'signup-form__hint signup-form__hint--error';
+        });
+    });
+
+    // 4. 마케팅 동의 & SMS/이메일 연동 로직
+    agreeMarketing.addEventListener('change', function() {
+        const isChecked = agreeMarketing.checked;
+        smsReceiveYN.checked = isChecked;
+        emailReceiveYN.checked = isChecked;
+    });
+
+    function updateMarketingState() {
+        agreeMarketing.checked = (smsReceiveYN.checked || emailReceiveYN.checked);
+    }
+
+    smsReceiveYN.addEventListener('change', updateMarketingState);
+    emailReceiveYN.addEventListener('change', updateMarketingState);
+
+    // 5. 비밀번호 가시성 토글
+    document.querySelectorAll('.signup-form__toggle-visibility').forEach(button => {
+        button.addEventListener('click', function() {
+            const input = this.previousElementSibling;
+            if (input.type === 'password') {
+                input.type = 'text';
+            } else {
+                input.type = 'password';
+            }
+        });
+    });
+
+    // 6. 폼 제출 검증
+    signupForm.addEventListener('submit', function(e) {
+        if (!isIdChecked) {
+            e.preventDefault();
+            alert('아이디 중복확인을 진행해주세요.');
+            idInput.focus();
+            return;
+        }
+
+        if (!isEmailChecked) {
+            e.preventDefault();
+            alert('이메일 중복확인을 진행해주세요.');
+            emailInput.focus();
+            return;
+        }
+
+        const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,}$/;
+        const passVal = passInput.value;
+        const passConfirmVal = passConfirmInput.value;
+
+        if (!passwordRegex.test(passVal)) {
+            e.preventDefault();
+            passCheckMsg.textContent = '비밀번호는 영문, 숫자, 특수문자를 포함하여 8자 이상이어야 합니다.';
+            passCheckMsg.className = 'signup-form__hint signup-form__hint--error';
+            passInput.focus();
+            return;
+        }
+
+        if (passVal !== passConfirmVal) {
+            e.preventDefault();
+            passCheckMsg.textContent = '비밀번호와 비밀번호 확인이 일치하지 않습니다.';
+            passCheckMsg.className = 'signup-form__hint signup-form__hint--error';
+            passConfirmInput.focus();
+            return;
+        }
+
+        passCheckMsg.textContent = '';
+    });
+});
+</script>
+
+</body>
+</html>

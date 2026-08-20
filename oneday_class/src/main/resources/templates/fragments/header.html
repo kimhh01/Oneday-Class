@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<!-- 다른 페이지에서 th:replace="~{header :: header}" 로 불러와 사용할 수 있습니다 -->
+<header class="site-header" th:fragment="header">
+    <div class="site-header__inner">
+
+        <!-- 1. 좌측 로고 (클릭 시 메인 페이지 / 로 이동) -->
+        <a th:href="@{/}" class="site-header__logo">
+            <span class="site-header__logo-text">숨쉬당</span>
+        </a>
+
+        <!-- 2. 우측 네비게이션 메뉴 -->
+        <nav class="site-header__nav">
+            
+            <!-- 비로그인 상태일 때 -->
+            <a th:if="${session.loginMember == null}" 
+               th:href="@{/member/login}" 
+               class="site-header__link">로그인</a>
+
+            <!-- 로그인 상태일 때 -->
+            <a th:if="${session.loginMember != null}" 
+               th:href="@{/logout}" 
+               class="site-header__link">로그아웃</a>
+
+            <!-- 마이페이지 -->
+            <a th:href="@{/mypage}" class="site-header__link">마이페이지</a>
+
+        </nav>
+
+    </div>
+</header>
+
+</body>
+</html>
