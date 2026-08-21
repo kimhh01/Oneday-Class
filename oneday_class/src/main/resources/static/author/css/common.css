@@ -20,6 +20,7 @@
 
 /* ---------- 1. reset ---------- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
+dialog { margin: auto; }
 html, body { height: 100%; }
 body {
 	font-family: var(--font-body);

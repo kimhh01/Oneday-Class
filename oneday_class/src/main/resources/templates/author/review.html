@@ -48,7 +48,7 @@
 
 					<nav class="review-class-chips" aria-label="클래스별 리뷰 보기">
 						<a th:href="@{/author/reviews(replyStatus=${search.replyStatus},sortType=${search.sortType})}" th:attr="aria-current=${search.classCode == 0} ? 'page' : null">전체 클래스</a>
-						<a th:each="item : ${classes}" th:if="${item.reviewCount > 0}" th:href="@{/author/reviews(classCode=${item.classCode},replyStatus=${search.replyStatus},sortType=${search.sortType})}" th:attr="aria-current=${search.classCode == item.classCode} ? 'page' : null" th:text="${item.classTitle}">클래스명</a>
+						<a th:each="item : ${classes}" th:href="@{/author/reviews(classCode=${item.classCode},replyStatus=${search.replyStatus},sortType=${search.sortType})}" th:attr="aria-current=${search.classCode == item.classCode} ? 'page' : null" th:text="${item.classTitle}">클래스명</a>
 					</nav>
 
 					<div class="review-summary" aria-label="리뷰 요약">

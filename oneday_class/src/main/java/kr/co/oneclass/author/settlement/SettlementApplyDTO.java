@@ -23,6 +23,7 @@ public class SettlementApplyDTO {
     private String authorName;                                  // 예금주 작가명
     private String bankName;                                    // 은행명
     private String accountNumber;                               // 계좌번호
+    private boolean agreement;                                  // 정산 정보·증빙 확인 동의
     private String settlementStatus;                            // 정산 상태
     private Date appliedAt;                                     // 정산 신청일
 }

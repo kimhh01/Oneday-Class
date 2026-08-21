@@ -8,7 +8,7 @@
 <link rel="stylesheet" href="/author/css/header.css" th:href="@{/author/css/header.css}">
 <link rel="stylesheet" href="/author/css/sidebar.css" th:href="@{/author/css/sidebar.css}">
 <link rel="stylesheet" href="/author/css/class-register.css" th:href="@{/author/css/class-register.css}">
-<link rel="stylesheet" href="/author/css/class-register-schedule.css" th:href="@{/author/css/class-register-schedule.css}">
+<link rel="stylesheet" href="/author/css/class-register-schedule.css?v=20260820-2" th:href="@{/author/css/class-register-schedule.css(v='20260820-2')}">
 <script src="/author/js/layout.js" th:src="@{/author/js/layout.js}" defer></script>
 <script src="/author/js/class-register-draft.js" th:src="@{/author/js/class-register-draft.js}" defer></script>
 </head>
@@ -209,6 +209,7 @@
 										</thead>
 										<tbody id="schedTableBody"></tbody>
 									</table>
+									<nav class="sched-pagination" id="schedPagination" aria-label="등록 일정 페이지" hidden></nav>
 								</div>
 
 								<div class="sched-empty" id="schedEmpty" hidden>
@@ -417,6 +418,8 @@
 
 	var DOW = ['일', '월', '화', '수', '목', '금', '토'];
 	var MAX_SCHEDULES = 100;   /* 요일 반복이 폭주하지 않도록 상한 */
+	var SCHEDULE_PAGE_SIZE = 10;
+	var schedulePage = 0;
 
 	/* 일정 한 건 = { date:'2026-08-01', start:'14:00', end:'16:00', min:2, max:6 }
 	   date 는 SCHEDULE.CLASS_DATE, start/end 는 START_TIME/END_TIME(VARCHAR2) 자리다. */
@@ -430,6 +433,7 @@
 		};
 	});
 	var mode = document.getElementById('scheduleType').value === 'REPEAT' ? 'repeat' : 'once';
+	var expandedScheduleDates = {};
 	var viewYear, viewMonth;   /* 달력이 지금 보여주는 연·월 */
 
 	/* ---------------- 날짜 도우미 ---------------- */
@@ -539,22 +543,25 @@
 		var wrap = document.getElementById('schedTableWrap');
 		var empty = document.getElementById('schedEmpty');
 		var count = document.getElementById('schedCount');
+		var pagination = document.getElementById('schedPagination');
 
 		count.textContent = schedules.length + '건';
 		wrap.hidden = schedules.length === 0;
 		empty.hidden = schedules.length !== 0;
-
 		body.innerHTML = '';
-		schedules.forEach(function (item, index) {
+		pagination.innerHTML = '';
+
+		function appendScheduleRow(item, scheduleIndex, number, showDate, detail) {
 			var tr = document.createElement('tr');
+			if (detail) tr.className = 'sched-table__detail-row';
 
 			var no = document.createElement('td');
 			no.className = 'sched-table__no';
-			no.innerHTML = '<span class="sched-no">' + (index + 1) + '</span>';
+			if (number) no.innerHTML = '<span class="sched-no">' + number + '</span>';
 
 			var date = document.createElement('td');
 			date.className = 'sched-table__date';
-			date.textContent = toKoreanDate(item.date);
+			date.textContent = showDate ? toKoreanDate(item.date) : '↳ 다른 시간';
 
 			var time = document.createElement('td');
 			time.textContent = toKoreanTime(item.start);
@@ -566,9 +573,9 @@
 			var button = document.createElement('button');
 			button.type = 'button';
 			button.className = 'sched-del';
-			button.dataset.remove = String(index);
+			button.dataset.remove = String(scheduleIndex);
 			button.innerHTML = '<svg aria-hidden="true"><use href="#icon-trash"></use></svg>삭제';
-			button.setAttribute('aria-label', toKoreanDate(item.date) + ' 일정 삭제');
+			button.setAttribute('aria-label', toKoreanDate(item.date) + ' ' + toKoreanTime(item.start) + ' 일정 삭제');
 			manage.appendChild(button);
 
 			tr.appendChild(no);
@@ -577,7 +584,108 @@
 			tr.appendChild(people);
 			tr.appendChild(manage);
 			body.appendChild(tr);
+		}
+
+		var groups = [];
+		schedules.forEach(function (item, index) {
+			var group = groups.length ? groups[groups.length - 1] : null;
+			if (!group || group.date !== item.date) {
+				group = { date: item.date, entries: [] };
+				groups.push(group);
+			}
+			group.entries.push({ item: item, index: index });
 		});
+
+		var totalPages = Math.max(1, Math.ceil(groups.length / SCHEDULE_PAGE_SIZE));
+		schedulePage = Math.min(schedulePage, totalPages - 1);
+		var pageStart = schedulePage * SCHEDULE_PAGE_SIZE;
+		var visibleGroups = groups.slice(pageStart, pageStart + SCHEDULE_PAGE_SIZE);
+
+		visibleGroups.forEach(function (group, visibleIndex) {
+			var groupIndex = pageStart + visibleIndex;
+			if (group.entries.length === 1) {
+				appendScheduleRow(group.entries[0].item, group.entries[0].index, groupIndex + 1, true, false);
+				return;
+			}
+
+			var expanded = expandedScheduleDates[group.date] === true;
+			var first = group.entries[0].item;
+			var tr = document.createElement('tr');
+			tr.className = 'sched-table__group-row';
+
+			var no = document.createElement('td');
+			no.className = 'sched-table__no';
+			no.innerHTML = '<span class="sched-no">' + (groupIndex + 1) + '</span>';
+
+			var date = document.createElement('td');
+			date.className = 'sched-table__date';
+			var toggle = document.createElement('button');
+			toggle.type = 'button';
+			toggle.className = 'sched-group-toggle';
+			toggle.dataset.toggleDate = group.date;
+			toggle.setAttribute('aria-expanded', String(expanded));
+			toggle.innerHTML = '<svg aria-hidden="true"><use href="#icon-chevron-down"></use></svg><span>'
+				+ toKoreanDate(group.date) + '</span>';
+			date.appendChild(toggle);
+
+			var time = document.createElement('td');
+			time.className = 'sched-group-time';
+			time.appendChild(document.createTextNode(toKoreanTime(first.start)));
+			var more = document.createElement('span');
+			more.className = 'sched-group-count';
+			more.textContent = '외 ' + (group.entries.length - 1) + '개';
+			time.appendChild(more);
+
+			var people = document.createElement('td');
+			people.textContent = first.min + '명 ~ ' + first.max + '명';
+
+			var manage = document.createElement('td');
+			var firstDelete = document.createElement('button');
+			firstDelete.type = 'button';
+			firstDelete.className = 'sched-del';
+			firstDelete.dataset.remove = String(group.entries[0].index);
+			firstDelete.innerHTML = '<svg aria-hidden="true"><use href="#icon-trash"></use></svg>삭제';
+			firstDelete.setAttribute('aria-label', toKoreanDate(first.date) + ' ' + toKoreanTime(first.start) + ' 일정 삭제');
+			manage.appendChild(firstDelete);
+
+			tr.append(no, date, time, people, manage);
+			body.appendChild(tr);
+
+			if (expanded) {
+				group.entries.slice(1).forEach(function (entry) {
+					appendScheduleRow(entry.item, entry.index, null, false, true);
+				});
+			}
+		});
+
+		pagination.hidden = groups.length <= SCHEDULE_PAGE_SIZE;
+		if (!pagination.hidden) {
+			var previous = document.createElement('button');
+			previous.type = 'button';
+			previous.className = 'sched-pagination__button';
+			previous.dataset.schedulePage = String(schedulePage - 1);
+			previous.disabled = schedulePage === 0;
+			previous.textContent = '이전';
+			pagination.appendChild(previous);
+
+			for (var page = 0; page < totalPages; page += 1) {
+				var pageButton = document.createElement('button');
+				pageButton.type = 'button';
+				pageButton.className = 'sched-pagination__button';
+				pageButton.dataset.schedulePage = String(page);
+				pageButton.setAttribute('aria-current', page === schedulePage ? 'page' : 'false');
+				pageButton.textContent = String(page + 1);
+				pagination.appendChild(pageButton);
+			}
+
+			var next = document.createElement('button');
+			next.type = 'button';
+			next.className = 'sched-pagination__button';
+			next.dataset.schedulePage = String(schedulePage + 1);
+			next.disabled = schedulePage === totalPages - 1;
+			next.textContent = '다음';
+			pagination.appendChild(next);
+		}
 	}
 
 	function renderCalendar() {
@@ -775,10 +883,26 @@
 		/* 행은 계속 다시 그려지므로, 버튼마다 이벤트를 다는 대신
 		   표 전체에 하나만 달고 클릭된 대상을 찾는다 (이벤트 위임). */
 		document.getElementById('schedTableBody').addEventListener('click', function (event) {
+			var toggle = event.target.closest('[data-toggle-date]');
+			if (toggle) {
+				expandedScheduleDates[toggle.dataset.toggleDate] = toggle.getAttribute('aria-expanded') !== 'true';
+				renderTable();
+				return;
+			}
 			var button = event.target.closest('[data-remove]');
 			if (!button) { return; }
 			schedules.splice(Number(button.dataset.remove), 1);
 			renderAll();
+		});
+	}
+
+	function bindSchedulePagination() {
+		document.getElementById('schedPagination').addEventListener('click', function (event) {
+			var button = event.target.closest('[data-schedule-page]');
+			if (!button || button.disabled) { return; }
+			schedulePage = Number(button.dataset.schedulePage);
+			renderTable();
+			document.getElementById('schedTableWrap').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 		});
 	}
 
@@ -832,6 +956,7 @@
 		bindAddOnce();
 		bindAddRepeat();
 		bindRemove();
+		bindSchedulePagination();
 		bindCalendarNav();
 		bindPriceInputs();
 

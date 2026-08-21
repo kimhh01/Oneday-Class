@@ -18,7 +18,7 @@ public class SalesListDTO {
     private String memberName;     // 구매자명
     private Date scheduleDate;     // 수업 진행일
     private int paymentAmount;     // 결제금액
-    private int discountAmount;    // 할인금액
+    private int refundAmount;      // 환불금액
     private int settlementAmount;  // 정산금액
     private String paymentStatus;  // 결제 상태
     private Date paymentDate;      // 결제일

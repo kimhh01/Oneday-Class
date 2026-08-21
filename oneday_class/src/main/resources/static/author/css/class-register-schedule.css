@@ -288,6 +288,57 @@
 	color: var(--text-strong);
 }
 
+.sched-table__group-row td {
+	background: #FCFAF6;
+}
+
+.sched-group-toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	font: inherit;
+	font-weight: 700;
+	color: var(--text-strong);
+}
+
+.sched-group-toggle svg {
+	width: 15px;
+	height: 15px;
+	color: var(--green-700);
+	transition: transform .15s ease;
+}
+
+.sched-group-toggle[aria-expanded="true"] svg {
+	transform: rotate(180deg);
+}
+
+.sched-group-count {
+	display: inline-flex;
+	padding: 4px 9px;
+	border-radius: 999px;
+	background: var(--green-50);
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--green-700);
+}
+
+.sched-group-time {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+}
+
+.sched-table__detail-row td {
+	background: #fff;
+}
+
+.sched-table__detail-row .sched-table__date {
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--text-muted);
+}
+
 .sched-no {
 	display: inline-grid;
 	place-items: center;
@@ -313,6 +364,43 @@
 	font-size: 12px;
 	color: var(--text-muted);
 	transition: border-color .15s, color .15s, background .15s;
+}
+
+.sched-pagination {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 14px 10px 2px;
+}
+
+.sched-pagination[hidden] {
+	display: none;
+}
+
+.sched-pagination__button {
+	display: inline-grid;
+	place-items: center;
+	min-width: 30px;
+	height: 30px;
+	padding: 0 9px;
+	border: 1px solid var(--border);
+	border-radius: 7px;
+	background: #fff;
+	font-size: 12px;
+	color: var(--text-body);
+}
+
+.sched-pagination__button[aria-current="page"] {
+	border-color: var(--green-600);
+	background: var(--green-50);
+	font-weight: 700;
+	color: var(--green-700);
+}
+
+.sched-pagination__button:disabled {
+	cursor: default;
+	opacity: .4;
 }
 
 .sched-del svg {

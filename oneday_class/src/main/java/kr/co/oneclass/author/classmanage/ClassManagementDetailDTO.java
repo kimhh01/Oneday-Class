@@ -19,4 +19,12 @@ public class ClassManagementDetailDTO {
     private int upcomingScheduleCount;                                 // 앞으로 진행할 일정 수
     private String classStatus;                                        // 현재 클래스 공개·비공개·폐쇄 상태
     private long salesAmount;                                          // 결제 완료·미환불 누적 판매 금액
+
+    public long getSettlementFeeAmount() {
+        return Math.round(salesAmount * 0.1d);
+    }
+
+    public long getExpectedSettlementAmount() {
+        return salesAmount - getSettlementFeeAmount();
+    }
 }

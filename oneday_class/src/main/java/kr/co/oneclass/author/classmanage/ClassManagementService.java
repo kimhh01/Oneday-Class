@@ -1,6 +1,8 @@
 package kr.co.oneclass.author.classmanage;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Set;
 
@@ -10,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import kr.co.oneclass.author.classbasic.ScheduleDAO;
 import kr.co.oneclass.author.classbasic.ClassPreviewDTO;
+import kr.co.oneclass.author.classbasic.RepeatScheduleDTO;
+import kr.co.oneclass.author.classbasic.ScheduleDTO;
 import kr.co.oneclass.author.classbasic.ClassService;
 
 @Service
@@ -18,28 +22,43 @@ public class ClassManagementService {
     private final ClassManagementDAO cmDAO;
     private final ScheduleDAO sDAO;
     private final ClassService cService;
+    private final TossPaymentCancellationClient tossCancellationClient;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public ClassManagementService(ClassManagementDAO cmDAO,
-            ScheduleDAO sDAO, ClassService cService) {
+            ScheduleDAO sDAO, ClassService cService,
+            TossPaymentCancellationClient tossCancellationClient) {
         this.cmDAO = cmDAO;
         this.sDAO = sDAO;
         this.cService = cService;
+        this.tossCancellationClient = tossCancellationClient;
     }
 
     // 작가가 운영하는 승인 완료 클래스 목록을 검색·필터링한다
     public List<ClassManagementDTO> getClassManagementList(long authorCode, String classStatus,
-            String keyword, LocalDate fromDate, LocalDate toDate) {
-        String normalizedStatus = Set.of("모집중", "준비중", "폐강").contains(classStatus)
-                ? classStatus : "all";
+            String keyword, LocalDate fromDate, LocalDate toDate, int page, int pageSize) {
+        String normalizedStatus = normalizeClassStatus(classStatus);
         String normalizedKeyword = trimToNull(keyword);
-        if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
-            throw new IllegalArgumentException("검색 시작일은 종료일보다 늦을 수 없습니다.");
-        }
+        validateDateRange(fromDate, toDate);
+        int normalizedPage = Math.max(page, 1);
+        int normalizedPageSize = Math.max(pageSize, 1);
         return cmDAO.selectClassManagementList(
                 authorCode,
                 normalizedStatus,
                 normalizedKeyword,
+                fromDate == null ? null : fromDate.toString(),
+                toDate == null ? null : toDate.toString(),
+                (normalizedPage - 1) * normalizedPageSize + 1,
+                normalizedPage * normalizedPageSize);
+    }
+
+    public int getClassManagementCount(long authorCode, String classStatus,
+            String keyword, LocalDate fromDate, LocalDate toDate) {
+        validateDateRange(fromDate, toDate);
+        return cmDAO.selectClassManagementCount(
+                authorCode,
+                normalizeClassStatus(classStatus),
+                trimToNull(keyword),
                 fromDate == null ? null : fromDate.toString(),
                 toDate == null ? null : toDate.toString());
     }
@@ -64,6 +83,88 @@ public class ClassManagementService {
                 normalizedKeyword,
                 fromDate == null ? null : fromDate.toString(),
                 toDate == null ? null : toDate.toString());
+    }
+
+    public List<ClassManagementDTO> getSchedulableClassList(long authorCode) {
+        return cmDAO.selectSchedulableClassList(authorCode);
+    }
+
+    // 기존 일정 테이블과 시퀀스를 사용해 승인 클래스에 단일 일정을 추가한다
+    @Transactional
+    public int addSchedule(long authorCode, ScheduleOperationDTO operation) {
+        validateScheduleOperation(operation);
+        ClassManagementDTO classInfo = cmDAO.selectClassManagementInfo(
+                authorCode, operation.getClassCode());
+        validateOperationalClass(classInfo);
+        operation.setScheduleCode(0);
+        if (sDAO.countDuplicateSchedule(authorCode, operation) > 0) {
+            throw new IllegalArgumentException("같은 날짜와 시작 시간의 일정이 이미 있습니다.");
+        }
+
+        java.sql.Date scheduleDate = java.sql.Date.valueOf(operation.getScheduleDate());
+        RepeatScheduleDTO repeatRule = new RepeatScheduleDTO();
+        repeatRule.setClassCode(operation.getClassCode());
+        repeatRule.setRepeatStartDate(scheduleDate);
+        repeatRule.setRepeatEndDate(scheduleDate);
+        if (sDAO.insertRepeatSchedule(repeatRule) != 1) {
+            throw new IllegalStateException("일정 운영 기간을 저장하지 못했습니다.");
+        }
+
+        ScheduleDTO schedule = toScheduleDTO(operation, repeatRule.getRepeatScheduleCode());
+        if (sDAO.insertSchedule(schedule) != 1) {
+            throw new IllegalStateException("새 일정을 저장하지 못했습니다.");
+        }
+        return schedule.getScheduleCode();
+    }
+
+    // 예약이 없는 미래 일정만 날짜·시간·정원을 변경한다
+    @Transactional
+    public boolean modifySchedule(long authorCode, int scheduleCode,
+            ScheduleOperationDTO operation) {
+        operation.setScheduleCode(scheduleCode);
+        validateScheduleOperation(operation);
+        ScheduleManageDTO saved = sDAO.selectScheduleManage(scheduleCode);
+        ClassManagementDTO classInfo = saved == null ? null
+                : cmDAO.selectClassManagementInfo(authorCode, saved.getClassCode());
+        validateOperationalClass(classInfo);
+        if (saved == null || saved.getClassCode() != operation.getClassCode()) {
+            throw new IllegalArgumentException("수정할 수 없는 클래스 일정입니다.");
+        }
+        if ("진행 완료".equals(saved.getScheduleStatus())) {
+            throw new IllegalArgumentException("이미 진행이 끝난 일정은 변경할 수 없습니다.");
+        }
+        if (saved.getReservedCount() > 0) {
+            throw new IllegalArgumentException("예약자가 있는 일정은 날짜·시간·정원을 변경할 수 없습니다.");
+        }
+        if (sDAO.countDuplicateSchedule(authorCode, operation) > 0) {
+            throw new IllegalArgumentException("같은 날짜와 시작 시간의 일정이 이미 있습니다.");
+        }
+        if (sDAO.updateManagedSchedule(authorCode, operation) != 1) {
+            throw new IllegalArgumentException("일정 정보가 변경되었습니다. 새로고침 후 다시 시도해주세요.");
+        }
+        if (sDAO.refreshRepeatRuleRange(authorCode, scheduleCode) != 1) {
+            throw new IllegalStateException("일정 운영 기간을 갱신하지 못했습니다.");
+        }
+        return true;
+    }
+
+    // 남은 정원이 있는 미래 마감 일정을 다시 모집 중으로 변경한다
+    @Transactional
+    public boolean reopenSchedule(long authorCode, int scheduleCode) {
+        ScheduleManageDTO schedule = sDAO.selectScheduleManage(scheduleCode);
+        ClassManagementDTO classInfo = schedule == null ? null
+                : cmDAO.selectClassManagementInfo(authorCode, schedule.getClassCode());
+        validateOperationalClass(classInfo);
+        if (schedule == null || !"모집 마감".equals(schedule.getScheduleStatus())) {
+            throw new IllegalArgumentException("다시 열 수 있는 마감 일정이 아닙니다.");
+        }
+        if (schedule.getMaxPeople() <= schedule.getReservedCount()) {
+            throw new IllegalArgumentException("정원이 모두 예약되어 있어 일정을 다시 열 수 없습니다.");
+        }
+        if (sDAO.reopenSchedule(authorCode, scheduleCode) != 1) {
+            throw new IllegalArgumentException("일정 정보가 변경되었습니다. 새로고침 후 다시 시도해주세요.");
+        }
+        return true;
     }
 
     // 현재 조회 결과를 일정 관리 상단 지표로 계산한다
@@ -166,12 +267,21 @@ public class ClassManagementService {
             throw new IllegalArgumentException("이미 정산에 포함된 결제가 있어 일정을 취소할 수 없습니다.");
         }
 
-        int refundablePaymentCount = cmDAO.countRefundableSchedulePayment(authorCode, scheduleCode);
+        List<ScheduleRefundPaymentDTO> refundablePayments =
+                cmDAO.selectRefundableSchedulePaymentList(authorCode, scheduleCode);
+        if (!refundablePayments.isEmpty()) {
+            // dummy/미설정 키는 첫 API 호출 전에 차단하여 일정과 DB 결제 상태를 그대로 둔다.
+            tossCancellationClient.validateConfiguration();
+            for (ScheduleRefundPaymentDTO payment : refundablePayments) {
+                tossCancellationClient.cancelFullPayment(
+                        payment.getPgCode(), scheduleCode, payment.getPaymentCode());
+            }
+        }
 
         if (sDAO.closeSchedule(authorCode, scheduleCode) != 1) {
             throw new IllegalArgumentException("일정 정보가 변경되었습니다. 새로고침 후 다시 시도해주세요.");
         }
-        if (cmDAO.refundSchedulePayments(authorCode, scheduleCode) != refundablePaymentCount) {
+        if (cmDAO.refundSchedulePayments(authorCode, scheduleCode) != refundablePayments.size()) {
             throw new IllegalArgumentException("결제 환불 상태를 반영하지 못했습니다. 다시 시도해주세요.");
         }
         return cmDAO.cancelScheduleReservations(authorCode, scheduleCode);
@@ -220,6 +330,64 @@ public class ClassManagementService {
         }
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private String normalizeClassStatus(String classStatus) {
+        return Set.of("모집중", "준비중", "폐강").contains(classStatus)
+                ? classStatus : "all";
+    }
+
+    private void validateDateRange(LocalDate fromDate, LocalDate toDate) {
+        if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
+            throw new IllegalArgumentException("검색 시작일은 종료일보다 늦을 수 없습니다.");
+        }
+    }
+
+    private void validateOperationalClass(ClassManagementDTO classInfo) {
+        if (classInfo == null || "폐강".equals(classInfo.getClassStatus())) {
+            throw new IllegalArgumentException("일정을 관리할 수 없는 클래스입니다.");
+        }
+    }
+
+    private void validateScheduleOperation(ScheduleOperationDTO operation) {
+        if (operation.getClassCode() <= 0 || operation.getScheduleDate() == null) {
+            throw new IllegalArgumentException("클래스와 수업일을 확인해주세요.");
+        }
+        if (operation.getScheduleDate().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("지난 날짜에는 일정을 등록할 수 없습니다.");
+        }
+        LocalTime startTime = parseTime(operation.getStartTime(), "시작");
+        LocalTime endTime = parseTime(operation.getEndTime(), "종료");
+        if (!startTime.isBefore(endTime)) {
+            throw new IllegalArgumentException("종료 시간은 시작 시간보다 늦어야 합니다.");
+        }
+        if (operation.getMinPeople() < 1 || operation.getMaxPeople() < operation.getMinPeople()
+                || operation.getMaxPeople() > 100) {
+            throw new IllegalArgumentException(
+                    "최소 인원은 1명 이상, 최대 인원은 최소 인원 이상 100명 이하여야 합니다.");
+        }
+        operation.setStartTime(startTime.toString());
+        operation.setEndTime(endTime.toString());
+    }
+
+    private LocalTime parseTime(String value, String label) {
+        try {
+            return LocalTime.parse(value == null ? "" : value.trim());
+        } catch (DateTimeParseException exception) {
+            throw new IllegalArgumentException(label + " 시간을 확인해주세요.");
+        }
+    }
+
+    private ScheduleDTO toScheduleDTO(ScheduleOperationDTO operation, int repeatRuleCode) {
+        ScheduleDTO schedule = new ScheduleDTO();
+        schedule.setClassCode(operation.getClassCode());
+        schedule.setRepeatRuleCode(repeatRuleCode);
+        schedule.setScheduleDate(java.sql.Date.valueOf(operation.getScheduleDate()));
+        schedule.setStartTime(operation.getStartTime());
+        schedule.setEndTime(operation.getEndTime());
+        schedule.setMinPeople(operation.getMinPeople());
+        schedule.setMaxPeople(operation.getMaxPeople());
+        return schedule;
     }
 
 }

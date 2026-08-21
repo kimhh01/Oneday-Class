@@ -10,11 +10,6 @@
 <link rel="stylesheet" href="/author/css/profile.css" th:href="@{/author/css/profile.css}">
 <script src="/author/js/layout.js" th:src="@{/author/js/layout.js}" defer></script>
 </head>
-<!--
-	작가 프로필 관리 화면 초안.
-	실제 연동 시 로그인 세션의 회원 정보로 작가를 조회하고, 클라이언트의 작가 코드를 권한 근거로 사용하지 않는다.
-	계좌 정보와 통장 사본은 별도 테이블을 가정하지 않고 CREATOR의 정산 관련 컬럼에 저장한다.
--->
 <body class="author-page profile-page" data-menu="profile" data-page="프로필 관리">
 <div class="app">
 	<div th:replace="~{author/fragments/icons :: icons}"></div>
@@ -29,8 +24,10 @@
 						<h1 class="page-title">프로필 관리</h1>
 						<p class="page-desc">작가 페이지에 공개되는 정보와 정산 계좌를 안전하게 관리할 수 있습니다.</p>
 					</div>
-					<a href="index.html" th:href="@{/author}" class="profile-preview-link"><svg aria-hidden="true"><use href="#icon-eye"></use></svg> 작가 페이지 보기</a>
+					<a href="index.html" th:href="@{/author}" class="profile-preview-link"><svg aria-hidden="true"><use href="#icon-home"></use></svg> 작가센터 홈</a>
 				</header>
+				<p class="profile-feedback profile-feedback--success" th:if="${profileMessage}" th:text="${profileMessage}" role="status"></p>
+				<p class="profile-feedback profile-feedback--error" th:if="${profileError}" th:text="${profileError}" role="alert"></p>
 
 				<form id="profileForm" method="post" enctype="multipart/form-data" th:action="@{/author/profile}" th:object="${profile}">
 					<section class="profile-overview" aria-label="프로필 요약 및 상태">
@@ -56,7 +53,7 @@
 
 							<section class="settlement-panel" aria-labelledby="settlementTitle">
 								<span class="profile-control-icon profile-control-icon--beige"><svg aria-hidden="true"><use href="#icon-wallet"></use></svg></span>
-								<div class="profile-control-copy"><h2 id="settlementTitle">정산 계좌</h2><p><strong id="maskedAccount" th:text="${#strings.isEmpty(account.accountNumber) ? '등록된 계좌 없음' : account.accountNumber}">등록된 계좌 없음</strong><span id="accountDocumentState" th:text="${#strings.isEmpty(account.bankbookPath) ? '통장 사본 미등록' : '통장 사본 등록됨'}">통장 사본 미등록</span></p></div>
+								<div class="profile-control-copy"><h2 id="settlementTitle">정산 계좌</h2><p><strong id="maskedAccount" th:text="${#strings.isEmpty(account.maskedAccountNumber) ? '등록된 계좌 없음' : account.maskedAccountNumber}">등록된 계좌 없음</strong><span id="accountDocumentState" th:text="${#strings.isEmpty(account.bankbookPath) ? '통장 사본 미등록' : '통장 사본 등록됨'}">통장 사본 미등록</span></p></div>
 								<button type="button" class="btn btn--outline btn--sm account-manage-button" id="openAccountDialog">계좌 정보 관리 <svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg></button>
 							</section>
 						</div>
@@ -95,9 +92,15 @@
 								<div class="profile-field-foot"><small>작가의 분위기와 클래스 이야기를 소개해주세요.</small><span><b id="introCount">0</b> / 300</span></div>
 							</div>
 							<div class="profile-field profile-field--wide">
-								<label for="kakaoLink">SNS 링크 <span>선택</span></label>
-								<div class="kakao-input"><span aria-hidden="true">S</span><input type="text" id="kakaoLink" th:field="*{kakaoUrl}" maxlength="50" placeholder="인스타그램 또는 카카오톡 채널 주소"></div>
-								<small>작가 활동을 소개하거나 수강생 문의에 사용할 SNS 주소를 입력해주세요.</small>
+								<label for="kakaoLink">카카오톡 채널 링크 <span>선택</span></label>
+								<div class="kakao-input"><span aria-hidden="true">톡</span><input type="url" id="kakaoLink" th:field="*{kakaoUrl}" maxlength="200" placeholder="https://pf.kakao.com/_채널아이디" aria-describedby="kakaoLinkHelp"></div>
+								<div class="kakao-channel-meta">
+									<small id="kakaoLinkHelp">카카오톡 채널을 만든 뒤 채널 홈 URL을 붙여넣어 주세요.</small>
+									<div class="kakao-channel-actions">
+										<a href="https://business.kakao.com/dashboard/" target="_blank" rel="noopener noreferrer">카카오톡 채널 만들기</a>
+										<a id="kakaoChannelPreviewLink" href="#" target="_blank" rel="noopener noreferrer" hidden>등록된 채널 열기</a>
+									</div>
+								</div>
 							</div>
 						</div>
 					</section>
@@ -118,9 +121,9 @@
 		<div class="account-dialog__head"><div><span>정산 정보</span><h2 id="accountDialogTitle">계좌 정보 관리</h2><p>정산금을 받을 계좌와 통장 사본을 등록해주세요.</p></div><button type="button" id="closeAccountDialog" aria-label="닫기">×</button></div>
 		<div class="account-dialog__body">
 			<label for="settlementAccount">계좌 정보</label>
-			<input id="settlementAccount" name="accountNumber" maxlength="20" placeholder="계좌번호" th:value="${account.accountNumber}" required>
+			<input id="settlementAccount" name="accountNumber" maxlength="24" inputmode="numeric" pattern="[0-9 -]{8,24}" placeholder="숫자 또는 하이픈으로 입력" th:value="${account.accountNumber}" required>
 			<small>계좌번호는 화면에서 일부만 표시됩니다.</small>
-			<label class="bankbook-upload" for="bankbookFile"><svg aria-hidden="true"><use href="#icon-image"></use></svg><span><strong id="bankbookFileName">통장 사본이 등록되어 있습니다.</strong><small>JPG, PNG 파일 · 최대 5MB</small></span><b>파일 선택</b></label>
+			<label class="bankbook-upload" for="bankbookFile"><svg aria-hidden="true"><use href="#icon-image"></use></svg><span><strong id="bankbookFileName" th:text="${#strings.isEmpty(account.bankbookPath) ? '통장 사본을 선택해주세요.' : '통장 사본이 등록되어 있습니다.'}">통장 사본을 선택해주세요.</strong><small>JPG, PNG 파일 · 최대 5MB</small></span><b>파일 선택</b></label>
 			<input type="file" id="bankbookFile" name="bankbookFile" accept="image/jpeg,image/png" hidden>
 		</div>
 		<div class="account-dialog__foot"><button type="button" id="cancelAccountDialog">취소</button><button type="submit">계좌 정보 저장</button></div>
@@ -133,16 +136,30 @@
 	'use strict';
 	var form=document.getElementById('profileForm'),photoInput=document.getElementById('profilePhoto'),photoPreview=document.getElementById('profilePhotoPreview'),initialPhoto=photoPreview.src,previewUrl='';
 	var intro=document.getElementById('introduction'),introCount=document.getElementById('introCount');
+	var kakaoInput=document.getElementById('kakaoLink'),kakaoPreviewLink=document.getElementById('kakaoChannelPreviewLink');
 	var accountDialog=document.getElementById('accountDialog'),accountForm=document.getElementById('accountForm'),accountInput=document.getElementById('settlementAccount'),bankbookInput=document.getElementById('bankbookFile');
 
 	function updateIntroCount(){introCount.textContent=intro.value.length;}
+	function getKakaoChannelUrl(value){
+		var candidate=value.trim();
+		if(!candidate)return '';
+		if(!/^https?:\/\//i.test(candidate))candidate='https://'+candidate;
+		try{
+			var url=new URL(candidate);
+			if(!/^https?:$/.test(url.protocol)||url.hostname.toLowerCase()!=='pf.kakao.com'||url.username||url.password||url.port||url.hash||!url.pathname.startsWith('/_')||url.pathname.length<=2)return '';
+			return 'https://pf.kakao.com'+url.pathname+url.search;
+		}catch(error){return '';}
+	}
+	function updateKakaoPreview(){var url=getKakaoChannelUrl(kakaoInput.value);kakaoPreviewLink.hidden=!url;if(url)kakaoPreviewLink.href=url;else kakaoPreviewLink.removeAttribute('href');}
 	function closeAccountDialog(){accountDialog.close();}
 
 	updateIntroCount();
+	updateKakaoPreview();
 	intro.addEventListener('input',updateIntroCount);
+	kakaoInput.addEventListener('input',updateKakaoPreview);
 	photoInput.addEventListener('change',function(){var file=photoInput.files[0];if(!file)return;if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl=URL.createObjectURL(file);photoPreview.src=previewUrl;});
 
-	document.getElementById('resetProfile').addEventListener('click',function(){setTimeout(function(){if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl='';photoPreview.src=initialPhoto;updateIntroCount();},0);});
+	document.getElementById('resetProfile').addEventListener('click',function(){setTimeout(function(){if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl='';photoPreview.src=initialPhoto;updateIntroCount();updateKakaoPreview();},0);});
 
 	document.getElementById('openAccountDialog').addEventListener('click',function(){accountDialog.showModal();});
 	document.getElementById('closeAccountDialog').addEventListener('click',closeAccountDialog);

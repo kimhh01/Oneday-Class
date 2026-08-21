@@ -58,12 +58,7 @@
 		c.STATUS AS CLASS_STATUS
 	</sql>
 
-	<!-- 운영 클래스 목록을 상태·일정 유형·클래스명으로 검색한다 -->
-	<select id="selectClassManagementList" parameterType="map"
-		resultType="kr.co.oneclass.author.classmanage.ClassManagementDTO">
-		SELECT
-			<include refid="classManagementColumns"/>
-		FROM CLASS c
+	<sql id="classManagementWhere">
 		WHERE c.OPERATOR_CODE = #{authorCode}
 		  AND c.APPROVAL_STATUS = '승인'
 		<if test="classStatus != null and classStatus != '' and classStatus != 'all'">
@@ -91,7 +86,44 @@
 				  AND rt.OPERATION_START_DATE &lt; TO_DATE(#{toDate}, 'YYYY-MM-DD') + 1
 			)
 		</if>
-		ORDER BY c.WRITE_DATE DESC, c.CLASS_CODE DESC
+	</sql>
+
+	<!-- 운영 클래스 목록을 검색한 뒤 Oracle ROWNUM으로 페이지를 나눈다 -->
+	<select id="selectClassManagementList" parameterType="map"
+		resultType="kr.co.oneclass.author.classmanage.ClassManagementDTO">
+		SELECT *
+		FROM (
+			SELECT class_page.*, ROWNUM AS RN
+			FROM (
+				SELECT
+					<include refid="classManagementColumns"/>
+				FROM CLASS c
+				<include refid="classManagementWhere"/>
+				ORDER BY c.WRITE_DATE DESC, c.CLASS_CODE DESC
+			) class_page
+			WHERE ROWNUM &lt;= #{endRow}
+		)
+		WHERE RN &gt;= #{startRow}
+	</select>
+
+	<select id="selectClassManagementCount" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+		FROM CLASS c
+		<include refid="classManagementWhere"/>
+	</select>
+
+	<select id="selectSchedulableClassList" parameterType="long"
+		resultType="kr.co.oneclass.author.classmanage.ClassManagementDTO">
+		SELECT
+			c.CLASS_CODE,
+			c.OPERATOR_CODE AS AUTHOR_CODE,
+			c.NAME AS CLASS_TITLE,
+			c.STATUS AS CLASS_STATUS
+		FROM CLASS c
+		WHERE c.OPERATOR_CODE = #{authorCode}
+		  AND c.APPROVAL_STATUS = '승인'
+		  AND c.STATUS IN ('모집중', '준비중')
+		ORDER BY c.NAME, c.CLASS_CODE
 	</select>
 
 	<!-- 검색 조건과 무관하게 작가의 전체 클래스 운영 지표를 계산한다 -->
@@ -343,6 +375,28 @@
 		  AND NOT EXISTS (
 			SELECT 1 FROM CALCULATE ca WHERE ca.PAYMENT_CODE = p.PAYMENT_CODE
 		  )
+	</select>
+
+	<!-- 일정 취소 전에 Toss 전액 취소 API를 호출할 결제 키 목록 -->
+	<select id="selectRefundableSchedulePaymentList" parameterType="map"
+		resultType="kr.co.oneclass.author.classmanage.ScheduleRefundPaymentDTO">
+		SELECT
+			p.PAYMENT_CODE,
+			p.PG_CODE
+		FROM PAYMENT p
+		JOIN RESERVATION rv ON rv.RESERVATION_CODE = p.RESERVATION_CODE
+		JOIN CLASS c ON c.CLASS_CODE = rv.CLASS_CODE
+		WHERE c.OPERATOR_CODE = #{authorCode}
+		  AND c.APPROVAL_STATUS = '승인'
+		  AND c.STATUS IN ('모집중', '준비중')
+		  AND rv.SCHEDULE_CODE = #{scheduleCode}
+		  AND rv.STATUS = '예약'
+		  AND p.STATUS = '결제완료'
+		  AND NVL(p.REFUND, 0) &lt; p.AMOUNT
+		  AND NOT EXISTS (
+			SELECT 1 FROM CALCULATE ca WHERE ca.PAYMENT_CODE = p.PAYMENT_CODE
+		  )
+		ORDER BY p.PAYMENT_CODE
 	</select>
 
 	<!-- 결제 완료 상태인 활성 예약을 전액 환불 완료로 반영한다 -->

@@ -19,7 +19,6 @@ public class ClassPreviewDTO {
 
     private List<ClassImageDTO> mainImageList = new ArrayList<>();     // 대표 이미지 목록
     private List<ClassImageDTO> resultImageList = new ArrayList<>();   // 완성작 이미지 목록
-    private List<ClassImageDTO> galleryImageList = new ArrayList<>();  // 갤러리 이미지 목록
 
     private CurriculumFormDTO curriculum;                              // 커리큘럼 단계 값
 }

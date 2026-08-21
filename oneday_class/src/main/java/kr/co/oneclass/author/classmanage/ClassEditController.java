@@ -181,13 +181,12 @@ public class ClassEditController {
     @PostMapping("/author/classes/{classCode}/edit/detail-extra")
     public String saveDetailExtra(@PathVariable("classCode") int classCode,
             ClassDetailDTO form,
-            @RequestParam(value = "galleryFiles", required = false) List<MultipartFile> galleryFiles,
             @RequestParam(value = "saveMode", defaultValue = "next") String saveMode,
             HttpSession session, RedirectAttributes redirectAttributes) {
         form.setClassCode(classCode);
         form.setAuthorCode(AuthorSessionUtils.getAuthorCode(session));
         try {
-            classService.modifyApprovedClassDetailExtra(form, galleryFiles);
+            classService.modifyApprovedClassDetailExtra(form);
             if (isStay(saveMode)) {
                 redirectAttributes.addFlashAttribute("draftSaved", "상세 정보 2/2를 저장했습니다.");
                 return editRedirect(classCode, "detail-extra");

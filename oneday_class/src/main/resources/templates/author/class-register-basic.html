@@ -67,25 +67,31 @@
 							</div>
 
 							<div class="field">
-								<label class="field__label" for="className"></label>
+								<label class="field__label" for="className">클래스 이름</label>
 								<div class="field__control">
 									<input class="input" type="text" id="className" th:field="*{classTitle}"
-										   maxlength="30" placeholder="예: 감성 도자기 핸드빌딩 원데이 클래스" required>
-									<p class="field__help">클래스를 대표할 수 있는 이름을 입력해주세요. (최대 30자)</p>
+										   maxlength="30" data-byte-limit="30" data-byte-counter="classNameBytes" placeholder="예: 감성 도자기 핸드빌딩 클래스" required>
+									<div class="field__foot">
+										<p class="field__help">클래스 이름을 입력해주세요.(최대 10자)</p>
+										<p class="field__count"><span id="classNameBytes">0</span> / 30 byte</p>
+									</div>
 								</div>
 							</div>
 
 							<div class="field">
-								<label class="field__label" for="summary"></label>
+								<label class="field__label" for="summary">한 줄 소개</label>
 								<div class="field__control">
 									<input class="input" type="text" id="summary" th:field="*{shortIntroduction}"
-										   maxlength="60" placeholder="예: 흙으로 빚는 나만의 따뜻한 작품" required>
-									<p class="field__help">클래스를 한 줄로 요약해주세요. (최대 60자)</p>
+										   maxlength="100" data-byte-limit="100" data-byte-counter="summaryBytes" placeholder="예: 흙으로 빚는 나만의 따뜻한 작품" required>
+									<div class="field__foot">
+										<p class="field__help">클래스를 한 줄로 표현해주세요.(최대 33자)</p>
+										<p class="field__count"><span id="summaryBytes">0</span> / 100 byte</p>
+									</div>
 								</div>
 							</div>
 
 							<div class="field">
-								<label class="field__label" for="intro"></label>
+								<label class="field__label" for="intro">클래스 소개</label>
 								<div class="field__control">
 									<textarea class="textarea" id="intro" th:field="*{classIntroduction}" maxlength="500"
 											  data-counter="introCount"
@@ -179,6 +185,18 @@
 
 <script>
 (function () {
+	document.querySelectorAll('[data-byte-limit]').forEach(function (element) {
+		var limit = Number(element.dataset.byteLimit);
+		var output = document.getElementById(element.dataset.byteCounter);
+		var update = function () {
+			var length = new TextEncoder().encode(element.value).length;
+			if (output) output.textContent = length;
+			element.setCustomValidity(length > limit ? limit + '바이트 이내로 입력해주세요.' : '');
+		};
+		element.addEventListener('input', update);
+		update();
+	});
+
 	var counters = document.querySelectorAll('[data-counter]');
 	counters.forEach(function (element) {
 		var output = document.getElementById(element.dataset.counter);
@@ -206,22 +224,45 @@
 	var preview = zone ? zone.querySelector('.upload-zone__preview') : null;
 	var thumbs = document.getElementById('uploadThumbs');
 	var objectUrls = [];
+	var selectedFiles = [];
 
 	function clearObjectUrls() {
 		objectUrls.forEach(function (url) { URL.revokeObjectURL(url); });
 		objectUrls = [];
 	}
 
-	function renderFiles(fileList) {
+	function fileKey(file) {
+		return file.name + ':' + file.size + ':' + file.lastModified;
+	}
+
+	function syncInput() {
+		var transfer = new DataTransfer();
+		selectedFiles.forEach(function (file) { transfer.items.add(file); });
+		input.files = transfer.files;
+	}
+
+	function appendFiles(fileList) {
+		var known = new Set(selectedFiles.map(fileKey));
+		Array.from(fileList || []).filter(function (file) {
+			return (file.type === 'image/jpeg' || file.type === 'image/png')
+				&& file.size <= 5 * 1024 * 1024;
+		}).forEach(function (file) {
+			var key = fileKey(file);
+			if (selectedFiles.length >= 5 || known.has(key)) return;
+			known.add(key);
+			selectedFiles.push(file);
+		});
+		syncInput();
+		renderFiles();
+	}
+
+	function renderFiles() {
 		if (!preview || !thumbs) return;
-		var files = Array.from(fileList || []).filter(function (file) {
-			return file.type.indexOf('image/') === 0;
-		}).slice(0, 5);
-		if (!files.length) return;
+		if (!selectedFiles.length) return;
 
 		clearObjectUrls();
 		thumbs.innerHTML = '';
-		files.forEach(function (file, index) {
+		selectedFiles.forEach(function (file, index) {
 			var url = URL.createObjectURL(file);
 			objectUrls.push(url);
 			if (index === 0) preview.src = url;
@@ -243,7 +284,7 @@
 			thumbs.appendChild(button);
 		});
 
-		for (var index = files.length; index < 5; index += 1) {
+		for (var index = selectedFiles.length; index < 5; index += 1) {
 			var empty = document.createElement('button');
 			empty.type = 'button';
 			empty.className = 'upload-thumb';
@@ -254,7 +295,7 @@
 	}
 
 	if (input && zone) {
-		input.addEventListener('change', function () { renderFiles(input.files); });
+		input.addEventListener('change', function () { appendFiles(input.files); });
 		zone.addEventListener('dragover', function (event) {
 			event.preventDefault();
 			zone.classList.add('is-dragging');
@@ -263,7 +304,7 @@
 		zone.addEventListener('drop', function (event) {
 			event.preventDefault();
 			zone.classList.remove('is-dragging');
-			renderFiles(event.dataTransfer.files);
+			appendFiles(event.dataTransfer.files);
 		});
 		document.addEventListener('click', function (event) {
 			var button = event.target.closest('[data-open-upload]');

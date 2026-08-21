@@ -157,14 +157,14 @@
 	<!--
 		리뷰 이미지 목록.
 		REVIEW_IMG 에 순서 컬럼이 없어 REVIEW_IMG_CODE 순서를 출력 순서로 쓴다.
-		컬럼명 REVJEW_IMG 는 오타지만 실제 컬럼명이므로 그대로 둔다.
+		이미지 경로 컬럼은 REVIEW_IMG 를 사용한다.
 	-->
 	<select id="selectReviewImageList" parameterType="int"
 		resultType="kr.co.oneclass.author.review.ReviewImageDTO">
 		SELECT
 			REVIEW_IMG_CODE AS REVIEW_IMAGE_CODE,
 			REVIEW_CODE,
-			REVJEW_IMG AS IMAGE_PATH,
+			REVIEW_IMG AS IMAGE_PATH,
 			ROW_NUMBER() OVER (ORDER BY REVIEW_IMG_CODE) AS IMAGE_ORDER
 		FROM REVIEW_IMG
 		WHERE REVIEW_CODE = #{reviewCode}

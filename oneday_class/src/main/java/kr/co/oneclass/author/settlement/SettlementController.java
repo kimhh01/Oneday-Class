@@ -1,10 +1,9 @@
 package kr.co.oneclass.author.settlement;
 
 import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -103,10 +102,10 @@ public class SettlementController {
         accountDTO.setAuthorCode(AuthorSessionUtils.getAuthorCode(session));
         try {
             boolean modified = sService.modifySettlementAccount(accountDTO, bankbookFile);
-            redirectAttributes.addFlashAttribute("message",
+            redirectAttributes.addFlashAttribute(modified ? "profileMessage" : "profileError",
                     modified ? "정산 계좌 정보가 저장되었습니다." : "정산 계좌 정보를 저장하지 못했습니다.");
         } catch (IllegalArgumentException | IllegalStateException exception) {
-            redirectAttributes.addFlashAttribute("message", exception.getMessage());
+            redirectAttributes.addFlashAttribute("profileError", exception.getMessage());
         }
         return "redirect:/author/profile";
     }
@@ -183,7 +182,6 @@ public class SettlementController {
         return "author/settlement-detail";
     }
 
-    // 현재 검색 조건의 매출 내역을 UTF-8 CSV 파일로 내려받는다
     @GetMapping("/author/sales/excel")
     public void downloadSalesExcel(SalesSearchDTO searchDTO,
             @RequestParam(value = "period", required = false, defaultValue = "all") String period,
@@ -197,24 +195,23 @@ public class SettlementController {
         searchDTO.setEndRow(Integer.MAX_VALUE);
         List<SalesListDTO> sales = sService.getSalesList(searchDTO);
 
-        prepareCsvResponse(response, "author-sales.csv");
-        try (PrintWriter writer = csvWriter(response)) {
-            writer.println("결제번호,결제일,클래스,구매자,결제금액,환불금액,정산액,결제상태");
-            for (SalesListDTO sale : sales) {
-                writer.println(String.join(",",
-                        csv("P-" + sale.getPaymentCode()),
-                        csv(formatDate(sale.getPaymentDate())),
-                        csv(sale.getClassTitle()),
-                        csv(sale.getMemberName()),
-                        String.valueOf(sale.getPaymentAmount()),
-                        String.valueOf(sale.getDiscountAmount()),
-                        String.valueOf(sale.getSettlementAmount()),
-                        csv(sale.getPaymentStatus())));
-            }
+        List<List<Object>> rows = new ArrayList<>();
+        for (SalesListDTO sale : sales) {
+            rows.add(Arrays.asList(
+                    "P-" + sale.getPaymentCode(),
+                    formatDate(sale.getPaymentDate()),
+                    sale.getClassTitle(),
+                    sale.getMemberName(),
+                    sale.getPaymentAmount(),
+                    sale.getRefundAmount(),
+                    sale.getSettlementAmount(),
+                    sale.getPaymentStatus()));
         }
+        prepareExcelResponse(response, "author-sales.xlsx");
+        ExcelExportWriter.write(response.getOutputStream(), "매출 내역",
+                List.of("결제번호", "결제일", "클래스", "구매자", "결제금액", "환불금액", "정산액", "결제상태"), rows);
     }
 
-    // 현재 검색 조건의 정산 내역을 UTF-8 CSV 파일로 내려받는다
     @GetMapping("/author/settlements/excel")
     public void downloadSettlementExcel(SettlementSearchDTO searchDTO,
             @RequestParam(value = "period", required = false, defaultValue = "all") String period,
@@ -228,22 +225,22 @@ public class SettlementController {
         searchDTO.setEndRow(Integer.MAX_VALUE);
         List<SettlementListDTO> settlements = sService.getSettlementList(searchDTO);
 
-        prepareCsvResponse(response, "author-settlements.csv");
-        try (PrintWriter writer = csvWriter(response)) {
-            writer.println("정산번호,신청일,대상시작일,대상종료일,결제건수,매출액,수수료,정산금액,상태");
-            for (SettlementListDTO settlement : settlements) {
-                writer.println(String.join(",",
-                        csv("S-" + settlement.getSettlementCode()),
-                        csv(formatDate(settlement.getAppliedAt())),
-                        csv(formatDate(settlement.getPeriodStartDate())),
-                        csv(formatDate(settlement.getPeriodEndDate())),
-                        String.valueOf(settlement.getPaymentCount()),
-                        String.valueOf(settlement.getTotalPaymentAmount()),
-                        String.valueOf(settlement.getTotalFeeAmount()),
-                        String.valueOf(settlement.getSettlementAmount()),
-                        csv(settlement.getSettlementStatus())));
-            }
+        List<List<Object>> rows = new ArrayList<>();
+        for (SettlementListDTO settlement : settlements) {
+            rows.add(Arrays.asList(
+                    "S-" + settlement.getSettlementCode(),
+                    formatDate(settlement.getAppliedAt()),
+                    formatDate(settlement.getPeriodStartDate()),
+                    formatDate(settlement.getPeriodEndDate()),
+                    settlement.getPaymentCount(),
+                    settlement.getTotalPaymentAmount(),
+                    settlement.getTotalFeeAmount(),
+                    settlement.getSettlementAmount(),
+                    settlement.getSettlementStatus()));
         }
+        prepareExcelResponse(response, "author-settlements.xlsx");
+        ExcelExportWriter.write(response.getOutputStream(), "정산 내역",
+                List.of("정산번호", "신청일", "대상시작일", "대상종료일", "결제건수", "매출액", "수수료(10%)", "정산금액", "상태"), rows);
     }
 
     // 정산 신청 화면이 요구하는 Model 값을 담는다
@@ -328,21 +325,9 @@ public class SettlementController {
         return Math.max(1, (count + PAGE_SIZE - 1) / PAGE_SIZE);
     }
 
-    private void prepareCsvResponse(HttpServletResponse response, String filename) {
-        response.setContentType("text/csv;charset=UTF-8");
+    private void prepareExcelResponse(HttpServletResponse response, String filename) {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
-    }
-
-    private PrintWriter csvWriter(HttpServletResponse response) throws IOException {
-        response.getOutputStream().write(0xEF);
-        response.getOutputStream().write(0xBB);
-        response.getOutputStream().write(0xBF);
-        return new PrintWriter(new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8));
-    }
-
-    private String csv(String value) {
-        String safe = value == null ? "" : value.replace("\"", "\"\"");
-        return "\"" + safe + "\"";
     }
 
     private String formatDate(Date date) {

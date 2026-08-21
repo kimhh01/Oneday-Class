@@ -249,9 +249,9 @@
 							</tbody>
 						</table>
 					</div>
+					<nav class="mgmt-pager" id="classSchedulePager" aria-label="클래스 일정 페이지" hidden></nav>
 				</section>
 
-				<!-- 정산 요약: 수수료 산식 확정 전에는 매출 금액만 표시한다. -->
 				<section class="settle" aria-labelledby="settleTitle">
 					<h2 class="settle__head" id="settleTitle">정산 요약</h2>
 					<div class="settle__grid">
@@ -266,17 +266,17 @@
 							<span class="settle__icon"><svg aria-hidden="true"><use href="#icon-receipt"></use></svg></span>
 							<div>
 								<p class="settle__label">
-									정산 수수료
+									정산 수수료 (10%)
 									<svg aria-hidden="true"><use href="#icon-info"></use></svg>
 								</p>
-								<p class="settle__value" id="settleFee">정책 확정 후 계산</p>
+								<p class="settle__value" id="settleFee" th:text="${'-₩' + #numbers.formatInteger(classDetail.settlementFeeAmount, 1, 'COMMA')}">-₩0</p>
 							</div>
 						</div>
 						<div class="settle__item settle__item--total">
 							<span class="settle__icon"><svg aria-hidden="true"><use href="#icon-wallet"></use></svg></span>
 							<div>
 								<p class="settle__label">예상 정산 금액</p>
-								<p class="settle__value" id="settleTotal">수수료 정책 확정 후 제공</p>
+								<p class="settle__value" id="settleTotal" th:text="${'₩' + #numbers.formatInteger(classDetail.expectedSettlementAmount, 1, 'COMMA')}">₩0</p>
 							</div>
 						</div>
 					</div>
@@ -549,9 +549,50 @@
 	};
 
 	var rows = [].slice.call(document.querySelectorAll('.schedule-row'));
+	var schedulePageSize = 10;
+	var schedulePage = 1;
+	var schedulePager = document.getElementById('classSchedulePager');
 	var visibilityButton = document.getElementById('visibilityButton');
 	var classStatus = visibilityButton.getAttribute('data-current-status');
 	var classClosed = classStatus === '폐강';
+
+	function renderSchedulePager() {
+		var totalPages = Math.max(1, Math.ceil(rows.length / schedulePageSize));
+		schedulePage = Math.min(Math.max(schedulePage, 1), totalPages);
+		rows.forEach(function (row, index) {
+			row.hidden = index < (schedulePage - 1) * schedulePageSize || index >= schedulePage * schedulePageSize;
+		});
+
+		schedulePager.innerHTML = '';
+		schedulePager.hidden = totalPages <= 1;
+		if (schedulePager.hidden) { return; }
+
+		function addPageButton(page, label, ariaLabel, disabled) {
+			var button = document.createElement('button');
+			button.type = 'button';
+			button.dataset.page = String(page);
+			button.disabled = disabled;
+			if (ariaLabel) { button.setAttribute('aria-label', ariaLabel); }
+			if (page === schedulePage && !ariaLabel) { button.setAttribute('aria-current', 'page'); }
+			button.innerHTML = label;
+			schedulePager.appendChild(button);
+		}
+
+		addPageButton(schedulePage - 1, '<svg aria-hidden="true"><use href="#icon-chevron-left"></use></svg>', '이전 페이지', schedulePage === 1);
+		for (var page = 1; page <= totalPages; page += 1) {
+			if (page >= schedulePage - 2 && page <= schedulePage + 2) {
+				addPageButton(page, String(page), '', false);
+			}
+		}
+		addPageButton(schedulePage + 1, '<svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg>', '다음 페이지', schedulePage === totalPages);
+	}
+
+	schedulePager.addEventListener('click', function (event) {
+		var button = event.target.closest('[data-page]');
+		if (!button || button.disabled) { return; }
+		schedulePage = Number(button.dataset.page);
+		renderSchedulePager();
+	});
 
 	/* ---------- 공통 : 다이얼로그 ---------- */
 	function openDialog(dialog) { dialog.showModal(); }
@@ -798,6 +839,7 @@
 
 	/* ---------- 첫 그리기 ---------- */
 	rows.forEach(paintRow);
+	renderSchedulePager();
 	refresh();
 	paintVisibility();
 }());

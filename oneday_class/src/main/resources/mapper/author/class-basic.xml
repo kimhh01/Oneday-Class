@@ -414,6 +414,35 @@
 		)
 	</insert>
 
+	<select id="selectClassMaterialList" parameterType="int"
+		resultType="kr.co.oneclass.author.classbasic.ClassMaterialDTO">
+		SELECT
+			CLASS_MATERIAL_CODE AS MATERIAL_CODE,
+			CLASS_CODE,
+			MATERIAL_NAME,
+			MATERIAL_CONTENT
+		FROM CLASS_MATERIAL
+		WHERE CLASS_CODE = #{classCode}
+		ORDER BY CLASS_MATERIAL_CODE
+	</select>
+
+	<delete id="deleteClassMaterialList" parameterType="int">
+		DELETE FROM CLASS_MATERIAL
+		WHERE CLASS_CODE = #{classCode}
+	</delete>
+
+	<insert id="insertClassMaterial" parameterType="map">
+		<selectKey keyProperty="generatedCode" resultType="int" order="BEFORE">
+			SELECT SEQ_CLASS_MATERIAL_CODE.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO CLASS_MATERIAL (
+			CLASS_MATERIAL_CODE, CLASS_CODE, MATERIAL_NAME, MATERIAL_CONTENT
+		) VALUES (
+			#{generatedCode}, #{classCode}, #{materialName}, #{materialContent}
+		)
+	</insert>
+
 	<select id="selectOfferingList"
 		resultType="kr.co.oneclass.author.classbasic.OfferingDTO">
 		SELECT

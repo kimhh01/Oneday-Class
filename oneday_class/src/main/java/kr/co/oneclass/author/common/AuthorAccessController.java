@@ -27,7 +27,7 @@ public class AuthorAccessController {
         return "author/access-guide";
     }
     
- // 💡 추가: 마이페이지 모달에서 [시작하기] 버튼 클릭 시 동작
+    // 마이페이지 모달에서 [시작하기] 버튼 클릭 시 관리자 승인 대기 작가를 등록한다
     @GetMapping("/author/start")
     public String startAuthor(HttpSession session) {
         // 1. 세션에서 로그인 회원 정보 가져오기
@@ -36,10 +36,10 @@ public class AuthorAccessController {
             return "redirect:/member/login";
         }
 
-        // 2. 작가 데이터가 없으면 '승인' 상태로 자동 INSERT (이미 존재 시 기존 데이터 반환)
+        // 작가 데이터가 없으면 '대기' 상태로 INSERT (이미 존재 시 기존 데이터 반환)
         authorSessionService.getOrCreateAuthor(loginMember.getMemberCode());
 
-        // 3. 바로 작가 대시보드 페이지로 이동 (인터셉터에서 '승인' 상태 확인 후 통과됨)
+        // 인터셉터가 승인 여부를 확인하고 미승인 작가는 안내 화면으로 보낸다
         return "redirect:/author";
     }
 }

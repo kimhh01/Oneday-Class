@@ -1,8 +1,6 @@
 @charset "UTF-8";
 
-.form-success,
-.form-error,
-.reply-error {
+.form-success, .form-error, .reply-error {
 	margin: 0 0 14px;
 	padding: 11px 14px;
 	border-radius: 9px;
@@ -15,8 +13,7 @@
 	color: #23643D;
 }
 
-.form-error,
-.reply-error {
+.form-error, .reply-error {
 	border: 1px solid #E8CFC9;
 	background: #FFF5F2;
 	color: #A14638;
@@ -27,7 +24,6 @@
    - 따뜻한 아이보리 표면과 실제 사진을 중심으로 구성
    - 공통 토큰/헤더/사이드바는 common.css에서 상속
    ============================================================= */
-
 .register-page-head {
 	margin: 0 0 24px;
 }
@@ -35,7 +31,6 @@
 .register-page-head--compact {
 	margin-bottom: 22px;
 }
-
 
 .register-form-page .register-page-head--compact .page-desc {
 	margin-top: 5px;
@@ -97,7 +92,8 @@
 	width: 49%;
 	min-height: 398px;
 	padding: 48px 20px 44px 44px;
-	background: linear-gradient(90deg, rgba(248,244,235,.98) 0%, rgba(248,244,235,.9) 72%, rgba(248,244,235,0) 100%);
+	background: linear-gradient(90deg, rgba(248, 244, 235, .98) 0%,
+		rgba(248, 244, 235, .9) 72%, rgba(248, 244, 235, 0) 100%);
 }
 
 .register-hero__kicker {
@@ -108,7 +104,10 @@
 	color: #947f5c;
 }
 
-.register-start-page .register-hero__kicker { display: none; }
+.register-start-page .register-hero__kicker {
+	display: none;
+}
+
 .register-start-page .register-hero__copy {
 	padding-top: 44px;
 	padding-bottom: 40px;
@@ -123,7 +122,8 @@
 	color: #1d1b17;
 }
 
-.register-hero__copy > p:not(.register-hero__kicker):not(.register-hero__note) {
+.register-hero__copy>p:not(.register-hero__kicker):not(.register-hero__note)
+	{
 	margin-top: 20px;
 	font-size: 14px;
 	line-height: 1.8;
@@ -166,8 +166,7 @@
 	inset: 0;
 	z-index: 1;
 	background-color: #e9dfcd;
-	background-image:
-		url("../images/photo/register-collage.png");
+	background-image: url("../images/photo/register-collage.png");
 	background-position: center;
 	background-size: cover;
 }
@@ -220,7 +219,7 @@
 	color: var(--text-body);
 }
 
-.draft-choice-modal__panel > p:last-of-type {
+.draft-choice-modal__panel>p:last-of-type {
 	font-size: 13px;
 	color: var(--text-muted);
 }
@@ -232,8 +231,7 @@
 	margin-top: 24px;
 }
 
-.draft-choice-modal__actions form,
-.draft-choice-modal__actions .btn {
+.draft-choice-modal__actions form, .draft-choice-modal__actions .btn {
 	width: 100%;
 }
 
@@ -247,11 +245,10 @@
 	background: #FDECE8;
 }
 
-@media (max-width: 520px) {
+@media ( max-width : 520px) {
 	.draft-choice-modal__panel {
 		padding: 24px 20px;
 	}
-
 	.draft-choice-modal__actions {
 		grid-template-columns: 1fr;
 	}
@@ -281,7 +278,7 @@
 	padding: 0 28px;
 }
 
-.start-guide__item + .start-guide__item {
+.start-guide__item+.start-guide__item {
 	border-left: 1px solid var(--border-soft);
 }
 
@@ -325,7 +322,9 @@
 	background: linear-gradient(90deg, #fbf8f2, #fff);
 }
 
-.register-start-page .start-ready { margin-top: 22px; }
+.register-start-page .start-ready {
+	margin-top: 22px;
+}
 
 .start-ready__title {
 	display: flex;
@@ -395,8 +394,7 @@
 	text-align: center;
 }
 
-.step__link,
-.step__static {
+.step__link, .step__static {
 	display: flex;
 	width: 100%;
 	flex-direction: column;
@@ -483,17 +481,17 @@
 	align-items: stretch;
 }
 
-.register-grid > .card {
+.register-grid>.card {
 	display: flex;
 	min-width: 0;
 	flex-direction: column;
 }
 
-.register-grid > .card + .card {
+.register-grid>.card+.card {
 	margin-top: 0;
 }
 
-.register-grid > .card > .card__body {
+.register-grid>.card>.card__body {
 	display: flex;
 	flex: 1;
 	flex-direction: column;
@@ -511,8 +509,7 @@
 	padding-top: 11px;
 }
 
-.register-info-card .input,
-.register-info-card .select select {
+.register-info-card .input, .register-info-card .select select {
 	height: 42px;
 }
 
@@ -569,7 +566,7 @@
 	width: 100%;
 	height: auto;
 	min-height: 0;
-	aspect-ratio: 2.05 / 1;
+	aspect-ratio: 2.05/1;
 	overflow: hidden;
 	border-radius: 13px;
 	background: #e6ddcf;
@@ -586,8 +583,7 @@
 	transition: border-color .15s;
 }
 
-.upload-zone:hover::after,
-.upload-zone.is-dragging::after {
+.upload-zone:hover::after, .upload-zone.is-dragging::after {
 	border-color: rgba(46, 158, 91, .75);
 }
 
@@ -645,7 +641,7 @@
 	position: relative;
 	display: grid;
 	place-items: center;
-	aspect-ratio: 1.28 / 1;
+	aspect-ratio: 1.28/1;
 	overflow: hidden;
 	border: 1px dashed #d9cdbd;
 	border-radius: 10px;
@@ -707,7 +703,7 @@
 
 /* ---------- 하단 작업 바: 페이지 흐름 안에 위치 ---------- */
 .step-actions {
-	grid-column: 1 / -1;
+	grid-column: 1/-1;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -739,27 +735,22 @@
 }
 
 /* ---------- 반응형 ---------- */
-@media (max-width: 1220px) {
+@media ( max-width : 1220px) {
 	.register-hero {
 		grid-template-columns: minmax(310px, .88fr) minmax(440px, 1.32fr);
 	}
-
 	.register-hero__copy {
 		padding-left: 36px;
 	}
-
 	.start-guide__item {
 		padding: 0 18px;
 	}
-
 	.start-ready {
 		gap: 22px;
 	}
-
 	.start-ready__title {
 		min-width: 235px;
 	}
-
 	.start-ready ul {
 		gap: 16px;
 	}
@@ -768,15 +759,12 @@
 /* =============================================================
    등록 시작 / 기본 정보 화면 보정
    ============================================================= */
-.register-start-page,
-.register-form-page {
+.register-start-page, .register-form-page {
 	background: var(--bg-page);
 }
 
-.register-start-page .app-header,
-.register-start-page .sidebar,
-.register-form-page .app-header,
-.register-form-page .sidebar {
+.register-start-page .app-header, .register-start-page .sidebar,
+	.register-form-page .app-header, .register-form-page .sidebar {
 	background: #FEFEFE;
 	border-color: #ECE8E0;
 }
@@ -786,7 +774,7 @@
 	height: 22px;
 }
 
-@media (min-width: 1025px) {
+@media ( min-width : 1025px) {
 	/* ---------- 등록 시작 ----------
 	   레이아웃 치수(--header-h / --sidebar-w / 본문 좌우 여백)는 common.css 것을 그대로 쓴다.
 	   여기서 다시 잡으면 메뉴를 옮길 때마다 헤더와 사이드바가 몇 px 씩 밀린다. */
@@ -813,7 +801,6 @@
 		height: 24px;
 		margin-left: 0;
 	}
-
 	.register-start-page .register-hero {
 		height: 400px;
 		min-height: 400px;
@@ -833,14 +820,8 @@
 		width: 51%;
 		min-height: 398px;
 		padding: 50px 20px 34px 46px;
-		background:
-			linear-gradient(
-				90deg,
-				#F8F4EC 0%,
-				rgba(248, 244, 236, .98) 62%,
-				rgba(248, 244, 236, .74) 79%,
-				rgba(248, 244, 236, 0) 100%
-			);
+		background: linear-gradient(90deg, #F8F4EC 0%, rgba(248, 244, 236, .98)
+			62%, rgba(248, 244, 236, .74) 79%, rgba(248, 244, 236, 0) 100%);
 	}
 	.register-start-page .register-hero h2 {
 		font-size: 40px;
@@ -848,30 +829,34 @@
 		line-height: 1.3;
 		letter-spacing: -.035em;
 	}
-	.register-start-page .register-hero__copy > p:not(.register-hero__kicker):not(.register-hero__note) {
+	.register-start-page .register-hero__copy>p:not(.register-hero__kicker):not(.register-hero__note)
+		{
 		margin-top: 20px;
 		font-size: 14px;
 		line-height: 1.8;
 	}
 	.register-start-page .register-hero__button {
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		width: 258px;
 		min-width: 258px;
 		height: 56px;
-		margin-top: 28px;
-		padding-right: 24px;
-		padding-left: 28px;
-		background: #1C542F !important;
-		box-shadow: 0 5px 12px rgba(28, 84, 47, .12);
+		padding: 0 24px;
 	}
+
 	.register-start-page .register-hero__button svg {
+		position: absolute;
+		right: 20px;
 		width: 18px;
 		height: 18px;
+		margin-left: 0;
 	}
 	.register-start-page .register-hero__note {
 		margin-top: 12px;
 		font-size: 11px;
 	}
-
 	.register-start-page .start-guide {
 		/* 시안에서 잰 px(391/407)을 그대로 박으면 폭이 조금만 달라져도
 		   세 번째 칸이 찌그러진다. 3등분으로 두고 높이도 최소값만 준다. */
@@ -888,7 +873,7 @@
 		gap: 20px;
 		padding: 0 0 0 40px;
 	}
-	.register-start-page .start-guide__item + .start-guide__item {
+	.register-start-page .start-guide__item+.start-guide__item {
 		border-left: 0;
 	}
 	.register-start-page .start-guide__icon {
@@ -909,7 +894,6 @@
 		font-size: 12px;
 		line-height: 1.65;
 	}
-
 	.register-start-page .start-ready {
 		height: 73px;
 		gap: 36px;
@@ -920,9 +904,22 @@
 		background: #F9F6F2;
 		box-shadow: 0 2px 8px rgba(73, 54, 31, .02);
 	}
+	.register-start-page .start-ready {
+		display: grid;
+		grid-template-columns: 280px minmax(0, 1fr);
+		align-items: center;
+		height: 73px;
+		gap: 28px;
+		margin-top: 22px;
+		padding: 12px 34px;
+		border-color: #ECE8E0;
+		border-radius: 10px;
+		background: #F9F6F2;
+		box-shadow: 0 2px 8px rgba(73, 54, 31, .02);
+	}
 	.register-start-page .start-ready__title {
-		min-width: 320px;
-		gap: 24px;
+		min-width: 0;
+		gap: 18px;
 	}
 	.register-start-page .start-ready__mark {
 		width: 46px;
@@ -930,13 +927,23 @@
 		border-color: #D7BD91;
 	}
 	.register-start-page .start-ready ul {
-		grid-template-columns: 264px 234px minmax(0, 1fr);
-		gap: 26px;
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		align-items: center;
+		gap: 24px;
+		min-width: 0;
 	}
 	.register-start-page .start-ready li {
+		display: flex;
+		align-items: center;
 		gap: 8px;
+		min-width: 0;
 		font-size: 12px;
 		white-space: nowrap;
+	}
+	.register-start-page .start-ready li svg {
+		width: 14px;
+		height: 14px;
 	}
 	.register-start-page .start-ready li svg {
 		width: 14px;
@@ -965,12 +972,11 @@
 		padding-right: 0;
 		padding-left: 0;
 	}
-
 	.register-form-page .register-grid {
 		grid-template-columns: minmax(0, 1.09fr) minmax(390px, 1fr);
 		gap: 16px;
 	}
-	.register-form-page .register-grid > .card {
+	.register-form-page .register-grid>.card {
 		height: auto;
 		min-height: 565px;
 		border-color: #ECE8E0;
@@ -993,15 +999,14 @@
 		font-size: 12px;
 		line-height: 1.5;
 	}
-	.register-form-page .register-info-card > .card__body {
+	.register-form-page .register-info-card>.card__body {
 		display: grid;
 		gap: 18px;
 		padding: 22px 20px 24px;
 	}
-	.register-form-page .register-photo-card > .card__body {
+	.register-form-page .register-photo-card>.card__body {
 		padding: 18px 20px 24px;
 	}
-
 	.register-form-page .register-info-card .field {
 		gap: 16px;
 		margin-bottom: 0;
@@ -1012,8 +1017,8 @@
 		width: 102px;
 		padding-top: 7px;
 	}
-	.register-form-page .register-info-card .input,
-	.register-form-page .register-info-card .select select {
+	.register-form-page .register-info-card .input, .register-form-page .register-info-card .select select
+		{
 		height: var(--control-md);
 		border-radius: 7px;
 	}
@@ -1036,9 +1041,8 @@
 		height: var(--control-md);
 		border-radius: 0 7px 7px 0;
 	}
-
 	.register-form-page .upload-zone {
-		aspect-ratio: 2.09 / 1;
+		aspect-ratio: 2.09/1;
 		border-radius: 8px;
 	}
 	.register-form-page .upload-zone__overlay {
@@ -1061,7 +1065,6 @@
 		margin-top: 19px;
 		padding-bottom: 6px;
 	}
-
 	.register-form-page .step-actions {
 		height: 68px;
 		margin-top: 2px;
@@ -1071,7 +1074,9 @@
 		box-shadow: 0 4px 14px rgba(60, 45, 30, .04);
 	}
 	/* 높이 40px 은 공통 .btn 과 같은 값이다. 바 높이 68px - 상하 여백 28px 에 딱 맞는다. */
-	.register-form-page .step-actions .btn { height: 40px; }
+	.register-form-page .step-actions .btn {
+		height: 40px;
+	}
 	.register-form-page .step-actions__save {
 		width: 112px;
 		padding-right: 14px;
@@ -1083,13 +1088,15 @@
 		min-width: 390px;
 	}
 	/* 이전/다음은 같은 폭으로 둔다 */
-	.register-form-page .step-actions__previous,
-	.register-form-page .step-actions__next {
+	.register-form-page .step-actions__previous, .register-form-page .step-actions__next
+		{
 		flex: none;
 		width: 188px;
 		min-width: 188px;
 	}
-	.register-form-page .step-actions__next { background: #1F6337; }
+	.register-form-page .step-actions__next {
+		background: #1F6337;
+	}
 
 	/* 화살표는 글자와 같은 줄에 둔다.
 	   예전에는 버튼을 grid 로 쪼개고 세로 구분선을 넣었는데,
@@ -1113,13 +1120,12 @@
 	align-items: stretch;
 }
 
-.location-grid > .card {
+.location-grid>.card {
 	min-width: 0;
 	height: 100%;
 }
 
-.location-info-card,
-.location-map-card {
+.location-info-card, .location-map-card {
 	display: flex;
 	min-height: 430px;
 	flex-direction: column;
@@ -1128,19 +1134,18 @@
 	box-shadow: 0 4px 16px rgba(60, 45, 30, .045);
 }
 
-.location-info-card .card-head-icon,
-.location-map-card .card-head-icon {
+.location-info-card .card-head-icon, .location-map-card .card-head-icon
+	{
 	padding: 20px 20px 0;
 }
 
-.location-info-card .card-head-icon .icon-box,
-.location-map-card .card-head-icon .icon-box {
+.location-info-card .card-head-icon .icon-box, .location-map-card .card-head-icon .icon-box
+	{
 	width: 40px;
 	height: 40px;
 }
 
-.location-info-card .card__body,
-.location-map-card .card__body {
+.location-info-card .card__body, .location-map-card .card__body {
 	display: flex;
 	min-height: 0;
 	flex: 1;
@@ -1179,8 +1184,7 @@
 	color: #8C8379;
 }
 
-.location-field__count,
-.location-field__help {
+.location-field__count, .location-field__help {
 	font-size: 10px;
 	color: #91877C;
 }
@@ -1216,7 +1220,7 @@
 	background: #ECF6EF;
 }
 
-.location-info-card > .card__body > .location-section .input {
+.location-info-card>.card__body>.location-section .input {
 	height: 36px;
 	border-radius: 7px;
 }
@@ -1263,8 +1267,7 @@
 	gap: 2px;
 }
 
-.selected-location__label,
-.selected-location__copy > span:last-child {
+.selected-location__label, .selected-location__copy>span:last-child {
 	font-size: 10px;
 	line-height: 1.4;
 	color: #8A8278;
@@ -1318,7 +1321,7 @@
 }
 
 .location-summary-card {
-	grid-column: 1 / -1;
+	grid-column: 1/-1;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -1382,131 +1385,109 @@
 	height: 12px;
 }
 
-@media (min-width: 1025px) and (max-width: 1120px) {
-	.register-form-page .register-grid,
-	.register-form-page .location-grid {
+@media ( min-width : 1025px) and (max-width: 1120px) {
+	.register-form-page .register-grid, .register-form-page .location-grid {
 		grid-template-columns: minmax(0, 1fr);
 	}
-
-	.location-info-card,
-	.location-map-card {
+	.location-info-card, .location-map-card {
 		min-height: 500px;
 	}
 }
 
-@media (min-width: 1025px) and (max-width: 1450px) {
+@media ( min-width : 1025px) and (max-width: 1450px) {
 	.register-start-page .start-guide {
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 		padding-right: 18px;
 		padding-left: 18px;
 	}
-
 	.register-start-page .start-guide__item {
 		min-width: 0;
 		gap: 13px;
 		padding: 0 14px;
 	}
-
 	.register-start-page .start-guide__icon {
 		width: 64px;
 		height: 64px;
 	}
-
 	.register-start-page .start-guide__icon svg {
 		width: 27px;
 		height: 27px;
 	}
-
 	.register-start-page .start-ready {
 		gap: 16px;
 		padding-right: 20px;
 		padding-left: 20px;
 	}
-
 	.register-start-page .start-ready__title {
 		min-width: 220px;
 		gap: 13px;
 	}
-
 	.register-start-page .start-ready ul {
 		grid-template-columns: repeat(3, minmax(0, 1fr));
 		gap: 12px;
 		min-width: 0;
 	}
-
 	.register-start-page .start-ready li {
 		min-width: 0;
 		white-space: normal;
 	}
-
 	.register-form-page .upload-thumbs {
 		grid-template-columns: repeat(5, minmax(0, 1fr));
 		gap: 10px;
 	}
-
 	.register-form-page .upload-thumb {
 		width: 100%;
 		height: auto;
-		aspect-ratio: 1.1 / 1;
+		aspect-ratio: 1.1/1;
 	}
 }
 
-@media (max-width: 1120px) {
+@media ( max-width : 1120px) {
 	.register-grid {
 		grid-template-columns: minmax(0, 1fr);
 	}
-
 	.location-grid {
 		grid-template-columns: minmax(0, 1fr);
 	}
-
 	.upload-zone {
 		height: min(54vw, 430px);
 	}
-
 	.start-guide {
 		padding: 24px 14px;
 	}
-
 	.start-guide__item {
 		align-items: flex-start;
 		padding: 0 14px;
 	}
-
 	.start-guide__icon {
 		width: 48px;
 		height: 48px;
 	}
-
 	.start-guide__icon svg {
 		width: 22px;
 		height: 22px;
 	}
-
 	.start-ready {
 		align-items: flex-start;
 	}
-
 	.start-ready ul {
 		grid-template-columns: 1fr;
 		gap: 8px;
 	}
 }
 
-@media (max-width: 860px) {
+@media ( max-width : 860px) {
 	.register-hero {
 		display: flex;
 		flex-direction: column;
 		min-height: 0;
 	}
-
 	.register-hero__copy {
 		width: 100%;
 		min-height: 0;
 		padding: 42px 36px;
 		background: #f8f4eb;
 	}
-
 	.register-hero__photo {
 		position: relative;
 		inset: auto;
@@ -1516,139 +1497,112 @@
 		background-image: url("../images/photo/register-collage.png");
 		background-position: center;
 	}
-
 	.start-guide {
 		grid-template-columns: 1fr;
 		padding: 8px 24px;
 	}
-
 	.start-guide__item {
 		padding: 20px 0;
 	}
-
-	.start-guide__item + .start-guide__item {
+	.start-guide__item+.start-guide__item {
 		border-top: 1px solid var(--border-soft);
 		border-left: 0;
 	}
-
 	.start-ready {
 		flex-direction: column;
 	}
 }
 
-@media (max-width: 640px) {
+@media ( max-width : 640px) {
 	.register-page-head {
 		margin-bottom: 18px;
 	}
-
 	.register-eyebrow {
 		display: none;
 	}
-
 	.register-hero {
 		border-radius: 14px;
 	}
-
 	.register-hero__copy {
 		padding: 30px 22px 32px;
 	}
-
 	.register-hero__photo {
 		min-height: 230px;
 	}
-
 	.register-hero h2 {
 		font-size: 30px;
 	}
-
 	.register-hero__button {
 		width: 100%;
 		min-width: 0;
 	}
-
 	.start-guide {
 		padding-right: 18px;
 		padding-left: 18px;
 	}
-
 	.start-guide__item {
 		gap: 14px;
 	}
-
 	.start-guide__item p br {
 		display: none;
 	}
-
 	.start-ready {
 		padding: 18px;
 	}
-
 	.start-ready__title {
 		min-width: 0;
 	}
-
 	.step-nav-wrap {
 		margin-right: calc(-1 * var(--gutter-x));
 		margin-left: calc(-1 * var(--gutter-x));
 		padding-left: 6px;
 	}
-
 	.register-info-card .field__label {
 		width: auto;
 		padding-top: 0;
 	}
-
 	.address-control {
 		flex-direction: column;
 		gap: 8px;
 	}
-
 	.address-control .input {
 		border-radius: 10px;
 	}
-
 	.address-control__button {
 		height: 40px;
 		border: 1px solid var(--border);
 		border-radius: 10px;
 	}
-
 	.upload-zone {
 		height: 60vw;
 		min-height: 220px;
 	}
-
 	.upload-zone__overlay {
 		min-width: 88%;
 		padding: 12px;
 	}
-
 	.upload-thumbs {
 		gap: 6px;
 	}
-
 	.upload-thumb {
 		border-radius: 8px;
 		font-size: 22px;
 	}
-
 	.step-actions {
 		align-items: stretch;
 		flex-direction: column;
 		padding: 12px;
 	}
-
 	.step-actions__nav {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
 	}
-
-	.step-actions .btn,
-	.step-actions__nav .btn,
-	.step-actions__nav .btn--primary {
+	.step-actions .btn, .step-actions__nav .btn, .step-actions__nav .btn--primary
+		{
 		width: 100%;
 		min-width: 0;
 		padding-right: 12px;
 		padding-left: 12px;
 	}
+
 }

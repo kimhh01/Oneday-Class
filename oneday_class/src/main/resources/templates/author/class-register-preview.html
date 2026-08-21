@@ -38,8 +38,30 @@
 							<span><svg aria-hidden="true"><use href="#icon-eye"></use></svg>미리보기</span>
 						</header>
 
-						<!-- 고객용 클래스 상세 페이지를 별도 팝업 없이 현재 화면에 직접 노출한다. -->
-						<article class="customer-preview" aria-label="수강생용 클래스 상세 화면 미리보기">
+						<section class="preview-launch" aria-labelledby="previewLaunchTitle">
+							<span class="preview-launch__icon"><svg aria-hidden="true"><use href="#icon-eye"></use></svg></span>
+							<div>
+								<h3 id="previewLaunchTitle">수강생에게 보일 화면을 확인해보세요</h3>
+								<p>현재 입력한 정보를 실제 클래스 상세 화면에서 확인합니다.</p>
+							</div>
+							<button type="button" class="btn btn--primary btn--lg preview-launch__button" id="openCustomerPreview">
+								<svg aria-hidden="true"><use href="#icon-search"></use></svg>미리보기
+							</button>
+						</section>
+
+						<dialog class="customer-preview-dialog" id="customerPreviewDialog" aria-labelledby="customerPreviewDialogTitle">
+							<header>
+								<div><strong id="customerPreviewDialogTitle">수강생 화면 미리보기</strong><span>실제 예약과 찜하기는 실행되지 않습니다.</span></div>
+								<button type="button" id="closeCustomerPreview" aria-label="미리보기 닫기">×</button>
+							</header>
+							<iframe title="실제 수강생용 클래스 상세 화면"
+								data-src="/author/classes/register/customer-preview"
+								th:attr="data-src=@{/author/classes/register/customer-preview(classCode=${preview.classBasic.classCode})}"
+								sandbox="allow-same-origin"></iframe>
+						</dialog>
+
+						<!-- 이전 작가용 요약 미리보기는 화면에서 제외하고 실제 수강생 화면을 팝업으로 제공한다. -->
+						<article class="customer-preview" aria-label="수강생용 클래스 상세 화면 미리보기" hidden>
 							<div class="customer-preview__bar">
 								<strong>숨비당 클래스</strong>
 								<span>미리보기 화면</span>
@@ -49,9 +71,7 @@
 								<img class="customer-gallery__main" src="/author/images/photo/class-upload-placeholder.png" th:src="${#lists.isEmpty(preview.mainImageList)} ? @{/author/images/photo/class-upload-placeholder.png} : ${#lists.isEmpty(preview.mainImageList) ? null : preview.mainImageList[0].imagePath}" alt="클래스 대표 이미지">
 								<img class="customer-gallery__step customer-gallery__step--one" alt="클래스 완성작 이미지"
 									 th:src="${#lists.isEmpty(preview.resultImageList)} ? @{/author/images/photo/class-upload-placeholder.png} : ${preview.resultImageList[0].imagePath}">
-								<img class="customer-gallery__step customer-gallery__step--two" alt="작품 갤러리 이미지"
-									 th:src="${#lists.isEmpty(preview.galleryImageList)} ? @{/author/images/photo/class-upload-placeholder.png} : ${preview.galleryImageList[0].imagePath}">
-								<span class="customer-gallery__count"><svg aria-hidden="true"><use href="#icon-image"></use></svg><th:block th:text="${#lists.size(preview.mainImageList) + #lists.size(preview.resultImageList) + #lists.size(preview.galleryImageList)}">0</th:block></span>
+								<span class="customer-gallery__count"><svg aria-hidden="true"><use href="#icon-image"></use></svg><th:block th:text="${#lists.size(preview.mainImageList) + #lists.size(preview.resultImageList)}">0</th:block></span>
 							</section>
 
 							<div class="customer-detail-layout">
@@ -73,6 +93,13 @@
 										<p th:text="${preview.classBasic.classIntroduction}">클래스 소개</p>
 										<ul class="customer-benefits">
 											<li th:each="advantage : ${preview.classDetail.advantageList}"><svg aria-hidden="true"><use href="#icon-check-circle"></use></svg><span><b th:text="${advantage}">클래스 장점</b></span></li>
+										</ul>
+									</section>
+
+									<section class="customer-section" th:if="${not #lists.isEmpty(preview.classDetail.materialNameList)}">
+										<h4>준비물 / 재료 안내</h4>
+										<ul class="customer-benefits">
+											<li th:each="materialName, stat : ${preview.classDetail.materialNameList}"><svg aria-hidden="true"><use href="#icon-check-circle"></use></svg><span><b th:text="${materialName}">준비물</b><small th:text="${preview.classDetail.materialContentList[stat.index]}">안내 내용</small></span></li>
 										</ul>
 									</section>
 
@@ -139,6 +166,19 @@
 	var checks = Array.from(document.querySelectorAll('.required-agreement'));
 	var request = document.getElementById('registerRequest');
 	var error = document.getElementById('agreementError');
+	var previewDialog = document.getElementById('customerPreviewDialog');
+	var previewFrame = previewDialog.querySelector('iframe');
+
+	document.getElementById('openCustomerPreview').addEventListener('click', function () {
+		if (!previewFrame.hasAttribute('src')) previewFrame.src = previewFrame.dataset.src;
+		previewDialog.showModal();
+	});
+	document.getElementById('closeCustomerPreview').addEventListener('click', function () {
+		previewDialog.close();
+	});
+	previewDialog.addEventListener('click', function (event) {
+		if (event.target === previewDialog) previewDialog.close();
+	});
 
 	function agreed() {
 		return checks.every(function (checkbox) { return checkbox.checked; });
