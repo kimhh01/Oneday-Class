@@ -37,4 +37,6 @@ public class AdminClassDetailDomain {
 	private String singleIntroduce;
 	private String introduce;
 	private String finishedProductDescription;
+	
+	private String approvalStatus;
 }

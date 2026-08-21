@@ -10,7 +10,7 @@
 </head>
 <body>
 	<div class="shell">
-		<aside th:replace="~{admin/fragments/sideMenu :: sideMenu('ondayclass')}"></aside>
+		<aside th:replace="~{admin/fragments/sideMenu :: sideMenu('onedayclass')}"></aside>
 		<main>
 			<div class="detail-head">
 				<h1 class="page-title" th:text="${clazz.className}">클래스 상세</h1>
@@ -19,8 +19,12 @@
 					<form
 					th:action="@{/admin/onedayclass/{id}/status(id=${clazz.classCode})}"
 					method="post">
-					<input type="hidden" name="classStatus" value="판매중지">
-					<button>판매 중지</button>
+					<input type="hidden" name="classStatus" value="준비중">
+					<button type="submit"
+						class="class-action-btn sale-stop-btn"
+						th:disabled="${clazz.classStatus == '폐강'}">
+						판매 중지
+					</button>
 				</form>
 				</div>
 			</div>
@@ -194,10 +198,16 @@
 				<form
 					th:action="@{/admin/onedayclass/{id}/reject(id=${clazz.classCode})}"
 					method="post">
-					<textarea name="rejectMessage" required
+					<textarea name="rejectMessage"
+						required
+						th:disabled="${clazz.approvalStatus == '승인'}"
 						placeholder="클래스 반려 사유 또는 수정 요청사항을 입력하세요."></textarea>
 					<div class="right">
-						<button class="danger">반려 처리</button>
+						<button type="submit"
+							class="class-action-btn danger"
+							th:disabled="${clazz.approvalStatus == '승인'}">
+							반려 처리
+						</button>
 					</div>
 				</form>
 			
@@ -208,7 +218,11 @@
 				<form class="right"
 					th:action="@{/admin/onedayclass/{id}/approve(id=${clazz.classCode})}"
 					method="post">
-					<button>클래스 승인</button>
+					<button type="submit"
+						class="class-action-btn approve-btn"
+						th:disabled="${clazz.approvalStatus == '승인'}">
+						클래스 승인
+					</button>
 				</form>
 			
 				</div></section>

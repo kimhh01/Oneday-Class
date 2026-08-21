@@ -139,6 +139,6 @@ public class AdminClassService {
 				dto.getRunningTime(), dto.getClassStatus(), dto.getSalePrice(), dto.getMarketPrice(),
 				dto.getDiscountRate(), dto.getMinimumPeople(), dto.getMaximumPeople(), dto.getRecruitmentStartDate(),
 				dto.getRecruitmentEndDate(), dto.getPeriodType(), dto.getSingleIntroduce(), dto.getIntroduce(),
-				dto.getFinishedProductDescription());
+				dto.getFinishedProductDescription(),dto.getApprovalStatus());
 	}
 }
