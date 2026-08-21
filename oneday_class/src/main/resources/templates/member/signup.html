@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>회원가입 | 숨쉬당</title>
     <link rel="stylesheet" th:href="@{/member/css/signup.css}">
+    <!-- 💡 CSRF 토큰 정보 메타 태그 -->
+    <meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}"/>
+    <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}"/>
     <!-- 카카오 주소 API -->
     <script src="//t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
 </head>
@@ -194,6 +197,20 @@ function execKakaoPostcode() {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
+	// 💡 CSRF 토큰 및 Content-Type 헤더 생성 공통 함수
+	function getCsrfHeaders() {
+	    const tokenMeta = document.querySelector("meta[name='_csrf']");
+	    const headerMeta = document.querySelector("meta[name='_csrf_header']");
+	    const headers = { 
+	        'Content-Type': 'application/x-www-form-urlencoded' 
+	    };
+
+	    if (tokenMeta && headerMeta && tokenMeta.content) {
+	        headers[headerMeta.content] = tokenMeta.content;
+	    }
+	    return headers;
+	}
+	
     const signupForm = document.getElementById('signupForm');
     
     // 아이디 관련
@@ -238,9 +255,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         fetch('/member/idDupCheck', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
+            headers: getCsrfHeaders(),
             body: 'id=' + encodeURIComponent(inputId)
         })
         .then(response => response.text())
@@ -293,9 +308,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         fetch('/member/emailDupCheck', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
+            headers: getCsrfHeaders(),
             body: 'email=' + encodeURIComponent(inputEmail)
         })
         .then(response => response.text())
