@@ -15,7 +15,48 @@
 		setBreadcrumb();
 		bindSidebarToggle();
 		bindUserMenu();
+		bindAuthorGuide();
 		document.dispatchEvent(new CustomEvent('layout:ready'));
+	}
+
+	function bindAuthorGuide() {
+		var dialog = document.getElementById('authorGuideDialog');
+		if (!dialog) { return; }
+		var viewer = dialog.querySelector('[data-author-guide-viewer]');
+		document.querySelectorAll('[data-author-guide-open]').forEach(function (button) {
+			button.addEventListener('click', function () {
+				loadGuidePages(viewer);
+				dialog.showModal();
+			});
+		});
+		dialog.querySelector('[data-author-guide-close]').addEventListener('click', function () {
+			dialog.close();
+		});
+		dialog.addEventListener('click', function (event) {
+			if (event.target === dialog) { dialog.close(); }
+		});
+	}
+
+	function loadGuidePages(viewer) {
+		if (!viewer || viewer.dataset.loaded === 'true') { return; }
+		var count = Number(viewer.dataset.pageCount);
+		var base = viewer.dataset.pageBase;
+		var fragment = document.createDocumentFragment();
+		for (var page = 1; page <= count; page += 1) {
+			var item = document.createElement('figure');
+			var image = document.createElement('img');
+			var caption = document.createElement('figcaption');
+			image.src = base + String(page).padStart(2, '0') + '.jpg';
+			image.alt = '작가 가이드 ' + page + '페이지';
+			image.loading = page <= 2 ? 'eager' : 'lazy';
+			image.decoding = 'async';
+			caption.textContent = page + ' / ' + count;
+			item.appendChild(image);
+			item.appendChild(caption);
+			fragment.appendChild(item);
+		}
+		viewer.appendChild(fragment);
+		viewer.dataset.loaded = 'true';
 	}
 
 	/* 사이드바 현재 메뉴 활성화 */

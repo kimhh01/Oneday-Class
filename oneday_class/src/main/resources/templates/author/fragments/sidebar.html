@@ -108,12 +108,28 @@
 		<div class="guide-card__body">
 			<p class="guide-card__title">작가 가이드</p>
 			<p class="guide-card__desc">처음이신가요?<br>이용 가이드를 확인해보세요.</p>
-			<a href="#" aria-disabled="true" title="준비 중" class="btn btn--outline btn--sm">
+			<button type="button" class="btn btn--outline btn--sm" data-author-guide-open>
 				바로가기 <svg><use href="#icon-chevron-right"></use></svg>
-			</a>
+			</button>
 		</div>
 	</div>
 </aside>
 
 <div class="sidebar-backdrop" data-sidebar-backdrop></div>
+
+<dialog class="author-guide-dialog" id="authorGuideDialog" aria-labelledby="authorGuideDialogTitle">
+	<header class="author-guide-dialog__head">
+		<div>
+			<strong id="authorGuideDialogTitle">작가 가이드</strong>
+			<span>원데이클래스 사업자 이용 안내</span>
+		</div>
+		<div class="author-guide-dialog__actions">
+			<a href="/author/docs/author-guide.pdf" th:href="@{/author/docs/author-guide.pdf}" download="원데이클래스_사업자_가이드.pdf">PDF 다운로드</a>
+			<button type="button" data-author-guide-close aria-label="작가 가이드 닫기">×</button>
+		</div>
+	</header>
+	<div class="author-guide-viewer" data-author-guide-viewer
+		 data-page-base="/author/docs/guide-pages/page-" data-page-count="30"
+		 aria-label="원데이클래스 사업자 작가 가이드"></div>
+</dialog>
 </th:block>
