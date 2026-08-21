@@ -18,6 +18,9 @@ import kr.co.oneclass.author.common.AuthorSessionUtils;
 @Controller
 public class ClassManagementController {
 
+    private static final int CLASS_PAGE_SIZE = 10;
+    private static final int SCHEDULE_PAGE_SIZE = 10;
+
     private final ClassManagementService cmService;
 
     public ClassManagementController(ClassManagementService cmService) {
@@ -33,16 +36,28 @@ public class ClassManagementController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
             @RequestParam(value = "to", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             Model model,
             HttpSession session) {
 
         long authorCode = AuthorSessionUtils.getAuthorCode(session);
         List<ClassManagementDTO> classes;
+        int classCount;
+        int currentPage;
+        int totalPages;
         try {
-            classes = cmService.getClassManagementList(
+            classCount = cmService.getClassManagementCount(
                     authorCode, classStatus, keyword, fromDate, toDate);
+            totalPages = Math.max(1, (classCount + CLASS_PAGE_SIZE - 1) / CLASS_PAGE_SIZE);
+            currentPage = Math.min(Math.max(page, 1), totalPages);
+            classes = cmService.getClassManagementList(
+                    authorCode, classStatus, keyword, fromDate, toDate,
+                    currentPage, CLASS_PAGE_SIZE);
         } catch (IllegalArgumentException exception) {
             classes = List.of();
+            classCount = 0;
+            currentPage = 1;
+            totalPages = 1;
             model.addAttribute("managementError", exception.getMessage());
         }
         ClassManagementSummaryDTO summary = cmService.getClassManagementSummary(authorCode);
@@ -52,8 +67,9 @@ public class ClassManagementController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("fromDate", fromDate);
         model.addAttribute("toDate", toDate);
-        model.addAttribute("currentPage", 1);
-        model.addAttribute("totalPages", 1);
+        model.addAttribute("classCount", classCount);
+        model.addAttribute("currentPage", currentPage);
+        model.addAttribute("totalPages", totalPages);
         model.addAttribute("summary", summary);
         return "author/class-manage";
     }
@@ -84,26 +100,96 @@ public class ClassManagementController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
             @RequestParam(value = "to", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             Model model,
             HttpSession session) {
 
         long authorCode = AuthorSessionUtils.getAuthorCode(session);
         List<ScheduleManageDTO> schedules;
+        ScheduleManagementSummaryDTO summary;
+        int scheduleCount;
+        int currentPage;
+        int totalPages;
         try {
-            schedules = cmService.getAuthorScheduleList(
+            List<ScheduleManageDTO> filteredSchedules = cmService.getAuthorScheduleList(
                     authorCode, scheduleStatus, keyword, fromDate, toDate);
+            summary = cmService.summarizeSchedules(filteredSchedules);
+            scheduleCount = filteredSchedules.size();
+            totalPages = Math.max(1, (scheduleCount + SCHEDULE_PAGE_SIZE - 1) / SCHEDULE_PAGE_SIZE);
+            currentPage = Math.min(Math.max(page, 1), totalPages);
+            int fromIndex = (currentPage - 1) * SCHEDULE_PAGE_SIZE;
+            int toIndex = Math.min(fromIndex + SCHEDULE_PAGE_SIZE, scheduleCount);
+            schedules = filteredSchedules.subList(fromIndex, toIndex);
         } catch (IllegalArgumentException exception) {
             schedules = List.of();
+            summary = new ScheduleManagementSummaryDTO();
+            scheduleCount = 0;
+            currentPage = 1;
+            totalPages = 1;
             model.addAttribute("managementError", exception.getMessage());
         }
 
         model.addAttribute("schedules", schedules);
-        model.addAttribute("summary", cmService.summarizeSchedules(schedules));
+        model.addAttribute("summary", summary);
+        model.addAttribute("scheduleCount", scheduleCount);
+        model.addAttribute("currentPage", currentPage);
+        model.addAttribute("totalPages", totalPages);
+        model.addAttribute("scheduleClasses", cmService.getSchedulableClassList(authorCode));
         model.addAttribute("scheduleStatus", scheduleStatus);
         model.addAttribute("keyword", keyword);
         model.addAttribute("fromDate", fromDate);
         model.addAttribute("toDate", toDate);
         return "author/schedule-manage";
+    }
+
+    // 승인된 클래스에 예약이 아직 없는 새 단일 일정을 추가한다
+    @PostMapping("/author/schedules")
+    public String addSchedule(
+            ScheduleOperationDTO operation,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            cmService.addSchedule(AuthorSessionUtils.getAuthorCode(session), operation);
+            redirectAttributes.addFlashAttribute("managementMessage", "새 일정을 등록했습니다.");
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+            redirectAttributes.addFlashAttribute("managementError", exception.getMessage());
+        }
+        return "redirect:/author/schedules";
+    }
+
+    // 예약이 없는 향후 일정의 날짜·시간·정원을 변경한다
+    @PostMapping("/author/classes/schedules/{scheduleCode}/details")
+    public String modifySchedule(
+            @PathVariable("scheduleCode") int scheduleCode,
+            ScheduleOperationDTO operation,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            cmService.modifySchedule(
+                    AuthorSessionUtils.getAuthorCode(session), scheduleCode, operation);
+            redirectAttributes.addFlashAttribute("managementMessage", "일정 정보를 변경했습니다.");
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+            redirectAttributes.addFlashAttribute("managementError", exception.getMessage());
+        }
+        return "redirect:/author/schedules";
+    }
+
+    // 남은 정원이 있는 미래 마감 일정을 다시 모집한다
+    @PostMapping("/author/classes/schedules/{scheduleCode}/reopen")
+    public String reopenSchedule(
+            @PathVariable("scheduleCode") int scheduleCode,
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            cmService.reopenSchedule(AuthorSessionUtils.getAuthorCode(session), scheduleCode);
+            redirectAttributes.addFlashAttribute("managementMessage", "일정 모집을 다시 시작했습니다.");
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+            redirectAttributes.addFlashAttribute("managementError", exception.getMessage());
+        }
+        return "redirect:/author/schedules";
     }
 
     // 승인 완료 또는 비공개 클래스를 공개 상태로 변경한다

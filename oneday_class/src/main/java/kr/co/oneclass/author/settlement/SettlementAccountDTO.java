@@ -16,6 +16,7 @@ public class SettlementAccountDTO {
     private String authorName;     // 예금주 작가명
     private String bankName;       // 은행명
     private String accountNumber;  // 계좌번호
+    private String maskedAccountNumber; // 화면 표시용 마스킹 계좌번호
     private String bankbookPath;   // 통장사본 이미지 경로
     private Date updatedAt;        // 계좌 정보 수정일
 }

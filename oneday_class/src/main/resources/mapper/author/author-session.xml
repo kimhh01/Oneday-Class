@@ -16,7 +16,7 @@
 		WHERE cr.MEMBER_CODE = #{memberCode}
 	</select>
 	
-	<!-- 💡 2. 작가 미등록 시 기본 등록 (OPERATOR_CODE, MEMBER_CODE, APPROVAL_STATUS='승인') -->
+	<!-- 작가 미등록 시 관리자 승인 대기 상태로 등록한다 -->
 	<insert id="insertInitialAuthor" parameterType="int">
 		INSERT INTO CREATOR (
 			OPERATOR_CODE,
@@ -26,7 +26,7 @@
 		) VALUES (
 			SEQ_CREATOR.NEXTVAL, /* 💡 사용 중인 오라클 시퀀스 명으로 설정 (예: SEQ_OPERATOR_CODE 등) */
 			#{memberCode},
-			'승인',
+			'대기',
 			SYSDATE
 		)
 	</insert>

@@ -24,14 +24,20 @@
 	</div>
 
 	<div class="app-header__right">
-		<button type="button" class="user-chip" aria-haspopup="menu" aria-expanded="false">
-			<span class="avatar">
-				<img src="/author/images/photo/studio-profile.png"
-					 th:src="${#strings.isEmpty(session.loginAuthorProfileImage)} ? @{/author/images/photo/studio-profile.png} : ${session.loginAuthorProfileImage}"
-					 alt="">
-			</span>
-			<span class="user-chip__name" th:text="|${session.loginAuthorName} 작가님|">작가님</span>
-			<svg><use href="#icon-chevron-down"></use></svg>
-		</button>
+		<div class="user-menu">
+			<button type="button" class="user-chip" data-user-menu-button aria-haspopup="menu" aria-expanded="false" aria-controls="authorUserMenu">
+				<span class="avatar">
+					<img src="/author/images/photo/studio-profile.png"
+						 th:src="${#strings.isEmpty(session.loginAuthorProfileImage)} ? @{/author/images/photo/studio-profile.png} : ${session.loginAuthorProfileImage}"
+						 alt="">
+				</span>
+				<span class="user-chip__name" th:text="|${session.loginAuthorName} 작가님|">작가님</span>
+				<svg><use href="#icon-chevron-down"></use></svg>
+			</button>
+			<nav class="user-menu__panel" id="authorUserMenu" role="menu" hidden>
+				<a role="menuitem" th:href="@{/author/profile}">프로필·정산 계좌</a>
+				<a role="menuitem" th:href="@{/logout}">로그아웃</a>
+			</nav>
+		</div>
 	</div>
 </header>

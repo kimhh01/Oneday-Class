@@ -126,6 +126,99 @@
 		  )
 	</update>
 
+	<!-- 예약이 없는 향후 일정만 날짜·시간·정원을 변경한다 -->
+	<update id="updateManagedSchedule" parameterType="map">
+		UPDATE SCHEDULE s
+		SET s.CLASS_DATE = #{scheduleDate},
+			s.START_TIME = #{startTime},
+			s.END_TIME = #{endTime},
+			s.MIN_PEOPLE = #{minPeople},
+			s.MAX_PEOPLE = #{maxPeople},
+			s.REMAINING_PEOPLE = #{maxPeople},
+			s.SOLD_OUT_YN = 'N'
+		WHERE s.SCHEDULE_CODE = #{scheduleCode}
+		  AND TRUNC(s.CLASS_DATE) &gt;= TRUNC(SYSDATE)
+		  AND NOT EXISTS (
+			SELECT 1
+			FROM RESERVATION rv
+			WHERE rv.SCHEDULE_CODE = s.SCHEDULE_CODE
+			  AND rv.STATUS = '예약'
+		  )
+		  AND EXISTS (
+			SELECT 1
+			FROM CLASS_REPEAT_RULE r
+			JOIN CLASS c ON c.CLASS_CODE = r.CLASS_CODE
+			WHERE r.REPEAT_RULE_CODE = s.REPEAT_RULE_CODE
+			  AND c.OPERATOR_CODE = #{authorCode}
+			  AND c.APPROVAL_STATUS = '승인'
+			  AND c.STATUS IN ('모집중', '준비중')
+		  )
+	</update>
+
+	<!-- 공유 반복 규칙은 연결된 전체 일정의 최소·최대 날짜로 다시 계산한다 -->
+	<update id="refreshRepeatRuleRange" parameterType="map">
+		UPDATE CLASS_REPEAT_RULE r
+		SET (r.OPERATION_START_DATE, r.OPERATION_END_DATE) = (
+			SELECT MIN(s2.CLASS_DATE), MAX(s2.CLASS_DATE)
+			FROM SCHEDULE s2
+			WHERE s2.REPEAT_RULE_CODE = r.REPEAT_RULE_CODE
+		)
+		WHERE r.REPEAT_RULE_CODE = (
+			SELECT s.REPEAT_RULE_CODE
+			FROM SCHEDULE s
+			WHERE s.SCHEDULE_CODE = #{scheduleCode}
+		)
+		  AND EXISTS (
+			SELECT 1
+			FROM CLASS c
+			WHERE c.CLASS_CODE = r.CLASS_CODE
+			  AND c.OPERATOR_CODE = #{authorCode}
+			  AND c.APPROVAL_STATUS = '승인'
+		  )
+	</update>
+
+	<select id="countDuplicateSchedule" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+		FROM SCHEDULE s
+		JOIN CLASS_REPEAT_RULE r ON r.REPEAT_RULE_CODE = s.REPEAT_RULE_CODE
+		JOIN CLASS c ON c.CLASS_CODE = r.CLASS_CODE
+		WHERE c.OPERATOR_CODE = #{authorCode}
+		  AND c.CLASS_CODE = #{classCode}
+		  AND TRUNC(s.CLASS_DATE) = #{scheduleDate}
+		  AND s.START_TIME = #{startTime}
+		  AND (#{scheduleCode} = 0 OR s.SCHEDULE_CODE != #{scheduleCode})
+	</select>
+
+	<!-- 남은 정원이 있는 모집 마감 일정을 다시 연다 -->
+	<update id="reopenSchedule" parameterType="map">
+		UPDATE SCHEDULE s
+		SET s.REMAINING_PEOPLE = s.MAX_PEOPLE - NVL((
+			SELECT SUM(rv.PEOPLE_NUMBER)
+			FROM RESERVATION rv
+			WHERE rv.SCHEDULE_CODE = s.SCHEDULE_CODE
+			  AND rv.STATUS = '예약'
+		), 0),
+			s.SOLD_OUT_YN = 'N'
+		WHERE s.SCHEDULE_CODE = #{scheduleCode}
+		  AND TRUNC(s.CLASS_DATE) &gt;= TRUNC(SYSDATE)
+		  AND s.SOLD_OUT_YN = 'Y'
+		  AND s.MAX_PEOPLE &gt; NVL((
+			SELECT SUM(rv.PEOPLE_NUMBER)
+			FROM RESERVATION rv
+			WHERE rv.SCHEDULE_CODE = s.SCHEDULE_CODE
+			  AND rv.STATUS = '예약'
+		  ), 0)
+		  AND EXISTS (
+			SELECT 1
+			FROM CLASS_REPEAT_RULE r
+			JOIN CLASS c ON c.CLASS_CODE = r.CLASS_CODE
+			WHERE r.REPEAT_RULE_CODE = s.REPEAT_RULE_CODE
+			  AND c.OPERATOR_CODE = #{authorCode}
+			  AND c.APPROVAL_STATUS = '승인'
+			  AND c.STATUS IN ('모집중', '준비중')
+		  )
+	</update>
+
 	<!-- SCHEDULE 이 CLASS_REPEAT_RULE 을 참조하므로 일정부터 지운다 -->
 	<delete id="deleteScheduleList" parameterType="int">
 		DELETE FROM SCHEDULE

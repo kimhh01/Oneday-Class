@@ -35,7 +35,28 @@
 					</div>
 				</header>
 
+				<p class="form-success" th:if="${managementMessage}" th:text="${managementMessage}" role="status"></p>
 				<p class="form-error" th:if="${managementError}" th:text="${managementError}" role="alert"></p>
+
+				<details class="schedule-create-panel">
+					<summary><svg aria-hidden="true"><use href="#icon-plus-box"></use></svg> 새 일정 등록</summary>
+					<form method="post" th:action="@{/author/schedules}" class="schedule-operation-form">
+						<label>클래스
+							<select name="classCode" required>
+								<option value="">클래스를 선택해주세요</option>
+								<option th:each="item : ${scheduleClasses}" th:value="${item.classCode}"
+									th:text="${item.classTitle + ' · ' + (item.classStatus == '모집중' ? '공개' : '비공개')}">클래스</option>
+							</select>
+						</label>
+						<label>수업일<input type="date" name="scheduleDate" required></label>
+						<label>시작 시간<input type="time" name="startTime" required></label>
+						<label>종료 시간<input type="time" name="endTime" required></label>
+						<label>최소 인원<input type="number" name="minPeople" min="1" max="100" value="1" required></label>
+						<label>최대 인원<input type="number" name="maxPeople" min="1" max="100" value="6" required></label>
+						<button class="btn btn--primary" type="submit" th:disabled="${#lists.isEmpty(scheduleClasses)}">일정 등록</button>
+					</form>
+					<p th:if="${#lists.isEmpty(scheduleClasses)}">일정을 추가할 수 있는 승인 클래스가 없습니다.</p>
+				</details>
 
 				<section class="mgmt-stats" aria-label="조회된 일정 운영 지표">
 					<div class="mgmt-stat">
@@ -139,17 +160,15 @@
 									<td class="col-badge"><span class="badge" th:classappend="${schedule.scheduleStatus == '모집중'} ? ' badge--green' : (${schedule.scheduleStatus == '모집 마감'} ? ' badge--blue' : ' badge--gray')" th:text="${schedule.scheduleStatus == '모집중' ? '모집 중' : schedule.scheduleStatus}">모집 중</span></td>
 									<td class="schedule-actions col-action">
 										<div th:if="${schedule.scheduleStatus != '진행 완료' and schedule.classStatus != '폐강'}">
-											<form class="schedule-capacity-form" method="post" th:action="@{/author/classes/schedules/{scheduleCode}/people(scheduleCode=${schedule.scheduleCode})}">
-												<input type="hidden" name="classCode" th:value="${schedule.classCode}">
-												<input type="hidden" name="source" value="schedules">
-												<label class="sr-only" th:for="${'remaining-' + schedule.scheduleCode}">남은 자리</label>
-												<input class="input schedule-capacity-input" type="number" name="remainingPeople" th:id="${'remaining-' + schedule.scheduleCode}" min="0" th:max="${schedule.maxPeople - schedule.reservedCount}" th:value="${schedule.remainingPeople}" required>
-												<button type="submit" class="btn btn--outline btn--sm">저장</button>
+											<button th:if="${schedule.scheduleStatus == '모집중' and schedule.reservedCount == 0}" type="button" class="btn btn--ghost btn--sm schedule-edit-button"
+												th:attr="data-url=@{/author/classes/schedules/{scheduleCode}/details(scheduleCode=${schedule.scheduleCode})},data-class-code=${schedule.classCode},data-date=${#dates.format(schedule.scheduleDate, 'yyyy-MM-dd')},data-start=${schedule.startTime},data-end=${schedule.endTime},data-min=${schedule.minPeople},data-max=${schedule.maxPeople}">일정 수정</button>
+											<form th:if="${schedule.scheduleStatus == '모집 마감' and schedule.maxPeople > schedule.reservedCount}" class="schedule-reopen-form" method="post" th:action="@{/author/classes/schedules/{scheduleCode}/reopen(scheduleCode=${schedule.scheduleCode})}">
+												<button type="submit" class="btn btn--outline btn--sm">다시 열기</button>
 											</form>
-											<form class="schedule-cancel-form" method="post" th:action="@{/author/classes/schedules/{scheduleCode}/cancel(scheduleCode=${schedule.scheduleCode})}" th:attr="data-reserved=${schedule.reservedCount}">
+											<form th:if="${schedule.scheduleStatus == '모집중'}" class="schedule-cancel-form" method="post" th:action="@{/author/classes/schedules/{scheduleCode}/cancel(scheduleCode=${schedule.scheduleCode})}" th:attr="data-reserved=${schedule.reservedCount}">
 												<input type="hidden" name="classCode" th:value="${schedule.classCode}">
 												<input type="hidden" name="source" value="schedules">
-												<button type="submit" class="btn btn--danger btn--sm" th:disabled="${schedule.remainingPeople == 0 and schedule.reservedCount == 0}">일정 취소</button>
+												<button type="submit" class="btn btn--danger btn--sm">일정 취소</button>
 											</form>
 										</div>
 										<span class="col-muted" th:unless="${schedule.scheduleStatus != '진행 완료' and schedule.classStatus != '폐강'}">변경 불가</span>
@@ -160,6 +179,37 @@
 					</div>
 					<p class="mgmt-empty" th:hidden="${not #lists.isEmpty(schedules)}">조건에 맞는 일정이 없습니다.</p>
 				</section>
+
+				<nav class="mgmt-pager" th:if="${totalPages > 1}" aria-label="일정 목록 페이지">
+					<a th:if="${currentPage > 1}"
+					   th:href="@{/author/schedules(page=${currentPage - 1},scheduleStatus=${scheduleStatus},keyword=${keyword},from=${fromDate},to=${toDate})}"
+					   aria-label="이전 페이지">
+						<svg aria-hidden="true"><use href="#icon-chevron-left"></use></svg>
+					</a>
+					<a th:each="pageNumber : ${#numbers.sequence(1, totalPages)}"
+					   th:if="${pageNumber >= currentPage - 2 and pageNumber <= currentPage + 2}"
+					   th:href="@{/author/schedules(page=${pageNumber},scheduleStatus=${scheduleStatus},keyword=${keyword},from=${fromDate},to=${toDate})}"
+					   th:attr="aria-current=${pageNumber == currentPage ? 'page' : null}"
+					   th:text="${pageNumber}">1</a>
+					<a th:if="${currentPage < totalPages}"
+					   th:href="@{/author/schedules(page=${currentPage + 1},scheduleStatus=${scheduleStatus},keyword=${keyword},from=${fromDate},to=${toDate})}"
+					   aria-label="다음 페이지">
+						<svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
+					</a>
+				</nav>
+
+				<dialog class="schedule-edit-dialog" id="scheduleEditDialog" aria-labelledby="scheduleEditTitle">
+					<form method="post" id="scheduleEditForm" class="schedule-operation-form schedule-operation-form--dialog">
+						<header><div><small>예약 없는 일정만 변경 가능</small><h2 id="scheduleEditTitle">일정 정보 수정</h2></div><button type="button" data-close-schedule-edit aria-label="닫기">×</button></header>
+						<input type="hidden" name="classCode" id="editClassCode">
+						<label>수업일<input type="date" name="scheduleDate" id="editScheduleDate" required></label>
+						<label>시작 시간<input type="time" name="startTime" id="editStartTime" required></label>
+						<label>종료 시간<input type="time" name="endTime" id="editEndTime" required></label>
+						<label>최소 인원<input type="number" name="minPeople" id="editMinPeople" min="1" max="100" required></label>
+						<label>최대 인원<input type="number" name="maxPeople" id="editMaxPeople" min="1" max="100" required></label>
+						<footer><button type="button" class="btn btn--ghost" data-close-schedule-edit>취소</button><button type="submit" class="btn btn--primary">변경 저장</button></footer>
+					</form>
+				</dialog>
 
 				<footer class="site-footer" th:replace="~{author/fragments/footer :: footer}"></footer>
 			</div>
@@ -178,6 +228,24 @@
 				: '이 일정을 취소하고 모집을 마감하시겠습니까?';
 			if (!window.confirm(message)) { event.preventDefault(); }
 		});
+	});
+
+	var editDialog = document.getElementById('scheduleEditDialog');
+	var editForm = document.getElementById('scheduleEditForm');
+	document.querySelectorAll('.schedule-edit-button').forEach(function (button) {
+		button.addEventListener('click', function () {
+			editForm.action = button.dataset.url;
+			document.getElementById('editClassCode').value = button.dataset.classCode;
+			document.getElementById('editScheduleDate').value = button.dataset.date;
+			document.getElementById('editStartTime').value = button.dataset.start;
+			document.getElementById('editEndTime').value = button.dataset.end;
+			document.getElementById('editMinPeople').value = button.dataset.min;
+			document.getElementById('editMaxPeople').value = button.dataset.max;
+			editDialog.showModal();
+		});
+	});
+	document.querySelectorAll('[data-close-schedule-edit]').forEach(function (button) {
+		button.addEventListener('click', function () { editDialog.close(); });
 	});
 }());
 </script>

@@ -8,6 +8,7 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.stereotype.Repository;
 
 import kr.co.oneclass.author.classmanage.ScheduleManageDTO;
+import kr.co.oneclass.author.classmanage.ScheduleOperationDTO;
 
 @Repository
 public class ScheduleDAO {
@@ -75,5 +76,45 @@ public class ScheduleDAO {
         param.put("authorCode", authorCode);
         param.put("scheduleCode", scheduleCode);
         return sqlSession.update(NAMESPACE + "closeSchedule", param);
+    }
+
+    // 예약이 없는 향후 일정의 날짜·시간·정원을 변경한다
+    public int updateManagedSchedule(long authorCode, ScheduleOperationDTO schedule) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("authorCode", authorCode);
+        param.put("scheduleCode", schedule.getScheduleCode());
+        param.put("scheduleDate", schedule.getScheduleDate());
+        param.put("startTime", schedule.getStartTime());
+        param.put("endTime", schedule.getEndTime());
+        param.put("minPeople", schedule.getMinPeople());
+        param.put("maxPeople", schedule.getMaxPeople());
+        return sqlSession.update(NAMESPACE + "updateManagedSchedule", param);
+    }
+
+    // 일정 변경 후 연결된 반복 규칙의 운영 기간을 실제 일정 범위로 맞춘다
+    public int refreshRepeatRuleRange(long authorCode, int scheduleCode) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("authorCode", authorCode);
+        param.put("scheduleCode", scheduleCode);
+        return sqlSession.update(NAMESPACE + "refreshRepeatRuleRange", param);
+    }
+
+    // 같은 클래스에 동일 날짜·시작 시간 일정이 있는지 확인한다
+    public int countDuplicateSchedule(long authorCode, ScheduleOperationDTO schedule) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("authorCode", authorCode);
+        param.put("classCode", schedule.getClassCode());
+        param.put("scheduleCode", schedule.getScheduleCode());
+        param.put("scheduleDate", schedule.getScheduleDate());
+        param.put("startTime", schedule.getStartTime());
+        return sqlSession.selectOne(NAMESPACE + "countDuplicateSchedule", param);
+    }
+
+    // 모집 마감된 향후 일정에 다시 예약 가능한 자리를 연다
+    public int reopenSchedule(long authorCode, int scheduleCode) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("authorCode", authorCode);
+        param.put("scheduleCode", scheduleCode);
+        return sqlSession.update(NAMESPACE + "reopenSchedule", param);
     }
 }

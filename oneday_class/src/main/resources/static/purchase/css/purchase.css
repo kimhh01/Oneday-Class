@@ -250,6 +250,22 @@ body {
     user-select: none;
 }
 
+/* 클릭 영역 전체 수평 정렬 및 기본 텍스트 스타일 초기화 */
+.card-content-link {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-grow: 1;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
+/* 마우스 호버 시 클래스 제목에 하이라이트 효과 */
+.card-content-link:hover .class-title {
+    color: #356846;
+}
+
 /* 반응형 */
 @media (max-width: 768px) {
     .purchase-container {

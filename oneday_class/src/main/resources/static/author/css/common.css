@@ -20,6 +20,7 @@
 
 /* ---------- 1. reset ---------- */
 * { margin: 0; padding: 0; box-sizing: border-box; }
+dialog { margin: auto; }
 html, body { height: 100%; }
 body {
 	font-family: var(--font-body);
@@ -516,7 +517,8 @@ svg {
 	gap: 8px 18px;
 	font-weight: 600;
 }
-.site-footer__links a:hover { color: var(--green-700); }
+.site-footer__links a:hover,
+.site-footer__links button:hover { color: var(--green-700); }
 .site-footer__copy { margin-top: 12px; line-height: 1.7; }
 .site-footer__copy b { font-weight: 600; color: var(--text-body); }
 

@@ -18,11 +18,14 @@ import kr.co.oneclass.author.common.AuthorSessionUtils;
 public class ClassController {
 
     private final ClassService cService;
+    private final AuthorCustomerPreviewService customerPreviewService;
     private final String kakaoMapAppKey;
 
     public ClassController(ClassService cService,
+            AuthorCustomerPreviewService customerPreviewService,
             @Value("${oneday.maps.kakao-app-key:}") String kakaoMapAppKey) {
         this.cService = cService;
+        this.customerPreviewService = customerPreviewService;
         this.kakaoMapAppKey = kakaoMapAppKey;
     }
 
@@ -245,18 +248,17 @@ public class ClassController {
         return "author/class-register-detail-extra";
     }
 
-    // 클래스 상세정보 2/2와 작품 갤러리 이미지 저장
+    // 클래스 상세정보 2/2 저장
     @PostMapping("/author/classes/register/detail-extra")
     public String saveClassDetailExtra(
             ClassDetailDTO cdDTO,
-            @RequestParam(value = "galleryFiles", required = false) List<MultipartFile> galleryFiles,
             @RequestParam(value = "saveMode", required = false, defaultValue = "next") String saveMode,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
         cdDTO.setAuthorCode(AuthorSessionUtils.getAuthorCode(session));
         try {
-            cService.modifyClassDetailExtra(cdDTO, galleryFiles);
+            cService.modifyClassDetailExtra(cdDTO);
             if (isStay(saveMode)) {
                 redirectAttributes.addFlashAttribute("draftSaved", "상세 정보 2/2를 임시 저장했습니다.");
                 return "redirect:/author/classes/register/detail-extra?classCode=" + cdDTO.getClassCode();
@@ -321,6 +323,25 @@ public class ClassController {
         cService.markDraftStep(authorCode, classCode, "preview");
         model.addAttribute("preview", preview);
         return "author/class-register-preview";
+    }
+
+    // 작가 본인의 초안을 실제 수강생용 상세 화면으로 미리보기
+    @GetMapping("/author/classes/register/customer-preview")
+    public String customerClassPreview(
+            @RequestParam("classCode") int classCode,
+            Model model,
+            HttpSession session) {
+
+        long authorCode = AuthorSessionUtils.getAuthorCode(session);
+        if (cService.getClassPreview(authorCode, classCode) == null) {
+            return "redirect:/author/classes/register-guide";
+        }
+        var detail = customerPreviewService.getCustomerPreview(classCode);
+        if (detail == null) {
+            return "redirect:/author/classes/register/preview?classCode=" + classCode;
+        }
+        model.addAttribute("detail", detail);
+        return "classDetail/classDetail";
     }
 
     // 클래스 등록 신청 버튼

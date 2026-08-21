@@ -57,12 +57,17 @@
 				  AND TRUNC(rv.RESERVATION_DATE) = TRUNC(SYSDATE) - 1
 			) AS YESTERDAY_RESERVATION_COUNT,
 			(
-				SELECT NVL(SUM(p.AMOUNT), 0)
+				SELECT NVL(SUM((p.AMOUNT - NVL(p.REFUND, 0))
+					- ROUND((p.AMOUNT - NVL(p.REFUND, 0)) * 0.1)), 0)
 				FROM PAYMENT p
 				JOIN RESERVATION rv ON p.RESERVATION_CODE = rv.RESERVATION_CODE
 				JOIN CLASS c ON rv.CLASS_CODE = c.CLASS_CODE
+				JOIN SCHEDULE s ON s.SCHEDULE_CODE = rv.SCHEDULE_CODE
 				WHERE c.OPERATOR_CODE = #{authorCode}
 				  AND p.STATUS = '결제완료'
+				  AND NVL(p.REFUND, 0) = 0
+				  AND rv.STATUS = '예약'
+				  AND TRUNC(s.CLASS_DATE) &lt;= TRUNC(SYSDATE)
 				  AND NOT EXISTS (
 					  SELECT 1
 					  FROM CALCULATE ca
@@ -74,8 +79,12 @@
 				FROM PAYMENT p
 				JOIN RESERVATION rv ON p.RESERVATION_CODE = rv.RESERVATION_CODE
 				JOIN CLASS c ON rv.CLASS_CODE = c.CLASS_CODE
+				JOIN SCHEDULE s ON s.SCHEDULE_CODE = rv.SCHEDULE_CODE
 				WHERE c.OPERATOR_CODE = #{authorCode}
 				  AND p.STATUS = '결제완료'
+				  AND NVL(p.REFUND, 0) = 0
+				  AND rv.STATUS = '예약'
+				  AND TRUNC(s.CLASS_DATE) &lt;= TRUNC(SYSDATE)
 				  AND NOT EXISTS (
 					  SELECT 1
 					  FROM CALCULATE ca
@@ -170,8 +179,12 @@
 					FROM PAYMENT p
 					JOIN RESERVATION rv ON p.RESERVATION_CODE = rv.RESERVATION_CODE
 					JOIN CLASS c ON rv.CLASS_CODE = c.CLASS_CODE
+					JOIN SCHEDULE s ON s.SCHEDULE_CODE = rv.SCHEDULE_CODE
 					WHERE c.OPERATOR_CODE = #{authorCode}
 					  AND p.STATUS = '결제완료'
+					  AND NVL(p.REFUND, 0) = 0
+					  AND rv.STATUS = '예약'
+					  AND TRUNC(s.CLASS_DATE) &lt;= TRUNC(SYSDATE)
 					  AND NOT EXISTS (
 						  SELECT 1
 						  FROM CALCULATE ca
@@ -233,13 +246,14 @@
 		WHERE ROWNUM &lt;= 7
 	</select>
 
-	<!-- 전체 공지 중 최신 3건을 대시보드에 노출한다 -->
+	<!-- 공개 공지 중 최신 3건을 대시보드에 노출한다 -->
 	<select id="selectRecentNoticeList"
 		resultType="kr.co.oneclass.author.dashboard.DashboardNoticeDTO">
 		SELECT *
 		FROM (
 			SELECT NOTICE_CODE, NOTICE_TYPE, TITLE, INPUT_DATE
 			FROM NOTICE
+			WHERE STATUS = '공개'
 			ORDER BY INPUT_DATE DESC, NOTICE_CODE DESC
 		)
 		WHERE ROWNUM &lt;= 3

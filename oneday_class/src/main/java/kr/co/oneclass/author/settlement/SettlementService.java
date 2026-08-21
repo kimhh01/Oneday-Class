@@ -59,18 +59,19 @@ public class SettlementService {
             account = new SettlementAccountDTO();
             account.setAuthorCode(authorCode);
         }
+        account.setMaskedAccountNumber(maskAccountNumber(account.getAccountNumber()));
         return account;
     }
 
     // 통장사본을 저장하고 CREATOR 의 정산계좌 정보를 등록하거나 수정한다
     @Transactional
     public boolean modifySettlementAccount(SettlementAccountDTO accountDTO, MultipartFile bankbookFile) {
-        String accountNumber = trimToNull(accountDTO.getAccountNumber());
+        String accountNumber = normalizeAccountNumber(accountDTO.getAccountNumber());
         if (accountNumber == null) {
             throw new IllegalArgumentException("계좌번호를 입력해주세요.");
         }
-        if (accountNumber.length() > 20) {
-            throw new IllegalArgumentException("계좌번호는 20자 이내로 입력해주세요.");
+        if (accountNumber.length() < 8 || accountNumber.length() > 20) {
+            throw new IllegalArgumentException("계좌번호는 숫자 8~20자리로 입력해주세요.");
         }
         accountDTO.setAccountNumber(accountNumber);
 
@@ -171,6 +172,9 @@ public class SettlementService {
     // 계좌와 매출상태를 검증하고 결제별 CALCULATE 행을 한 그룹으로 등록한다
     @Transactional
     public int submitSettlement(SettlementApplyDTO applyDTO) {
+        if (!applyDTO.isAgreement()) {
+            throw new IllegalArgumentException("정산 정보와 증빙 내용을 확인하고 동의해주세요.");
+        }
         calculateSettlement(applyDTO);
 
         SettlementAccountDTO account = sDAO.selectSettlementAccount(applyDTO.getAuthorCode());
@@ -231,5 +235,28 @@ public class SettlementService {
         }
         String trimmed = value.trim();
         return trimmed.isEmpty() ? null : trimmed;
+    }
+
+    private String normalizeAccountNumber(String value) {
+        String normalized = trimToNull(value);
+        if (normalized == null) {
+            return null;
+        }
+        normalized = normalized.replace("-", "").replace(" ", "");
+        return normalized.matches("\\d+") ? normalized : null;
+    }
+
+    private String maskAccountNumber(String value) {
+        String normalized = normalizeAccountNumber(value);
+        if (normalized == null) {
+            return null;
+        }
+        if (normalized.length() <= 4) {
+            return "*".repeat(normalized.length());
+        }
+        int visiblePrefix = Math.min(3, normalized.length() - 4);
+        return normalized.substring(0, visiblePrefix)
+                + "*".repeat(normalized.length() - visiblePrefix - 4)
+                + normalized.substring(normalized.length() - 4);
     }
 }

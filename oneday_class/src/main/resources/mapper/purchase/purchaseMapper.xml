@@ -106,5 +106,25 @@
         LEFT JOIN payment p ON r.reservation_code = p.reservation_code
         WHERE r.reservation_code = TO_NUMBER(#{reservationCode})
     </select>
+    
+    <!-- 3. 예약 테이블 상태 변경 ('취소'로 변경 / 지난 일정 및 이미 취소된 건 제외) -->
+	<update id="updateReservationStatusCancel">
+	    UPDATE reservation
+	    SET status = '취소'
+	    WHERE reservation_code = TO_NUMBER(#{reservationCode})
+	      AND member_code = TO_NUMBER(#{memberCode})
+	      AND reservation_date &gt;= SYSDATE
+	      AND status NOT LIKE '%취소%'
+	      AND status NOT LIKE '%환불%'
+	</update>
+	
+	<!-- 4. 결제 테이블 상태 변경 ('환불완료', REFUND=AMOUNT, REFUND_DATE=SYSDATE) -->
+	<update id="updatePaymentStatusRefund">
+	    UPDATE payment
+	    SET status = '환불완료',
+	        refund = amount,
+	        refund_date = SYSDATE
+	    WHERE reservation_code = TO_NUMBER(#{reservationCode})
+	</update>
 
 </mapper>

@@ -183,6 +183,27 @@ public class ClassDAO {
         return inserted;
     }
 
+    // 팀 클래스 상세와 관리자 검수가 공통으로 읽는 준비물 목록을 조회한다
+    public List<ClassMaterialDTO> selectClassMaterialList(int classCode) {
+        return sqlSession.selectList(NAMESPACE + "selectClassMaterialList", classCode);
+    }
+
+    public int deleteClassMaterialList(int classCode) {
+        return sqlSession.delete(NAMESPACE + "deleteClassMaterialList", classCode);
+    }
+
+    public int insertClassMaterialList(ClassDetailDTO cdDTO) {
+        int inserted = 0;
+        for (int index = 0; index < cdDTO.getMaterialNameList().size(); index++) {
+            Map<String, Object> param = new HashMap<>();
+            param.put("classCode", cdDTO.getClassCode());
+            param.put("materialName", cdDTO.getMaterialNameList().get(index));
+            param.put("materialContent", cdDTO.getMaterialContentList().get(index));
+            inserted += sqlSession.insert(NAMESPACE + "insertClassMaterial", param);
+        }
+        return inserted;
+    }
+
     // 상세정보 화면의 활성 제공 항목 선택지를 조회한다
     public List<OfferingDTO> selectOfferingList() {
         return sqlSession.selectList(NAMESPACE + "selectOfferingList");

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpSession;
 import kr.co.oneclass.author.common.AuthorSessionUtils;
@@ -36,10 +37,19 @@ public class AuthorProfileController {
     public String modifyAuthorProfile(
             AuthorProfileDTO apDTO,
             @RequestParam(value = "profileFile", required = false) MultipartFile profileFile,
-            HttpSession session) {
+            HttpSession session,
+            RedirectAttributes redirectAttributes) {
 
         apDTO.setAuthorCode(AuthorSessionUtils.getAuthorCode(session));
-        aService.modifyAuthorProfile(apDTO, profileFile);
+        try {
+            if (aService.modifyAuthorProfile(apDTO, profileFile)) {
+                redirectAttributes.addFlashAttribute("profileMessage", "프로필 정보를 저장했습니다.");
+            } else {
+                redirectAttributes.addFlashAttribute("profileError", "프로필 정보를 저장하지 못했습니다.");
+            }
+        } catch (IllegalArgumentException | IllegalStateException exception) {
+            redirectAttributes.addFlashAttribute("profileError", exception.getMessage());
+        }
         return "redirect:/author/profile";
     }
 }

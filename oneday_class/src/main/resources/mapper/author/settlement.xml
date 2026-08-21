@@ -51,6 +51,9 @@
 	<select id="selectSalesSummary" parameterType="long"
 		resultType="kr.co.oneclass.author.settlement.SalesSummaryDTO">
 		SELECT
+			COUNT(*) AS TOTAL_PAYMENT_COUNT,
+			NVL(SUM(CASE WHEN NVL(p.REFUND, 0) &gt; 0 OR p.STATUS = '환불완료' THEN 1 ELSE 0 END), 0)
+				AS TOTAL_REFUND_COUNT,
 			NVL(SUM(p.AMOUNT), 0) AS TOTAL_PAYMENT_AMOUNT,
 			NVL(SUM(NVL(p.REFUND, 0)), 0) AS TOTAL_CANCEL_AMOUNT,
 			NVL(SUM(<include refid="calculatedSettlementAmount"/>), 0) AS EXPECTED_SETTLEMENT_AMOUNT
@@ -73,7 +76,7 @@
 					m.NAME AS MEMBER_NAME,
 					s.CLASS_DATE AS SCHEDULE_DATE,
 					p.AMOUNT AS PAYMENT_AMOUNT,
-					NVL(p.REFUND, 0) AS DISCOUNT_AMOUNT,
+					NVL(p.REFUND, 0) AS REFUND_AMOUNT,
 					<include refid="calculatedSettlementAmount"/> AS SETTLEMENT_AMOUNT,
 					p.STATUS AS PAYMENT_STATUS,
 					CAST(p.PAYMENT_DATE AS DATE) AS PAYMENT_DATE

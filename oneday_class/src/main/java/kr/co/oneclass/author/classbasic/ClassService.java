@@ -1,5 +1,6 @@
 package kr.co.oneclass.author.classbasic;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
@@ -13,6 +14,7 @@ import java.time.format.DateTimeParseException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
@@ -27,7 +29,6 @@ public class ClassService {
     private static final Logger log = LoggerFactory.getLogger(ClassService.class);
     private static final String MAIN_IMAGE_TYPE = "대표";
     private static final String RESULT_IMAGE_TYPE = "완성";
-    private static final String GALLERY_IMAGE_TYPE = "갤러리";
     private static final String LEGACY_DETAIL_IMAGE_TYPE = "상세";
     private static final String DRAFT_PLACEHOLDER = "작성 중";
     private static final Set<String> REGISTER_STEPS = Set.of(
@@ -89,6 +90,7 @@ public class ClassService {
         cDAO.deleteClassOptionList(classCode);
         cDAO.deleteClassNoticeList(classCode);
         cDAO.deleteClassTagList(classCode);
+        cDAO.deleteClassMaterialList(classCode);
 
         if (cDAO.deleteDraftClass(authorCode, classCode) != 1) {
             throw new IllegalArgumentException("삭제할 수 있는 작성 중 클래스가 없습니다.");
@@ -346,7 +348,9 @@ public class ClassService {
             return null;
         }
         detail.setResultImageList(selectResultImageList(classCode));
-        detail.setGalleryImageList(ciDAO.selectClassImageListByType(classCode, GALLERY_IMAGE_TYPE));
+        List<ClassMaterialDTO> materials = cDAO.selectClassMaterialList(classCode);
+        detail.setMaterialNameList(materials.stream().map(ClassMaterialDTO::getMaterialName).toList());
+        detail.setMaterialContentList(materials.stream().map(ClassMaterialDTO::getMaterialContent).toList());
         return detail;
     }
 
@@ -447,22 +451,19 @@ public class ClassService {
         }
     }
 
-    // 상세정보 2/2의 제공사항·태그·갤러리 이미지를 저장한다
+    // 상세정보 2/2의 제공사항·준비물·태그를 저장한다
     @Transactional
-    public boolean modifyClassDetailExtra(ClassDetailDTO cdDTO,
-            List<MultipartFile> galleryFiles) {
-        return modifyClassDetailExtra(cdDTO, galleryFiles, false);
+    public boolean modifyClassDetailExtra(ClassDetailDTO cdDTO) {
+        return modifyClassDetailExtra(cdDTO, false);
     }
 
     // 승인 상태를 유지한 채 운영 클래스 상세정보 2/2를 저장한다
     @Transactional
-    public boolean modifyApprovedClassDetailExtra(ClassDetailDTO cdDTO,
-            List<MultipartFile> galleryFiles) {
-        return modifyClassDetailExtra(cdDTO, galleryFiles, true);
+    public boolean modifyApprovedClassDetailExtra(ClassDetailDTO cdDTO) {
+        return modifyClassDetailExtra(cdDTO, true);
     }
 
-    private boolean modifyClassDetailExtra(ClassDetailDTO cdDTO,
-            List<MultipartFile> galleryFiles, boolean approvedEdit) {
+    private boolean modifyClassDetailExtra(ClassDetailDTO cdDTO, boolean approvedEdit) {
         ClassDetailDTO saved = getClassDetail(cdDTO.getAuthorCode(), cdDTO.getClassCode());
         if (saved == null
                 || (approvedEdit
@@ -473,32 +474,6 @@ public class ClassService {
         }
         validateDraftDetailExtra(cdDTO);
 
-        List<MultipartFile> newGalleryFiles = nonEmptyFiles(galleryFiles);
-        List<ClassImageDTO> oldGalleryImages = saved.getGalleryImageList();
-        Set<Integer> removeCodes = new HashSet<>(cdDTO.getRemoveImageCodeList());
-        List<ClassImageDTO> removedImages = oldGalleryImages.stream()
-                .filter(image -> removeCodes.contains(image.getImageCode()))
-                .toList();
-        if (removedImages.size() != removeCodes.size()) {
-            throw new IllegalArgumentException("삭제할 갤러리 이미지 정보를 확인해주세요.");
-        }
-
-        Set<Integer> removedCodeSet = removedImages.stream()
-                .map(ClassImageDTO::getImageCode)
-                .collect(java.util.stream.Collectors.toSet());
-        List<ClassImageDTO> remainingGalleryImages = oldGalleryImages.stream()
-                .filter(image -> !removedCodeSet.contains(image.getImageCode()))
-                .toList();
-        int remainingGalleryCount = remainingGalleryImages.size();
-        int nextGalleryImageOrder = remainingGalleryImages.stream()
-                .mapToInt(ClassImageDTO::getImageOrder)
-                .max()
-                .orElse(0) + 1;
-        if (remainingGalleryCount + newGalleryFiles.size() > 9) {
-            throw new IllegalArgumentException("작품 갤러리 사진은 최대 9장까지 등록할 수 있습니다.");
-        }
-
-        List<String> storedPaths = new ArrayList<>();
         try {
             int touched = approvedEdit
                     ? cDAO.guardApprovedClassEdit(cdDTO.getAuthorCode(), cdDTO.getClassCode())
@@ -510,35 +485,18 @@ public class ClassService {
             cDAO.deleteClassOptionList(cdDTO.getClassCode());
             cDAO.deleteClassNoticeList(cdDTO.getClassCode());
             cDAO.deleteClassTagList(cdDTO.getClassCode());
+            cDAO.deleteClassMaterialList(cdDTO.getClassCode());
             if (cDAO.insertClassOptionList(cdDTO) != cdDTO.getOptionCodeList().size()
                     || cDAO.insertClassNoticeList(cdDTO) != cdDTO.getNoticeList().size()
-                    || cDAO.insertClassTagList(cdDTO) != cdDTO.getTagList().size()) {
+                    || cDAO.insertClassTagList(cdDTO) != cdDTO.getTagList().size()
+                    || cDAO.insertClassMaterialList(cdDTO) != cdDTO.getMaterialNameList().size()) {
                 throw new IllegalStateException("추가 정보 항목을 저장하지 못했습니다.");
             }
 
-            for (ClassImageDTO removedImage : removedImages) {
-                if (ciDAO.deleteClassImage(removedImage.getImageCode()) != 1) {
-                    throw new IllegalStateException("기존 갤러리 이미지를 삭제하지 못했습니다.");
-                }
-            }
-            for (MultipartFile file : newGalleryFiles) {
-                storedPaths.add(fileStorageService.store(file, "class-gallery"));
-            }
-            for (int index = 0; index < storedPaths.size(); index++) {
-                ClassImageDTO image = new ClassImageDTO();
-                image.setClassCode(cdDTO.getClassCode());
-                image.setImagePath(storedPaths.get(index));
-                image.setImageType(GALLERY_IMAGE_TYPE);
-                image.setImageOrder(nextGalleryImageOrder + index);
-                if (ciDAO.insertClassImage(image) != 1) {
-                    throw new IllegalStateException("작품 갤러리 이미지 정보를 저장하지 못했습니다.");
-                }
-            }
-            deleteAfterCommit(removedImages.stream().map(ClassImageDTO::getImagePath).toList());
             return true;
-        } catch (RuntimeException exception) {
-            storedPaths.forEach(this::deleteQuietly);
-            throw exception;
+        } catch (DataAccessException exception) {
+            log.error("클래스 추가 정보 DB 저장 실패: classCode={}", cdDTO.getClassCode(), exception);
+            throw new IllegalStateException("추가 정보를 저장하지 못했습니다. 다시 시도해주세요.");
         }
     }
 
@@ -653,7 +611,6 @@ public class ClassService {
         preview.setMainImageList(ciDAO.selectClassImageListByType(classCode, MAIN_IMAGE_TYPE));
         if (detail != null) {
             preview.setResultImageList(detail.getResultImageList());
-            preview.setGalleryImageList(detail.getGalleryImageList());
         }
         return preview;
     }
@@ -723,11 +680,11 @@ public class ClassService {
         if (cbDTO.getClassCode() <= 0 || cbDTO.getCategoryCode() <= 0) {
             throw new IllegalArgumentException("카테고리를 선택해주세요.");
         }
-        if (title == null || title.length() > 30) {
-            throw new IllegalArgumentException("클래스명은 30자 이내로 입력해주세요.");
+        if (title == null || utf8Length(title) > 30) {
+            throw new IllegalArgumentException("클래스명은 30바이트 이내로 입력해주세요. (한글만 입력 시 최대 10자)");
         }
-        if (shortIntroduction == null || shortIntroduction.length() > 100) {
-            throw new IllegalArgumentException("한 줄 소개는 100자 이내로 입력해주세요.");
+        if (shortIntroduction == null || utf8Length(shortIntroduction) > 100) {
+            throw new IllegalArgumentException("한 줄 소개는 100바이트 이내로 입력해주세요. (한글만 입력 시 최대 33자)");
         }
         if (introduction == null || introduction.length() > 500) {
             throw new IllegalArgumentException("클래스 소개는 500자 이내로 입력해주세요.");
@@ -735,6 +692,10 @@ public class ClassService {
         cbDTO.setClassTitle(title);
         cbDTO.setShortIntroduction(shortIntroduction);
         cbDTO.setClassIntroduction(introduction);
+    }
+
+    private int utf8Length(String value) {
+        return value.getBytes(StandardCharsets.UTF_8).length;
     }
 
     private void mergeDraftLocation(ClassLocationDTO target, ClassLocationDTO saved) {
@@ -866,6 +827,7 @@ public class ClassService {
         }
         cdDTO.setNoticeList(normalizeList(cdDTO.getNoticeList(), 5, 80, "추가 유의사항"));
         cdDTO.setTagList(normalizeList(cdDTO.getTagList(), 8, 18, "태그"));
+        normalizeMaterials(cdDTO);
         List<Integer> options = cdDTO.getOptionCodeList() == null
                 ? new ArrayList<>()
                 : new ArrayList<>(new LinkedHashSet<>(cdDTO.getOptionCodeList()));
@@ -874,6 +836,40 @@ public class ClassService {
         }
         cdDTO.setOptionCodeList(options);
         normalizeRemoveImageCodes(cdDTO);
+    }
+
+    private void normalizeMaterials(ClassDetailDTO cdDTO) {
+        List<String> names = cdDTO.getMaterialNameList() == null
+                ? List.of() : cdDTO.getMaterialNameList();
+        List<String> contents = cdDTO.getMaterialContentList() == null
+                ? List.of() : cdDTO.getMaterialContentList();
+        if (names.size() != contents.size() || names.size() > 10) {
+            throw new IllegalArgumentException("준비물·재료는 최대 10개까지 등록할 수 있습니다.");
+        }
+
+        List<String> normalizedNames = new ArrayList<>();
+        List<String> normalizedContents = new ArrayList<>();
+        Set<String> uniqueNames = new HashSet<>();
+        for (int index = 0; index < names.size(); index++) {
+            String name = trimToNull(names.get(index));
+            String content = trimToNull(contents.get(index));
+            if (name == null && content == null) {
+                continue;
+            }
+            if (name == null || content == null) {
+                throw new IllegalArgumentException("준비물 이름과 안내 내용을 모두 입력해주세요.");
+            }
+            if (name.length() > 30 || content.length() > 80) {
+                throw new IllegalArgumentException("준비물 이름은 30자, 안내 내용은 80자 이내로 입력해주세요.");
+            }
+            if (!uniqueNames.add(name.toLowerCase(java.util.Locale.ROOT))) {
+                throw new IllegalArgumentException("같은 준비물 이름을 중복 등록할 수 없습니다.");
+            }
+            normalizedNames.add(name);
+            normalizedContents.add(content);
+        }
+        cdDTO.setMaterialNameList(normalizedNames);
+        cdDTO.setMaterialContentList(normalizedContents);
     }
 
     private void normalizeRemoveImageCodes(ClassDetailDTO cdDTO) {

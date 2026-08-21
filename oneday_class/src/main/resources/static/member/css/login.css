@@ -192,6 +192,38 @@ body {
     display: block;
 }
 
+/* 💡 X 버튼 위치 조정을 위한 스타일 */
+.login-card {
+	position: relative; /* X 버튼 절대 위치 기준 */
+}
+
+.page-close-x {
+	position: absolute;
+	top: 24px;
+	left: 24px;
+	width: 28px;
+	height: 28px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	text-decoration: none;
+	z-index: 10;
+	border-radius: 50%;
+	transition: background-color 0.15s ease;
+}
+
+.page-close-x:hover {
+	background-color: #f2f2f2;
+}
+
+.page-close-x svg path {
+	transition: stroke 0.15s ease;
+}
+
+.page-close-x:hover svg path {
+	stroke: #222222;
+}
+
 /* 모바일 대응 */
 @media (max-width: 480px) {
     .login-card {
