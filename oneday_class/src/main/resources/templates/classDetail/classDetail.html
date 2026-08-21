@@ -8,9 +8,13 @@
 <link rel="stylesheet"
 	href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 <link rel="stylesheet" th:href="@{/classDetail/css/classDetail.css}">
+
+<!-- CSRF Meta 태그 추가 -->
+    <meta name="_csrf" th:content="${_csrf?.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf?.headerName}"/>
 </head>
-<div th:replace="~{common/header :: headerFragment}"></div>
 <body class="map-page-body">
+<div th:replace="~{common/header :: headerFragment}"></div>
 
 
 	<!-- 2. 메인 2컬럼 본문 영역 -->
@@ -407,7 +411,7 @@
 				<h3 class="section-heading">이런 클래스는 어때요?</h3>
 				<div class="similar-class-grid"
 					th:if="${detail?.sameCategoryList != null and !#lists.isEmpty(detail.sameCategoryList)}">
-					<th:block th:each="item : ${detail.sameCategoryList}">
+					<th:block th:each="item : ${detail.sameCategoryList}" th:if="${item.status eq '모집중'}">
 						<a class="similar-card" th:if="${item != null}" th:href="@{/classDetail(classCode=${item.classCode})}">
 							<div class="thumb-box">
 								<img
@@ -514,7 +518,7 @@
 
 	</main>
 
-
+<div th:replace="~{common/footer :: footerFragment}"></div>
 </body>
 <script
 	src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
@@ -728,35 +732,44 @@ function renderCalendarDaysBar() {
                 const currentUrl = encodeURIComponent(window.location.href);
                 window.location.href = "/member/login/general?redirect=" + currentUrl;
             }
-            return; // 비회원이면 진행 중단
+            return; 
         }
 
-        // 2. 클래스 코드 및 버튼 요소 준비
+        // 2. 클래스 코드 및 요소 준비
         const bookmarkBtn = document.getElementById('btnBookmark');
         const classCode = /*[[${detail?.classDetail?.classCode}]]*/ 3; 
 
+        // 💡 HTML meta 태그에서 CSRF 토큰 정보 가져오기
+        const token = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+        const header = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+
         try {
-            // 💡 @RequestParam("classCode") 규격에 맞게 폼 데이터 형태로 변환
             const formData = new URLSearchParams();
             formData.append('classCode', classCode);
 
-            // 3. 서버로 POST 요청
+            // 헤더 객체 생성 및 CSRF 헤더 추가
+            const requestHeaders = {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            };
+            
+            if (token && header) {
+                requestHeaders[header] = token; // X-CSRF-TOKEN 헤더 세팅
+            }
+
+            // 3. 서버로 POST 요청 (맨 앞 '/' 추가 권장)
             const response = await fetch('/classDetail/bookmark/toggle', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
+                headers: requestHeaders,
                 body: formData
             });
 
-            // 💡 컨트롤러가 String("ADDED", "REMOVED" 등)을 반환하므로 text()로 다룹니다.
             const resultText = await response.text(); 
 
             if (resultText === "ADDED") {
-                bookmarkBtn.classList.add('active'); // CSS에서 하트 빨간색 채우기
+                bookmarkBtn.classList.add('active');
                 alert("찜 목록에 추가되었습니다. ❤️");
             } else if (resultText === "REMOVED") {
-                bookmarkBtn.classList.remove('active'); // CSS에서 빈 하트로 변경
+                bookmarkBtn.classList.remove('active');
                 alert("찜하기가 취소되었습니다.");
             } else if (resultText === "LOGIN_REQUIRED") {
                 alert("세션이 만료되었습니다. 다시 로그인해 주세요.");

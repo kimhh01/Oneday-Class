@@ -57,7 +57,7 @@
     <!-- 3. 관심 클래스 추가 -->
     <insert id="insertBookmark">
         INSERT INTO bookmark (bookmark_code, member_code, class_code, bookmark_date)
-        VALUES (seq_bookmark.NEXTVAL, TO_NUMBER(#{memberCode}), TO_NUMBER(#{classCode}), SYSDATE)
+        VALUES (seq_bookmark_code.NEXTVAL, TO_NUMBER(#{memberCode}), TO_NUMBER(#{classCode}), SYSDATE)
     </insert>
 
     <!-- 4. 관심 클래스 삭제 -->

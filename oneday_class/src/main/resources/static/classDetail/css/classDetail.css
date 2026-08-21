@@ -178,9 +178,6 @@ body.map-page-body {
     border-bottom: 1px solid var(--border-line);
     margin-top: 1.5rem;
     background-color: #ffffff;
-    position: sticky;
-    top: 60px;
-    z-index: 10;
 }
 
 .tab-link {
@@ -603,7 +600,7 @@ body.map-page-body {
 /* 우측 고정 위젯 박스 */
 .sticky-booking-widget {
 	position: sticky;
-    top: 120px; /* 스크롤을 내렸을 때 화면 상단에서 띄울 간격 (필수값!) */
+    top: 30px; /* 스크롤을 내렸을 때 화면 상단에서 띄울 간격 (필수값!) */
     z-index: 10; /* 다른 요소 위에 뜨도록 설정 */
     
     border: 1px solid #f1f3f5;

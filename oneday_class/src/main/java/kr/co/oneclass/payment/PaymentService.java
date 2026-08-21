@@ -79,7 +79,7 @@ public class PaymentService {
                     Map.class
             );
             
-            // ② PG 승인 성공 시: 예약(reservation) DB 저장
+            // ② 예약(reservation) DB 저장
             ReservationDTO rDTO = new ReservationDTO();
             rDTO.setClassCode(classCode);
             rDTO.setMemberCode(memberCode);
@@ -88,11 +88,11 @@ public class PaymentService {
             rDTO.setTotalPrice(amount.intValue());
             rDTO.setStatus("예약");
             
-            rDAO.insertReservation(rDTO); // XML의 insertReservation 호출
+            rDAO.insertReservation(rDTO); // XML에 selectKey가 있다면 rDTO.getReservationCode()에 PK가 담김
 
             // ③ 결제(payment) DB 저장
             PaymentDTO pDTO = new PaymentDTO();
-            pDTO.setReservationCode(rDTO.getReservationCode()); // 생성된 예약 번호 연결
+            pDTO.setReservationCode(rDTO.getReservationCode()); 
             pDTO.setAmount(amount.intValue()); 
             pDTO.setMeans(paymentMethod); 
             pDTO.setPaymentDate(new java.sql.Date(System.currentTimeMillis())); 
@@ -101,11 +101,12 @@ public class PaymentService {
 
             pDAO.insertPayment(pDTO);
 
-            // 결제 후 좌석 수 변경
-            ScheduleDTO sDTO = new ScheduleDTO();
-            if(sDTO.getRemainingPeople()-peopleCount >= 0) {
-            	sDTO.setRemainingPeople(sDTO.getRemainingPeople()-peopleCount);
-            	
+            // ④ 좌석 수 차감 (rDAO의 updateRemaining 직접 호출)
+            int updatedRows = rDAO.updateRemaining(scheduleCode, peopleCount);
+            
+            // (선택 사항) 만약 차감된 행이 0개라면 수량 부족으로 예외 발생 -> 트랜잭션 롤백
+            if (updatedRows == 0) {
+                throw new RuntimeException("잔여 좌석이 부족하여 예약을 완료할 수 없습니다.");
             }
             
         } catch (org.springframework.web.client.HttpClientErrorException e) {

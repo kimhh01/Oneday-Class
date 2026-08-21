@@ -19,6 +19,7 @@ import lombok.Getter;
 		private String name;
 		private int price;
 		private int desiredPrice;
+		private int discountRate;
 		private String zipcode;
 		private String address;
 		private String oldAddress;

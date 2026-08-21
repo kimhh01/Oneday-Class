@@ -33,7 +33,7 @@ public class ClassDetailService {
 			return null;
 		}
 		
-		if(!"승인".equals(classDto.getApprovalStatus())) {
+		if(!"모집중".equals(classDto.getStatus())) {
 			return null;
 		}
 		

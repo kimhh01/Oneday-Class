@@ -6,22 +6,9 @@
 <!-- 외부 스타일시트 연결 -->
 <link rel="stylesheet" th:href="@{/map/css/map.css}">
 </head>
+
 <body class="map-page-body">
-
-	<!-- 1. GNB 헤더 영역 -->
-	<header class="main-header">
-		<div class="header-inner">
-			<div class="header-logo">Class 101</div>
-			<nav class="header-nav">
-				<a href="#">로그아웃</a> <a href="#">고객센터</a> <a href="#">마이페이지</a> <a
-					href="#">예약내역</a> <a href="#">관심목록</a>
-			</nav>
-			<button class="hamburger-btn" aria-label="메뉴 열기">
-				<span></span><span></span><span></span>
-			</button>
-		</div>
-	</header>
-
+<div th:replace="~{common/header :: headerFragment}"></div>
 	<!-- 2. 제목 & 필터 검색 영역 -->
 	<section class="filter-section">
 		<div class="filter-top">
@@ -288,23 +275,7 @@
 		</div>
 	</section>
 
-	<!-- 5. 하단 정보 영역 (푸터) -->
-	<footer class="footer">
-		<div class="footer-inner">
-			<div class="footer-left">
-				<p class="company-name">원데이클래스 주식회사</p>
-				<p class="company-info">
-					주소: 06043 서울특별시 강남구 테헤란로 123, 클래스101 빌딩 5층 | 사업자등록번호: 141-81-81254<br>
-					통신판매업 신고번호: 제 2026-서울강남-1010호 | 대표: 김클래스 | 개인정보보호 책임자: 서클래스<br>
-					이메일: cs@class101.co.kr | 전화: 1588-7822
-				</p>
-			</div>
-			<div class="social-links">
-				<a href="#">Facebook</a> <a href="#">Instagram</a> <a href="#">YouTube</a>
-				<a href="#">Blog</a>
-			</div>
-		</div>
-	</footer>
+	<div th:replace="~{common/footer :: footerFragment}"></div>
 
 	<!-- 카카오 지도 API 로드 (libraries=services 포함) -->
 	<script type="text/javascript"
