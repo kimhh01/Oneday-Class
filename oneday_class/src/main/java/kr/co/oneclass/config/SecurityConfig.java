@@ -20,7 +20,7 @@ public class SecurityConfig {
         http
             // 1. CSRF 활성화
             .csrf(csrf -> csrf
-            		.ignoringRequestMatchers("/member/check-id") // 아이디 중복 확인 URL 패턴 추가
+            		.ignoringRequestMatchers("/member/idDupCheck","/member/emailDupCheck") // 아이디 중복 확인 URL 패턴 추가
             		//.disable())
             		)
             // 2. 모든 요청에 대해 접근 전체 허용 (로그인 없이 모든 페이지/정적 자원 접근 가능)
