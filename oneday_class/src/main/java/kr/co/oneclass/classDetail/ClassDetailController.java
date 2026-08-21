@@ -19,10 +19,11 @@ public class ClassDetailController {
     private ClassDetailService cdService;
 
     @GetMapping("/classDetail")
-    public String useClass2(@RequestParam("classCode") String classCode, Model model) {
+    public String useClass(@RequestParam("classCode") String classCode, Model model, HttpSession session) {
         // 서비스에서 모든 조립 과정을 마친 하나의 객체를 가져옵니다.
     	int code=Integer.parseInt(classCode);
         ClassDetailResponseDTO detail = cdService.getClassDetail(code);
+        
         
         
         if (detail == null) {

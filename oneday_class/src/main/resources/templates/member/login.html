@@ -1,26 +1,23 @@
 <!DOCTYPE html>
-<!--
-  Spring Boot 프로젝트의 View 파일 (Thymeleaf HTML)
-  위치 예시   : src/main/resources/templates/member/login.html
-  매핑 예시   : @GetMapping("/member/login") -> return "member/login";
-  참고 사항   :
-    - 이 화면에는 공통 헤더/푸터를 포함하지 않았습니다. (추후 별도 include 예정)
-    - 우측 상단 닫기(X) 버튼은 요청에 따라 제거했습니다.
-    - css/이미지 등 정적 리소스는 src/main/resources/static/login/ 아래에 위치하며
-      Boot 기본 설정에 따라 "/login/**" 경로로 바로 서빙됩니다.
-    - th:href, th:src, th:action은 Thymeleaf의 @{...} URL 표현식으로 컨텍스트 경로를 자동 반영합니다.
--->
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>로그인 | 숨쉬당</title>
     <link rel="stylesheet" th:href="@{css/login.css}">
+
 </head>
 <body>
 
 <div class="login-wrapper">
     <div class="login-card">
+
+        <!-- 💡 [추가] 카드 상단 왼쪽 X 버튼 (클릭 시 홈 '/' 이동) -->
+        <a th:href="@{/}" class="page-close-x" aria-label="홈으로 돌아가기">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 6L6 18M6 6l12 12" stroke="#888888" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        </a>
 
         <div class="login-logo">
             <p class="login-logo__tagline">일상을 배우는 취미공간</p>

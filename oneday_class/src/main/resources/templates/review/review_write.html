@@ -12,7 +12,7 @@
     <link rel="stylesheet" th:href="@{/review/css/review_write.css}">
 </head>
 <body>
-
+<div th:replace="~{common/header :: headerFragment}"></div>
 <div class="review-wrapper">
     <div class="review-container">
 
@@ -134,6 +134,8 @@
 
     </div>
 </div>
+
+<div th:replace="~{common/footer :: footerFragment}"></div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {

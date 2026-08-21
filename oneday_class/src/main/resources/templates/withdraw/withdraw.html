@@ -11,6 +11,7 @@
 </head>
 <body>
 
+<div th:replace="~{common/header :: headerFragment}"></div>
 <div class="withdraw-wrapper">
     <div class="withdraw-container">
 
@@ -92,6 +93,8 @@
 
     </div>
 </div>
+
+<div th:replace="~{common/footer :: footerFragment}"></div>
 
 <!-- ========================================== -->
 <!-- 회원탈퇴 확인 모달 (일반 / 소셜 자동 분기) -->

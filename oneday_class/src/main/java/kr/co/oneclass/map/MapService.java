@@ -17,6 +17,14 @@ public class MapService {
 	private final MapDAO mDAO;
 	
 	public List<ClassDTO> getClassList(MapSearchDTO mDTO) {
+		
+		List<ClassDTO> classList=mDAO.selectClassList(mDTO);
+		
+		for(ClassDTO cDTO : classList) {
+			if(!"모집중".equals(cDTO.getStatus())) {
+				return null;
+			}
+		}
 		return mDAO.selectClassList(mDTO); 
 	}
 	

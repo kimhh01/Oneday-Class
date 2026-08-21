@@ -11,10 +11,10 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@NoArgsConstructor  // 👈 MyBatis 데이터 매핑용 기본 생성자 추가
+@NoArgsConstructor 
 @AllArgsConstructor
 public class OperatorDTO {
-	private long operatorCode; // 👈 int -> long 변경 (오버플로우/캐스팅 에러 방지)
+	private long operatorCode; 
 	private int memberCode;
 	private String approvalStatus;
 	private String activityName;

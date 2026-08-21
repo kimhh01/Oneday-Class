@@ -1,38 +1,53 @@
 <div th:fragment="headerFragment" xmlns:th="http://www.thymeleaf.org">
     <style>
-    
-    .site-header {
-    width: 100%;
-  /*   border-bottom: 1px solid var(--border-light, #eaeaea); */
-    background-color: #ffffff;
-    padding: 20px 0;
-}
+        /* 💡 메인 페이지와 동일한 Pretendard 웹폰트 로드 */
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
-    .header-top{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-    }
-    .logo{
-      font-family:Georgia,serif;
-      font-size:27px;
-    }
-    .header-menu{
-      display:flex;
-      gap:20px;
-      font-size:12px;
-    }
-    
-  .header-inner {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 0 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-sizing: border-box;
-}
+        .site-header {
+            width: 100%;
+            background-color: #ffffff;
+            padding: 20px 0;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif;
+        }
 
+        .header-inner {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        /* 로고 디자인 */
+        .logo {
+            font-family: Georgia, serif;
+            font-size: 27px;
+        }
+
+        .logo a {
+            color: #000000 !important;
+            text-decoration: none !important;
+        }
+
+        /* 💡 메뉴 글씨체/크기/굵기 완전 일치화 */
+        .header-menu {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 12px;
+        }
+
+        .header-menu a,
+        .site-header__link {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans KR", sans-serif !important;
+            font-size: 13.5px !important;
+            font-weight: 500 !important;
+            color: #222222 !important;
+            text-decoration: none !important;
+            letter-spacing: -0.2px;
+        }
     </style>
 
     <header class="site-header">
@@ -42,20 +57,20 @@
             </div>
             
             <nav class="header-menu">
-            
-	            	<!-- 비로그인 상태일 때 -->
-	            <a th:if="${session.loginMember == null}" 
-	               th:href="@{/member/login}" 
-	               class="site-header__link">로그인</a>
-	
-	            <!-- 로그인 상태일 때 -->
-	            <a th:if="${session.loginMember != null}" 
-	               th:href="@{/logout}" 
-	               class="site-header__link">로그아웃</a>
-                <!-- 마이페이지 -->
-           		<a th:href="@{/mypage}" class="site-header__link">마이페이지</a>
-                <a th:href="@{/mypage/purchase}">예약내역</a>
-                <a th:href="@{/mypage/bookmark}">관심목록</a>
+                <!-- 비로그인 상태일 때 -->
+                <a th:if="${session.loginMember == null}" 
+                   th:href="@{/member/login}" 
+                   class="site-header__link">로그인</a>
+
+                <!-- 로그인 상태일 때 -->
+                <a th:if="${session.loginMember != null}" 
+                   th:href="@{/logout}" 
+                   class="site-header__link">로그아웃</a>
+
+                <!-- 마이페이지 메뉴 -->
+                <a th:href="@{/mypage}" class="site-header__link">마이페이지</a>
+                <a th:href="@{/mypage/purchase}" class="site-header__link">예약내역</a>
+                <a th:href="@{/mypage/bookmark}" class="site-header__link">관심목록</a>
             </nav>
         </div>
     </header>
