@@ -7,14 +7,12 @@
     <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : 'X-CSRF-TOKEN'}"/>
 
     <title>구매 상세 | 숨쉬당</title>
-    <link rel="stylesheet" th:href="@{/fragments/css/header.css}">
-    <link rel="stylesheet" th:href="@{/fragments/css/footer.css}">
     <link rel="stylesheet" th:href="@{/fragments/css/sidebar.css}">
     <link rel="stylesheet" th:href="@{/purchase/css/purchase_detail.css}">
 </head>
 <body>
 
-<div th:replace="~{fragments/header :: header}"></div>
+<div th:replace="~{common/header :: headerFragment}"></div>
 
 <div class="order-detail-wrapper">
     <div class="order-detail-container">
@@ -162,7 +160,7 @@
     </div>
 </div>
 
-<div th:replace="~{fragments/footer :: footer}"></div>
+<div th:replace="~{common/footer :: footerFragment}"></div>
 
 <script>
     function openCancelModal() {
