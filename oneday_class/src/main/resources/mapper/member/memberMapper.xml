@@ -239,17 +239,15 @@
 	        member_type, 
 	        ip_address, 
 	        login_date
-	    ) VALUES (
-	        #{memberCode}, 
-	        NULL, 
-	        (
-	            SELECT CASE WHEN COUNT(*) > 0 THEN '작가' ELSE '회원' END 
-	            FROM creator 
-	            WHERE member_code = #{memberCode}
-	        ), 
+	    )
+	    SELECT 
+	        #{memberCode},
+	        c.operator_code,
+	        CASE WHEN c.operator_code IS NOT NULL THEN '작가' ELSE '회원' END,
 	        #{ipAddress}, 
 	        SYSDATE
-	    )
+	    FROM DUAL
+	    LEFT JOIN creator c ON c.member_code = #{memberCode}
 	</insert>
 
 </mapper>
