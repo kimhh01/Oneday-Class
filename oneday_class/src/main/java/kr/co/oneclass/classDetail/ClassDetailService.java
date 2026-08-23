@@ -19,7 +19,7 @@ import kr.co.oneclass.common.TagDTO;
 public class ClassDetailService {
 
 	@Autowired
-	private ClassDetailDAO classDetailDAO;
+	private ClassDetailDAO cDAO;
 
 	
 	@Autowired 
@@ -28,7 +28,7 @@ public class ClassDetailService {
 
 	public ClassDetailResponseDTO getClassDetail(int classCode) {
 		// 1. 클래스 기본 상세 조회
-		ClassDTO classDto = classDetailDAO.selectClass(classCode);
+		ClassDTO classDto = cDAO.selectClass(classCode);
 		if (classDto == null) {
 			return null;
 		}
@@ -39,38 +39,42 @@ public class ClassDetailService {
 		
 		
 		// 💡 [추가] 이미지 리스트 조회 후 ClassDTO에 넣어주기!
-	    List<ClassImageDTO> imageList = classDetailDAO.selectClassImageList(classCode);
+	    List<ClassImageDTO> imageList = cDAO.selectClassImageList(classCode);
 	    classDto.setImageList(imageList);
 		
 	 // 2. 기존 로직 동일
 	    long creatorCode = classDto.getOperatorCode();
 	    int categoryCode = classDto.getCategoryCode();
 
-	    OperatorDTO creatorDto = classDetailDAO.selectCreator(creatorCode);
-	    List<ClassDTO> sameCategoryList = classDetailDAO.selectSameCategoryList(classCode, categoryCode);
-	    List<CurriculumDTO> curriculumList = classDetailDAO.selectCurriculum(classCode);
-	    List<ReviewDTO> reviewList = classDetailDAO.selectReviewList(classCode);
+	    OperatorDTO creatorDto = cDAO.selectCreator(creatorCode);
+	    List<ClassDTO> sameCategoryList = cDAO.selectSameCategoryList(classCode, categoryCode);
+	    List<CurriculumDTO> curriculumList = cDAO.selectCurriculum(classCode);
+	    List<ReviewDTO> reviewList = cDAO.selectReviewList(classCode);
 	    // 2. 리뷰 리스트를 반복문 돌리며 각 reviewCode로 이미지를 조회해 세팅합니다.
 	    if (reviewList != null && !reviewList.isEmpty()) {
 	        for (ReviewDTO review : reviewList) {
 	            int reviewCode = review.getReviewCode(); // 리뷰 DTO에서 reviewCode 추출
-	            List<ReviewImgDTO> imgList = classDetailDAO.selectReviewImgList(reviewCode);
+	            List<ReviewImgDTO> imgList = cDAO.selectReviewImgList(reviewCode);
 	            review.setReviewImg(imgList); // 리뷰 DTO 내부의 List<ReviewImgDTO>에 세팅
 	        }
 	    }
-	    ReviewSummaryDTO reviewSummaryDto = classDetailDAO.selectReviewSummary(classCode);
-	    List<ScheduleDTO> representativeSchedule = classDetailDAO.selectSchedule(classCode);
-	    List<ScheduleDTO> scheduleList = classDetailDAO.selectScheduleList(classCode);
-	    List<MaterialDTO> materialList = classDetailDAO.selectMaterialList(classCode);
-	    List<OfferingDTO> offeringList = classDetailDAO.selectOfferingList(classCode);
-	    List<TagDTO> tagList = classDetailDAO.selectTagList(classCode);
-	    List<DetailInfoDTO> detailInfoList = classDetailDAO.selectDetailInfoList(classCode);
-	    List<AdditionalInfoDTO> additionalInfoList = classDetailDAO.selectAdditionalInfo(classCode);
+	    ReviewSummaryDTO reviewSummaryDto = cDAO.selectReviewSummary(classCode);
+	    List<ScheduleDTO> representativeSchedule = cDAO.selectSchedule(classCode);
+	    List<ScheduleDTO> scheduleList = cDAO.selectScheduleList(classCode);
+	    List<MaterialDTO> materialList = cDAO.selectMaterialList(classCode);
+	    List<OfferingDTO> offeringList = cDAO.selectOfferingList(classCode);
+	    List<TagDTO> tagList = cDAO.selectTagList(classCode);
+	    List<DetailInfoDTO> detailInfoList = cDAO.selectDetailInfoList(classCode);
+	    List<AdditionalInfoDTO> additionalInfoList = cDAO.selectAdditionalInfo(classCode);
 	    
 		// 4. 하나의 DTO로 결합하여 반환
 		return new ClassDetailResponseDTO(classDto, creatorDto, sameCategoryList, curriculumList, reviewList,
 				reviewSummaryDto, representativeSchedule, scheduleList, materialList,
 				offeringList, tagList, detailInfoList, additionalInfoList);
+	}
+	//조회수 증가 메서드
+	public void increaseViewCount(int classCode) {
+		cDAO.increaseViewCount(classCode);
 	}
 	
 	

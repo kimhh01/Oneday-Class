@@ -42,6 +42,7 @@
         FROM class c
 		LEFT JOIN category cat ON c.category_code = cat.category_code
         <where>
+        	AND c.status = '모집중'
             <!-- 1) 내 위치 기준 N km 반경 내 검색 -->
             <if test="lat != null and lng != null">
                 AND ( 6371 * ACOS( COS( #{lat} * 3.141592653589793 / 180 ) * COS( lat * 3.141592653589793 / 180 ) 

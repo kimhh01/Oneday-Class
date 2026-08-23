@@ -66,11 +66,15 @@ WHERE s.schedule_code = #{scheduleCode}
         #{totalPrice}
     )
 </insert>
-<!--좌석 수 변경-->
-<update id="updateRemaining" parameterType="int">
-UPDATE schedule
-SET remaining_people = remaining_people - #{count}
-WHERE schedule_code = #{scheduleCode}
-  AND remaining_people >= #{count}
+<!-- 좌석 수 차감 및 잔여 좌석 0 이하 시 매진(Y) 처리 -->
+<update id="updateRemaining">
+    UPDATE schedule
+    SET remaining_people = remaining_people - #{count},
+        sold_out_yn = CASE 
+                        WHEN (remaining_people - #{count}) &lt;= 0 THEN 'Y'
+                        ELSE sold_out_yn 
+                      END
+    WHERE schedule_code = #{scheduleCode}
+      AND remaining_people >= #{count}
 </update>
 </mapper>

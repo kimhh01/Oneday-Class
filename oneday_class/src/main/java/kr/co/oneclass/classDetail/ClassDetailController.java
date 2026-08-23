@@ -20,8 +20,23 @@ public class ClassDetailController {
 
     @GetMapping("/classDetail")
     public String useClass(@RequestParam("classCode") String classCode, Model model, HttpSession session) {
-        // 서비스에서 모든 조립 과정을 마친 하나의 객체를 가져옵니다.
-    	int code=Integer.parseInt(classCode);
+    	int code = Integer.parseInt(classCode);
+    	
+    	// 1. 세션에서 사용자가 이미 방문한 클래스 코드 목록(HashSet 등) 확인
+        java.util.Set<Integer> visitedClasses = (java.util.Set<Integer>) session.getAttribute("visitedClasses");
+
+        if (visitedClasses == null) {
+            visitedClasses = new java.util.HashSet<>();
+        }
+
+        // 2. 해당 클래스를 처음 조회하는 경우에만 조회수 증가 수행
+        if (!visitedClasses.contains(code)) {
+            cdService.increaseViewCount(code); // 조회수 증가 서비스 메서드 호출
+            visitedClasses.add(code);          // 세션에 방문 기록 추가
+            session.setAttribute("visitedClasses", visitedClasses); // 세션 갱신
+        }
+    	
+    	// 서비스에서 모든 조립 과정을 마친 하나의 객체를 가져옵니다.
         ClassDetailResponseDTO detail = cdService.getClassDetail(code);
         
         

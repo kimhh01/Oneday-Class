@@ -61,4 +61,7 @@ public interface ClassDetailDAO {
 	
 	//상세정보 조회
 	public List<DetailInfoDTO> selectDetailInfoList(int classCode);
+	
+	//조회수 증가
+	public void increaseViewCount(int classCode);
 }

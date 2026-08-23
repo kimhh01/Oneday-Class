@@ -20,11 +20,6 @@ public class MapService {
 		
 		List<ClassDTO> classList=mDAO.selectClassList(mDTO);
 		
-		for(ClassDTO cDTO : classList) {
-			if(!"모집중".equals(cDTO.getStatus())) {
-				return null;
-			}
-		}
 		return mDAO.selectClassList(mDTO); 
 	}
 	

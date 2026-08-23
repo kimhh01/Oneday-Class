@@ -1,6 +1,5 @@
 package kr.co.oneclass.payment;
 
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +10,7 @@ import jakarta.servlet.http.HttpSession;
 import kr.co.oneclass.common.CategoryDTO;
 import kr.co.oneclass.common.ClassDTO;
 import kr.co.oneclass.common.ScheduleDTO;
+import kr.co.oneclass.member.Member; // 💡 Member 클래스 import 추가
 import lombok.RequiredArgsConstructor;
 
 @Controller
@@ -21,7 +21,13 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @GetMapping 
-    public String payment(@RequestParam("scheduleCode") int scheduleCode, Model model) {
+    public String payment(@RequestParam("scheduleCode") int scheduleCode, HttpSession session, Model model) {
+        // 💡 로그인 여부 서버 검증 추가
+        Member loginMember = (Member) session.getAttribute("loginMember");
+        if (loginMember == null) {
+            return "redirect:/member/login/general";
+        }
+
         ClassDTO classDTO = paymentService.getClassDetailByScheduleCode(scheduleCode);
         ScheduleDTO schedule = paymentService.getClassDetailByScheduleCode2(scheduleCode);
         CategoryDTO category = paymentService.getCategory(scheduleCode);
@@ -42,7 +48,8 @@ public class PaymentController {
             @RequestParam("scheduleCode") int scheduleCode,
             @RequestParam(defaultValue = "1") int peopleCount,
             @RequestParam(defaultValue = "CARD") String paymentMethod,
-            HttpSession session, // 로그인 유저 정보를 세션에서 가져오기 위해 추가
+            @RequestParam(value = "memberCode", required = false, defaultValue = "0") int memberCodeParam, // 💡 추가
+            HttpSession session, 
             Model model) {
 
         // 1. 화면 표출용 데이터 사전 조회
@@ -60,28 +67,31 @@ public class PaymentController {
         if (schedule == null) schedule = new ScheduleDTO();
         if (category == null) category = new CategoryDTO();
 
-        // 2. memberCode & classCode 추출
-        // TODO: 실제 세션에 저장된 로그인 유저 DTO 객체 및 필드명에 맞게 수정해주세요.
-        int memberCode = 1; 
-        /* 
-        MemberDTO loginUser = (MemberDTO) session.getAttribute("loginUser");
-        if (loginUser != null) {
-            memberCode = loginUser.getMemberCode();
-        } 
-        */
-        
-        int classCode = classDTO.getClassCode(); // 조회한 클래스 정보에서 classCode 추출
+        // 2. 세션에서 로그인 유저 가져오기
+        Member loginMember = (Member) session.getAttribute("loginMember");
+        int memberCode = 0;
 
+        if (loginMember != null) {
+            memberCode = loginMember.getMemberCode();
+        } else if (memberCodeParam > 0) {
+            // PG사 리다이렉트로 세션이 잠시 유실되었을 경우 URL 파라미터값 활용
+            memberCode = memberCodeParam;
+        } else {
+            // 회원 정보를 전혀 찾을 수 없는 경우에만 이동
+            return "redirect:/member/login";
+        }
+
+        int classCode = classDTO.getClassCode();
+
+        // 3. 결제 승인 및 DB 저장 처리
         try {
             paymentService.confirmPayment(paymentKey, orderId, amount, 
                     scheduleCode, peopleCount, paymentMethod, 
                     memberCode, classCode);
         } catch (Exception e) {
-            // 예외 원인을 상세히 보기 위해 printStackTrace() 출력
             e.printStackTrace(); 
         }
 
-        // 4. Model 데이터 전달
         model.addAttribute("classInfo", classDTO);
         model.addAttribute("schedule", schedule);
         model.addAttribute("category", category);

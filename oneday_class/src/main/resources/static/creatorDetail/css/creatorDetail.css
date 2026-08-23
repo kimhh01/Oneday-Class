@@ -140,7 +140,7 @@ body.map-page-body {
 }
 
 /* ==========================================================================
-   5. 가로형 클래스 리스트 (사진 속 카드 구현)
+   5. 가로형 클래스 리스트 & 마우스 호버 효과
    ========================================================================== */
 .content-section {
     margin-top: 1.5rem;
@@ -152,15 +152,29 @@ body.map-page-body {
     gap: 1rem;
 }
 
+/* 카드 기본 설정 (호버 모션을 위한 transition 및 내부 여백 조정) */
 .horizontal-class-card {
     display: flex;
-    gap: 1rem;
+    gap: 1.25rem;
     text-decoration: none;
     color: inherit;
-    padding: 0.5rem 0;
+    padding: 1rem;
+    background-color: #ffffff;
+    border: 1px solid var(--border-line);
+    border-radius: 12px;
+    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+    position: relative;
+    top: 0;
 }
 
-/* 썸네일 영역 */
+/* 🔥 [클래스 호버 효과] 마우스를 올렸을 때 적용되는 스타일 */
+.horizontal-class-card:hover {
+    top: -4px; /* 위로 부드럽게 4px 떠오름 */
+    border-color: var(--brand-green-hover); /* 테두리를 초록 계열로 살짝 강조 */
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.06); /* 부드럽고 고급스러운 그림자 생성 */
+}
+
+/* 썸네일 영역 (이미지 줌 효과) */
 .horizontal-class-card .thumb-box {
     position: relative;
     width: 140px;
@@ -168,12 +182,19 @@ body.map-page-body {
     border-radius: 8px;
     overflow: hidden;
     flex-shrink: 0;
+    background-color: #f1f3f5;
 }
 
 .horizontal-class-card .thumb-box img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 0.35s ease; /* 이미지 확대 애니메이션 */
+}
+
+/* 호버 시 썸네일 이미지 미세 확대 */
+.horizontal-class-card:hover .thumb-box img {
+    transform: scale(1.06);
 }
 
 .sold-out-overlay {
@@ -186,17 +207,31 @@ body.map-page-body {
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 1;
 }
 
 .horizontal-class-card .wish-btn {
     position: absolute;
     top: 6px;
     right: 6px;
-    background: transparent;
+    background: rgba(0, 0, 0, 0.2);
     border: none;
     color: #ffffff;
-    font-size: 1rem;
+    font-size: 0.9rem;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
+    z-index: 2;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.horizontal-class-card .wish-btn:hover {
+    background: rgba(0, 0, 0, 0.5);
+    transform: scale(1.1);
 }
 
 /* 클래스 정보 영역 */
@@ -214,18 +249,23 @@ body.map-page-body {
 }
 
 .horizontal-class-card .class-title {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 600;
-    color: #333333;
+    color: #212529;
     margin: 0 0 0.4rem 0;
     line-height: 1.35;
+    transition: color 0.2s ease;
+}
+
+/* 호버 시 클래스 제목 초록색 강조 */
+.horizontal-class-card:hover .class-title {
+    color: var(--brand-green);
 }
 
 .horizontal-class-card .price-row {
     display: flex;
     align-items: center;
     gap: 0.35rem;
-    margin-bottom: 0.4rem;
 }
 
 .discount-rate {

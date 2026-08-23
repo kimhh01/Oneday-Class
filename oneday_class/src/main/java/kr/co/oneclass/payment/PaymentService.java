@@ -52,7 +52,7 @@ public class PaymentService {
     // 2. 실제 예매 및 결제 승인 처리 메서드
     // ==========================================
     
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void confirmPayment(String paymentKey, String orderId, Long amount, 
                                int scheduleCode, int peopleCount, String paymentMethod, 
                                int memberCode, int classCode) {
@@ -88,7 +88,7 @@ public class PaymentService {
             rDTO.setTotalPrice(amount.intValue());
             rDTO.setStatus("예약");
             
-            rDAO.insertReservation(rDTO); // XML에 selectKey가 있다면 rDTO.getReservationCode()에 PK가 담김
+            rDAO.insertReservation(rDTO);
 
             // ③ 결제(payment) DB 저장
             PaymentDTO pDTO = new PaymentDTO();
@@ -101,10 +101,10 @@ public class PaymentService {
 
             pDAO.insertPayment(pDTO);
 
-            // ④ 좌석 수 차감 (rDAO의 updateRemaining 직접 호출)
+            // ④ 잔여 좌석 차감 및 품절(Y) 자동 변경 쿼리 실행
             int updatedRows = rDAO.updateRemaining(scheduleCode, peopleCount);
             
-            // (선택 사항) 만약 차감된 행이 0개라면 수량 부족으로 예외 발생 -> 트랜잭션 롤백
+            // 잔여 좌석이 모자라 0개 행이 변경되었을 경우 예외 발생 -> 트랜잭션 전체 롤백
             if (updatedRows == 0) {
                 throw new RuntimeException("잔여 좌석이 부족하여 예약을 완료할 수 없습니다.");
             }
