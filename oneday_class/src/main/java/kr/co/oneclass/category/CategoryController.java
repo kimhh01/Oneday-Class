@@ -27,7 +27,7 @@ public class CategoryController {
     /**
      * 선택한 카테고리·정렬·필터 조건의 클래스 목록
      */
-    @GetMapping("/category/class")
+    @GetMapping("/categorClass")
     public String categoryClass(CategorySearchDTO searchDTO, Model model) {
         // 소문자 변수명(categoryService)으로 호출
         List<CategoryDTO> categoryList = categoryService.searchCategoryList();
@@ -48,6 +48,6 @@ public class CategoryController {
         model.addAttribute("searchDTO", searchDTO);
         model.addAttribute("currentCategoryName", currentCategoryName);
 
-        return "category/category_class";
+        return "category/categoryClass";
     }
 }

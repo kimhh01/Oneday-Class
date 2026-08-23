@@ -47,7 +47,7 @@ public class MainController {
     }
 
  // 2. 인기 뷰티 랭킹 페이지
-    @GetMapping("/top_category/beauty")
+    @GetMapping("/topCategory/beauty")
     public String beautyPage(HttpSession session, 
                              @RequestParam(value = "categoryCode", defaultValue = "1") int categoryCode, 
                              Model model) {
@@ -56,11 +56,11 @@ public class MainController {
         
         List<ClassDTO> beautyList = ms.searchTopRatedClassList(categoryCode);
         model.addAttribute("classList", beautyList);
-        return "top_category/popular_beauty";
+        return "topCategory/popularBeauty";
     }
 
     // 3. 인기 베이킹 랭킹 페이지
-    @GetMapping("/top_category/baking")
+    @GetMapping("/topCategory/baking")
     public String bakingPage(HttpSession session, 
                              @RequestParam(value = "categoryCode", defaultValue = "2") int categoryCode, 
                              Model model) {
@@ -69,11 +69,11 @@ public class MainController {
         
         List<ClassDTO> bakingList = ms.searchTopRatedClassList(categoryCode);
         model.addAttribute("classList", bakingList);
-        return "top_category/popular_baking";
+        return "topCategory/popularBaking";
     }
 
     // 4. 인기 액티비티 랭킹 페이지
-    @GetMapping("/top_category/activity")
+    @GetMapping("/topCategory/activity")
     public String activityPage(HttpSession session, 
                                @RequestParam(value = "categoryCode", defaultValue = "3") int categoryCode, 
                                Model model) {
@@ -82,7 +82,7 @@ public class MainController {
         
         List<ClassDTO> activityList = ms.searchTopRatedClassList(categoryCode);
         model.addAttribute("classList", activityList);
-        return "top_category/popular_activity";
+        return "topCategory/popularActivity";
     }
 
     // 5. 조건별 예약 가능 클래스 검색
@@ -92,7 +92,7 @@ public class MainController {
                                        Model model) {
         List<ClassDTO> availableList = ms.searchAvailableClass(categoryCode, scheduleDTO);
         model.addAttribute("availableList", availableList);
-        return "main/available_list";
+        return "main/availableList";
     }
 
     // 6. 루트 URL 접속 시 /main으로 리다이렉트

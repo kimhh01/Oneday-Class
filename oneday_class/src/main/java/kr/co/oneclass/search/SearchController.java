@@ -37,7 +37,7 @@ public class SearchController {
         }
 
         model.addAttribute("keyword", keyword);
-        return "search/search_keyword"; // 통합 검색 메인 View
+        return "search/searchKeyword"; // 통합 검색 메인 View
     }
 
     /**
@@ -60,7 +60,7 @@ public class SearchController {
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("activeTab", "artist");    // 👈 작가 탭 활성화 indicator
         
-        return "search/search_keyword_more";
+        return "search/searchKeywordMore";
     }
 
     /**
@@ -83,6 +83,6 @@ public class SearchController {
         model.addAttribute("currentPage", currentPage);
         model.addAttribute("activeTab", "class");     // 👈 클래스 탭 활성화 indicator
         
-        return "search/search_keyword_more";
+        return "search/searchKeywordMore";
     }
 }

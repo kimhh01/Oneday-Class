@@ -92,21 +92,21 @@
                 <span class="category-name">지역별 찾기</span>
             </a>
 
-            <a th:href="@{/top_category/beauty(categoryCode=1)}" class="category-item">
+            <a th:href="@{/topCategory/beauty(categoryCode=1)}" class="category-item">
                 <div class="category-icon">
                     <img th:src="@{/images/icon/beauty_icon.svg}" alt="뷰티" style="width: 36px; height: 36px;">
                 </div>
                 <span class="category-name">인기 뷰티</span>
             </a>
 
-            <a th:href="@{/top_category/baking(categoryCode=2)}" class="category-item">
+            <a th:href="@{/topCategory/baking(categoryCode=2)}" class="category-item">
                 <div class="category-icon">
                     <img th:src="@{/images/icon/baking_icon.svg}" alt="베이킹" style="width: 36px; height: 36px;">
                 </div>
                 <span class="category-name">인기 베이킹</span>
             </a>
             
-            <a th:href="@{/top_category/activity(categoryCode=3)}" class="category-item">
+            <a th:href="@{/topCategory/activity(categoryCode=3)}" class="category-item">
                 <div class="category-icon">
                     <img th:src="@{/images/icon/activity_icon.svg}" alt="액티비티" style="width: 36px; height: 36px;">
                 </div>
@@ -148,12 +148,12 @@
                                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                             </svg>
                         </button>
-                        <a th:href="@{/class/detail(classCode=${cls.classCode})}">
+                        <a th:href="@{/classDetail(classCode=${cls.classCode})}">
                             <img th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}" 
                                  th:alt="${cls.name}">
                         </a>
                     </div>
-                    <a th:href="@{/class/detail(classCode=${cls.classCode})}">
+                    <a th:href="@{/classDetail(classCode=${cls.classCode})}">
                         <div class="class-info">
                             <div class="class-loc" th:text="${cls.address}"></div>
                             <div class="class-name" th:text="${cls.name}"></div>
@@ -193,7 +193,7 @@
             <div class="section-header">
                 <h2 class="section-title">인기 디저트 클래스 🍰</h2>
                 <span class="view-all">
-                    <a th:href="@{/top_category/baking(categoryCode=2)}">전체보기 &gt;</a>
+                    <a th:href="@{/topCategory/baking(categoryCode=2)}">전체보기 &gt;</a>
                 </span>
             </div>
             
@@ -208,12 +208,12 @@
                                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                             </svg>
                         </button>
-                        <a th:href="@{/class/detail(classCode=${cls.classCode})}">
+                        <a th:href="@{/classDetail(classCode=${cls.classCode})}">
                             <img th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}" 
                                  th:alt="${cls.name}">
                         </a>
                     </div>
-                    <a th:href="@{/class/detail(classCode=${cls.classCode})}">
+                    <a th:href="@{/classDetail(classCode=${cls.classCode})}">
                         <div class="class-info">
                             <div class="class-loc" th:text="${cls.address}"></div>
                             <div class="class-name" th:text="${cls.name}"></div>
@@ -239,7 +239,7 @@
             <div class="section-header">
                 <h2 class="section-title">휴가 전 이미지 변신!<br>나에게 어울리는 메이크업 찾기 💄✨</h2>
                 <span class="view-all">
-                    <a th:href="@{/top_category/beauty(categoryCode=1)}">전체보기 &gt;</a>
+                    <a th:href="@{/topCategory/beauty(categoryCode=1)}">전체보기 &gt;</a>
                 </span>
             </div>
             <div class="grid-3">
@@ -253,12 +253,12 @@
                                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                             </svg>
                         </button>
-                        <a th:href="@{/class/detail(classCode=${cls.classCode})}">
+                        <a th:href="@{/classDetail(classCode=${cls.classCode})}">
                             <img th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}" 
                                  th:alt="${cls.name}">
                         </a>
                     </div>
-                    <a th:href="@{/class/detail(classCode=${cls.classCode})}">
+                    <a th:href="@{/classDetail(classCode=${cls.classCode})}">
                         <div class="class-info">
                             <div class="class-loc" th:text="${cls.address}"></div>
                             <div class="class-name" th:text="${cls.name}"></div>

@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CSRF 메타 태그 -->
+    <meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}"/>
+    <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : ''}"/>
     <title>검색 결과 - 상세 보기</title>
     <link rel="stylesheet" th:href="@{/search/css/search.css}">
 </head>
@@ -23,8 +26,7 @@
             </div>
         </form>
 
-       
- <!-- 탭 메뉴 (a 태그 링크 방식으로 변경) -->
+        <!-- 탭 메뉴 -->
         <div class="tab-nav">
             <a th:href="@{/search/creator-more(keyword=${keyword})}" 
                class="tab-btn" 
@@ -58,10 +60,20 @@
                     </div>
                 </div>
 
-                <!-- 작가별 클래스 목록 그리드 (클래스가 존재할 때만 노출) -->
+                <!-- 작가별 클래스 목록 그리드 -->
                 <div class="artist-classes-grid" th:if="${creator.classList != null and !#lists.isEmpty(creator.classList)}">
-                    <div class="sub-class-card" th:each="cls : ${creator.classList}">
-                        <a th:href="@{/class/detail(classCode=${cls.classCode})}">
+                    <div class="sub-class-card" th:each="cls : ${creator.classList}" style="position: relative;">
+                        <!-- 찜(북마크) 버튼 -->
+                        <button type="button" class="bookmark-btn" 
+                                th:data-class-code="${cls.classCode}" 
+                                onclick="toggleBookmark(event, this)">
+                            <svg width="18" height="18" viewBox="0 0 24 24" 
+                                 th:fill="${bookmarkedClassCodes != null and #lists.contains(bookmarkedClassCodes, cls.classCode)} ? '#e33838' : 'none'" 
+                                 stroke="#e33838" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </button>
+                        <a th:href="@{/classDetail(classCode=${cls.classCode})}">
                             <img th:src="${cls.mainImage != null ? cls.mainImage : '/images/class/default_class.png'}" 
                                  th:alt="${cls.name}" class="sub-class-img">
                             <div class="sub-class-title" th:text="${cls.name}">클래스 제목</div>
@@ -81,6 +93,7 @@
                 <button class="page-btn page-arrow">&gt;</button>
             </div>
         </div>
+
         <!-- ================= [2] 클래스 탭 컨텐츠 ================= -->
         <div id="tab-class" class="tab-content" th:classappend="${activeTab == 'class' ? 'active' : ''}">
             
@@ -89,16 +102,28 @@
             </div>
 
             <div class="class-list" th:if="${!#lists.isEmpty(classList)}">
-                <div class="class-item" th:each="cls : ${classList}">
-                    <img th:src="${cls.mainImage != null ? cls.mainImage : '/images/class/default_class.png'}" 
-                         th:alt="${cls.name}" class="class-img">
-                    <div class="class-info">
-                        <div class="class-location" th:text="${cls.address}">지역</div>
-                        <div class="class-title" th:text="${cls.name}">클래스명</div>
-                        <div class="class-price-info">
-                            <span class="final-price" th:text="${cls.price != null ? #numbers.formatInteger(cls.price, 0, 'COMMA') + '원' : '0원'}">가격</span>
+                <div class="class-item" th:each="cls : ${classList}" style="position: relative;">
+                    <!-- 찜(북마크) 버튼 -->
+                    <button type="button" class="bookmark-btn" 
+                            th:data-class-code="${cls.classCode}" 
+                            onclick="toggleBookmark(event, this)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" 
+                             th:fill="${bookmarkedClassCodes != null and #lists.contains(bookmarkedClassCodes, cls.classCode)} ? '#e33838' : 'none'" 
+                             stroke="#e33838" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                    </button>
+                    <a th:href="@{/classDetail(classCode=${cls.classCode})}" style="display: flex; gap: 20px; width: 100%; text-decoration: none; color: inherit;">
+                        <img th:src="${cls.mainImage != null ? cls.mainImage : '/images/class/default_class.png'}" 
+                             th:alt="${cls.name}" class="class-img">
+                        <div class="class-info">
+                            <div class="class-location" th:text="${cls.address}">지역</div>
+                            <div class="class-title" th:text="${cls.name}">클래스명</div>
+                            <div class="class-price-info">
+                                <span class="final-price" th:text="${cls.price != null ? #numbers.formatInteger(cls.price, 0, 'COMMA') + '원' : '0원'}">가격</span>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 </div>
             </div>
 
@@ -127,6 +152,44 @@
 
             document.querySelector(`[data-target="${tabId}"]`).classList.add('active');
             document.getElementById(tabId).classList.add('active');
+        }
+
+        // 찜(북마크) 토글 비동기 함수
+        function toggleBookmark(event, btn) {
+            event.stopPropagation();
+            event.preventDefault();
+
+            const classCode = btn.getAttribute('data-class-code');
+            const tokenMeta = document.querySelector("meta[name='_csrf']");
+            const headerMeta = document.querySelector("meta[name='_csrf_header']");
+            
+            const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+            if (tokenMeta && headerMeta && tokenMeta.getAttribute("content")) {
+                headers[headerMeta.getAttribute("content")] = tokenMeta.getAttribute("content");
+            }
+
+            fetch('/mypage/bookmark/toggle', {
+                method: 'POST',
+                headers: headers,
+                body: 'classCode=' + encodeURIComponent(classCode)
+            })
+            .then(response => response.text())
+            .then(data => {
+                const svg = btn.querySelector('svg');
+                if (data === 'ADDED') {
+                    if (svg) svg.setAttribute('fill', '#e33838');
+                    if (confirm('관심 클래스에 추가되었습니다!\n마이페이지 관심 클래스로 이동하시겠습니까?')) {
+                        location.href = '/mypage/bookmark';
+                    }
+                } else if (data === 'REMOVED') {
+                    if (svg) svg.setAttribute('fill', 'none');
+                    alert('관심 클래스에서 해제되었습니다.');
+                } else if (data === 'LOGIN_REQUIRED') {
+                    alert('로그인이 필요한 서비스입니다.');
+                    location.href = '/member/login';
+                }
+            })
+            .catch(error => console.error('Error:', error));
         }
     </script>
 </body>
