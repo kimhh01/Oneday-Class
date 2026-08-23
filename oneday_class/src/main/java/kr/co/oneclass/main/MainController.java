@@ -3,6 +3,7 @@ package kr.co.oneclass.main;
 
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,10 +15,10 @@ import kr.co.oneclass.member.Member;
 import java.util.List;
 
 @Controller
-@RequiredArgsConstructor
 public class MainController {
-
-    private final MainService ms;
+	
+    @Autowired
+    private MainService ms;
 
     // 1. 메인 페이지 (인기 클래스 + 당일/주말 및 카테고리별 데이터 + 로그인 세션 처리)
     @GetMapping("/main")
@@ -30,17 +31,17 @@ public class MainController {
         }
 
         // 당일 / 주말 예약 가능 클래스 데이터
-        model.addAttribute("todayClasses", ms.searchTodayClass());
-        model.addAttribute("weekendClasses", ms.searchWeekendClass());
+        model.addAttribute("todayClasses",  ms.searchTodayClass());
+        model.addAttribute("weekendClasses",  ms.searchWeekendClass());
 
         // 1-1. 이달의 인기 클래스 상위 3개 (전체 카테고리 = 0)
-        model.addAttribute("topRatedList", ms.searchTopRatedClass(0, 3)); 
+        model.addAttribute("topRatedList",  ms.searchTopRatedClass(0, 3)); 
 
         // 1-2. 인기 디저트/베이킹 클래스 상위 5개 (베이킹 카테고리 코드 = 2)
-        model.addAttribute("bakingList", ms.searchTopRatedClass(2, 5)); 
+        model.addAttribute("bakingList",  ms.searchTopRatedClass(2, 5)); 
 
         // 1-3. 인기 뷰티 클래스 상위 3개 (뷰티 카테고리 코드 = 1)
-        model.addAttribute("beautyList", ms.searchTopRatedClass(1, 3)); 
+        model.addAttribute("beautyList",  ms.searchTopRatedClass(1, 3)); 
 
         return "main/main"; 
     }

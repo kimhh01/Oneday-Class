@@ -21,14 +21,17 @@
 
   <div class="page">
 
-    <!-- 검색바 -->
-    <form th:action="@{/search}" method="get" class="search-wrap">
-      <div class="search-box">
-        <span class="search-icon">⌕</span>
-        <input class="search-input" type="text" name="keyword" placeholder="원하는 키워드를 검색해보세요.">
-        <button type="submit" class="search-btn">검색</button>
-      </div>
-    </form>
+    
+ <!-- 1. 메인 검색바 -->
+        <div class="search-wrap">
+            <form th:action="@{/search}" method="get" class="search-box">
+                <div class="search-icon">
+                    <img th:src="@{/images/icon/search_icon.svg}" alt="검색" style="width: 20px; height: 20px;">
+                </div>
+                <input class="search-input" type="text" name="keyword" placeholder="원하는 키워드를 검색해보세요.">
+                <button type="submit" class="search-btn">검색</button>
+            </form>
+        </div>
 
     <section class="visual-copy">
       <div class="main-copy">실패없는 <span class="point">인기 베이킹</span> 추천!</div>

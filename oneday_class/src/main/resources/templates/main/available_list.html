@@ -16,7 +16,7 @@
         <h2 class="section-title">
             <span>
                 <th:block th:if="${scheduleDTO != null and scheduleDTO.date != null}" 
-                          th:text="${#dates.format(scheduleDTO.date, 'yyyy.MM.dd')} + ' 예약 가능 클래스'">
+                          th:text="${#dates.format(scheduleDTO.date, 'yyyy.MM.dd')} + '예약 가능 클래스'">
                 </th:block>
                 <th:block th:if="${scheduleDTO == null or scheduleDTO.date == null}">
                     예약 가능 클래스

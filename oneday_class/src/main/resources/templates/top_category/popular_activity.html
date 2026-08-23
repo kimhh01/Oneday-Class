@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+<meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}"/>
+<meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : ''}"/>
+
   <title>인기 액티비티 클래스</title>
      
   <link rel="stylesheet" th:href="@{/top_category/css/top_category.css}">
@@ -21,14 +25,18 @@
 
   <div class="page">
 
-    <!-- 검색바 -->
-    <form th:action="@{/search}" method="get" class="search-wrap">
-      <div class="search-box">
-        <span class="search-icon">⌕</span>
-        <input class="search-input" type="text" name="keyword" placeholder="원하는 키워드를 검색해보세요.">
-        <button type="submit" class="search-btn">검색</button>
-      </div>
-    </form>
+   
+ <!-- 1. 메인 검색바 -->
+        <div class="search-wrap">
+            <form th:action="@{/search}" method="get" class="search-box">
+                <div class="search-icon">
+                    <img th:src="@{/images/icon/search_icon.svg}" alt="검색" style="width: 20px; height: 20px;">
+                </div>
+                <input class="search-input" type="text" name="keyword" placeholder="원하는 키워드를 검색해보세요.">
+                <button type="submit" class="search-btn">검색</button>
+            </form>
+        </div>
+        
 
     <section class="visual-copy">
       <div class="main-copy">실패없는 <span class="point">인기 액티비티</span> 추천!</div>
@@ -52,40 +60,55 @@
 
       <!-- DB 동적 리스트 반복 -->
       <div class="class-list" th:if="${!#lists.isEmpty(classList)}">
-        <article class="class-card" th:each="cls, stat : ${classList}">
-          <a th:href="@{/class/detail(classCode=${cls.classCode})}" style="display: flex; width: 100%; text-decoration: none; color: inherit;">
-            <div class="class-thumb-wrap">
-              <span class="rank-badge" th:text="${stat.count}">1</span>
-              <div class="class-thumb">
-                <img th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}" 
-                     th:alt="${cls.name}">
-              </div>
-            </div>
+      
+  <article class="class-card" th:each="cls, stat : ${classList}">
+  <div class="class-thumb-wrap">
+    <span class="rank-badge" th:text="${stat.count}">1</span>
+    
+    <!-- 💡 찜(북마크) 버튼 추가 -->
+    <button type="button" class="bookmark-btn" 
+            th:data-class-code="${cls.classCode}" 
+            onclick="toggleBookmark(event, this)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e33838" stroke-width="2">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+      </svg>
+    </button>
 
-            <div class="class-info">
-              <div class="location" th:text="${cls.address}">위치</div>
-              <div class="class-name" th:text="${cls.name}">클래스 제목</div>
-              <div class="meta">
-                <span class="star" th:text="'★ ' + ${cls.starRatingAvg}">★ 5.0</span>
-                <span class="bar">|</span>
-                <span th:text="'조회수 ' + ${cls.viewsCnt}">조회수 0</span>
-              </div>
-            </div>
+    <a th:href="@{/class/detail(classCode=${cls.classCode})}">
+      <div class="class-thumb">
+        <img th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}" 
+             th:alt="${cls.name}">
+      </div>
+    </a>
+  </div>
 
-            <div class="price-box">
-              <span class="discount-badge" 
-                    th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}"
-                    th:text="${cls.discountRate + '% 할인'}">할인</span>
-              <div class="price-row">
-                <span class="discount-rate" 
-                      th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}"
-                      th:text="${cls.discountRate + '%'}"></span>
-                <span class="final-price" 
-                      th:text="${#numbers.formatInteger(cls.price, 0, 'COMMA') + '원'}">가격</span>
-              </div>
-            </div>
-          </a>
-        </article>
+  <a th:href="@{/class/detail(classCode=${cls.classCode})}" style="display: flex; flex: 1; text-decoration: none; color: inherit;">
+    <div class="class-info">
+      <div class="location" th:text="${cls.address}">위치</div>
+      <div class="class-name" th:text="${cls.name}">클래스 제목</div>
+      <div class="meta">
+        <span class="star" th:text="'★ ' + ${cls.starRatingAvg}">★ 5.0</span>
+        <span class="bar">|</span>
+        <span th:text="'조회수 ' + ${cls.viewsCnt}">조회수 0</span>
+      </div>
+    </div>
+
+    <div class="price-box">
+      <span class="discount-badge" 
+            th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}"
+            th:text="${cls.discountRate + '% 할인'}">할인</span>
+      <div class="price-row">
+        <span class="discount-rate" 
+              th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}"
+              th:text="${cls.discountRate + '%'}"></span>
+        <span class="final-price" 
+              th:text="${#numbers.formatInteger(cls.price, 0, 'COMMA') + '원'}">가격</span>
+      </div>
+    </div>
+  </a>
+</article>
+
+        
       </div>
     </section>
 
@@ -93,4 +116,46 @@
   
 <div th:replace="~{common/footer :: footerFragment}"></div>
 </body>
+
+<script>
+function toggleBookmark(event, btn) {
+    event.stopPropagation();
+    event.preventDefault();
+
+    const classCode = btn.getAttribute('data-class-code');
+    const tokenMeta = document.querySelector("meta[name='_csrf']");
+    const headerMeta = document.querySelector("meta[name='_csrf_header']");
+    
+    const headers = {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    };
+
+    if (tokenMeta && headerMeta && tokenMeta.getAttribute("content")) {
+        headers[headerMeta.getAttribute("content")] = tokenMeta.getAttribute("content");
+    }
+
+    fetch('/mypage/bookmark/toggle', {
+        method: 'POST',
+        headers: headers,
+        body: 'classCode=' + encodeURIComponent(classCode)
+    })
+    .then(response => response.text())
+    .then(data => {
+        if (data === 'ADDED') {
+            if (confirm('관심 클래스에 추가되었습니다!\n마이페이지 관심 클래스로 이동하시겠습니까?')) {
+                location.href = '/mypage/bookmark';
+            }
+        } else if (data === 'REMOVED') {
+            alert('관심 클래스에서 해제되었습니다.');
+        } else if (data === 'LOGIN_REQUIRED') {
+            alert('로그인이 필요한 서비스입니다.');
+            location.href = '/member/login';
+        } else {
+            alert('처리 중 오류가 발생했습니다.');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
+
 </html>

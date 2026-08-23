@@ -13,7 +13,7 @@ import java.util.List;
 public class CategoryController {
 
     @Autowired
-    private CategoryService categoryService; // 👈 변수명 첫 글자를 소문자 c로 변경
+    private CategoryService categoryService;
 
     /**
      * 카테고리 메인 (전체 목록)

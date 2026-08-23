@@ -14,4 +14,6 @@ public class CategorySearchDTO {
     private int minPrice;            // 최소 가격
     private int maxPrice;            // 최대 가격
     private int minPeople;           // 최소 수강 인원
+	
+	
 }

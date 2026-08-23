@@ -50,3 +50,4 @@ application-local.properties
 *.tmp
 *.bak
 *.orig
+/.apt_generated_tests/
