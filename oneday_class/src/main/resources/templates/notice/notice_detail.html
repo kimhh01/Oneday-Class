@@ -74,14 +74,14 @@
 			    <div class="nav-btn-group">
 			        <!-- 이전 글 버튼 -->
 			        <a th:if="${notice.prevNoticeCode != null and notice.prevNoticeCode != 0}" 
-			           th:href="@{/notice/detail(noticeCode=${notice.prevNoticeCode})}" 
+			           th:href="@{/mypage/notice/detail(noticeCode=${notice.prevNoticeCode})}" 
 			           class="btn-nav">‹ 이전 글</a>
 			        <button th:if="${notice.prevNoticeCode == null or notice.prevNoticeCode == 0}" 
 			                type="button" class="btn-nav disabled" disabled>‹ 이전 글</button>
 			
 			        <!-- 다음 글 버튼 -->
 			        <a th:if="${notice.nextNoticeCode != null and notice.nextNoticeCode != 0}" 
-			           th:href="@{/notice/detail(noticeCode=${notice.nextNoticeCode})}" 
+			           th:href="@{/mypage/notice/detail(noticeCode=${notice.nextNoticeCode})}" 
 			           class="btn-nav">다음 글 ›</a>
 			        <button th:if="${notice.nextNoticeCode == null or notice.nextNoticeCode == 0}" 
 			                type="button" class="btn-nav disabled" disabled>다음 글 ›</button>

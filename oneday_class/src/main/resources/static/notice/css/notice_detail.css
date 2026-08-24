@@ -171,6 +171,7 @@ body {
     font-size: 13.5px;
     font-weight: 500;
     cursor: pointer;
+    text-decoration: none; /* 💡 밑줄 제거 추가 */
     transition: all 0.15s ease;
 }
 
@@ -178,6 +179,25 @@ body {
     border-color: #356846;
     color: #356846;
     background-color: #f4f8f4;
+    text-decoration: none; /* 💡 마우스 호버 시 밑줄 제거 추가 */
+}
+
+/* 💡 비활성화(disabled) 상태 스타일 추가 */
+.btn-nav.disabled,
+.btn-nav:disabled {
+    color: #cccccc !important;
+    border-color: #eeeeee !important;
+    background-color: #fafafa !important;
+    cursor: not-allowed !important; /* 마우스 커서 금지 표시 */
+    pointer-events: none;          /* 클릭 및 포인터 이벤트 완벽 차단 */
+}
+
+/* 비활성화 상태일 때 호버(마우스 올림) 효과 무효화 */
+.btn-nav.disabled:hover,
+.btn-nav:disabled:hover {
+    border-color: #eeeeee !important;
+    color: #cccccc !important;
+    background-color: #fafafa !important;
 }
 
 /* 반응형 */
