@@ -55,7 +55,7 @@ public class UserReviewServiceImpl implements UserReviewService {
     }
 
     @Override
-    public Review getReview(int classCode, int memberCode) {
-        return reviewDAO.selectReview(classCode, memberCode);
+    public Review getReview(int reservationCode) {
+        return reviewDAO.selectReview(reservationCode);
     }
 }

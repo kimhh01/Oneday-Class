@@ -24,7 +24,6 @@
 	            ELSE r.status
 	        END AS classStatus,
 	
-	        /* 💡 NVL을 사용하여 리뷰가 없으면 0, 있으면 review_code를 반환 */
 	        NVL(rev.review_code, 0) AS reviewCode
 	
 	    FROM reservation r
@@ -34,9 +33,8 @@
 	                           AND img.type = '대표' 
 	                           AND img.sort_order = 1
 	
-	    /* 💡 MEMBER_CODE와 CLASS_CODE 기준으로 리뷰 테이블 LEFT JOIN */
-	    LEFT JOIN review rev ON r.class_code = rev.class_code 
-	                        AND r.member_code = rev.member_code
+	    <!-- 💡 수정된 부분: reservation_code로 1:1 매칭 -->
+	    LEFT JOIN review rev ON r.reservation_code = rev.reservation_code
 	
 	    WHERE r.member_code = TO_NUMBER(#{memberCode})
 	    <if test="status != null and status != '' and status != 'ALL'">

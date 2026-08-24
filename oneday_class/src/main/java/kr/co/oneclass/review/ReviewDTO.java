@@ -17,6 +17,7 @@ public class ReviewDTO {
     private int reviewCode;
     private int classCode;
     private int memberCode;
+    private int reservationCode;
     private String reviewContent;
     private Date reviewDate;
     

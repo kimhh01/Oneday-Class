@@ -13,5 +13,5 @@ public interface UserReviewDAO {
     int insertReviewImg(@Param("reviewCode") int reviewCode, @Param("imagePath") String imagePath);
 
     // 3. 리뷰 상세 조회
-    Review selectReview(@Param("classCode") int classCode, @Param("memberCode") int memberCode);
+    Review selectReview(@Param("reservationCode") int reservationCode);
 }

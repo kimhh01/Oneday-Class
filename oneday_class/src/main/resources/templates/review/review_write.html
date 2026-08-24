@@ -56,10 +56,10 @@
 
             <!-- 하단 리뷰 작성 폼 -->
             <form th:action="@{/mypage/review/write}" method="post" enctype="multipart/form-data" id="reviewForm" class="review-form-card">
-                <!-- 💡 classCode hidden 태그 추가 -->
-                <input type="hidden" name="classCode" th:value="${classCode}">
-                <input type="hidden" name="reservationCode" th:value="${purchase != null ? purchase.reservationCode : param.reservationCode}">
-                <input type="hidden" name="rating" id="ratingInput" value="5.0">
+				<!-- 💡 purchase 객체 내부의 필드명으로 수정 -->
+				<input type="hidden" name="classCode" th:value="${purchase.classCode}">
+				<input type="hidden" name="reservationCode" th:value="${purchase.reservationCode}">
+				<input type="hidden" name="rating" id="ratingInput" value="5.0">
 
                 <!-- 1. 리뷰 내용 -->
                 <div class="form-section">

@@ -17,12 +17,10 @@ public class UserReviewController {
 
     /**
      * 리뷰 작성 페이지 이동
-     * @param memberCode 회원 코드
-     * @param classCode 클래스 코드
+     * @param reservationCode 예약 코드
      */
     @GetMapping("/write")
-    public String reviewView(@RequestParam("memberCode") int memberCode,
-                             @RequestParam("classCode") int classCode,
+    public String reviewView(@RequestParam("reservationCode") int reservationCode,
                              HttpSession session,
                              Model model) {
         
@@ -31,19 +29,22 @@ public class UserReviewController {
             return "redirect:/member/login";
         }
 
-        // 💡 1. 반환 타입 Review로 변경 및 파라미터 순서(classCode, memberCode) 맞춤
-        Review reviewData = reviewService.getReview(classCode, memberCode);
+        // 💡 1. reservationCode 기반으로 리뷰 작성할 예약/클래스 정보 조회
+        Review reviewData = reviewService.getReview(reservationCode);
         
+        // 💡 2. 본인의 예약 내역이 아닌 경우 접근 차단 (보안 처리)
+        if (reviewData == null || reviewData.getMemberCode() != loginMember.getMemberCode()) {
+            return "redirect:/mypage/purchase";
+        }
+
         model.addAttribute("purchase", reviewData);
-        model.addAttribute("memberCode", memberCode);
-        model.addAttribute("classCode", classCode);
 
         return "review/review_write";
     }
 
     /**
      * 리뷰 등록 처리
-     * @param rdto 리뷰 데이터 DTO (내부에 List<MultipartFile> images 자동 바인딩)
+     * @param rdto 리뷰 데이터 DTO (폼의 hidden input으로 reservationCode, classCode가 자동 바인딩)
      */
     @PostMapping("/write")
     public String writeReview(@ModelAttribute ReviewDTO rdto,
@@ -55,9 +56,9 @@ public class UserReviewController {
             return "redirect:/member/login";
         }
 
+        // 💡 3. 작성자 memberCode는 세션값으로 설정하여 전달
         rdto.setMemberCode(loginMember.getMemberCode());
         
-        // 💡 2. rdto 단일 파라미터로 서비스 메서드 호출
         boolean isSuccess = reviewService.writeReview(rdto);
 
         if (isSuccess) {

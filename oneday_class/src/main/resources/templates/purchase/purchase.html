@@ -62,22 +62,20 @@
 			            </div>
 			        </a>
 			
-			        <!-- 우측 상태 및 버튼 영역 (독립 배치하여 리뷰 작성 클릭 시 상세 이동 방지) -->
-			        <div class="card-action">
-			            <!-- 1. 수강 완료 상태이고, 작성된 리뷰가 없는 경우 (reviewCode가 0) -->
-			            <a th:if="${(item.classStatus == '수강완료' or item.classStatus == '이용 완료' or item.status == '수강완료' or item.status == '이용 완료') and (item.reviewCode == 0)}"
-			               th:href="@{/mypage/review/write(memberCode=${session.loginMember.memberCode}, classCode=${item.classCode})}" 
-			               class="btn-review">리뷰 작성</a>
-			
-			            <!-- 2. 작성된 리뷰가 존재하는 경우 (reviewCode가 0보다 큼) -->
-			            <span th:if="${item.reviewCode > 0}" 
-			                  class="btn-review-completed">리뷰 작성 완료</span>
-			
-			            <!-- 상태 배지 -->
-			            <span class="badge-status" 
-			                  th:classappend="${item.classStatus == '수강완료' or item.classStatus == '이용 완료' or item.status == '수강완료' or item.status == '이용 완료'} ? 'status-completed' : (${item.classStatus == '취소완료' or item.classStatus == '환불완료' or item.status == '취소완료' or item.status == '환불완료' or item.status == '취소'} ? 'status-canceled' : 'status-upcoming')"
-			                  th:text="${item.classStatus != null ? item.classStatus : item.status}">수강완료</span>
-			        </div>
+					<!-- 구매/예약 내역 목록 페이지 (mypage/purchase.html 등) -->
+					<div class="card-action">
+					    <!-- 💡 th:href 부분: reservationCode 전달으로 변경 -->
+					    <a th:if="${(item.classStatus == '수강완료' or item.classStatus == '이용 완료' or item.status == '수강완료' or item.status == '이용 완료') and (item.reviewCode == 0)}"
+					       th:href="@{/mypage/review/write(reservationCode=${item.reservationCode})}" 
+					       class="btn-review">리뷰 작성</a>
+					
+					    <span th:if="${item.reviewCode > 0}" 
+					          class="btn-review-completed">리뷰 작성 완료</span>
+					
+					    <span class="badge-status" 
+					          th:classappend="${item.classStatus == '수강완료' or item.classStatus == '이용 완료' or item.status == '수강완료' or item.status == '이용 완료'} ? 'status-completed' : (${item.classStatus == '취소완료' or item.classStatus == '환불완료' or item.status == '취소완료' or item.status == '환불완료' or item.status == '취소'} ? 'status-canceled' : 'status-upcoming')"
+					          th:text="${item.classStatus != null ? item.classStatus : item.status}">수강완료</span>
+					</div>
 			
 			    </div>
 			</div>

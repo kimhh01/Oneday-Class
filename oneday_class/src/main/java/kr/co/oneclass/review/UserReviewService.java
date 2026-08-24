@@ -6,5 +6,5 @@ public interface UserReviewService {
     boolean writeReview(ReviewDTO rdto);
 
     // 리뷰 상세 조회
-    Review getReview(int classCode, int memberCode);
+    Review getReview(int reservationCode);
 }
