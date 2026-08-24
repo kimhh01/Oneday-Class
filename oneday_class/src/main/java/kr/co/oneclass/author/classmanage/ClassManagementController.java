@@ -192,19 +192,23 @@ public class ClassManagementController {
         return "redirect:/author/schedules";
     }
 
-    // 승인 완료 또는 비공개 클래스를 공개 상태로 변경한다
+    // 승인 완료된 비공개 클래스의 공개 승인을 요청한다
     @PostMapping("/author/classes/{classCode}/open")
-    public String openClass(
+    public String requestClassOpenApproval(
             @PathVariable("classCode") int classCode,
             HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        if (!cmService.openClass(AuthorSessionUtils.getAuthorCode(session), classCode)) {
-            redirectAttributes.addFlashAttribute("managementError", "공개할 수 있는 클래스가 아닙니다.");
-        } else {
-            redirectAttributes.addFlashAttribute("managementMessage", "클래스를 공개했습니다.");
+        if (!cmService.requestClassOpenApproval(
+                AuthorSessionUtils.getAuthorCode(session), classCode)) {
+            redirectAttributes.addFlashAttribute(
+                    "managementError", "공개 승인을 요청할 수 있는 클래스가 아닙니다.");
+            return "redirect:/author/classes/" + classCode;
         }
-        return "redirect:/author/classes/" + classCode;
+        redirectAttributes.addFlashAttribute(
+                "approvalMessage", "공개 승인 요청이 접수되었습니다. 관리자 검수 후 공개됩니다.");
+        redirectAttributes.addAttribute("approvalStatus", "대기");
+        return "redirect:/author/class-approval";
     }
 
     // 공개 중인 클래스를 비공개 상태로 변경한다

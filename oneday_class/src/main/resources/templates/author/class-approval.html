@@ -22,22 +22,25 @@
 				<header class="mgmt-head">
 					<div>
 						<h1 class="page-title">클래스 검수 현황</h1>
-						<p class="page-desc mgmt-head__desc">제출한 클래스의 승인 상태를 확인하고, 반려된 클래스는 수정해서 다시 제출할 수 있어요.</p>
+						<p class="page-desc mgmt-head__desc">작성 중인 클래스를 이어서 등록하고 관리자 검수 결과를 확인할 수 있어요.</p>
 					</div>
 					<a class="btn btn--primary" th:href="@{/author/classes/register-guide}">새 클래스 등록</a>
 				</header>
 
 				<p class="approval-alert approval-alert--error" th:if="${approvalError}" th:text="${approvalError}" role="alert">처리할 수 없습니다.</p>
+				<p class="approval-alert approval-alert--success" th:if="${approvalMessage}" th:text="${approvalMessage}" role="status">처리가 완료되었습니다.</p>
 
 				<form class="mgmt-filter approval-filter" method="get" th:action="@{/author/class-approval}">
 					<div class="mgmt-filter__field">
-						<label class="mgmt-filter__label" for="classStatus">승인 상태</label>
+						<label class="mgmt-filter__label" for="approvalStatus">승인 상태</label>
 						<div class="select">
-							<select id="classStatus" name="classStatus">
-								<option value="all" th:selected="${classStatus == null or classStatus == '' or classStatus == 'all'}">전체</option>
-								<option value="대기" th:selected="${classStatus == '대기'}">검수 대기</option>
-								<option value="반려" th:selected="${classStatus == '반려'}">반려</option>
-								<option value="승인" th:selected="${classStatus == '승인'}">승인</option>
+							<select id="approvalStatus" name="approvalStatus">
+								<option value="all" th:selected="${approvalStatus == null or approvalStatus == '' or approvalStatus == 'all'}">전체</option>
+								<option value="작성중" th:selected="${approvalStatus == '작성중'}">작성 중</option>
+								<option value="대기" th:selected="${approvalStatus == '대기'}">검수 대기</option>
+								<option value="반려" th:selected="${approvalStatus == '반려'}">반려</option>
+								<option value="승인" th:selected="${approvalStatus == '승인'}">승인</option>
+								<option value="중지" th:selected="${approvalStatus == '중지'}">운영 중지</option>
 							</select>
 							<svg class="select__arrow"><use href="#icon-chevron-down"></use></svg>
 						</div>
@@ -55,20 +58,36 @@
 				<section class="mgmt-panel" aria-label="클래스 검수 목록">
 					<div class="mgmt-panel__scroll" th:unless="${#lists.isEmpty(approvals)}">
 						<table class="mgmt-table approval-table">
-							<thead><tr><th>클래스</th><th>카테고리</th><th>희망 가격</th><th>제출일</th><th class="col-center">상태</th><th>반려 사유 / 관리</th></tr></thead>
+							<thead><tr><th>클래스</th><th>카테고리</th><th>희망 가격</th><th>최근 수정일</th><th class="col-center">승인 상태</th><th class="col-center">운영 상태</th><th>관리</th></tr></thead>
 							<tbody>
 								<tr th:each="item : ${approvals}">
 									<td class="table__name"><span th:text="${item.classTitle}">클래스명</span><small th:text="|CL${item.classCode}|">CL0</small></td>
 									<td th:text="${item.categoryName}">카테고리</td>
 									<td th:text="|${#numbers.formatInteger(item.desiredPrice, 1, 'COMMA')}원|">0원</td>
 									<td th:text="${item.registeredDate == null ? '-' : #dates.format(item.registeredDate, 'yyyy.MM.dd')}">-</td>
-									<td class="col-center"><span class="badge" th:classappend="${item.classStatus == '승인' ? 'badge--green' : (item.classStatus == '반려' ? 'badge--red' : 'badge--amber')}" th:text="${item.classStatus}">대기</span></td>
+									<td class="col-center"><span class="badge" th:classappend="${item.approvalStatus == '승인' ? 'badge--green' : ((item.approvalStatus == '반려' or item.approvalStatus == '중지') ? 'badge--red' : 'badge--amber')}" th:text="${item.approvalStatus}">대기</span></td>
+									<td class="col-center"><span class="badge" th:classappend="${item.classStatus == '모집중' ? 'badge--green' : (item.classStatus == '폐강' ? 'badge--red' : (item.classStatus == '대기중' ? 'badge--amber' : 'badge--gray'))}" th:text="${item.classStatus == '모집중' ? '모집 중' : (item.classStatus == '준비중' ? '준비 중' : (item.classStatus == '대기중' ? '확인 대기' : item.classStatus))}">준비 중</span></td>
 									<td class="approval-table__action">
-										<div th:if="${item.classStatus == '반려'}">
-											<p th:text="${#strings.isEmpty(item.rejectionReason) ? '반려 사유가 등록되지 않았습니다.' : item.rejectionReason}">반려 사유</p>
+										<div th:if="${item.approvalStatus == '작성중' and item.classStatus == '준비중'}">
+											<p>관리자 검수 결과를 반영해 수정 중입니다.</p>
+											<a class="btn btn--primary btn--sm" th:href="@{/author/classes/register/basic(classCode=${item.classCode})}">이어서 작성</a>
+										</div>
+										<div th:if="${item.approvalStatus == '반려' and item.classStatus == '대기중'}">
+											<p class="approval-table__reason" th:text="${#strings.isEmpty(item.rejectionReason) ? '반려 사유가 등록되지 않았습니다.' : item.rejectionReason}">반려 사유</p>
 											<form method="post" th:action="@{/author/class-approval/{code}/resubmit(code=${item.classCode})}"><button class="btn btn--outline btn--sm" type="submit">재작성</button></form>
 										</div>
-										<span class="text-muted" th:unless="${item.classStatus == '반려'}" th:text="${item.classStatus == '승인' ? '승인이 완료되었습니다.' : '관리자 검수 중입니다.'}">검수 중</span>
+										<div th:if="${item.approvalStatus == '중지' and item.classStatus == '대기중'}">
+											<p class="approval-table__reason" th:text="${#strings.isEmpty(item.rejectionReason) ? '운영이 중지되었습니다.' : item.rejectionReason}">운영 중지 사유</p>
+											<form method="post" th:action="@{/author/class-approval/{code}/suspension/edit(code=${item.classCode})}"><button class="btn btn--outline btn--sm" type="submit">수정하기</button></form>
+										</div>
+										<div th:if="${item.approvalStatus == '승인' and item.classStatus == '대기중'}">
+											<p class="approval-table__success">관리자 승인이 완료되었습니다.</p>
+											<form method="post" th:action="@{/author/class-approval/{code}/start(code=${item.classCode})}"><button class="btn btn--primary btn--sm" type="submit">모집 시작</button></form>
+										</div>
+										<span class="text-muted" th:if="${item.approvalStatus == '대기'}">관리자 검수 중입니다.</span>
+										<span class="text-muted" th:if="${item.approvalStatus == '승인' and item.classStatus == '모집중'}">현재 모집 중입니다.</span>
+										<span class="text-muted" th:if="${item.approvalStatus == '승인' and item.classStatus == '준비중'}">현재 비공개 상태입니다.</span>
+										<span class="text-muted" th:if="${item.approvalStatus == '승인' and item.classStatus == '폐강'}">폐강된 클래스입니다.</span>
 									</td>
 								</tr>
 							</tbody>

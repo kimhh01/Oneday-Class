@@ -28,11 +28,12 @@ public class ClassDAO {
         sqlSession.selectOne(NAMESPACE + "lockDraftOwner", authorCode);
     }
 
-    // 작가가 가장 최근에 저장한 작성중 초안을 조회한다
+    // 관리자 사유가 없는 일반 신규등록 초안 중 가장 최근 항목을 조회한다
     public ClassBasicDTO selectLatestDraftClass(long authorCode) {
         return sqlSession.selectOne(NAMESPACE + "selectLatestDraftClass", authorCode);
     }
 
+    // 재작성 클래스는 제외하고 일반 신규등록 초안만 삭제한다
     public int deleteDraftClass(long authorCode, int classCode) {
         return sqlSession.delete(NAMESPACE + "deleteDraftClass", ownerParam(authorCode, classCode));
     }

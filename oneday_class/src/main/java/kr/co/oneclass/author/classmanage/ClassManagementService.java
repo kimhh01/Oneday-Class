@@ -206,16 +206,16 @@ public class ClassManagementService {
         return detail;
     }
 
-    // 승인된 비공개 클래스(준비중)를 공개 상태(모집중)로 변경한다
-    public boolean openClass(long authorCode, int classCode) {
-        return cmDAO.updateClassOperationalStatus(
-                authorCode, classCode, "준비중", "모집중") == 1;
+    // 승인된 비공개 클래스는 바로 공개하지 않고 관리자 공개 승인을 요청한다
+    @Transactional
+    public boolean requestClassOpenApproval(long authorCode, int classCode) {
+        return cmDAO.requestClassOpenApproval(authorCode, classCode) == 1;
     }
 
     // 승인된 공개 클래스(모집중)를 비공개 상태(준비중)로 변경한다
+    @Transactional
     public boolean hideClass(long authorCode, int classCode) {
-        return cmDAO.updateClassOperationalStatus(
-                authorCode, classCode, "모집중", "준비중") == 1;
+        return cmDAO.hideClass(authorCode, classCode) == 1;
     }
 
     // 현재 신청 인원과 입력값을 검증하고 일정 모집 인원을 변경한다

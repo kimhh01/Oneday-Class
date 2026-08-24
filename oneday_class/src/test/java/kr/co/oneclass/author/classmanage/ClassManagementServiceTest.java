@@ -2,6 +2,7 @@ package kr.co.oneclass.author.classmanage;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -121,6 +122,18 @@ class ClassManagementServiceTest {
         assertEquals(12, service.addSchedule(authorCode, validScheduleForm(2)));
         verify(scheduleDAO).insertRepeatSchedule(any(RepeatScheduleDTO.class));
         verify(scheduleDAO).insertSchedule(any(ScheduleDTO.class));
+    }
+
+    @Test
+    void openingHiddenClassRequestsApprovalWithoutPublishingImmediately() {
+        long authorCode = 1L;
+        int classCode = 2;
+        when(classManagementDAO.requestClassOpenApproval(authorCode, classCode)).thenReturn(1);
+
+        assertTrue(service.requestClassOpenApproval(authorCode, classCode));
+
+        verify(classManagementDAO).requestClassOpenApproval(authorCode, classCode);
+        verify(classManagementDAO, never()).hideClass(authorCode, classCode);
     }
 
     private ScheduleOperationDTO validScheduleForm(int classCode) {

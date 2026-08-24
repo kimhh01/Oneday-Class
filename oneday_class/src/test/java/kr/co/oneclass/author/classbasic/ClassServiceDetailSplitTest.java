@@ -56,6 +56,29 @@ class ClassServiceDetailSplitTest {
     }
 
     @Test
+    void startingRegistrationCreatesNewDraftWhenNoOrdinaryDraftExists() {
+        when(classDAO.insertDraftClass(any(ClassBasicDTO.class))).thenAnswer(invocation -> {
+            ClassBasicDTO newDraft = invocation.getArgument(0);
+            newDraft.setClassCode(30);
+            return 1;
+        });
+
+        int classCode = classService.addDraftClass(7L);
+
+        assertEquals(30, classCode);
+        verify(classDAO).insertDraftClass(any(ClassBasicDTO.class));
+    }
+
+    @Test
+    void replacingDraftCannotDeleteClassOutsideOrdinaryDraftList() {
+        assertThrows(IllegalArgumentException.class,
+                () -> classService.replaceDraftClass(7L, 10));
+
+        verify(scheduleDAO, never()).deleteScheduleList(anyInt());
+        verify(classDAO, never()).deleteDraftClass(7L, 10);
+    }
+
+    @Test
     void replacingDraftDeletesExistingDataAndCreatesNewDraft() {
         ClassBasicDTO draft = new ClassBasicDTO();
         draft.setClassCode(10);

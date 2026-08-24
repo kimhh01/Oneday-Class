@@ -454,41 +454,6 @@
 </dialog>
 
 
-<!-- ============ 공개 완료 ============ -->
-<dialog class="mgmt-dialog mgmt-dialog--center" id="publishedDialog" aria-labelledby="publishedDialogTitle">
-	<div class="mgmt-dialog__head">
-		<span></span>
-		<button type="button" class="mgmt-dialog__close" data-close-dialog aria-label="닫기">
-			<svg aria-hidden="true"><use href="#icon-x"></use></svg>
-		</button>
-	</div>
-
-	<div class="mgmt-dialog__body">
-		<span class="mgmt-dialog__mark"><svg aria-hidden="true"><use href="#icon-check"></use></svg></span>
-		<h2 class="mgmt-dialog__title" id="publishedDialogTitle">클래스를 공개했습니다!</h2>
-		<p class="mgmt-dialog__desc">
-			클래스가 다시 공개되었습니다.<br>
-			이제 수강생들이 클래스를 확인하고 신청할 수 있습니다.
-		</p>
-
-		<div class="mgmt-notice">
-			<svg aria-hidden="true"><use href="#icon-info"></use></svg>
-			<p>공개 시점 이후의 일정부터 모집이 다시 시작됩니다.</p>
-		</div>
-
-		<ul class="mgmt-dialog__list">
-			<li>공개 전 마감되지 않은 일정은 그대로 유지됩니다.</li>
-			<li>공개 전 수강생에게는 별도의 알림이 발송되지 않습니다.</li>
-		</ul>
-	</div>
-
-	<div class="mgmt-dialog__foot">
-		<button type="button" class="btn btn--ghost" data-close-dialog>확인</button>
-		<a class="btn btn--primary" href="class-manage.html" th:href="@{/author/classes}">클래스 관리로 이동</a>
-	</div>
-</dialog>
-
-
 <!-- ============ 클래스 폐강 ============
 	 남은 일정이 0건일 때만 열린다. 게이트는 아래 스크립트가 건다. -->
 <dialog class="mgmt-dialog mgmt-dialog--center" id="closeDialog" aria-labelledby="closeDialogTitle">
@@ -786,7 +751,7 @@
 		} else {
 			state.className = 'badge badge--gray';
 			state.textContent = '비공개';
-			label.textContent = '클래스 공개';
+			label.textContent = '공개 승인 요청';
 			icon.setAttribute('href', '#icon-eye');
 		}
 	}
@@ -797,7 +762,7 @@
 			openDialog(hideDialog);          /* 숨기는 건 확인을 받는다 */
 			return;
 		}
-		document.getElementById('classOpenForm').submit();   /* 공개는 바로 제출 */
+		document.getElementById('classOpenForm').submit();   /* 공개 승인 요청을 제출 */
 	});
 
 	document.getElementById('confirmHideButton').addEventListener('click', function () {

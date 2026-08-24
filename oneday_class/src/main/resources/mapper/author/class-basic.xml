@@ -59,6 +59,7 @@
 			WHERE c.OPERATOR_CODE = #{authorCode}
 			  AND c.STATUS = '준비중'
 			  AND c.APPROVAL_STATUS = '작성중'
+			  AND c.APPROVAL_MEMO IS NULL
 			ORDER BY c.WRITE_DATE DESC, c.CLASS_CODE DESC
 		)
 		WHERE ROWNUM = 1
@@ -70,6 +71,7 @@
 		  AND OPERATOR_CODE = #{authorCode}
 		  AND STATUS = '준비중'
 		  AND APPROVAL_STATUS = '작성중'
+		  AND APPROVAL_MEMO IS NULL
 	</delete>
 
 	<select id="selectClassBasic" parameterType="map"
@@ -467,11 +469,12 @@
 	<update id="reopenRejectedClass" parameterType="map">
 		UPDATE CLASS
 		SET APPROVAL_STATUS = '작성중',
+			STATUS = '준비중',
 			REGISTER_STEP = 'basic',
 			WRITE_DATE = SYSDATE
 		WHERE CLASS_CODE = #{classCode}
 		  AND OPERATOR_CODE = #{authorCode}
-		  AND STATUS = '준비중'
+		  AND STATUS = '대기중'
 		  AND APPROVAL_STATUS = '반려'
 	</update>
 

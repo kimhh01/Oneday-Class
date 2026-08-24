@@ -5,7 +5,7 @@
 <!--
 	작가센터 클래스 관리 조회 Mapper.
 	승인 완료(APPROVAL_STATUS = '승인') 클래스만 운영 대상으로 본다.
-	CLASS.STATUS 는 모집중 / 준비중 / 폐강을 사용한다.
+	운영 관리 화면에는 모집중 / 준비중 / 폐강 상태만 표시한다.
 -->
 <mapper namespace="kr.co.oneclass.author.classmanage.ClassManagementDAO">
 
@@ -61,6 +61,7 @@
 	<sql id="classManagementWhere">
 		WHERE c.OPERATOR_CODE = #{authorCode}
 		  AND c.APPROVAL_STATUS = '승인'
+		  AND c.STATUS IN ('모집중', '준비중', '폐강')
 		<if test="classStatus != null and classStatus != '' and classStatus != 'all'">
 			AND c.STATUS = #{classStatus}
 		</if>
@@ -214,6 +215,7 @@
 		JOIN CLASS c ON c.CLASS_CODE = r.CLASS_CODE
 		WHERE c.OPERATOR_CODE = #{authorCode}
 		  AND c.APPROVAL_STATUS = '승인'
+		  AND c.STATUS IN ('모집중', '준비중', '폐강')
 		<if test="scheduleStatus == '모집중'">
 			AND TRUNC(s.CLASS_DATE) &gt;= TRUNC(SYSDATE)
 			AND s.SOLD_OUT_YN != 'Y'
@@ -256,16 +258,29 @@
 		WHERE c.OPERATOR_CODE = #{authorCode}
 		  AND c.CLASS_CODE = #{classCode}
 		  AND c.APPROVAL_STATUS = '승인'
+		  AND c.STATUS IN ('모집중', '준비중', '폐강')
 	</select>
 
-	<!-- 승인된 클래스의 공개/비공개 상태만 정해진 흐름으로 변경한다 -->
-	<update id="updateClassOperationalStatus" parameterType="map">
+	<!-- 비공개 클래스는 상태를 열지 않고 관리자 공개 승인 대기로 전환한다 -->
+	<update id="requestClassOpenApproval" parameterType="map">
 		UPDATE CLASS
-		SET STATUS = #{nextStatus}
+		SET APPROVAL_STATUS = '대기',
+			APPROVAL_MEMO = NULL,
+			WRITE_DATE = SYSDATE
 		WHERE CLASS_CODE = #{classCode}
 		  AND OPERATOR_CODE = #{authorCode}
 		  AND APPROVAL_STATUS = '승인'
-		  AND STATUS = #{currentStatus}
+		  AND STATUS = '준비중'
+	</update>
+
+	<!-- 공개 중인 승인 클래스는 관리자 승인 없이 즉시 비공개로 전환한다 -->
+	<update id="hideClass" parameterType="map">
+		UPDATE CLASS
+		SET STATUS = '준비중'
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND APPROVAL_STATUS = '승인'
+		  AND STATUS = '모집중'
 	</update>
 
 	<!-- 모집 일정과 활성 예약이 모두 정리된 승인 클래스만 폐강한다 -->

@@ -75,15 +75,20 @@ public class ClassManagementDAO {
         return sqlSession.selectOne(NAMESPACE + "selectClassManagementInfo", param);
     }
 
-    // 승인된 클래스의 운영 상태를 현재 상태 조건과 함께 변경한다
-    public int updateClassOperationalStatus(long authorCode, int classCode,
-            String currentStatus, String nextStatus) {
+    // 승인된 비공개 클래스의 공개 승인 요청을 접수한다
+    public int requestClassOpenApproval(long authorCode, int classCode) {
         Map<String, Object> param = new HashMap<>();
         param.put("authorCode", authorCode);
         param.put("classCode", classCode);
-        param.put("currentStatus", currentStatus);
-        param.put("nextStatus", nextStatus);
-        return sqlSession.update(NAMESPACE + "updateClassOperationalStatus", param);
+        return sqlSession.update(NAMESPACE + "requestClassOpenApproval", param);
+    }
+
+    // 승인된 공개 클래스를 작가가 즉시 비공개로 전환한다
+    public int hideClass(long authorCode, int classCode) {
+        Map<String, Object> param = new HashMap<>();
+        param.put("authorCode", authorCode);
+        param.put("classCode", classCode);
+        return sqlSession.update(NAMESPACE + "hideClass", param);
     }
 
     // 모든 모집 일정과 예약이 정리된 승인 클래스를 폐강 상태로 변경한다

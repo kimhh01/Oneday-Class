@@ -21,6 +21,7 @@ public class ClassApprovalDTO {
     private Date registeredDate;     // 클래스 등록일
     private Date recruitStartDate;   // 모집 시작일
     private Date recruitEndDate;     // 모집 종료일
-    private String classStatus;      // 검수 상태
+    private String approvalStatus;   // 승인 상태: 대기, 승인, 반려, 중지
+    private String classStatus;      // 운영 상태: 준비중, 대기중, 모집중, 폐강
     private String rejectionReason;  // 반려 사유
 }
