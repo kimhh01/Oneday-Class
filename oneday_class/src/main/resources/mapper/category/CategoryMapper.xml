@@ -28,6 +28,8 @@
              WHERE ci.CLASS_CODE = c.CLASS_CODE 
                AND ROWNUM = 1) as mainImage
         FROM CLASS c
+        join class_repeat_rule crr on crr.class_code = c.class_code
+        JOIN SCHEDULE s ON s.repeat_rule_code = crr.repeat_rule_code
         <where>
             <!-- 대분류 카테고리 -->
             <if test="categoryCode != null and categoryCode > 0">
@@ -49,7 +51,14 @@
             <if test="maxPrice != null and maxPrice > 0">
                 AND (CASE WHEN c.DESIRED_PRICE > 0 AND c.PRICE > c.DESIRED_PRICE THEN c.DESIRED_PRICE ELSE c.PRICE END) &lt;= #{maxPrice}
             </if>
-
+            
+            <!-- 당일 예약 -->
+			<if test="sameDayOnly">
+				<!-- 오늘 날짜 조건 (TRUNC 사용) -->
+        AND s.class_date = TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+        AND s.START_TIME > TO_CHAR(SYSDATE + (2 / 24), 'HH24:MI')
+        AND s.remaining_people &lt; s.max_people
+			</if>
          <!-- 최소 수강 인원 (CLASS_REPEAT_RULE을 거쳐 SCHEDULE 조회) -->
             <if test="minPeople != null and minPeople > 0">
                 AND EXISTS (
@@ -92,5 +101,8 @@
         WHERE CLASS_CODE = #{classCode}
         ORDER BY SORT_ORDER ASC
     </select>
+    
+    <!-- 4. 당일 예약 페이지 목록 조회 -->
+    <select id=""></select>
 
 </mapper>

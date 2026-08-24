@@ -37,4 +37,6 @@ public interface SearchDAO {
 
     // 클래스 이미지 목록 조회
     List<ClassImageDTO> selectImage(long classCode);
+    
+ 
 }

@@ -109,45 +109,46 @@ document.addEventListener("DOMContentLoaded", function() {
     // -------------------------------------------------------------
     // 3. 지도의 현재 범위(Bounds) + 필터 조건 동시 필터링
     // -------------------------------------------------------------
-    function filterClassesByMapBounds() {
-        const bounds = map.getBounds();
-        const swLatLng = bounds.getSouthWest();
-        const neLatLng = bounds.getNorthEast();
+	function filterClassesByMapBounds() {
+	    const bounds = map.getBounds();
+	    const swLatLng = bounds.getSouthWest();
+	    const neLatLng = bounds.getNorthEast();
 
-        const minLat = swLatLng.getLat();
-        const maxLat = neLatLng.getLat();
-        const minLng = swLatLng.getLng();
-        const maxLng = neLatLng.getLng();
+	    const minLat = swLatLng.getLat();
+	    const maxLat = neLatLng.getLat();
+	    const minLng = swLatLng.getLng();
+	    const maxLng = neLatLng.getLng();
 
-        // 오늘 날짜 구하기 (YYYY-MM-DD)
-        const todayStr = new Date().toISOString().split('T')[0];
+	    const filteredClasses = allClassData.filter(item => {
+	        if (!item.lat || !item.lng) return false;
 
-        const filteredClasses = allClassData.filter(item => {
-            if (!item.lat || !item.lng) return false;
+	        // 1. 지도 화면 영역(Bounds) 내 존재 여부
+	        const isInMapBounds = (item.lat >= minLat && item.lat <= maxLat && item.lng >= minLng && item.lng <= maxLng);
 
-            // 조건 A: 지도 화면 영역 범위 내
-            const isInMapBounds = (item.lat >= minLat && item.lat <= maxLat && item.lng >= minLng && item.lng <= maxLng);
+	        // 2. 카테고리 필터
+	        const isMatchingCategory = !selectedCategoryCode ||
+	            (String(item.categoryCode) === String(selectedCategoryCode) ||
+	             String(item.parentCategoryCode) === String(selectedCategoryCode));
 
-            // 조건 B: 카테고리 일치
-            const isMatchingCategory = !selectedCategoryCode ||
-                (String(item.categoryCode) === String(selectedCategoryCode) ||
-                    String(item.parentCategoryCode) === String(selectedCategoryCode));
+	        // 3. 날짜 필터 (classDate 또는 scheduleDate 등 실제 스케줄 날짜 필드와 비교)
+	        // item.classDate, item.scheduleDate, item.writeDate 중 존재하는 날짜 데이터 참조
+	        const rawDate = item.classDate || item.scheduleDate || item.writeDate || '';
+	        const targetDateStr = String(rawDate);
+	        
+	        const isMatchingDate = !selectedDate || targetDateStr.includes(selectedDate);
 
-            // 조건 C-1: 오늘 이전(과거) 데이터 자동 제외
-            const itemDate = item.writeDate ? item.writeDate.substring(0, 10) : '';
-            const isUpcomingOrToday = itemDate >= todayStr;
+	        // 4. 시간 필터
+	        const rawTime = item.startTime || item.classTime || '';
+	        const targetTimeStr = String(rawTime);
+	        
+	        const isMatchingTime = !selectedTime || targetTimeStr.includes(selectedTime);
 
-            // 조건 C-2: 선택된 날짜 필터링
-            const isMatchingDate = !selectedDate || (item.writeDate && item.writeDate.includes(selectedDate));
+	        return isInMapBounds && isMatchingCategory && isMatchingDate && isMatchingTime;
+	    });
 
-            // 조건 D: 선택된 시간 필터링
-            const isMatchingTime = !selectedTime || (item.writeDate && item.writeDate.includes(selectedTime));
+	    renderMarkersAndSidebar(filteredClasses);
+	}
 
-            return isInMapBounds && isMatchingCategory && isUpcomingOrToday && isMatchingDate && isMatchingTime;
-        });
-
-        renderMarkersAndSidebar(filteredClasses);
-    }
 
     function renderMarkersAndSidebar(classList) {
         markers.forEach(overlay => overlay.setMap(null));
@@ -222,7 +223,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const listSigungu = document.getElementById('list-sigungu');
     const listDong = document.getElementById('list-dong');
 
-    let selectedSido = "서울";
+    let selectedSido = "";
     let selectedSigungu = "";
     let selectedDong = "";
 
@@ -318,26 +319,37 @@ document.addEventListener("DOMContentLoaded", function() {
         if (selectedDong === '선택안함') selectedDong = '';
     });
 
-    btnRegionSearch?.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const fullAddress = `${selectedSido} ${selectedSigungu} ${selectedDong}`.trim();
+	// btnRegionSearch 클릭 이벤트 내부 수정
+	btnRegionSearch?.addEventListener('click', function(e) {
+	    e.stopPropagation();
+	    
+	    // 시/도가 선택되지 않았거나 모두 '선택안함'인 경우 -> '지역 전체'로 리셋
+	    if (!selectedSido || selectedSido === '선택안함') {
+	        const textSpan = btnRegionToggle.querySelector('.select-text');
+	        if (textSpan) textSpan.innerText = "지역 전체";
+	        regionModal?.classList.add('hidden');
+	        filterClassesByMapBounds(); // 지도 범위 기준으로 다시 필터링
+	        return;
+	    }
 
-        geocoder.addressSearch(fullAddress, function(result, status) {
-            if (status === kakao.maps.services.Status.OK) {
-                const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-                map.setCenter(coords);
-                map.setLevel(4);
-                regionModal?.classList.add('hidden');
+	    const fullAddress = `${selectedSido} ${selectedSigungu} ${selectedDong}`.trim();
 
-                const textSpan = btnRegionToggle.querySelector('.select-text');
-                if (textSpan) {
-                    textSpan.innerText = `${selectedSigungu || selectedSido} ${selectedDong}`.trim();
-                }
-            } else {
-                alert("해당 지역의 위치를 찾을 수 없습니다.");
-            }
-        });
-    });
+	    geocoder.addressSearch(fullAddress, function(result, status) {
+	        if (status === kakao.maps.services.Status.OK) {
+	            const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+	            map.setCenter(coords);
+	            map.setLevel(4);
+	            regionModal?.classList.add('hidden');
+
+	            const textSpan = btnRegionToggle.querySelector('.select-text');
+	            if (textSpan) {
+	                textSpan.innerText = `${selectedSigungu || selectedSido} ${selectedDong}`.trim();
+	            }
+	        } else {
+	            alert("해당 지역의 위치를 찾을 수 없습니다.");
+	        }
+	    });
+	});
 
     // -------------------------------------------------------------
     // 5. 날짜 및 시간 선택 관련

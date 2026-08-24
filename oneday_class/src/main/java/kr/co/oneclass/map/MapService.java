@@ -17,9 +17,6 @@ public class MapService {
 	private final MapDAO mDAO;
 	
 	public List<ClassDTO> getClassList(MapSearchDTO mDTO) {
-		
-		List<ClassDTO> classList=mDAO.selectClassList(mDTO);
-		
 		return mDAO.selectClassList(mDTO); 
 	}
 	

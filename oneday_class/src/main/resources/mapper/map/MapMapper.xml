@@ -33,7 +33,6 @@
     c.approval_memo AS approvalMemo,
     c.write_date AS writeDate,
     c.register_step AS registerStep
-            <!-- 💡 오라클 수식: radians 함수 대신 (각도 * 3.141592653589793 / 180) 적용 -->
             <if test="lat != null and lng != null">
                 , ( 6371 * ACOS( COS( #{lat} * 3.141592653589793 / 180 ) * COS( lat * 3.141592653589793 / 180 ) 
                 * COS( (lng * 3.141592653589793 / 180) - (#{lng} * 3.141592653589793 / 180) ) 
@@ -91,7 +90,7 @@
     <select id="selectCategoryList" resultType="kr.co.oneclass.common.CategoryDTO">
         SELECT 
             category_code AS categoryCode,
-            name AS categoryName,        <!-- CategoryDTO의 categoryName 필드와 매핑 -->
+            name AS categoryName,   
             parents_category AS parentCategoryCode
         FROM category
         ORDER BY category_code ASC

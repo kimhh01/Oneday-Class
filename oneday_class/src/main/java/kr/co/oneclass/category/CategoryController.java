@@ -27,7 +27,7 @@ public class CategoryController {
     /**
      * 선택한 카테고리·정렬·필터 조건의 클래스 목록
      */
-    @GetMapping("/categorClass")
+    @GetMapping("/categoryClass")
     public String categoryClass(CategorySearchDTO searchDTO, Model model) {
         // 소문자 변수명(categoryService)으로 호출
         List<CategoryDTO> categoryList = categoryService.searchCategoryList();
@@ -50,4 +50,36 @@ public class CategoryController {
 
         return "category/categoryClass";
     }
+    
+    @GetMapping("/category/today")
+    public String sameToday(CategorySearchDTO searchDTO, Model model) {
+    	searchDTO.setSameDayOnly(true);
+        
+        List<CategoryDTO> categoryList = categoryService.searchCategoryList();
+        List<ClassDTO> classList = categoryService.searchCategoryClass(searchDTO);
+        
+        model.addAttribute("categoryList", categoryList);
+        model.addAttribute("classList", classList);
+        model.addAttribute("searchDTO", searchDTO);
+        model.addAttribute("currentCategoryName", "⚡ 오늘 당일예약");
+        
+        return "category/categoryClass";
+    }
+    
+    @GetMapping("/category/week")
+    public String sameWeek(CategorySearchDTO searchDTO, Model model) {
+    	searchDTO.setSameWeekOnly(true);
+    	
+    	List<CategoryDTO> categoryList = categoryService.searchCategoryList();
+    	List<ClassDTO> classList = categoryService.searchCategoryClass(searchDTO);
+    	
+    	model.addAttribute("categoryList", categoryList);
+    	model.addAttribute("classList", classList);
+    	model.addAttribute("searchDTO", searchDTO);
+    	model.addAttribute("currentCategoryName", "주말예약");
+    	
+    	return "category/categoryClass";
+    }
+    
+   
 }

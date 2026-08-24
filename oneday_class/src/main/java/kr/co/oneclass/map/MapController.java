@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MapController {
 
-	@Autowired(required = false)
     private final MapService mapService;
 
     /**
@@ -33,7 +32,7 @@ public class MapController {
         model.addAttribute("classList", classList);
         model.addAttribute("categoryList", categoryList);
         
-        return "map/map"; // templates/map/map.html
+        return "map/map";
     }
 
     /**
