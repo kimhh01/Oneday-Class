@@ -63,7 +63,6 @@
 
 	<!-- 회원 목록 -->
 	<select id="selectMemberList" resultMap="adminMemberResultMap">
-
 		SELECT
 		MEMBER_CODE,
 		PHONE,
@@ -89,13 +88,11 @@
 		M.INPUT_DATE
 
 		FROM MEMBER M
-
 		<where>
 
 			<if
 				test="searchDTO.keyword != null
 						and searchDTO.keyword != ''">
-
 				AND (
 				M.NAME LIKE '%' || #{searchDTO.keyword} || '%'
 				OR M.EMAIL
@@ -103,36 +100,25 @@
 				OR M.PHONE LIKE '%' ||
 				#{searchDTO.keyword} || '%'
 				)
-
 			</if>
 
 			<if
 				test="searchDTO.status != null
 						and searchDTO.status != ''">
-
 				AND M.STATUS = #{searchDTO.status}
-
 			</if>
-
 		</where>
-
 		ORDER BY M.MEMBER_CODE DESC
-
 		) A
 
 		WHERE ROWNUM &lt;= #{endRow}
-
 		)
 
 		WHERE RN
 		&gt;= #{startRow}
-
 	</select>
 
-
-	<!-- 회원 목록 전체 건수 -->
 	<select id="selectMemberCount" resultType="int">
-
 		SELECT COUNT(*)
 
 		FROM MEMBER M
@@ -142,7 +128,6 @@
 			<if
 				test="searchDTO.keyword != null
 				and searchDTO.keyword != ''">
-
 				AND (
 				M.NAME LIKE '%' || #{searchDTO.keyword} || '%'
 				OR M.EMAIL
@@ -150,24 +135,18 @@
 				OR M.PHONE LIKE '%' ||
 				#{searchDTO.keyword} || '%'
 				)
-
 			</if>
 
 			<if test="searchDTO.status != null
 				and searchDTO.status != ''">
-
 				AND M.STATUS = #{searchDTO.status}
-
 			</if>
 
 		</where>
 
 	</select>
 
-
-	<!-- 회원 상세 -->
 	<select id="selectMemberByCode" resultMap="adminMemberResultMap">
-
 		SELECT
 		M.MEMBER_CODE,
 		M.PHONE,
@@ -183,9 +162,6 @@
 		M.IMAGE,
 		M.INPUT_DATE,
 
-
-		/* 전체
-		예약 수 */
 		(
 		SELECT COUNT(*)
 
@@ -194,10 +170,9 @@
 		WHERE R.MEMBER_CODE =
 		M.MEMBER_CODE
 
-		) AS RESERVATION_NUM,
+		)
+		AS RESERVATION_NUM,
 
-
-		/* 누적 결제 금액 */
 		(
 		SELECT
 		NVL(SUM(P.AMOUNT), 0)
@@ -208,14 +183,13 @@
 		ON
 		P.RESERVATION_CODE = R.RESERVATION_CODE
 
-		WHERE R.MEMBER_CODE =
+		WHERE
+		R.MEMBER_CODE =
 		M.MEMBER_CODE
 		AND P.STATUS = '결제완료'
 
 		) AS TOTAL_PAYMENT,
 
-
-		/* 취소 건수 */
 		(
 		SELECT COUNT(*)
 
@@ -226,32 +200,28 @@
 
 		) AS CANCEL_COUNT,
 
-
-		/* 최근 로그인 */
 		(
 		SELECT
 		MAX(LH.LOGIN_DATE)
 
-		FROM LOGIN_HISTORY LH
+		FROM
+		LOGIN_HISTORY LH
 
 		WHERE LH.MEMBER_CODE =
 		M.MEMBER_CODE
 
-		) AS LAST_LOGIN_DATE
+		) AS
+		LAST_LOGIN_DATE
 
 
 		FROM MEMBER M
 
 		WHERE M.MEMBER_CODE =
 		#{memberCode}
-
 	</select>
 
-
-	<!-- 회원 예약 목록 : 최신순 / 5개 페이징 -->
 	<select id="selectMemberReservationList"
 		resultMap="adminMemberReservationResultMap">
-
 		SELECT
 		RESERVATION_CODE,
 		CLASS_CODE,
@@ -322,26 +292,18 @@
 		)
 
 		WHERE RN &gt;= #{startRow}
-
 	</select>
 
-
-	<!-- 회원 예약 전체 건수 -->
 	<select id="selectMemberReservationCount" resultType="int">
-
 		SELECT
 		COUNT(*)
 
 		FROM RESERVATION
 
 		WHERE MEMBER_CODE = #{memberCode}
-
 	</select>
 
-
-	<!-- 회원 상태 변경 -->
 	<update id="updateMemberStatus">
-
 		UPDATE MEMBER
 
 		SET STATUS = #{status}
@@ -357,8 +319,51 @@
 		</if>
 
 		WHERE MEMBER_CODE = #{memberCode}
-
 	</update>
 
+	<select id="selectReservationForCancel"
+		resultMap="adminMemberReservationResultMap">
+		SELECT
+		R.RESERVATION_CODE,
+		R.CLASS_CODE,
+		C.NAME AS CLASS_NAME,
+		R.RESERVATION_DATE,
+		R.PEOPLE_NUMBER,
+		R.STATUS AS RESERVATION_STATUS,
+		P.PAYMENT_CODE,
+		P.AMOUNT,
+		P.MEANS,
+		P.PAYMENT_DATE,
+		P.STATUS AS
+		PAYMENT_STATUS,
+		P.REFUND,
+		P.REFUND_DATE
+		FROM RESERVATION R
+		JOIN CLASS C
+		ON
+		R.CLASS_CODE = C.CLASS_CODE
+		LEFT JOIN PAYMENT P
+		ON R.RESERVATION_CODE =
+		P.RESERVATION_CODE
+		WHERE R.RESERVATION_CODE = #{reservationCode}
+	</select>
+
+	<update id="updatePaymentRefund">
+		UPDATE PAYMENT
+		SET REFUND = AMOUNT,
+		STATUS = '환불완료',
+		REFUND_DATE = SYSDATE
+		WHERE RESERVATION_CODE = #{reservationCode}
+		AND
+		STATUS = '결제완료'
+	</update>
+
+	<update id="updateReservationCancel">
+		UPDATE RESERVATION
+		SET STATUS = '취소'
+		WHERE
+		RESERVATION_CODE = #{reservationCode}
+		AND STATUS = '예약'
+	</update>
 
 </mapper>

@@ -97,9 +97,9 @@ public class AdminClassService {
 	}
 
 	@Transactional
-	public boolean changeClassStatus(int classCode, AdminClassStatusUpdateDTO dto) {
+	public boolean updateClassStatus(int classCode) {
 
-		return classDAO.updateClassStatus(classCode, dto) > 0;
+		return classDAO.updateClassStatus(classCode) > 0;
 	}
 
 	@Transactional
@@ -139,6 +139,6 @@ public class AdminClassService {
 				dto.getRunningTime(), dto.getClassStatus(), dto.getSalePrice(), dto.getMarketPrice(),
 				dto.getDiscountRate(), dto.getMinimumPeople(), dto.getMaximumPeople(), dto.getRecruitmentStartDate(),
 				dto.getRecruitmentEndDate(), dto.getPeriodType(), dto.getSingleIntroduce(), dto.getIntroduce(),
-				dto.getFinishedProductDescription(),dto.getApprovalStatus());
+				dto.getFinishedProductDescription(), dto.getApprovalStatus());
 	}
 }

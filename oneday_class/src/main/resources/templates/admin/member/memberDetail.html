@@ -1,58 +1,103 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
-
 <head>
 <meta charset="UTF-8">
+
 <title>회원 상세 정보</title>
 
 <link rel="stylesheet" th:href="@{/admin/css/admin-common.css}">
+
 <link rel="stylesheet" th:href="@{/admin/css/admin-layout.css}">
+
 <link rel="stylesheet" th:href="@{/admin/css/admin-member.css}">
+
 </head>
 
 <body>
 
-	<div th:replace="~{admin/fragments/sideMenu :: sideMenu('member')}"></div>
+	<div th:replace="~{admin/fragments/sideMenu
+		:: sideMenu('member')}">
+	</div>
+
 	<main class="main member-detail-page">
+
 		<div class="page-head">
+
 			<h1>회원 상세 정보</h1>
+
 			<a class="btn btn-secondary" th:href="@{/admin/members}"> 목록으로 </a>
+
 		</div>
+
+
 		<div class="flash-message" th:if="${message}" th:text="${message}">
 		</div>
 
+		<div class="flash-message error" th:if="${error}" th:text="${error}">
+		</div>
+
+
+		<!-- =========================
+		     회원 요약
+		========================= -->
+
 		<section class="member-summary">
+
 			<div class="member-summary-left">
+
 				<div class="member-profile">
+
 					<img
-						th:if="${member.image != null and !#strings.isEmpty(member.image)}"
+						th:if="${member.image != null
+							and !#strings.isEmpty(
+								member.image)}"
 						th:src="${member.image}" th:alt="${member.name}"
 						class="member-profile-image">
+
 					<div
-						th:unless="${member.image != null and !#strings.isEmpty(member.image)}"
+						th:unless="${member.image != null
+							and !#strings.isEmpty(
+								member.image)}"
 						class="member-profile-fallback"
-						th:text="${#strings.substring(member.name, 0, 1)}"></div>
+						th:text="${#strings.substring(
+							member.name,
+							0,
+							1)}">
+					</div>
+
 				</div>
+
+
 				<div class="member-summary-name">
-					<strong th:text="${member.name}"></strong> <span
+
+					<strong th:text="${member.name}"> </strong> <span
 						class="member-status"
 						th:classappend="${member.status == '정상'}
-		? ' status-active'
-		: (${member.status == '휴면'}
-			? ' status-dormant'
-			: (${member.status == '정지'}
-				? ' status-suspended'
-				: ' status-withdrawn'))"
+						? ' status-active'
+						: (${member.status == '휴면'}
+							? ' status-dormant'
+							: (${member.status == '정지'}
+								? ' status-suspended'
+								: ' status-withdrawn'))"
 						th:text="${member.status}"> </span>
+
 				</div>
+
 			</div>
 
+
 			<div class="member-summary-stats">
+
 				<div class="summary-stat">
-					<strong th:text="${member.reservationNum}">0</strong> <span>총
+
+					<strong th:text="${member.reservationNum}"> 0 </strong> <span>총
 						예약</span>
+
 				</div>
+
+
 				<div class="summary-stat">
+
 					<strong
 						th:text="${#numbers.formatInteger(
 							member.totalPayment,
@@ -60,62 +105,117 @@
 							'COMMA'
 						) + '원'}">
 						0원 </strong> <span>누적 결제</span>
+
 				</div>
+
+
 				<div class="summary-stat">
-					<strong th:text="${member.cancelCount}">0</strong> <span>취소내역</span>
+
+					<strong th:text="${member.cancelCount}"> 0 </strong> <span>취소내역</span>
+
 				</div>
+
 			</div>
+
 		</section>
 
+
+		<!-- =========================
+		     회원 기본 정보
+		========================= -->
+
 		<section class="member-info-grid">
+
 			<div class="member-info-panel">
+
 				<div class="member-info-title">기본 정보</div>
+
 				<dl class="member-info-list">
+
 					<div class="info-row">
+
 						<dt>회원번호</dt>
+
 						<dd th:text="${member.memberCode}"></dd>
+
 					</div>
+
+
 					<div class="info-row">
+
 						<dt>이름</dt>
+
 						<dd th:text="${member.name}"></dd>
+
 					</div>
+
+
 					<div class="info-row">
+
 						<dt>이메일</dt>
+
 						<dd th:text="${member.email}"></dd>
+
 					</div>
+
+
 					<div class="info-row">
+
 						<dt>휴대폰</dt>
+
 						<dd th:text="${member.phone}"></dd>
+
 					</div>
+
+
 					<div class="info-row">
+
 						<dt>우편번호</dt>
+
 						<dd
 							th:text="${member.zipcode != null
-							? member.zipcode
-							: '-'}">
+								? member.zipcode
+								: '-'}">
 						</dd>
+
 					</div>
+
+
 					<div class="info-row">
+
 						<dt>주소</dt>
+
 						<dd>
+
 							<span
 								th:text="${member.address != null
 									? member.address
 									: '-'}">
 							</span> <span
 								th:if="${member.address2 != null
-									and !#strings.isEmpty(member.address2)}"
+									and !#strings.isEmpty(
+										member.address2)}"
 								th:text="' ' + ${member.address2}"> </span>
+
 						</dd>
+
 					</div>
+
 				</dl>
+
 			</div>
 
+
 			<div class="member-info-panel">
+
 				<div class="member-info-title">계정 상태</div>
+
 				<dl class="member-info-list">
+
 					<div class="info-row">
+
 						<dt>가입일</dt>
+
 						<dd
 							th:text="${member.inputDate != null
 								? #dates.format(
@@ -124,10 +224,14 @@
 								)
 								: '-'}">
 						</dd>
+
 					</div>
 
+
 					<div class="info-row">
+
 						<dt>최근 로그인</dt>
+
 						<dd
 							th:text="${member.lastLoginDate != null
 								? #dates.format(
@@ -136,10 +240,14 @@
 								)
 								: '-'}">
 						</dd>
+
 					</div>
 
+
 					<div class="info-row">
+
 						<dt>휴면 전환일</dt>
+
 						<dd
 							th:text="${member.humanDate != null
 								? #dates.format(
@@ -148,58 +256,103 @@
 								)
 								: '-'}">
 						</dd>
+
 					</div>
 
+
 					<div class="info-row">
+
 						<dt>마케팅 수신</dt>
+
 						<dd>
+
 							<span> 이메일 <strong
 								th:text="${member.emailReceive == 'Y'
 										? '동의'
 										: '미동의'}">
 							</strong>
-							</span> <span>&nbsp;/&nbsp;</span> <span> 문자 <strong
+							</span> <span> &nbsp;/&nbsp; </span> <span> 문자 <strong
 								th:text="${member.smsReceive == 'Y'
 										? '동의'
 										: '미동의'}">
 							</strong>
 							</span>
+
 						</dd>
+
 					</div>
+
 				</dl>
+
 			</div>
 
 		</section>
 
+
+		<!-- =========================
+		     예약 내역
+		========================= -->
+
 		<section class="member-reservation-panel">
+
 			<div class="member-info-title">예약 내역</div>
+
 			<table class="member-reservation-table">
+
 				<thead>
+
 					<tr>
+
 						<th>예약번호</th>
+
 						<th>클래스명</th>
+
 						<th>예약일</th>
+
 						<th>인원</th>
+
 						<th>결제금액</th>
+
 						<th>예약상태</th>
+
+						<th>관리</th>
+
 					</tr>
+
 				</thead>
+
+
 				<tbody>
+
 					<tr th:if="${#lists.isEmpty(reservations)}">
-						<td colspan="6" class="empty">예약 내역이 없습니다.</td>
+
+						<td colspan="7" class="empty">예약 내역이 없습니다.</td>
+
 					</tr>
+
+
 					<tr th:each="reservation : ${reservations}">
+
 						<td th:text="${reservation.reservationCode}"></td>
+
+
 						<td th:text="${reservation.className}"></td>
+
+
 						<td
-							th:text="${reservation.reservationDate != null
+							th:text="${reservation.reservationDate
+								!= null
 								? #dates.format(
 									reservation.reservationDate,
 									'yyyy.MM.dd'
 								)
 								: '-'}">
 						</td>
+
+
 						<td th:text="${reservation.peopleNumber}"></td>
+
+
 						<td
 							th:text="${reservation.amount != null
 								? #numbers.formatInteger(
@@ -210,64 +363,176 @@
 								: '-'}">
 						</td>
 
+
 						<td><span class="reservation-status"
 							th:text="${reservation.reservationStatus}"> </span></td>
+
+						<td>
+
+							<form class="reservation-cancel-form"
+								th:action="@{/admin/members/{memberCode}
+								/reservations/{reservationCode}
+								/cancel(
+									memberCode=
+										${member.memberCode},
+									reservationCode=
+										${reservation.reservationCode}
+								)}"
+								method="post">
+
+								<button type="button" class="reservation-cancel-btn"
+									th:disabled="${reservation.reservationStatus != '예약'}"
+									th:onclick="${reservation.reservationStatus == '예약'}
+            ? |confirmReservationCancel(
+                ${reservation.reservationCode},
+                '${reservation.className}',
+                '${#dates.format(reservation.reservationDate, 'yyyy.MM.dd')}'
+              )|
+            : null">
+									환불 취소</button>
+
+							</form>
+
+						</td>
+
 					</tr>
+
 				</tbody>
+
 			</table>
 
+
+			<!-- 예약 페이징 -->
+
 			<div class="pagination" th:if="${reservationPage.totalPage > 1}">
+
 				<a th:if="${reservationPage.startPage > 1}"
 					th:href="@{/admin/members/{code}(
 						code=${member.memberCode},
-						reservationPage=${reservationPage.startPage - 1}
+						reservationPage=
+						${reservationPage.startPage - 1}
 					)}">
+
 					이전 </a> <a
 					th:each="pageNum :
-						${#numbers.sequence(
-							reservationPage.startPage,
-							reservationPage.endPage
-						)}"
+					${#numbers.sequence(
+						reservationPage.startPage,
+						reservationPage.endPage
+					)}"
 					th:href="@{/admin/members/{code}(
 						code=${member.memberCode},
 						reservationPage=${pageNum}
 					)}"
 					th:text="${pageNum}"
-					th:classappend="${pageNum == reservationPage.currentPage}
+					th:classappend="${pageNum
+						== reservationPage.currentPage}
 						? ' active'
 						: ''">
-				</a> <a th:if="${reservationPage.endPage < reservationPage.totalPage}"
+				</a> <a
+					th:if="${reservationPage.endPage
+						< reservationPage.totalPage}"
 					th:href="@{/admin/members/{code}(
 						code=${member.memberCode},
-						reservationPage=${reservationPage.endPage + 1}
+						reservationPage=
+						${reservationPage.endPage + 1}
 					)}">
+
 					다음 </a>
+
 			</div>
+
 		</section>
+
+
+		<!-- =========================
+		     회원 상태 처리
+		========================= -->
+
 		<div class="member-action-area">
+
 			<form th:if="${member.status == '휴면'}"
-				th:action="@{/admin/members/{code}/status(code=${member.memberCode})}"
+				th:action="@{/admin/members/{code}/status(
+					code=${member.memberCode}
+				)}"
 				method="post">
+
 				<input type="hidden" name="status" value="정상">
+
 				<button type="submit" class="btn member-active-btn">휴면 해제</button>
+
 			</form>
+
+
 			<form th:if="${member.status == '정상'}"
-				th:action="@{/admin/members/{code}/status(code=${member.memberCode})}"
+				th:action="@{/admin/members/{code}/status(
+					code=${member.memberCode}
+				)}"
 				method="post">
+
 				<input type="hidden" name="status" value="정지">
+
 				<button type="submit" class="btn member-suspend-btn">회원 정지
+
 				</button>
+
 			</form>
+
+
 			<form th:if="${member.status == '정지'}"
-				th:action="@{/admin/members/{code}/status(code=${member.memberCode})}"
+				th:action="@{/admin/members/{code}/status(
+					code=${member.memberCode}
+				)}"
 				method="post">
+
 				<input type="hidden" name="status" value="정상">
+
 				<button type="submit" class="btn member-active-btn">정지 해제</button>
+
 			</form>
 
 		</div>
 
 	</main>
+
+
+	<!-- =========================
+	     환불 확인
+	========================= -->
+
+	<script>
+		document.querySelectorAll('.reservation-cancel-form').forEach(
+				function(form) {
+
+					form.addEventListener('submit', function(event) {
+
+						const button = form
+								.querySelector('.reservation-cancel-btn');
+
+						if (button.disabled) {
+
+							event.preventDefault();
+
+							return;
+						}
+
+						const reservationCode = button.dataset.reservationCode;
+
+						const className = button.dataset.className;
+
+						const reservationDate = button.dataset.reservationDate;
+
+						const message = '예약을 취소하고 ' + '환불 처리하시겠습니까?' + '\\n\\n'
+								+ '예약번호 : ' + reservationCode + '\\n'
+								+ '클래스명 : ' + className + '\\n' + '예약일 : '
+								+ reservationDate;
+
+						if (!confirm(message)) {
+
+							event.preventDefault();
+						}
+					});
+				});
+	</script>
 
 </body>
 

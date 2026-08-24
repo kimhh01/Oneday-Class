@@ -30,7 +30,7 @@ public interface AdminClassDAO {
 
 	List<AdminFinishedProductDTO> selectFinishedProductList(@Param("classCode") int classCode);
 
-	int updateClassStatus(@Param("classCode") int classCode, @Param("dto") AdminClassStatusUpdateDTO dto);
+	int updateClassStatus(@Param("classCode") int classCode);
 
 	int updateClassApproval(@Param("classCode") int classCode);
 

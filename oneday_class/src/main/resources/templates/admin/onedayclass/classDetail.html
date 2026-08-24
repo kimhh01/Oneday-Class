@@ -10,222 +10,228 @@
 </head>
 <body>
 	<div class="shell">
-		<aside th:replace="~{admin/fragments/sideMenu :: sideMenu('onedayclass')}"></aside>
+		<aside
+			th:replace="~{admin/fragments/sideMenu :: sideMenu('onedayclass')}"></aside>
 		<main>
 			<div class="detail-head">
 				<h1 class="page-title" th:text="${clazz.className}">클래스 상세</h1>
 				<div class="toolbar">
 					<a th:href="@{/admin/onedayclass}">목록으로</a>
 					<form
-					th:action="@{/admin/onedayclass/{id}/status(id=${clazz.classCode})}"
-					method="post">
-					<input type="hidden" name="classStatus" value="준비중">
-					<button type="submit"
-						class="class-action-btn sale-stop-btn"
-						th:disabled="${clazz.classStatus == '폐강'}">
-						판매 중지
-					</button>
-				</form>
+						th:action="@{/admin/onedayclass/{id}/status(id=${clazz.classCode})}"
+						method="post">
+
+						<button type="submit" class="class-action-btn sale-stop-btn"
+							th:disabled="${clazz.approvalStatus != '승인'}">판매 중지</button>
+
+					</form>
 				</div>
 			</div>
 			<section class="detail-section">
 				<h2>기본 정보</h2>
 				<div class="detail-body">
-				<div class="grid">
-					<div class="info">
-						<small>작가</small><b th:text="${clazz.writerName}"></b>
+					<div class="grid">
+						<div class="info">
+							<small>작가</small><b th:text="${clazz.writerName}"></b>
+						</div>
+						<div class="info">
+							<small>활동명</small><b th:text="${clazz.workshopName}"></b>
+						</div>
+						<div class="info">
+							<small>카테고리</small><b th:text="${clazz.categoryName}"></b>
+						</div>
+						<div class="info">
+							<small>지역</small><b th:text="${clazz.region}"></b>
+						</div>
+						<div class="info">
+							<small>소요시간</small><b th:text="${clazz.runningTime}+'분'"></b>
+						</div>
+						<div class="info">
+							<small>상태</small><b th:text="${clazz.classStatus}"></b>
+						</div>
+						<div class="info full">
+							<small>한 줄 소개</small><b th:text="${clazz.singleIntroduce}"></b>
+						</div>
 					</div>
-					<div class="info">
-						<small>활동명</small><b th:text="${clazz.workshopName}"></b>
-					</div>
-					<div class="info">
-						<small>카테고리</small><b th:text="${clazz.categoryName}"></b>
-					</div>
-					<div class="info">
-						<small>지역</small><b th:text="${clazz.region}"></b>
-					</div>
-					<div class="info">
-						<small>소요시간</small><b th:text="${clazz.runningTime}+'분'"></b>
-					</div>
-					<div class="info">
-						<small>상태</small><b th:text="${clazz.classStatus}"></b>
-					</div>
-					<div class="info full">
-						<small>한 줄 소개</small><b th:text="${clazz.singleIntroduce}"></b>
-					</div>
+					<p class="text" th:text="${clazz.introduce}"></p>
+
 				</div>
-				<p class="text" th:text="${clazz.introduce}"></p>
-			
-				</div></section>
+			</section>
 			<section class="detail-section">
 				<h2>가격 및 인원</h2>
 				<div class="detail-body">
-				<div class="grid five">
-					<div class="info">
-						<small>판매가</small><b
-							th:text="${#numbers.formatInteger(clazz.salePrice,0,'COMMA')}+'원'"></b>
+					<div class="grid five">
+						<div class="info">
+							<small>판매가</small><b
+								th:text="${#numbers.formatInteger(clazz.salePrice,0,'COMMA')}+'원'"></b>
+						</div>
+						<div class="info">
+							<small>실제가</small><b
+								th:text="${#numbers.formatInteger(clazz.marketPrice,0,'COMMA')}+'원'"></b>
+						</div>
+						<div class="info">
+							<small>할인율</small><b th:text="${clazz.discountRate}+'%'"></b>
+						</div>
+						<div class="info">
+							<small>최소 인원</small><b th:text="${clazz.minimumPeople}+'명'"></b>
+						</div>
+						<div class="info">
+							<small>최대 인원</small><b th:text="${clazz.maximumPeople}+'명'"></b>
+						</div>
 					</div>
-					<div class="info">
-						<small>실제가</small><b
-							th:text="${#numbers.formatInteger(clazz.marketPrice,0,'COMMA')}+'원'"></b>
-					</div>
-					<div class="info">
-						<small>할인율</small><b th:text="${clazz.discountRate}+'%'"></b>
-					</div>
-					<div class="info">
-						<small>최소 인원</small><b th:text="${clazz.minimumPeople}+'명'"></b>
-					</div>
-					<div class="info">
-						<small>최대 인원</small><b th:text="${clazz.maximumPeople}+'명'"></b>
-					</div>
+
 				</div>
-			
-				</div></section>
+			</section>
 			<section class="detail-section">
 				<h2>대표사진</h2>
 				<div class="detail-body">
-				<div class="images">
-					<img th:each="i:${images}" th:if="${i.imageType=='대표'}"
-						th:src="${i.imagePath}">
+					<div class="images">
+						<img th:each="i:${images}" th:if="${i.imageType=='대표'}"
+							th:src="${i.imagePath}">
+					</div>
+
 				</div>
-			
-				</div></section>
+			</section>
 			<section class="detail-section">
 				<h2>클래스 태그</h2>
 				<div class="detail-body">
-				<div class="tags">
-					<span th:each="t:${tags}" th:text="${'# '+t.tagName}"></span>
+					<div class="tags">
+						<span th:each="t:${tags}" th:text="${'# '+t.tagName}"></span>
+					</div>
+
 				</div>
-			
-				</div></section>
+			</section>
 			<section class="detail-section">
 				<h2>모집 및 스케줄</h2>
 				<div class="detail-body">
-				<div class="grid three">
-					<div class="info">
-						<small>모집 시작일</small><b
-							th:text="${clazz.recruitmentStartDate!=null?#dates.format(clazz.recruitmentStartDate,'yyyy.MM.dd'):'-'}"></b>
+					<div class="grid three">
+						<div class="info">
+							<small>모집 시작일</small><b
+								th:text="${clazz.recruitmentStartDate!=null?#dates.format(clazz.recruitmentStartDate,'yyyy.MM.dd'):'-'}"></b>
+						</div>
+						<div class="info">
+							<small>모집 종료일</small><b
+								th:text="${clazz.recruitmentEndDate!=null?#dates.format(clazz.recruitmentEndDate,'yyyy.MM.dd'):'-'}"></b>
+						</div>
+						<div class="info">
+							<small>반복 타입</small><b th:text="${clazz.periodType}"></b>
+						</div>
 					</div>
-					<div class="info">
-						<small>모집 종료일</small><b
-							th:text="${clazz.recruitmentEndDate!=null?#dates.format(clazz.recruitmentEndDate,'yyyy.MM.dd'):'-'}"></b>
-					</div>
-					<div class="info">
-						<small>반복 타입</small><b th:text="${clazz.periodType}"></b>
-					</div>
+					<table>
+						<thead>
+							<tr>
+								<th>날짜</th>
+								<th>시간</th>
+								<th>최소 인원</th>
+								<th>최대 인원</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="s:${schedules}">
+								<td
+									th:text="${s.classDate!=null?#dates.format(s.classDate,'yyyy.MM.dd'):'-'}"></td>
+								<td th:text="${s.startTime}+' ~ '+${s.endTime}"></td>
+								<td th:text="${s.minimumPeople}+'명'"></td>
+								<td th:text="${s.maximumPeople}+'명'"></td>
+							</tr>
+						</tbody>
+					</table>
+
 				</div>
-				<table>
-					<thead>
-						<tr>
-							<th>날짜</th>
-							<th>시간</th>
-							<th>최소 인원</th>
-							<th>최대 인원</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr th:each="s:${schedules}">
-							<td
-								th:text="${s.classDate!=null?#dates.format(s.classDate,'yyyy.MM.dd'):'-'}"></td>
-							<td th:text="${s.startTime}+' ~ '+${s.endTime}"></td>
-							<td th:text="${s.minimumPeople}+'명'"></td>
-							<td th:text="${s.maximumPeople}+'명'"></td>
-						</tr>
-					</tbody>
-				</table>
-			
-				</div></section>
+			</section>
 			<section class="detail-section">
 				<h2>클래스 완성작</h2>
 				<div class="detail-body">
-				<div class="images">
-					<img th:each="p:${finishedProducts}"
-						th:src="${p.finishedProductImage}">
+					<div class="images">
+						<img th:each="p:${finishedProducts}"
+							th:src="${p.finishedProductImage}">
+					</div>
+					<p class="text" th:text="${clazz.finishedProductDescription}"></p>
+
 				</div>
-				<p class="text" th:text="${clazz.finishedProductDescription}"></p>
-			
-				</div></section>
+			</section>
 			<section class="detail-section">
 				<h2>재료</h2>
 				<div class="detail-body">
-				<div class="cards">
-					<div th:each="m:${materials}">
-						<b th:text="${m.materialName}"></b>
-						<p th:text="${m.materialContent}"></p>
+					<div class="cards">
+						<div th:each="m:${materials}">
+							<b th:text="${m.materialName}"></b>
+							<p th:text="${m.materialContent}"></p>
+						</div>
 					</div>
+
 				</div>
-			
-				</div></section>
+			</section>
 			<section class="detail-section">
 				<h2>추가 제공사항</h2>
 				<div class="detail-body">
-				<div class="tags">
-					<span th:each="o:${offerings}" th:text="${o.offeringName}"></span>
+					<div class="tags">
+						<span th:each="o:${offerings}" th:text="${o.offeringName}"></span>
+					</div>
+					<div class="cards">
+						<div th:each="a:${additionalInfos}" th:text="${a.content}"></div>
+					</div>
+
 				</div>
-				<div class="cards">
-					<div th:each="a:${additionalInfos}" th:text="${a.content}"></div>
-				</div>
-			
-				</div></section>
+			</section>
 			<section class="detail-section">
 				<h2>작품 갤러리</h2>
 				<div class="detail-body">
-				<div class="images">
-					<img th:each="i:${images}" th:if="${i.imageType=='갤러리'}"
-						th:src="${i.imagePath}">
+					<div class="images">
+						<img th:each="i:${images}" th:if="${i.imageType=='갤러리'}"
+							th:src="${i.imagePath}">
+					</div>
+
 				</div>
-			
-				</div></section>
+			</section>
 			<section class="detail-section">
 				<h2>커리큘럼</h2>
 				<div class="detail-body">
-				<div class="curriculum">
-					<article th:each="c:${curriculums}">
-						<b class="step" th:text="${c.stepNumber}+'단계'"></b>
-						<div>
-							<strong th:text="${c.curriculumTitle}"></strong>
-							<p th:text="${c.curriculumDescription}"></p>
-						</div>
-						<img th:if="${c.curriculumImage!=null}"
-							th:src="${c.curriculumImage}">
-					</article>
+					<div class="curriculum">
+						<article th:each="c:${curriculums}">
+							<b class="step" th:text="${c.stepNumber}+'단계'"></b>
+							<div>
+								<strong th:text="${c.curriculumTitle}"></strong>
+								<p th:text="${c.curriculumDescription}"></p>
+							</div>
+							<img th:if="${c.curriculumImage!=null}"
+								th:src="${c.curriculumImage}">
+						</article>
+					</div>
+
 				</div>
-			
-				</div></section>
+			</section>
 			<section class="detail-section">
 				<h2>반려 메시지</h2>
 				<div class="detail-body">
-				<form
-					th:action="@{/admin/onedayclass/{id}/reject(id=${clazz.classCode})}"
-					method="post">
-					<textarea name="rejectMessage"
-						required
-						th:disabled="${clazz.approvalStatus == '승인'}"
-						placeholder="클래스 반려 사유 또는 수정 요청사항을 입력하세요."></textarea>
-					<div class="right">
-						<button type="submit"
-							class="class-action-btn danger"
-							th:disabled="${clazz.approvalStatus == '승인'}">
-							반려 처리
-						</button>
-					</div>
-				</form>
-			
-				</div></section>
+					<form
+						th:action="@{/admin/onedayclass/{id}/reject(id=${clazz.classCode})}"
+						method="post">
+						<textarea name="rejectMessage" required
+							th:disabled="${clazz.approvalStatus == '승인'}"
+							placeholder="클래스 반려 사유 또는 수정 요청사항을 입력하세요."></textarea>
+						<div class="right">
+							<button type="submit" class="class-action-btn danger"
+								th:disabled="${clazz.approvalStatus == '승인'}">반려 처리</button>
+						</div>
+					</form>
+
+				</div>
+			</section>
 			<section class="detail-section">
 				<h2>승인 처리</h2>
 				<div class="detail-body">
-				<form class="right"
-					th:action="@{/admin/onedayclass/{id}/approve(id=${clazz.classCode})}"
-					method="post">
-					<button type="submit"
-						class="class-action-btn approve-btn"
-						th:disabled="${clazz.approvalStatus == '승인'}">
-						클래스 승인
-					</button>
-				</form>
-			
-				</div></section>
+					<form class="right"
+						th:action="@{/admin/onedayclass/{id}/approve(id=${clazz.classCode})}"
+						method="post">
+
+						<button type="submit" class="class-action-btn approve-btn"
+							th:disabled="${clazz.approvalStatus != '대기'}">클래스 승인</button>
+
+					</form>
+
+				</div>
+			</section>
 		</main>
 	</div>
 </body>

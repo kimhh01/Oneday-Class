@@ -22,4 +22,9 @@ public interface AdminMemberDAO {
 
 	public int updateMemberStatus(AdminMemberStatusUpdateDTO statusUpdateDTO);
 
+	AdminMemberReservationDTO selectReservationForCancel(@Param("reservationCode") int reservationCode);
+
+	int updatePaymentRefund(@Param("reservationCode") int reservationCode);
+
+	int updateReservationCancel(@Param("reservationCode") int reservationCode);
 }

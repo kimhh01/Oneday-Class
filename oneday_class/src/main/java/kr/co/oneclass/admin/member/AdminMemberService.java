@@ -18,4 +18,6 @@ public interface AdminMemberService {
 
 	public boolean updateMemberStatus(AdminMemberStatusUpdateDTO statusUpdateDTO);
 
+	// 예약 취소 + 결제 환불
+	public boolean cancelReservation(int reservationCode);
 }

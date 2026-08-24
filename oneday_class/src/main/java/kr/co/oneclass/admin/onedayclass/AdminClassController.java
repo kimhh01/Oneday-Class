@@ -49,14 +49,16 @@ public class AdminClassController {
 		return "admin/onedayclass/classDetail";
 	}
 
+	// 판매 중지
 	@PostMapping("/{classCode}/status")
-	public String changeClassStatus(@PathVariable int classCode, AdminClassStatusUpdateDTO dto) {
+	public String changeClassStatus(@PathVariable int classCode) {
 
-		classService.changeClassStatus(classCode, dto);
+		classService.updateClassStatus(classCode);
 
 		return "redirect:/admin/onedayclass/" + classCode;
 	}
 
+	// 클래스 승인
 	@PostMapping("/{classCode}/approve")
 	public String approveClass(@PathVariable int classCode) {
 
@@ -65,6 +67,7 @@ public class AdminClassController {
 		return "redirect:/admin/onedayclass/" + classCode;
 	}
 
+	// 클래스 반려
 	@PostMapping("/{classCode}/reject")
 	public String rejectClass(@PathVariable int classCode, AdminClassReviewDTO dto) {
 
