@@ -28,8 +28,6 @@
              WHERE ci.CLASS_CODE = c.CLASS_CODE 
                AND ROWNUM = 1) as mainImage
         FROM CLASS c
-        join class_repeat_rule crr on crr.class_code = c.class_code
-        JOIN SCHEDULE s ON s.repeat_rule_code = crr.repeat_rule_code
         <where>
             <!-- 대분류 카테고리 -->
             <if test="categoryCode != null and categoryCode > 0">
@@ -54,10 +52,30 @@
             
             <!-- 당일 예약 -->
 			<if test="sameDayOnly">
-				<!-- 오늘 날짜 조건 (TRUNC 사용) -->
-        AND s.class_date = TO_CHAR(SYSDATE, 'YYYY-MM-DD')
-        AND s.START_TIME > TO_CHAR(SYSDATE + (2 / 24), 'HH24:MI')
-        AND s.remaining_people &lt; s.max_people
+				AND EXISTS (
+					SELECT 1
+					FROM class_repeat_rule crr
+					JOIN SCHEDULE s ON s.repeat_rule_code = crr.repeat_rule_code
+					WHERE crr.class_code = c.class_code
+					  AND s.class_date = TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+					  AND s.START_TIME > TO_CHAR(SYSDATE + (2 / 24), 'HH24:MI')
+					  AND s.remaining_people > 0
+				)
+			</if>
+			<!-- 주말 예약 (이번 주 토/일요일 스케줄 조회) -->
+        <if test="sameWeekOnly">
+				AND EXISTS (
+					SELECT 1
+					FROM class_repeat_rule crr
+					JOIN SCHEDULE s ON s.repeat_rule_code = crr.repeat_rule_code
+					WHERE crr.class_code = c.class_code
+					  AND s.class_date IN (
+						  TO_CHAR(TRUNC(SYSDATE, 'IW') + 5, 'YYYY-MM-DD'), /* 이번 주 토요일 */
+						  TO_CHAR(TRUNC(SYSDATE, 'IW') + 6, 'YYYY-MM-DD')  /* 이번 주 일요일 */
+					  )
+					  AND s.class_date >= TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+					  AND s.remaining_people > 0
+				)
 			</if>
          <!-- 최소 수강 인원 (CLASS_REPEAT_RULE을 거쳐 SCHEDULE 조회) -->
             <if test="minPeople != null and minPeople > 0">

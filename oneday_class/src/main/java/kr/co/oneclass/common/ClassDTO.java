@@ -42,4 +42,6 @@ import lombok.Getter;
 		private List<TagDTO> tagList; 
 		private String registerStep;
 		private List<MaterialDTO> materialList;
+		private String classDate; // 스케줄 날짜 목록 (예: "2026-08-11,2026-08-26")
+		private String startTime; // 스케줄 시간 목록 (예: "14:00,15:00")
 	}

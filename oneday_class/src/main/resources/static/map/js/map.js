@@ -109,6 +109,9 @@ document.addEventListener("DOMContentLoaded", function() {
     // -------------------------------------------------------------
     // 3. 지도의 현재 범위(Bounds) + 필터 조건 동시 필터링
     // -------------------------------------------------------------
+	// -------------------------------------------------------------
+	// 3. 지도의 현재 범위(Bounds) + 필터 조건 동시 필터링
+	// -------------------------------------------------------------
 	function filterClassesByMapBounds() {
 	    const bounds = map.getBounds();
 	    const swLatLng = bounds.getSouthWest();
@@ -125,25 +128,37 @@ document.addEventListener("DOMContentLoaded", function() {
 	        // 1. 지도 화면 영역(Bounds) 내 존재 여부
 	        const isInMapBounds = (item.lat >= minLat && item.lat <= maxLat && item.lng >= minLng && item.lng <= maxLng);
 
-	        // 2. 카테고리 필터
+	        // 2. 지역 (동/구) 필터링
+	        const targetAddress = item.address || item.oldAddress || '';
+	        const isMatchingRegion = !selectedDong || targetAddress.includes(selectedDong);
+
+	        // 3. 카테고리 필터링
 	        const isMatchingCategory = !selectedCategoryCode ||
 	            (String(item.categoryCode) === String(selectedCategoryCode) ||
 	             String(item.parentCategoryCode) === String(selectedCategoryCode));
 
-	        // 3. 날짜 필터 (classDate 또는 scheduleDate 등 실제 스케줄 날짜 필드와 비교)
-	        // item.classDate, item.scheduleDate, item.writeDate 중 존재하는 날짜 데이터 참조
-	        const rawDate = item.classDate || item.scheduleDate || item.writeDate || '';
-	        const targetDateStr = String(rawDate);
-	        
-	        const isMatchingDate = !selectedDate || targetDateStr.includes(selectedDate);
+	        // ---------------------------------------------------------
+	        // 4. 날짜 및 시간 필터링 (스케줄 리스트 1:1 정밀 검사)
+	        // ---------------------------------------------------------
+	        const dateList = item.classDate ? String(item.classDate).split(',') : [];
+	        const timeList = item.startTime ? String(item.startTime).split(',') : [];
 
-	        // 4. 시간 필터
-	        const rawTime = item.startTime || item.classTime || '';
-	        const targetTimeStr = String(rawTime);
-	        
-	        const isMatchingTime = !selectedTime || targetTimeStr.includes(selectedTime);
+	        let isMatchingSchedule = true;
 
-	        return isInMapBounds && isMatchingCategory && isMatchingDate && isMatchingTime;
+	        if (selectedDate || selectedTime) {
+	            // 날짜와 시간 조건이 하나라도 걸려있으면 스케줄 목록 중 만족하는 스케줄이 1개라도 있는지 확인
+	            isMatchingSchedule = dateList.some((dStr, idx) => {
+	                const trimmedDate = dStr.trim();
+	                const trimmedTime = timeList[idx] ? timeList[idx].trim() : '';
+
+	                const datePass = !selectedDate || trimmedDate.includes(selectedDate);
+	                const timePass = !selectedTime || trimmedTime.includes(selectedTime);
+
+	                return datePass && timePass;
+	            });
+	        }
+
+	        return isInMapBounds && isMatchingRegion && isMatchingCategory && isMatchingSchedule;
 	    });
 
 	    renderMarkersAndSidebar(filteredClasses);
@@ -240,38 +255,43 @@ document.addEventListener("DOMContentLoaded", function() {
         regionModal?.classList.add('hidden');
     });
 
-    listSido?.addEventListener('click', function(e) {
-        const target = e.target.closest('li');
-        if (!target) return;
+	listSido?.addEventListener('click', function(e) {
+	    const target = e.target.closest('li');
+	    if (!target) return;
 
-        listSido.querySelectorAll('li').forEach(el => el.classList.remove('active'));
-        target.classList.add('active');
+	    listSido.querySelectorAll('li').forEach(el => el.classList.remove('active'));
+	    target.classList.add('active');
 
-        selectedSido = target.getAttribute('data-sido') || target.innerText.trim();
-        selectedSigungu = "";
-        selectedDong = "";
+	    selectedSido = target.getAttribute('data-sido') || "";
+	    selectedSigungu = "";
+	    selectedDong = "";
 
-        listDong.innerHTML = '<li class="active" data-dong="선택안함">선택안함</li>';
+	    // 하위 구/동 선택 초기화
+	    listSigungu.innerHTML = '<li class="active" data-sigungu="">선택안함</li>';
+	    listDong.innerHTML = '<li class="active" data-dong="">선택안함</li>';
 
-        ps.keywordSearch(`${selectedSido}`, function(data, status) {
-            listSigungu.innerHTML = '<li class="active" data-sigungu="선택안함">선택안함</li>';
-            if (status === kakao.maps.services.Status.OK) {
-                const sigunguSet = new Set();
-                data.forEach(place => {
-                    const parts = place.address_name.split(' ');
-                    if (parts.length > 1 && (parts[1].endsWith('구') || parts[1].endsWith('군') || parts[1].endsWith('시'))) {
-                        sigunguSet.add(parts[1]);
-                    }
-                });
-                sigunguSet.forEach(sigungu => {
-                    const li = document.createElement('li');
-                    li.setAttribute('data-sigungu', sigungu);
-                    li.textContent = sigungu;
-                    listSigungu.appendChild(li);
-                });
-            }
-        });
-    });
+	    // 시/도가 '전체'가 아니고 특정 지역일 때만 카카오 키워드 검색 실행
+	    if (selectedSido) {
+	        ps.keywordSearch(`${selectedSido}`, function(data, status) {
+	            listSigungu.innerHTML = '<li class="active" data-sigungu="">선택안함</li>';
+	            if (status === kakao.maps.services.Status.OK) {
+	                const sigunguSet = new Set();
+	                data.forEach(place => {
+	                    const parts = place.address_name.split(' ');
+	                    if (parts.length > 1 && (parts[1].endsWith('구') || parts[1].endsWith('군') || parts[1].endsWith('시'))) {
+	                        sigunguSet.add(parts[1]);
+	                    }
+	                });
+	                sigunguSet.forEach(sigungu => {
+	                    const li = document.createElement('li');
+	                    li.setAttribute('data-sigungu', sigungu);
+	                    li.textContent = sigungu;
+	                    listSigungu.appendChild(li);
+	                });
+	            }
+	        });
+	    }
+	});
 
     listSigungu?.addEventListener('click', function(e) {
         const target = e.target.closest('li');
@@ -323,15 +343,21 @@ document.addEventListener("DOMContentLoaded", function() {
 	btnRegionSearch?.addEventListener('click', function(e) {
 	    e.stopPropagation();
 	    
-	    // 시/도가 선택되지 않았거나 모두 '선택안함'인 경우 -> '지역 전체'로 리셋
+	    // 시/도가 빈값(전체)이거나 '선택안함'인 경우 -> '지역 전체'로 리셋
 	    if (!selectedSido || selectedSido === '선택안함') {
+	        selectedSido = "";
+	        selectedSigungu = "";
+	        selectedDong = "";
+
 	        const textSpan = btnRegionToggle.querySelector('.select-text');
 	        if (textSpan) textSpan.innerText = "지역 전체";
+
 	        regionModal?.classList.add('hidden');
-	        filterClassesByMapBounds(); // 지도 범위 기준으로 다시 필터링
+	        filterClassesByMapBounds(); // 지역 조건 없이 현재 지도 범위 기준 조회
 	        return;
 	    }
 
+	    // 특정 지역(서울, 경기 등)을 선택한 경우 Geocoder 이동
 	    const fullAddress = `${selectedSido} ${selectedSigungu} ${selectedDong}`.trim();
 
 	    geocoder.addressSearch(fullAddress, function(result, status) {
@@ -345,6 +371,10 @@ document.addEventListener("DOMContentLoaded", function() {
 	            if (textSpan) {
 	                textSpan.innerText = `${selectedSigungu || selectedSido} ${selectedDong}`.trim();
 	            }
+
+	            setTimeout(() => {
+	                filterClassesByMapBounds();
+	            }, 100);
 	        } else {
 	            alert("해당 지역의 위치를 찾을 수 없습니다.");
 	        }
@@ -547,33 +577,33 @@ document.addEventListener("DOMContentLoaded", function() {
         categoryModal?.classList.add('hidden');
     });
 
-    listParentCategory?.addEventListener('click', function(e) {
-        const target = e.target.closest('li');
-        if (!target) return;
+	listParentCategory?.addEventListener('click', function(e) {
+	    const target = e.target.closest('li');
+	    if (!target) return;
 
-        listParentCategory.querySelectorAll('li').forEach(el => el.classList.remove('active'));
-        target.classList.add('active');
+	    listParentCategory.querySelectorAll('li').forEach(el => el.classList.remove('active'));
+	    target.classList.add('active');
 
-        const parentCode = target.getAttribute('data-code');
-        const parentName = target.innerText.trim();
+	    const parentCode = target.getAttribute('data-code');
+	    const parentName = target.innerText.trim();
 
-        listChildCategory.innerHTML = `<li class="active" data-code="${parentCode || ''}" data-name="${parentName}">전체</li>`;
+	    // parentCode가 빈값이면 "전체" 선택된 것으로 처리
+	    selectedCategoryCode = parentCode || "";
+	    selectedCategoryName = parentCode ? parentName : "카테고리 전체";
 
-        selectedCategoryCode = parentCode || "";
-        selectedCategoryName = parentCode ? parentName : "카테고리 전체";
+	    listChildCategory.innerHTML = `<li class="active" data-code="${parentCode || ''}" data-name="${selectedCategoryName}">전체</li>`;
 
-        if (!parentCode) return;
+	    if (!parentCode) return;
 
-        const subCategories = allCategories.filter(cat => String(cat.parentCategoryCode) === String(parentCode));
-
-        subCategories.forEach(sub => {
-            const li = document.createElement('li');
-            li.setAttribute('data-code', sub.categoryCode);
-            li.setAttribute('data-name', sub.categoryName);
-            li.textContent = sub.categoryName;
-            listChildCategory.appendChild(li);
-        });
-    });
+	    const subCategories = allCategories.filter(cat => String(cat.parentCategoryCode) === String(parentCode));
+	    subCategories.forEach(sub => {
+	        const li = document.createElement('li');
+	        li.setAttribute('data-code', sub.categoryCode);
+	        li.setAttribute('data-name', sub.categoryName);
+	        li.textContent = sub.categoryName;
+	        listChildCategory.appendChild(li);
+	    });
+	});
 
     listChildCategory?.addEventListener('click', function(e) {
         const target = e.target.closest('li');

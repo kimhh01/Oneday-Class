@@ -248,12 +248,29 @@ body.map-page-body {
     gap: 0.75rem;
 }
 
+/* 커리큘럼 아이템 (세로 정렬로 변경) */
 .curriculum-item {
     display: flex;
-    gap: 1rem;
+    flex-direction: column; /* STEP/글/이미지를 위에서 아래로 배치 */
+    gap: 0.75rem;
     background-color: var(--gray-bg);
-    padding: 1rem;
-    border-radius: 4px;
+    padding: 1.25rem;
+    border-radius: 8px;
+}
+
+/* 커리큘럼 이미지 박스 및 이미지 크기 설정 */
+.curr-img-box {
+    width: 100%;
+    margin-top: 0.5rem;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.curr-img {
+    width: 100%;
+    max-height: 280px; /* 너무 커지지 않도록 적정 세로 길이 제한 */
+    object-fit: cover;  /* 비율을 유지하며 상자에 맞춤 */
+    display: block;
 }
 
 .curr-step {
@@ -525,8 +542,9 @@ body.map-page-body {
 
 /* 튜터 프로필 카드 */
 .tutor-profile-card {
-    background-color: #f8f0ff;
-    border-radius: 8px;
+    background-color: #f0fdf4; /* 연한 연두색 배경 */
+    border: 1px solid #bbf7d0; /* 은은한 연두색 테두리 */
+    border-radius: 12px;
     padding: 2.5rem 1.5rem;
     text-align: center;
 }
