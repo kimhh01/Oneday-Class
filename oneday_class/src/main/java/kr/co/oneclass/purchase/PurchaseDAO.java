@@ -29,4 +29,7 @@ public interface PurchaseDAO {
      * 4. 결제 테이블 상태 변경 ('환불완료', REFUND=AMOUNT, REFUND_DATE=SYSDATE)
      */
     int updatePaymentStatusRefund(@Param("reservationCode") String reservationCode);
+    
+    // 지나간 예약 상태 일괄 업데이트
+    int updateExpiredReservationStatus();
 }

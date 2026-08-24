@@ -126,5 +126,15 @@
 	        refund_date = SYSDATE
 	    WHERE reservation_code = TO_NUMBER(#{reservationCode})
 	</update>
+	
+	<!-- 지나간 예약을 DB에서 '수강완료'로 변경 -->
+	<update id="updateExpiredReservationStatus">
+	    UPDATE reservation
+	    SET status = '수강완료'
+	    WHERE reservation_date &lt; SYSDATE
+	      AND status NOT LIKE '%취소%'
+	      AND status NOT LIKE '%환불%'
+	      AND status != '수강완료'
+	</update>
 
 </mapper>
