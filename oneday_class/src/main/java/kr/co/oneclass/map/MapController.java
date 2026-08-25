@@ -31,6 +31,7 @@ public class MapController {
         
         model.addAttribute("classList", classList);
         model.addAttribute("categoryList", categoryList);
+        model.addAttribute("searchDTO", searchDTO);
         
         return "map/map";
     }

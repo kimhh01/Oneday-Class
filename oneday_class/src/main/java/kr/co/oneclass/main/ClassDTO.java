@@ -16,11 +16,11 @@ public class ClassDTO {
     private int desiredPrice;//희망가격 ->(희망가격/가격)x100으로 할인율표기
     
 
- // 정가(price) 대비 희망/할인가(desiredPrice)의 할인율 (%) 계산
+ // 정가(desiredPrice) 대비 최종 판매가(price)의 할인율 (%) 계산
     public int getDiscountRate() {
-        // 정가(price)가 할인가(desiredPrice)보다 클 때만 계산 진행
-        if (this.price > 0 && this.desiredPrice > 0 && this.price > this.desiredPrice) {
-            return (int) Math.round((1.0 - ((double) this.desiredPrice / this.price)) * 100);
+        // 정가(desiredPrice)가 존재하고, 판매가(price)보다 클 때만 계산 진행
+        if (this.desiredPrice > 0 && this.price > 0 && this.desiredPrice > this.price) {
+            return (int) Math.round((1.0 - ((double) this.price / this.desiredPrice)) * 100);
         }
         return 0;
     }

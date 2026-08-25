@@ -31,11 +31,14 @@
 
 			<!-- 1) 지역 선택 드롭다운 -->
 			<div class="filter-dropdown-container">
-				<button id="btn-region-toggle" class="filter-select">
-					<span class="icon">📍</span> 
-					<span class="select-text">지역 전체</span>
-					<span class="arrow">∨</span>
-				</button>
+			
+			<button id="btn-region-toggle" class="filter-select">
+    <span class="icon">📍</span> 
+    <span class="select-text" 
+          id="regionSelectText"
+          th:text="${searchDTO != null and searchDTO.keyword != null and searchDTO.keyword != '' ? searchDTO.keyword : (searchDTO != null and searchDTO.dong != null and searchDTO.dong != '' ? searchDTO.dong : '지역 전체')}">지역 전체</span>
+    <span class="arrow">∨</span>
+</button>
 
 				<!-- 지역 선택 모달 -->
 				<div id="region-modal" class="region-modal-container hidden">
@@ -281,6 +284,7 @@
 		/*<![CDATA[*/
 		const classListData = /*[[${classList}]]*/[];
 		const categoryListData = /*[[${categoryList}]]*/[];
+		const searchDTOData = /*[[${searchDTO}]]*/ {};
 		/*]]>*/
 	</script>
 

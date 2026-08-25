@@ -34,6 +34,13 @@
             c.write_date AS writeDate,
             c.register_step AS registerStep,
             
+            /* 대표 이미지 (SORT_ORDER = 1) */
+            (SELECT ci.image 
+             FROM CLASS_IMG ci 
+             WHERE ci.class_code = c.class_code 
+               AND ci.sort_order = 1 
+               AND ROWNUM = 1) AS mainImage,
+            
             /* 스케줄 날짜 목록 (YYYY-MM-DD 형태로 변환하여 쉼표로 연결) */
             (SELECT LISTAGG(TO_CHAR(s.class_date, 'YYYY-MM-DD'), ',') WITHIN GROUP (ORDER BY s.class_date)
              FROM class_repeat_rule crr
@@ -47,42 +54,43 @@
              WHERE crr.class_code = c.class_code) AS startTime
 
             <if test="lat != null and lng != null">
-                , ( 6371 * ACOS( COS( #{lat} * 3.141592653589793 / 180 ) * COS( lat * 3.141592653589793 / 180 ) 
-                * COS( (lng * 3.141592653589793 / 180) - (#{lng} * 3.141592653589793 / 180) ) 
-                + SIN( #{lat} * 3.141592653589793 / 180 ) * SIN( lat * 3.141592653589793 / 180 ) ) ) AS distance
+                , ( 6371 * ACOS( COS( #{lat} * 3.141592653589793 / 180 ) * COS( c.lat * 3.141592653589793 / 180 ) 
+                * COS( (c.lng * 3.141592653589793 / 180) - (#{lng} * 3.141592653589793 / 180) ) 
+                + SIN( #{lat} * 3.141592653589793 / 180 ) * SIN( c.lat * 3.141592653589793 / 180 ) ) ) AS distance
             </if>
         FROM class c
 		LEFT JOIN category cat ON c.category_code = cat.category_code
         <where>
-        	AND c.status = '모집중'
+        	c.status = '모집중'
+
             <!-- 1) 내 위치 기준 N km 반경 내 검색 -->
             <if test="lat != null and lng != null">
-                AND ( 6371 * ACOS( COS( #{lat} * 3.141592653589793 / 180 ) * COS( lat * 3.141592653589793 / 180 ) 
-                    * COS( (lng * 3.141592653589793 / 180) - (#{lng} * 3.141592653589793 / 180) ) 
-                    + SIN( #{lat} * 3.141592653589793 / 180 ) * SIN( lat * 3.141592653589793 / 180 ) ) ) &lt;= #{distance}
+                AND ( 6371 * ACOS( COS( #{lat} * 3.141592653589793 / 180 ) * COS( c.lat * 3.141592653589793 / 180 ) 
+                    * COS( (c.lng * 3.141592653589793 / 180) - (#{lng} * 3.141592653589793 / 180) ) 
+                    + SIN( #{lat} * 3.141592653589793 / 180 ) * SIN( c.lat * 3.141592653589793 / 180 ) ) ) &lt;= #{distance}
             </if>
 
             <!-- 2) '동' 이름 기준 검색 -->
             <if test="(lat == null or lng == null) and (dong != null and dong != '')">
-                AND address LIKE '%' || #{dong} || '%'
+                AND c.address LIKE '%' || #{dong} || '%'
             </if>
 
             <!-- 3) 영역(Bounds: minLat ~ maxLat) 기준 검색 -->
             <if test="minLat != null and minLat != 0 and maxLat != null and maxLat != 0">
-                AND lat BETWEEN #{minLat} AND #{maxLat}
+                AND c.lat BETWEEN #{minLat} AND #{maxLat}
             </if>
             <if test="minLng != null and minLng != 0 and maxLng != null and maxLng != 0">
-                AND lng BETWEEN #{minLng} AND #{maxLng}
+                AND c.lng BETWEEN #{minLng} AND #{maxLng}
             </if>
 
             <!-- 4) 카테고리 필터 -->
             <if test="category != null and category != ''">
-                AND category_code = #{category}
+                AND c.category_code = #{category}
             </if>
 
             <!-- 5) 키워드 검색 -->
             <if test="keyword != null and keyword != ''">
-                AND (name LIKE '%' || #{keyword} || '%' OR address LIKE '%' || #{keyword} || '%')
+                AND (c.name LIKE '%' || #{keyword} || '%' OR c.address LIKE '%' || #{keyword} || '%')
             </if>
         </where>
         <choose>
@@ -90,7 +98,7 @@
                 ORDER BY distance ASC
             </when>
             <otherwise>
-                ORDER BY class_code DESC
+                ORDER BY c.class_code DESC
             </otherwise>
         </choose>
     </select>

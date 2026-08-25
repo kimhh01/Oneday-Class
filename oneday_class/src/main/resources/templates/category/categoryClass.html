@@ -5,8 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}" />
-<meta name="_csrf_header"
-	th:content="${_csrf != null ? _csrf.headerName : ''}" />
+<meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : ''}" />
 
 <title>원데이클래스 - 카테고리</title>
 <link rel="stylesheet" th:href="@{/category/css/category.css}">
@@ -20,8 +19,7 @@
 		<h1>원데이클래스</h1>
 		<form class="search-box" th:action="@{/search}" method="get">
 			<div class="search-icon">
-				<img th:src="@{/images/icon/search_icon.svg}" alt="검색 아이콘"
-					style="width: 15px; height: 15px;">
+				<img th:src="@{/images/icon/search_icon.svg}" alt="검색 아이콘" style="width: 15px; height: 15px;">
 			</div>
 			<input type="search" name="keyword" placeholder="원하는 키워드를 검색해보세요.">
 			<button type="submit">검색</button>
@@ -31,125 +29,94 @@
 	<main class="content">
 		<section>
 			<!-- 페이지 타이틀 -->
-			<h2 class="page-title"
-				th:text="${currentCategoryName != null ? currentCategoryName : '전체'}">전체</h2>
+			<h2 class="page-title" th:text="${currentCategoryName != null ? currentCategoryName : '전체'}">전체</h2>
 
 			<!-- 2. 대분류 카테고리 탭 (왼쪽 정렬) -->
 			<nav class="main-category">
-  <a th:href="@{/category/class(sameDayOnly=${searchDTO.sameDayOnly}, sameWeekOnly=${searchDTO.sameWeekOnly})}" 
-     th:classappend="${searchDTO.categoryCode == null or searchDTO.categoryCode == 0 ? 'active' : ''}">전체</a>
-  <a th:each="cat : ${categoryList}" 
-     th:if="${cat.parentCategoryCode == null}"
-     th:href="@{/category/class(categoryCode=${cat.categoryCode}, sameDayOnly=${searchDTO.sameDayOnly}, sameWeekOnly=${searchDTO.sameWeekOnly})}"
-     th:text="${cat.categoryName}"
-     th:classappend="${searchDTO.categoryCode == cat.categoryCode ? 'active' : ''}">카테고리</a>
-</nav>
+				<a th:href="@{/category/class(sameDayOnly=${searchDTO.sameDayOnly}, sameWeekOnly=${searchDTO.sameWeekOnly})}" 
+				   th:classappend="${searchDTO.categoryCode == null or searchDTO.categoryCode == 0 ? 'active' : ''}">전체</a>
+				<a th:each="cat : ${categoryList}" 
+				   th:if="${cat.parentCategoryCode == null}"
+				   th:href="@{/category/class(categoryCode=${cat.categoryCode}, sameDayOnly=${searchDTO.sameDayOnly}, sameWeekOnly=${searchDTO.sameWeekOnly})}"
+				   th:text="${cat.categoryName}"
+				   th:classappend="${searchDTO.categoryCode == cat.categoryCode ? 'active' : ''}">카테고리</a>
+			</nav>
 
 			<!-- 3. 소분류 카테고리 탭 (대분류 선택 시 노출) -->
 			<nav class="sub-category" th:if="${searchDTO.categoryCode != null and searchDTO.categoryCode > 0}">
-  <a th:href="@{/category/class(categoryCode=${searchDTO.categoryCode}, sameDayOnly=${searchDTO.sameDayOnly}, sameWeekOnly=${searchDTO.sameWeekOnly})}"
-     th:classappend="${searchDTO.subCategoryCode == null or searchDTO.subCategoryCode == 0 ? 'active' : ''}">전체</a>
-  <a th:each="subCat : ${categoryList}"
-     th:if="${subCat.parentCategoryCode == searchDTO.categoryCode}"
-     th:href="@{/category/class(categoryCode=${searchDTO.categoryCode}, subCategoryCode=${subCat.categoryCode}, sameDayOnly=${searchDTO.sameDayOnly}, sameWeekOnly=${searchDTO.sameWeekOnly})}"
-     th:text="${subCat.categoryName}"
-     th:classappend="${searchDTO.subCategoryCode == subCat.categoryCode ? 'active' : ''}">소분류</a>
-</nav>
+				<a th:href="@{/category/class(categoryCode=${searchDTO.categoryCode}, sameDayOnly=${searchDTO.sameDayOnly}, sameWeekOnly=${searchDTO.sameWeekOnly})}"
+				   th:classappend="${searchDTO.subCategoryCode == null or searchDTO.subCategoryCode == 0 ? 'active' : ''}">전체</a>
+				<a th:each="subCat : ${categoryList}"
+				   th:if="${subCat.parentCategoryCode == searchDTO.categoryCode}"
+				   th:href="@{/category/class(categoryCode=${searchDTO.categoryCode}, subCategoryCode=${subCat.categoryCode}, sameDayOnly=${searchDTO.sameDayOnly}, sameWeekOnly=${searchDTO.sameWeekOnly})}"
+				   th:text="${subCat.categoryName}"
+				   th:classappend="${searchDTO.subCategoryCode == subCat.categoryCode ? 'active' : ''}">소분류</a>
+			</nav>
 
 			<!-- 4. 정렬 & 필터 툴바 -->
 			<div class="toolbar">
 				<details class="sort-dropdown">
-					<summary
-						th:text="${searchDTO.sort != null and searchDTO.sort != '' ? searchDTO.sort : '신규순'}">신규순</summary>
+					<summary th:text="${searchDTO.sort != null and searchDTO.sort != '' ? searchDTO.sort : '신규순'}">신규순</summary>
 					<div class="sort-menu">
-  <a th:href="@{/category/class(categoryCode=${searchDTO.categoryCode}, subCategoryCode=${searchDTO.subCategoryCode}, sort='신규순', minPrice=${searchDTO.minPrice}, maxPrice=${searchDTO.maxPrice}, minPeople=${searchDTO.minPeople}, sameDayOnly=${searchDTO.sameDayOnly}, sameWeekOnly=${searchDTO.sameWeekOnly})}">신규순</a>
-  <a th:href="@{/category/class(categoryCode=${searchDTO.categoryCode}, subCategoryCode=${searchDTO.subCategoryCode}, sort='추천순', minPrice=${searchDTO.minPrice}, maxPrice=${searchDTO.maxPrice}, minPeople=${searchDTO.minPeople}, sameDayOnly=${searchDTO.sameDayOnly}, sameWeekOnly=${searchDTO.sameWeekOnly})}">추천순</a>
-  <a th:href="@{/category/class(categoryCode=${searchDTO.categoryCode}, subCategoryCode=${searchDTO.subCategoryCode}, sort='낮은 가격순', minPrice=${searchDTO.minPrice}, maxPrice=${searchDTO.maxPrice}, minPeople=${searchDTO.minPeople}, sameDayOnly=${searchDTO.sameDayOnly}, sameWeekOnly=${searchDTO.sameWeekOnly})}">낮은 가격순</a>
-  <a th:href="@{/category/class(categoryCode=${searchDTO.categoryCode}, subCategoryCode=${searchDTO.subCategoryCode}, sort='높은 가격순', minPrice=${searchDTO.minPrice}, maxPrice=${searchDTO.maxPrice}, minPeople=${searchDTO.minPeople}, sameDayOnly=${searchDTO.sameDayOnly}, sameWeekOnly=${searchDTO.sameWeekOnly})}">높은 가격순</a>
-</div>
+						<a th:href="@{/category/class(categoryCode=${searchDTO.categoryCode}, subCategoryCode=${searchDTO.subCategoryCode}, sort='신규순', minPrice=${searchDTO.minPrice}, maxPrice=${searchDTO.maxPrice}, minPeople=${searchDTO.minPeople}, sameDayOnly=${searchDTO.sameDayOnly}, sameWeekOnly=${searchDTO.sameWeekOnly})}">신규순</a>
+						<a th:href="@{/category/class(categoryCode=${searchDTO.categoryCode}, subCategoryCode=${searchDTO.subCategoryCode}, sort='추천순', minPrice=${searchDTO.minPrice}, maxPrice=${searchDTO.maxPrice}, minPeople=${searchDTO.minPeople}, sameDayOnly=${searchDTO.sameDayOnly}, sameWeekOnly=${searchDTO.sameWeekOnly})}">추천순</a>
+						<a th:href="@{/category/class(categoryCode=${searchDTO.categoryCode}, subCategoryCode=${searchDTO.subCategoryCode}, sort='낮은 가격순', minPrice=${searchDTO.minPrice}, maxPrice=${searchDTO.maxPrice}, minPeople=${searchDTO.minPeople}, sameDayOnly=${searchDTO.sameDayOnly}, sameWeekOnly=${searchDTO.sameWeekOnly})}">낮은 가격순</a>
+						<a th:href="@{/category/class(categoryCode=${searchDTO.categoryCode}, subCategoryCode=${searchDTO.subCategoryCode}, sort='높은 가격순', minPrice=${searchDTO.minPrice}, maxPrice=${searchDTO.maxPrice}, minPeople=${searchDTO.minPeople}, sameDayOnly=${searchDTO.sameDayOnly}, sameWeekOnly=${searchDTO.sameWeekOnly})}">높은 가격순</a>
+					</div>
 				</details>
 
-				<button type="button" class="filter-link" onclick="openFilter()"
-					style="background: none; border: none; cursor: pointer;">
-					필터 ⚙</button>
+				<button type="button" class="filter-link" onclick="openFilter()" style="background: none; border: none; cursor: pointer;">
+					필터 ⚙
+				</button>
 			</div>
 
-			<!-- 5. 클래스 카드 그리드 -->
+			<!-- 5. 클래스 카드 그리드 (단일 정의) -->
 			<section class="class-grid">
-				<div th:if="${#lists.isEmpty(classList)}"
-					style="grid-column: 1/-1; text-align: center; padding: 60px 0; color: #888;">
-					검색 조건에 맞는 클래스가 없습니다.</div>
+				<div th:if="${#lists.isEmpty(classList)}" style="grid-column: 1/-1; text-align: center; padding: 60px 0; color: #888;">
+					검색 조건에 맞는 클래스가 없습니다.
+				</div>
 
 				<article class="class-card" th:each="cls : ${classList}">
-					<div style="position: relative;">
+					<div style="position: relative; width: 100%;">
 						<!-- 찜(북마크) 하트 버튼 -->
-						<button type="button" class="bookmark-btn"
-							th:data-class-code="${cls.classCode}"
-							onclick="toggleBookmark(event, this)">
-							<svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-								stroke="#e33838" stroke-width="2">
-        <path
-									d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-      </svg>
+						<button type="button" class="bookmark-btn" 
+								th:data-class-code="${cls.classCode}" 
+								onclick="toggleBookmark(event, this)">
+							<svg width="20" height="20" viewBox="0 0 24 24" 
+								 th:fill="${bookmarkedClassCodes != null and #lists.contains(bookmarkedClassCodes, cls.classCode)} ? '#e33838' : 'none'" 
+								 stroke="#e33838" stroke-width="2">
+								<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+							</svg>
 						</button>
-      <button type="button" class="filter-link" onclick="openFilter()" style="background:none; border:none; cursor:pointer;">
-        필터 ⚙
-      </button>
-    </div>
 
-    <!-- 5. 클래스 카드 그리드 -->
-    <section class="class-grid">
-      <div th:if="${#lists.isEmpty(classList)}" style="grid-column: 1/-1; text-align: center; padding: 60px 0; color: #888;">
-        검색 조건에 맞는 클래스가 없습니다.
-      </div>
-
-      <article class="class-card" th:each="cls : ${classList}">
-        <div style="position: relative;">
-          <!-- 찜(북마크) 하트 버튼 -->
-          <button type="button" class="bookmark-btn" 
-                  th:data-class-code="${cls.classCode}" 
-                  onclick="toggleBookmark(event, this)">
-            <svg width="20" height="20" viewBox="0 0 24 24" 
-                 th:fill="${bookmarkedClassCodes != null and #lists.contains(bookmarkedClassCodes, cls.classCode)} ? '#e33838' : 'none'" 
-                 stroke="#e33838" stroke-width="2">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-            </svg>
-          </button>
-
-						<a th:href="@{/class/detail(classCode=${cls.classCode})}"> <img
-							th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}"
-							th:alt="${cls.name}">
+						<a th:href="@{/class/detail(classCode=${cls.classCode})}">
+							<img th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}" 
+								 th:alt="${cls.name}" 
+								 style="display: block; width: 100%;">
 						</a>
 					</div>
-          <a th:href="@{/class/detail(classCode=${cls.classCode})}"> 
-            <img th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}"
-                 th:alt="${cls.name}"> 
-          </a>
-        </div>
 
 					<a th:href="@{/class/detail(classCode=${cls.classCode})}">
 						<div class="class-meta" th:text="${cls.address}">위치 정보</div>
 						<div class="class-title" th:text="${cls.name}">클래스명</div>
+						
 						<div class="class-price">
-							<span class="now"
-								th:text="${#numbers.formatInteger((cls.desiredPrice != null and cls.desiredPrice > 0 and cls.price > cls.desiredPrice) ? cls.desiredPrice : cls.price, 0, 'COMMA') + '원'}"></span>
-						</div>
+    <span class="discount" 
+          th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}" 
+          th:text="${cls.discountRate + '%'}" 
+          style="color: #e33838; font-weight: bold; margin-right: 6px;"></span>
+          
+    <span class="original" 
+          th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}" 
+          th:text="${#numbers.formatInteger(cls.desiredPrice, 0, 'COMMA')}" 
+          style="color: #b0b0b0; text-decoration: line-through; font-size: 13px; margin-right: 6px;"></span>
+          
+    <span class="now" 
+          th:text="${#numbers.formatInteger(cls.price, 0, 'COMMA') + '원'}" 
+          style="font-weight: bold;"></span>
+</div>
 					</a>
 				</article>
-        <a th:href="@{/class/detail(classCode=${cls.classCode})}">
-          <div class="class-meta" th:text="${cls.address}">위치 정보</div>
-          <div class="class-title" th:text="${cls.name}">클래스명</div>
-          <div class="class-price">
-            <span class="now" th:text="${#numbers.formatInteger((cls.desiredPrice != null and cls.desiredPrice > 0 and cls.price > cls.desiredPrice) ? cls.desiredPrice : cls.price, 0, 'COMMA') + '원'}"></span>
-          </div>
-        </a>
-      </article>
-      
-    </section>
-  </section>
-</main>
-
-
 			</section>
 		</section>
 	</main>
@@ -172,16 +139,14 @@
 
 			<div class="filter-title-row">
 				<h3>필터</h3>
-				<a class="filter-close" onclick="closeFilter()"
-					style="cursor: pointer;">×</a>
+				<a class="filter-close" onclick="closeFilter()" style="cursor: pointer;">×</a>
 			</div>
 
 			<div class="filter-content">
 				<section class="filter-section">
 					<h4>상세 카테고리</h4>
 					<div class="chips">
-						<th:block
-							th:if="${searchDTO.categoryCode == null or searchDTO.categoryCode == 0}">
+						<th:block th:if="${searchDTO.categoryCode == null or searchDTO.categoryCode == 0}">
 							<a class="chip"
 								th:classappend="${searchDTO.categoryCode == null or searchDTO.categoryCode == 0 ? 'selected' : ''}"
 								onclick="selectMainCat(0, this)">전체</a>
@@ -193,8 +158,7 @@
 								th:onclick="|selectMainCat(${cat.categoryCode}, this)|">대분류</a>
 						</th:block>
 
-						<th:block
-							th:if="${searchDTO.categoryCode != null and searchDTO.categoryCode > 0}">
+						<th:block th:if="${searchDTO.categoryCode != null and searchDTO.categoryCode > 0}">
 							<a class="chip"
 								th:classappend="${searchDTO.subCategoryCode == null or searchDTO.subCategoryCode == 0 ? 'selected' : ''}"
 								onclick="selectSubCat(0, this)">전체</a>
@@ -213,13 +177,14 @@
 					<div class="chips">
 						<a class="chip"
 							th:classappend="${searchDTO.maxPrice == 30000 ? 'selected' : ''}"
-							onclick="selectPrice(0, 30000, this)">3만원 이하</a> <a class="chip"
+							onclick="selectPrice(0, 30000, this)">3만원 이하</a> 
+						<a class="chip"
 							th:classappend="${searchDTO.minPrice == 30000 and searchDTO.maxPrice == 50000 ? 'selected' : ''}"
-							onclick="selectPrice(30000, 50000, this)">3-5만원</a> <a
-							class="chip"
+							onclick="selectPrice(30000, 50000, this)">3-5만원</a> 
+						<a class="chip"
 							th:classappend="${searchDTO.minPrice == 50000 and searchDTO.maxPrice == 100000 ? 'selected' : ''}"
-							onclick="selectPrice(50000, 100000, this)">5-10만원</a> <a
-							class="chip"
+							onclick="selectPrice(50000, 100000, this)">5-10만원</a> 
+						<a class="chip"
 							th:classappend="${searchDTO.minPrice == 100000 ? 'selected' : ''}"
 							onclick="selectPrice(100000, 0, this)">10만원 이상</a>
 					</div>
@@ -230,13 +195,17 @@
 					<div class="chips">
 						<a class="chip"
 							th:classappend="${searchDTO.minPeople == 1 ? 'selected' : ''}"
-							onclick="selectPeople(1, this)">1명</a> <a class="chip"
+							onclick="selectPeople(1, this)">1명</a> 
+						<a class="chip"
 							th:classappend="${searchDTO.minPeople == 2 ? 'selected' : ''}"
-							onclick="selectPeople(2, this)">2명</a> <a class="chip"
+							onclick="selectPeople(2, this)">2명</a> 
+						<a class="chip"
 							th:classappend="${searchDTO.minPeople == 3 ? 'selected' : ''}"
-							onclick="selectPeople(3, this)">3명</a> <a class="chip"
+							onclick="selectPeople(3, this)">3명</a> 
+						<a class="chip"
 							th:classappend="${searchDTO.minPeople == 4 ? 'selected' : ''}"
-							onclick="selectPeople(4, this)">4명</a> <a class="chip"
+							onclick="selectPeople(4, this)">4명</a> 
+						<a class="chip"
 							th:classappend="${searchDTO.minPeople == 5 ? 'selected' : ''}"
 							onclick="selectPeople(5, this)">5명 이상</a>
 					</div>
