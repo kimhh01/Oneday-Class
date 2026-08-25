@@ -11,4 +11,5 @@ public class Bookmark {
 
 	private int classCode;
 	private String className, classRegion, classImg, classPrice;
+	private String classStatus, classApprovalStatus;
 }

@@ -55,11 +55,14 @@
 			            </div>
 			
 			            <!-- 클래스 정보 -->
-			            <div class="card-info">
-			                <h2 class="class-title" th:text="${item.className}">도자기 머그컵 만들기</h2>
-			                <p class="class-date" th:text="${item.reservationDate}">2026.07.25(토) 14:00</p>
-			                <p class="class-studio" th:text="${item.activityName}">행복한 도자기 작가</p>
-			            </div>
+						<div class="card-info">
+						    <h2 class="class-title" th:text="${item.className}">도자기 머그컵 만들기</h2>
+						    
+						    <!-- 💡 item.reservationDate -> item.classDate 로 변경 -->
+						    <p class="class-date" th:text="${item.classDate}">2026.01.01(없음) 11:11</p>
+						    
+						    <p class="class-studio" th:text="${item.activityName}">행복한 도자기 작가</p>
+						</div>
 			        </a>
 			
 					<!-- 구매/예약 내역 목록 페이지 (mypage/purchase.html 등) -->

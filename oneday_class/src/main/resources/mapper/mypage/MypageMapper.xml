@@ -15,10 +15,10 @@
     <!-- 최근 공지사항 조회 쿼리 -->
     <select id="selectRecentNotice" resultMap="mypageNoticeResultMap">
         SELECT * FROM (
-          SELECT title, content, input_date, notice_type 
+          SELECT title, content, input_date, notice_type, status 
           FROM notice 
           ORDER BY input_date DESC
-        ) WHERE ROWNUM = 1
+        ) WHERE ROWNUM = 1 and STATUS='공개'
     </select>
     
     <!-- 💡 추가: 로그인한 회원의 작가(승인 상태) 등록 건수 조회 -->

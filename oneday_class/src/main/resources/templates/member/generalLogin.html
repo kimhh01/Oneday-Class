@@ -81,6 +81,25 @@
     </p>
 
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtn = document.querySelector('.login-form__toggle-visibility');
+    const passwordInput = document.getElementById('password');
 
+    if (toggleBtn && passwordInput) {
+        toggleBtn.addEventListener('click', function() {
+            // input 타입을 password <-> text 변환
+            const isPassword = passwordInput.type === 'password';
+            passwordInput.type = isPassword ? 'text' : 'password';
+
+            // 접근성(aria-label) 및 스타일 토글
+            toggleBtn.setAttribute('aria-label', isPassword ? '비밀번호 숨기기' : '비밀번호 표시');
+            toggleBtn.classList.toggle('active', isPassword);
+        });
+    }
+});
+</script>
+</body>
+</html>
 </body>
 </html>

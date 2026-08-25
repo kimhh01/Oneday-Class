@@ -46,38 +46,45 @@
 			       th:text="${cat.categoryName}">카테고리명</a>
 			</div>
 
-            <!-- DB 조회 데이터 반복 출력 영역 (데이터가 있을 때) -->
-            <div class="class-grid" th:if="${bookmarkList != null and !#lists.isEmpty(bookmarkList)}">
-                
-                <!-- 💡 카드 클릭 시 클래스 상세 페이지로 이동 (cursor: pointer 추가) -->
-                <div class="class-card" 
-                     th:each="item : ${bookmarkList}"
-                     th:onclick="|location.href='@{/classDetail(classCode=${item.classCode})}'|"
-                     style="cursor: pointer;">
-                     
-                    <div class="card-thumb">
-                        <img th:src="${item.classImg != null and item.classImg != '' ? item.classImg : '/uploads/default_class.png'}" 
-                             th:alt="${item.className}"
-                             onError="this.src='/uploads/default_class.png';">
-                    </div>
-                    <div class="card-body">
-                        <div class="card-title-row">
-                            <h3 class="class-title" th:text="${item.className}">클래스명</h3>
-                            
-                            <!-- 💡 event 파라미터 전달 추가 (상세 페이지 이동 방지용) -->
-                            <button type="button" class="btn-heart active" aria-label="관심 해제" 
-                                    th:onclick="|toggleHeart(event, this, '${item.classCode}')|">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="#ff4d4f" stroke="#ff4d4f" stroke-width="2">
-                                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                                </svg>
-                            </button>
-                        </div>
-                        <p class="class-location" th:text="${item.classRegion != null and item.classRegion != '' ? item.classRegion : '지역 정보 없음'}">지역</p>
-                        <p class="class-price" th:text="${item.classPrice}">0원</p>
-                    </div>
-                </div>
-
-            </div>
+			<!-- DB 조회 데이터 반복 출력 영역 (데이터가 있을 때) -->
+			<div class="class-grid" th:if="${bookmarkList != null and !#lists.isEmpty(bookmarkList)}">
+			    
+			    <!-- 💡 모집중 + 승인 조건에 따른 클래스 분기 및 클릭 제어 -->
+			    <div class="class-card" 
+			         th:each="item : ${bookmarkList}"
+			         th:classappend="${item.classStatus != '모집중' or item.classApprovalStatus != '승인'} ? 'disabled-card' : ''"
+			         th:onclick="${item.classStatus == '모집중' and item.classApprovalStatus == '승인'} ? |location.href='@{/classDetail(classCode=${item.classCode})}'| : null"
+			         th:style="${item.classStatus == '모집중' and item.classApprovalStatus == '승인'} ? 'cursor: pointer;' : 'cursor: default;'">
+			         
+			        <div class="card-thumb" style="position: relative;">
+			            <img th:src="${item.classImg != null and item.classImg != '' ? item.classImg : '/uploads/default_class.png'}" 
+			                 th:alt="${item.className}"
+			                 onError="this.src='/uploads/default_class.png';">
+			
+			            <!-- 💡 판매 중지/비활성화 클래스인 경우 썸네일 위에 뱃지 오버레이 노출 -->
+			            <div th:if="${item.classStatus != '모집중' or item.classApprovalStatus != '승인'}" class="sold-out-overlay">
+			                <span>판매 중지</span>
+			            </div>
+			        </div>
+			
+			        <div class="card-body">
+			            <div class="card-title-row">
+			                <h3 class="class-title" th:text="${item.className}">클래스명</h3>
+			                
+			                <!-- 💡 찜 해제 버튼: 판매 중지된 클래스라도 찜 해제는 가능하도록 유지 (event.stopPropagation() 적용됨) -->
+			                <button type="button" class="btn-heart active" aria-label="관심 해제" 
+			                        th:onclick="|toggleHeart(event, this, '${item.classCode}')|">
+			                    <svg width="20" height="20" viewBox="0 0 24 24" fill="#ff4d4f" stroke="#ff4d4f" stroke-width="2">
+			                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+			                    </svg>
+			                </button>
+			            </div>
+			            <p class="class-location" th:text="${item.classRegion != null and item.classRegion != '' ? item.classRegion : '지역 정보 없음'}">지역</p>
+			            <p class="class-price" th:text="${item.classPrice}">0원</p>
+			        </div>
+			    </div>
+			
+			</div>
 
             <!-- 관심 클래스가 존재하지 않을 때 표시 -->
             <div class="empty-bookmark" th:if="${bookmarkList == null or #lists.isEmpty(bookmarkList)}">

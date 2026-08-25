@@ -11,6 +11,8 @@
         <result property="classRegion" column="CLASSREGION"/>
         <result property="classImg"    column="CLASSIMG"/>
         <result property="classPrice"  column="CLASSPRICE"/>
+        <result property="classStatus"         column="CLASSSTATUS"/>         <!-- 💡 STATUS 매핑 -->
+        <result property="classApprovalStatus" column="CLASSAPPROVALSTATUS"/> <!-- 💡 APPROVAL_STATUS 매핑 -->
     </resultMap>
 
     <!-- 1. 관심 클래스 전체 개수 조회 (CATEGORY 조인 적용) -->
@@ -32,6 +34,8 @@
             SELECT ROWNUM rnum, temp.* FROM (
                 SELECT c.class_code AS classCode,
                        c.name AS className,
+                       c.status AS classStatus,                  
+                       c.approval_status AS classApprovalStatus,
                        CASE
                            WHEN c.old_address IS NULL OR c.old_address = '-' THEN ''
                            ELSE NVL(REGEXP_SUBSTR(c.old_address, '^.+?[동|구|면|리]'), c.old_address)

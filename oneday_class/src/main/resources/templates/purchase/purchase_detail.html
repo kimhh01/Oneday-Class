@@ -37,36 +37,38 @@
 
                 <!-- [상단] 클래스 요약 카드 -->
                 <div class="class-summary-card">
-                    <div class="summary-thumb">
-                        <img th:src="${purchase != null and purchase.classImg != null ? purchase.classImg : '/order/images/sample_mug.jpg'}" alt="클래스 대표 이미지">
-                    </div>
-                    <div class="summary-info">
-                        <!-- 💡 categoryName 제거 후 고정 표기 또는 기본 클래스 배지로 수정 -->
-                        <div class="category-badge">원데이 클래스</div>
-                        <h2 class="class-name" th:text="${purchase != null ? purchase.className : '도자기 머그컵 만들기'}">도자기 머그컵 만들기</h2>
-                        <div class="summary-meta">
-                            <div class="meta-item">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#777777" stroke-width="2">
-                                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                                </svg>
-                                <span th:text="${purchase != null ? purchase.reservationDate : '2026-07-20 오전 9:10:15'}">2026-07-20 오전 9:10:15</span>
-                            </div>
-                        </div>
-                        <div class="summary-sub-meta">
-                            <span class="meta-icon-text">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                                <span th:text="${purchase != null ? purchase.address : '성수 공방'}">성수 공방</span>
-                            </span>
-                        </div>
-                    </div>
-                    <!-- classStatus 기반 상태 배지 스타일 (취소/환불 포함 시 취소 스타일 적용) -->
-                    <div class="status-pill" 
-                         th:classappend="${purchase != null and (purchase.classStatus == '취소' or purchase.classStatus == '취소완료' or purchase.classStatus == '환불완료') ? 'status-cancelled' : ''}"
-                         th:text="${purchase != null ? purchase.classStatus : '예약'}">예약</div>
-                </div>
+				    <div class="summary-thumb">
+				        <img th:src="${purchase != null and purchase.classImg != null ? purchase.classImg : '/order/images/sample_mug.jpg'}" alt="클래스 대표 이미지">
+				    </div>
+				    <div class="summary-info">
+				        <div class="category-badge">원데이 클래스</div>
+				        <h2 class="class-name" th:text="${purchase != null ? purchase.className : '도자기 머그컵 만들기'}">도자기 머그컵 만들기</h2>
+				        <div class="summary-meta">
+				            <div class="meta-item">
+				                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#777777" stroke-width="2">
+				                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+				                    <line x1="16" y1="2" x2="16" y2="6"></line>
+				                    <line x1="8" y1="2" x2="8" y2="6"></line>
+				                    <line x1="3" y1="10" x2="21" y2="10"></line>
+				                </svg>
+				                
+				                <!-- 💡 reservationDate -> classDate (스케줄 기반 실제 수강 일시) 변경 -->
+				                <span th:text="${purchase != null and purchase.classDate != null ? purchase.classDate : '2026.08.24(월) 14:00'}">2026.08.24(월) 14:00</span>
+				            </div>
+				        </div>
+				        <div class="summary-sub-meta">
+				            <span class="meta-icon-text">
+				                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+				                <span th:text="${purchase != null ? purchase.address : '성수 공방'}">성수 공방</span>
+				            </span>
+				        </div>
+				    </div>
+				    
+				    <!-- classStatus 기반 상태 배지 스타일 -->
+				    <div class="status-pill" 
+				         th:classappend="${purchase != null and (purchase.classStatus == '취소' or purchase.classStatus == '취소완료' or purchase.classStatus == '환불완료') ? 'status-cancelled' : ''}"
+				         th:text="${purchase != null ? purchase.classStatus : '예약'}">예약</div>
+				</div>
 
                 <!-- [중단] 클래스 정보 -->
                 <div class="info-section-box">
@@ -78,11 +80,11 @@
                                 <span class="info-value" th:text="${purchase != null ? purchase.className : '도자기 머그컵 만들기'}">도자기 머그컵 만들기</span>
                             </div>
                             <div class="info-row">
-                                <span class="info-label">진행 일시</span>
+                                <span class="info-label">예약 일시</span>
                                 <span class="info-value" th:text="${purchase != null ? purchase.reservationDate : '2026-07-20 오전 9:10:15'}">2026-07-20 오전 9:10:15</span>
                             </div>
                             <div class="info-row">
-                                <span class="info-label">장소</span>
+                                <span class="info-label">예약 장소</span>
                                 <span class="info-value" th:text="${purchase != null ? (purchase.address + ' ' + (purchase.address2 != null ? purchase.address2 : '')) : '서울 성동구 성수이로 00, 성수 공방'}">서울 성동구 성수이로 00, 성수 공방</span>
                             </div>
                         </div>
@@ -106,8 +108,8 @@
                             </div>
                             <div class="info-row">
                                 <span class="info-label">결제 일시</span>
-                                <span class="info-value" th:text="${purchase != null ? (purchase.paymentDate != null ? purchase.paymentDate : purchase.reservationDate) : '2026-07-20 오전 9:10:15'}">2026-07-20 오전 9:10:15</span>
-                            </div>
+								<span class="info-value" th:text="${purchase?.paymentDate ?: '2026-07-20 오전 9:10:15'}">2026-07-20 오전 9:10:15</span>                            
+      						</div>
                             <div class="info-row" th:if="${purchase != null and purchase.paymentMethod != null}">
                                 <span class="info-label">결제 수단</span>
                                 <span class="info-value" th:text="${purchase.paymentMethod}">신용카드</span>
@@ -120,8 +122,8 @@
                             </div>
                             <div class="info-row">
                                 <span class="info-label">결제 상태</span>
-                                <span class="info-value status-text" th:text="${purchase != null ? (purchase.paymentStatus != null ? purchase.paymentStatus : purchase.classStatus) : '결제완료'}">결제완료</span>
-                            </div>
+								<span class="info-value status-text" th:text="${purchase?.paymentStatus ?: '에러'}">결제완료</span>                            
+      						</div>
                         </div>
                     </div>
                 </div>

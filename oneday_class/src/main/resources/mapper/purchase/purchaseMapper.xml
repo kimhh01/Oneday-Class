@@ -4,74 +4,66 @@
 
 <mapper namespace="kr.co.oneclass.purchase.PurchaseDAO">
 
-	<!-- 1. 회원별 구매/예약 내역 목록 조회 -->
-	<select id="selectListByMember" resultType="kr.co.oneclass.purchase.Purchase">
-	    SELECT 
-	        r.reservation_code AS reservationCode,
-	        r.class_code AS classCode,
-	        r.member_code AS memberCode,
-	        c.name AS className,
-	        c.operator_code AS operatorCode,
-	        cr.activity_name AS activityName,
-	        img.image AS classImg,
-	        c.address AS address,
-	        TO_CHAR(r.reservation_date, 'YYYY.MM.DD(DY) HH24:MI') AS reservationDate,
-	        TO_CHAR(r.reservation_date, 'YYYY.MM.DD(DY) HH24:MI') AS classDate,
-	        
-	        CASE 
-	            WHEN r.status LIKE '%취소%' OR r.status LIKE '%환불%' THEN r.status
-	            WHEN r.reservation_date &lt; SYSDATE THEN '수강완료'
-	            ELSE r.status
-	        END AS classStatus,
-	
-	        NVL(rev.review_code, 0) AS reviewCode
-	
-	    FROM reservation r
-	    JOIN class c ON r.class_code = c.class_code
-	    LEFT JOIN creator cr ON c.operator_code = cr.operator_code
-	    LEFT JOIN class_img img ON c.class_code = img.class_code 
-	                           AND img.type = '대표' 
-	                           AND img.sort_order = 1
-	
-	    <!-- 💡 수정된 부분: reservation_code로 1:1 매칭 -->
-	    LEFT JOIN review rev ON r.reservation_code = rev.reservation_code
-	
-	    WHERE r.member_code = TO_NUMBER(#{memberCode})
-	    <if test="status != null and status != '' and status != 'ALL'">
-	        <choose>
-	            <when test="status == '예약' or status == '이용 예정'">
-	                AND NOT (r.status LIKE '%취소%' OR r.status LIKE '%환불%')
-	                AND r.reservation_date &gt;= SYSDATE
-	            </when>
-	            <when test="status == '수강완료' or status == '이용 완료'">
-	                AND NOT (r.status LIKE '%취소%' OR r.status LIKE '%환불%')
-	                AND (r.status IN ('수강완료', '이용 완료') OR r.reservation_date &lt; SYSDATE)
-	            </when>
-	            <when test="status == '취소/환불'">
-	                AND (r.status LIKE '%취소%' OR r.status LIKE '%환불%')
-	            </when>
-	            <otherwise>
-	                AND r.status = #{status}
-	            </otherwise>
-	        </choose>
-	    </if>
-	    ORDER BY r.reservation_code DESC
-	</select>
+    <!-- 1. 회원별 구매/예약 내역 목록 조회 -->
+    <select id="selectListByMember" resultType="kr.co.oneclass.purchase.Purchase">
+        SELECT 
+            r.reservation_code AS reservationCode,
+            r.class_code AS classCode,
+            r.member_code AS memberCode,
+            c.name AS className,
+            c.operator_code AS operatorCode,
+            cr.activity_name AS activityName,
+            img.image AS classImg,
+            c.address AS address,
+            TO_CHAR(r.reservation_date, 'YYYY.MM.DD(DY) HH24:MI') AS reservationDate,
+            TO_CHAR(s.class_date, 'YYYY.MM.DD(DY)', 'NLS_DATE_LANGUAGE=KOREAN') || ' ' || s.start_time AS classDate,
+            
+            /* 💡 DB의 예약 상태(r.status)를 가공 없이 그대로 조회 */
+            r.status AS classStatus,
 
-    <!-- 2. 구매/예약 상세 내역 조회 (상단: reservation.status / 하단: payment.status) -->
+            NVL(rev.review_code, 0) AS reviewCode
+
+        FROM reservation r
+        JOIN class c ON r.class_code = c.class_code
+        LEFT JOIN schedule s ON r.schedule_code = s.schedule_code
+        LEFT JOIN creator cr ON c.operator_code = cr.operator_code
+        LEFT JOIN class_img img ON c.class_code = img.class_code 
+                               AND img.type = '대표' 
+                               AND img.sort_order = 1
+        LEFT JOIN review rev ON r.reservation_code = rev.reservation_code
+
+        WHERE r.member_code = TO_NUMBER(#{memberCode})
+        <if test="status != null and status != '' and status != 'ALL'">
+            <choose>
+                <when test="status == '예약' or status == '이용 예정'">
+                    AND NOT (r.status LIKE '%취소%' OR r.status LIKE '%환불%')
+                    AND TO_DATE(TO_CHAR(s.class_date, 'YYYY-MM-DD') || ' ' || s.start_time, 'YYYY-MM-DD HH24:MI') &gt;= SYSDATE
+                </when>
+                <when test="status == '수강완료' or status == '이용 완료'">
+                    AND NOT (r.status LIKE '%취소%' OR r.status LIKE '%환불%')
+                    AND (r.status IN ('수강완료', '이용 완료') OR TO_DATE(TO_CHAR(s.class_date, 'YYYY-MM-DD') || ' ' || s.start_time, 'YYYY-MM-DD HH24:MI') &lt; SYSDATE)
+                </when>
+                <when test="status == '취소/환불'">
+                    AND (r.status LIKE '%취소%' OR r.status LIKE '%환불%')
+                </when>
+                <otherwise>
+                    AND r.status = #{status}
+                </otherwise>
+            </choose>
+        </if>
+        ORDER BY r.reservation_code DESC
+    </select>
+
+    <!-- 2. 구매/예약 상세 내역 조회 -->
     <select id="selectDetail" resultType="kr.co.oneclass.purchase.Purchase">
         SELECT 
             r.reservation_code AS reservationCode,
             r.people_number AS reservationNum,
             TO_CHAR(r.reservation_date, 'YYYY.MM.DD HH24:MI') AS reservationDate,
-            TO_CHAR(r.reservation_date, 'YYYY.MM.DD HH24:MI') AS classDate,
+            TO_CHAR(s.class_date, 'YYYY.MM.DD') || ' ' || s.start_time AS classDate,
             
-            /* 상단용: 예약/수강 상태 (시간 경과 체크) */
-            CASE 
-                WHEN r.status IN ('취소완료', '환불완료', '취소됨') THEN r.status
-                WHEN r.reservation_date &lt; SYSDATE THEN '수강완료'
-                ELSE r.status
-            END AS classStatus,
+            /* 💡 상단용: DB의 예약/수강 상태(r.status) 그대로 조회 */
+            r.status AS classStatus,
             
             r.price AS totalPrice,
             
@@ -87,7 +79,7 @@
             c.introduce AS introduce,
             TO_CHAR(c.write_date, 'YYYY.MM.DD HH24:MI') AS writeDate,
             
-            /* 하단용: 결제 상태 */
+            /* 💡 하단용: DB의 결제 상태(p.status) 그대로 조회 */
             p.payment_code AS paymentCode,
             p.amount AS finalPrice,
             p.means AS paymentMethod,
@@ -98,6 +90,7 @@
             TO_CHAR(p.refund_date, 'YYYY.MM.DD HH24:MI') AS refundDate
         FROM reservation r
         JOIN class c ON r.class_code = c.class_code
+        LEFT JOIN schedule s ON r.schedule_code = s.schedule_code
         LEFT JOIN class_img img ON c.class_code = img.class_code 
                                AND img.type = '대표' 
                                AND img.sort_order = 1
@@ -105,34 +98,38 @@
         WHERE r.reservation_code = TO_NUMBER(#{reservationCode})
     </select>
     
-    <!-- 3. 예약 테이블 상태 변경 ('취소'로 변경 / 지난 일정 및 이미 취소된 건 제외) -->
-	<update id="updateReservationStatusCancel">
-	    UPDATE reservation
-	    SET status = '취소'
-	    WHERE reservation_code = TO_NUMBER(#{reservationCode})
-	      AND member_code = TO_NUMBER(#{memberCode})
-	      AND reservation_date &gt;= SYSDATE
-	      AND status NOT LIKE '%취소%'
-	      AND status NOT LIKE '%환불%'
-	</update>
-	
-	<!-- 4. 결제 테이블 상태 변경 ('환불완료', REFUND=AMOUNT, REFUND_DATE=SYSDATE) -->
-	<update id="updatePaymentStatusRefund">
-	    UPDATE payment
-	    SET status = '환불완료',
-	        refund = amount,
-	        refund_date = SYSDATE
-	    WHERE reservation_code = TO_NUMBER(#{reservationCode})
-	</update>
-	
-	<!-- 지나간 예약을 DB에서 '수강완료'로 변경 -->
-	<update id="updateExpiredReservationStatus">
-	    UPDATE reservation
-	    SET status = '수강완료'
-	    WHERE reservation_date &lt; SYSDATE
-	      AND status NOT LIKE '%취소%'
-	      AND status NOT LIKE '%환불%'
-	      AND status != '수강완료'
-	</update>
+    <!-- 3. 예약 테이블 상태 변경 -->
+    <update id="updateReservationStatusCancel">
+        UPDATE reservation
+        SET status = '취소'
+        WHERE reservation_code = TO_NUMBER(#{reservationCode})
+          AND member_code = TO_NUMBER(#{memberCode})
+          AND status NOT LIKE '%취소%'
+          AND status NOT LIKE '%환불%'
+    </update>
+    
+    <!-- 4. 결제 테이블 상태 변경 -->
+    <update id="updatePaymentStatusRefund">
+        UPDATE payment
+        SET status = '환불완료',
+            refund = amount,
+            refund_date = SYSDATE
+        WHERE reservation_code = TO_NUMBER(#{reservationCode})
+    </update>
+    
+    <!-- 5. 지나간 예약을 DB에서 '수강완료'로 변경 (스케줄러용) -->
+    <update id="updateExpiredReservationStatus">
+        UPDATE reservation
+        SET status = '수강완료'
+        WHERE reservation_code IN (
+            SELECT r.reservation_code
+            FROM reservation r
+            JOIN schedule s ON r.schedule_code = s.schedule_code
+            WHERE TO_DATE(TO_CHAR(s.class_date, 'YYYY-MM-DD') || ' ' || s.start_time, 'YYYY-MM-DD HH24:MI') &lt; SYSDATE
+              AND r.status NOT LIKE '%취소%'
+              AND r.status NOT LIKE '%환불%'
+              AND r.status != '수강완료'
+        )
+    </update>
 
 </mapper>
