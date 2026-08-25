@@ -45,5 +45,8 @@ public class ClassDTO {
     private String registerStep;
     
     private String mainImage;
+    
+    private boolean isBookmarked;
+    
 		
 }

@@ -92,12 +92,40 @@
 									d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
       </svg>
 						</button>
+      <button type="button" class="filter-link" onclick="openFilter()" style="background:none; border:none; cursor:pointer;">
+        필터 ⚙
+      </button>
+    </div>
+
+    <!-- 5. 클래스 카드 그리드 -->
+    <section class="class-grid">
+      <div th:if="${#lists.isEmpty(classList)}" style="grid-column: 1/-1; text-align: center; padding: 60px 0; color: #888;">
+        검색 조건에 맞는 클래스가 없습니다.
+      </div>
+
+      <article class="class-card" th:each="cls : ${classList}">
+        <div style="position: relative;">
+          <!-- 찜(북마크) 하트 버튼 -->
+          <button type="button" class="bookmark-btn" 
+                  th:data-class-code="${cls.classCode}" 
+                  onclick="toggleBookmark(event, this)">
+            <svg width="20" height="20" viewBox="0 0 24 24" 
+                 th:fill="${bookmarkedClassCodes != null and #lists.contains(bookmarkedClassCodes, cls.classCode)} ? '#e33838' : 'none'" 
+                 stroke="#e33838" stroke-width="2">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+          </button>
 
 						<a th:href="@{/class/detail(classCode=${cls.classCode})}"> <img
 							th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}"
 							th:alt="${cls.name}">
 						</a>
 					</div>
+          <a th:href="@{/class/detail(classCode=${cls.classCode})}"> 
+            <img th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}"
+                 th:alt="${cls.name}"> 
+          </a>
+        </div>
 
 					<a th:href="@{/class/detail(classCode=${cls.classCode})}">
 						<div class="class-meta" th:text="${cls.address}">위치 정보</div>
@@ -108,6 +136,18 @@
 						</div>
 					</a>
 				</article>
+        <a th:href="@{/class/detail(classCode=${cls.classCode})}">
+          <div class="class-meta" th:text="${cls.address}">위치 정보</div>
+          <div class="class-title" th:text="${cls.name}">클래스명</div>
+          <div class="class-price">
+            <span class="now" th:text="${#numbers.formatInteger((cls.desiredPrice != null and cls.desiredPrice > 0 and cls.price > cls.desiredPrice) ? cls.desiredPrice : cls.price, 0, 'COMMA') + '원'}"></span>
+          </div>
+        </a>
+      </article>
+      
+    </section>
+  </section>
+</main>
 
 
 			</section>
@@ -271,11 +311,14 @@ function toggleBookmark(event, btn) {
     })
     .then(response => response.text())
     .then(data => {
+        const svg = btn.querySelector('svg');
         if (data === 'ADDED') {
+            if (svg) svg.setAttribute('fill', '#e33838');
             if (confirm('관심 클래스에 추가되었습니다!\n마이페이지 관심 클래스로 이동하시겠습니까?')) {
                 location.href = '/mypage/bookmark';
             }
         } else if (data === 'REMOVED') {
+            if (svg) svg.setAttribute('fill', 'none');
             alert('관심 클래스에서 해제되었습니다.');
         } else if (data === 'LOGIN_REQUIRED') {
             alert('로그인이 필요한 서비스입니다.');
@@ -284,12 +327,9 @@ function toggleBookmark(event, btn) {
     })
     .catch(error => console.error('Error:', error));
 }
-
-
 </script>
 
 	<div th:replace="~{common/footer :: footerFragment}"></div>
-
 
 </body>
 </html>

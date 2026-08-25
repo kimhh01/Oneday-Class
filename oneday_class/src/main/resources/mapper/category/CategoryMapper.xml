@@ -12,7 +12,7 @@
         ORDER BY CATEGORY_CODE ASC
     </select>
 
-   <!-- 2. 검색 조건에 맞는 카테고리별 클래스 목록 조회 -->
+    <!-- 2. 검색 조건에 맞는 카테고리별 클래스 목록 조회 -->
     <select id="selectCategoryClass" parameterType="kr.co.oneclass.category.CategorySearchDTO" resultType="kr.co.oneclass.main.ClassDTO">
         SELECT 
             c.CLASS_CODE as classCode,
@@ -51,33 +51,35 @@
             </if>
             
             <!-- 당일 예약 -->
-			<if test="sameDayOnly">
-				AND EXISTS (
-					SELECT 1
-					FROM class_repeat_rule crr
-					JOIN SCHEDULE s ON s.repeat_rule_code = crr.repeat_rule_code
-					WHERE crr.class_code = c.class_code
-					  AND s.class_date = TO_CHAR(SYSDATE, 'YYYY-MM-DD')
-					  AND s.START_TIME > TO_CHAR(SYSDATE + (2 / 24), 'HH24:MI')
-					  AND s.remaining_people > 0
-				)
-			</if>
-			<!-- 주말 예약 (이번 주 토/일요일 스케줄 조회) -->
-        <if test="sameWeekOnly">
-				AND EXISTS (
-					SELECT 1
-					FROM class_repeat_rule crr
-					JOIN SCHEDULE s ON s.repeat_rule_code = crr.repeat_rule_code
-					WHERE crr.class_code = c.class_code
-					  AND s.class_date IN (
-						  TO_CHAR(TRUNC(SYSDATE, 'IW') + 5, 'YYYY-MM-DD'), /* 이번 주 토요일 */
-						  TO_CHAR(TRUNC(SYSDATE, 'IW') + 6, 'YYYY-MM-DD')  /* 이번 주 일요일 */
-					  )
-					  AND s.class_date >= TO_CHAR(SYSDATE, 'YYYY-MM-DD')
-					  AND s.remaining_people > 0
-				)
-			</if>
-         <!-- 최소 수강 인원 (CLASS_REPEAT_RULE을 거쳐 SCHEDULE 조회) -->
+            <if test="sameDayOnly">
+                AND EXISTS (
+                    SELECT 1
+                    FROM class_repeat_rule crr
+                    JOIN SCHEDULE s ON s.repeat_rule_code = crr.repeat_rule_code
+                    WHERE crr.class_code = c.class_code
+                      AND s.class_date = TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+                      AND s.START_TIME > TO_CHAR(SYSDATE + (2 / 24), 'HH24:MI')
+                      AND s.remaining_people > 0
+                )
+            </if>
+            
+            <!-- 주말 예약 (이번 주 토/일요일 스케줄 조회) -->
+            <if test="sameWeekOnly">
+                AND EXISTS (
+                    SELECT 1
+                    FROM class_repeat_rule crr
+                    JOIN SCHEDULE s ON s.repeat_rule_code = crr.repeat_rule_code
+                    WHERE crr.class_code = c.class_code
+                      AND s.class_date IN (
+                          TO_CHAR(TRUNC(SYSDATE, 'IW') + 5, 'YYYY-MM-DD'), /* 이번 주 토요일 */
+                          TO_CHAR(TRUNC(SYSDATE, 'IW') + 6, 'YYYY-MM-DD')  /* 이번 주 일요일 */
+                      )
+                      AND s.class_date >= TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+                      AND s.remaining_people > 0
+                )
+            </if>
+            
+            <!-- 최소 수강 인원 -->
             <if test="minPeople != null and minPeople > 0">
                 AND EXISTS (
                     SELECT 1 
@@ -87,7 +89,6 @@
                       AND s.MAX_PEOPLE &gt;= #{minPeople}
                 )
             </if>
-            
         </where>
 
         <!-- 정렬 조건 -->
@@ -119,8 +120,5 @@
         WHERE CLASS_CODE = #{classCode}
         ORDER BY SORT_ORDER ASC
     </select>
-    
-    <!-- 4. 당일 예약 페이지 목록 조회 -->
-    <select id=""></select>
 
 </mapper>

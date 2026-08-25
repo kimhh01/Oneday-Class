@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CSRF 메타 태그 -->
+    <meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}"/>
+    <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : ''}"/>
     <title>예약 가능 클래스 - 검색 결과</title>
     <link rel="stylesheet" th:href="@{/search/css/search.css}">
 </head>
@@ -31,8 +34,19 @@
 
         <!-- 검색 결과 목록 (search.css의 class-list 구조) -->
         <div class="class-list" th:if="${!#lists.isEmpty(availableList)}">
-            <div class="class-item" th:each="cls : ${availableList}">
-                <a th:href="@{/class/detail(classCode=${cls.classCode})}" style="display: flex; gap: 20px; width: 100%;">
+            <div class="class-item" th:each="cls : ${availableList}" style="position: relative;">
+                <!-- 찜(북마크) 버튼 -->
+                <button type="button" class="bookmark-btn" 
+                        th:data-class-code="${cls.classCode}" 
+                        onclick="toggleBookmark(event, this)">
+                    <svg width="20" height="20" viewBox="0 0 24 24" 
+                         th:fill="${bookmarkedClassCodes != null and #lists.contains(bookmarkedClassCodes, cls.classCode)} ? '#e33838' : 'none'" 
+                         stroke="#e33838" stroke-width="2">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                </button>
+
+                <a th:href="@{/class/detail(classCode=${cls.classCode})}" style="display: flex; gap: 20px; width: 100%; text-decoration: none; color: inherit;">
                     <img th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}" 
                          th:alt="${cls.name}" class="class-img">
                     
@@ -63,6 +77,45 @@
 </main>
 
 <div th:replace="~{common/footer :: footerFragment}"></div>
+
+<script>
+function toggleBookmark(event, btn) {
+    event.stopPropagation();
+    event.preventDefault();
+
+    const classCode = btn.getAttribute('data-class-code');
+    const tokenMeta = document.querySelector("meta[name='_csrf']");
+    const headerMeta = document.querySelector("meta[name='_csrf_header']");
+
+    const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+    if (tokenMeta && headerMeta && tokenMeta.getAttribute("content")) {
+        headers[headerMeta.getAttribute("content")] = tokenMeta.getAttribute("content");
+    }
+
+    fetch('/mypage/bookmark/toggle', {
+        method: 'POST',
+        headers: headers,
+        body: 'classCode=' + encodeURIComponent(classCode)
+    })
+    .then(response => response.text())
+    .then(data => {
+        const svg = btn.querySelector('svg');
+        if (data === 'ADDED') {
+            if (svg) svg.setAttribute('fill', '#e33838');
+            if (confirm('관심 클래스에 추가되었습니다!\n마이페이지 관심 클래스로 이동하시겠습니까?')) {
+                location.href = '/mypage/bookmark';
+            }
+        } else if (data === 'REMOVED') {
+            if (svg) svg.setAttribute('fill', 'none');
+            alert('관심 클래스에서 해제되었습니다.');
+        } else if (data === 'LOGIN_REQUIRED') {
+            alert('로그인이 필요한 서비스입니다.');
+            location.href = '/member/login';
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
 
 </body>
 </html>

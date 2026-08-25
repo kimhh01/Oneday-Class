@@ -4,10 +4,18 @@
 
 <mapper namespace="kr.co.oneclass.main.MainDAO">
 
-    <!-- 선택한 카테고리의 인기 클래스 N개 조회 (대분류 선택 시 하위 소분류 클래스까지 조인 검색) -->
+    <!-- 선택한 카테고리의 인기 클래스 N개 조회 -->
     <select id="selectTopRatedClass" resultType="kr.co.oneclass.main.ClassDTO">
         SELECT * FROM (
-            SELECT class_code, category_code, name, price, desired_price as desiredPrice, address, star_rating_avg, single_introduce
+            SELECT 
+                class_code as classCode, 
+                category_code as categoryCode, 
+                name, 
+                price, 
+                desired_price as desiredPrice, 
+                address, 
+                star_rating_avg as starRatingAvg, 
+                single_introduce as singleIntroduce
             FROM CLASS
             <where>
                 <if test="categoryCode != 0">
@@ -21,7 +29,15 @@
 
     <!-- 선택한 카테고리의 인기 클래스 전체 -->
     <select id="selectTopRatedClassList" parameterType="long" resultType="kr.co.oneclass.main.ClassDTO">
-        SELECT class_code, category_code, name, price, desired_price as desiredPrice, address, star_rating_avg, single_introduce
+        SELECT 
+            class_code as classCode, 
+            category_code as categoryCode, 
+            name, 
+            price, 
+            desired_price as desiredPrice, 
+            address, 
+            star_rating_avg as starRatingAvg, 
+            single_introduce as singleIntroduce
         FROM CLASS
         <where>
             <if test="categoryCode != 0">
@@ -34,7 +50,15 @@
 
     <!-- 당일 예약 가능한 클래스 -->
     <select id="selectTodayClass" resultType="kr.co.oneclass.main.ClassDTO">
-        SELECT DISTINCT c.class_code, c.category_code, c.name, c.price, c.desired_price as desiredPrice, c.address, c.star_rating_avg, c.single_introduce
+        SELECT DISTINCT 
+            c.class_code as classCode, 
+            c.category_code as categoryCode, 
+            c.name, 
+            c.price, 
+            c.desired_price as desiredPrice, 
+            c.address, 
+            c.star_rating_avg as starRatingAvg, 
+            c.single_introduce as singleIntroduce
         FROM CLASS c
         JOIN CLASS_REPEAT_RULE r ON c.class_code = r.class_code
         JOIN SCHEDULE s ON r.repeat_rule_code = s.repeat_rule_code
@@ -45,7 +69,15 @@
 
     <!-- 주말 예약 가능한 클래스 -->
     <select id="selectWeekendClass" resultType="kr.co.oneclass.main.ClassDTO">
-        SELECT DISTINCT c.class_code, c.category_code, c.name, c.price, c.desired_price as desiredPrice, c.address, c.star_rating_avg, c.single_introduce
+        SELECT DISTINCT 
+            c.class_code as classCode, 
+            c.category_code as categoryCode, 
+            c.name, 
+            c.price, 
+            c.desired_price as desiredPrice, 
+            c.address, 
+            c.star_rating_avg as starRatingAvg, 
+            c.single_introduce as singleIntroduce
         FROM CLASS c
         JOIN CLASS_REPEAT_RULE r ON c.class_code = r.class_code
         JOIN SCHEDULE s ON r.repeat_rule_code = s.repeat_rule_code
@@ -57,7 +89,15 @@
 
     <!-- 카테고리와 선택 날짜/시간 조건 검색 -->
     <select id="selectAvailableClass" resultType="kr.co.oneclass.main.ClassDTO">
-        SELECT DISTINCT c.class_code, c.category_code, c.name, c.price, c.desired_price as desiredPrice, c.address, c.star_rating_avg, c.single_introduce
+        SELECT DISTINCT 
+            c.class_code as classCode, 
+            c.category_code as categoryCode, 
+            c.name, 
+            c.price, 
+            c.desired_price as desiredPrice, 
+            c.address, 
+            c.star_rating_avg as starRatingAvg, 
+            c.single_introduce as singleIntroduce
         FROM CLASS c
         JOIN CLASS_REPEAT_RULE r ON c.class_code = r.class_code
         JOIN SCHEDULE s ON r.repeat_rule_code = s.repeat_rule_code

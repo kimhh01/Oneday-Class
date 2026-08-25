@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 💡 CSRF 토큰 메타 태그 추가 -->
+    <!-- CSRF 토큰 메타 태그 -->
     <meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}"/>
     <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : ''}"/>
     <title>클래스101 메인</title>
@@ -140,11 +140,13 @@
             <div class="grid-3">
                 <div class="class-card" th:each="cls : ${topRatedList}">
                     <div style="position: relative;">
-                        <!-- 💡 찜 버튼 -->
+                        <!-- 찜 버튼 -->
                         <button type="button" class="bookmark-btn" 
                                 th:data-class-code="${cls.classCode}" 
                                 onclick="toggleBookmark(event, this)">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e33838" stroke-width="2">
+                            <svg width="20" height="20" viewBox="0 0 24 24" 
+                                 th:fill="${bookmarkedClassCodes != null and #lists.contains(bookmarkedClassCodes, cls.classCode)} ? '#e33838' : 'none'" 
+                                 stroke="#e33838" stroke-width="2">
                                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                             </svg>
                         </button>
@@ -200,11 +202,13 @@
             <div class="grid-5">
                 <div class="class-card" th:each="cls : ${bakingList}">
                     <div style="position: relative;">
-                        <!-- 💡 찜 버튼 -->
+                        <!-- 찜 버튼 -->
                         <button type="button" class="bookmark-btn" 
                                 th:data-class-code="${cls.classCode}" 
                                 onclick="toggleBookmark(event, this)">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e33838" stroke-width="2">
+                            <svg width="20" height="20" viewBox="0 0 24 24" 
+                                 th:fill="${bookmarkedClassCodes != null and #lists.contains(bookmarkedClassCodes, cls.classCode)} ? '#e33838' : 'none'" 
+                                 stroke="#e33838" stroke-width="2">
                                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                             </svg>
                         </button>
@@ -245,11 +249,13 @@
             <div class="grid-3">
                 <div class="class-card" th:each="cls : ${beautyList}">
                     <div style="position: relative;">
-                        <!-- 💡 찜 버튼 -->
+                        <!-- 찜 버튼 -->
                         <button type="button" class="bookmark-btn" 
                                 th:data-class-code="${cls.classCode}" 
                                 onclick="toggleBookmark(event, this)">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e33838" stroke-width="2">
+                            <svg width="20" height="20" viewBox="0 0 24 24" 
+                                 th:fill="${bookmarkedClassCodes != null and #lists.contains(bookmarkedClassCodes, cls.classCode)} ? '#e33838' : 'none'" 
+                                 stroke="#e33838" stroke-width="2">
                                 <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
                             </svg>
                         </button>
@@ -301,7 +307,7 @@
         });
     });
 
-    // 💡 관심 클래스 찜 토글 비동기 함수
+    // 관심 클래스 찜 토글 비동기 함수
     function toggleBookmark(event, btn) {
         event.stopPropagation();
         event.preventDefault();
@@ -325,11 +331,16 @@
         })
         .then(response => response.text())
         .then(data => {
+            // 버튼 내부의 svg 요소 탐색
+            const svg = btn.querySelector('svg');
+            
             if (data === 'ADDED') {
+                if (svg) svg.setAttribute('fill', '#e33838');
                 if (confirm('관심 클래스에 추가되었습니다!\n마이페이지 관심 클래스로 이동하시겠습니까?')) {
                     location.href = '/mypage/bookmark';
                 }
             } else if (data === 'REMOVED') {
+                if (svg) svg.setAttribute('fill', 'none');
                 alert('관심 클래스에서 해제되었습니다.');
             } else if (data === 'LOGIN_REQUIRED') {
                 alert('로그인이 필요한 서비스입니다.');
