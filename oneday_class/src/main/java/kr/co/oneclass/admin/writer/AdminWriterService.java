@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import kr.co.oneclass.admin.common.PageDomain;
+
 @Service
 public class AdminWriterService {
 
@@ -75,5 +77,22 @@ public class AdminWriterService {
 		return new AdminWriterClassDomain(dto.getClassCode(), dto.getClassName(), dto.getPeriodType(),
 				dto.getRecruitmentStartDate(), dto.getRecruitmentEndDate(), dto.getMinimumPeople(),
 				dto.getMaximumPeople(), dto.getPrice(), dto.getClassStatus());
+	}
+
+	public PageDomain getWriterPage(AdminWriterSearchDTO searchDTO) {
+
+		int currentPage = Math.max(searchDTO.getPage(), 1);
+
+		int totalCount = writerDAO.selectWriterCount(searchDTO);
+
+		int pageSize = Math.max(searchDTO.getPageSize(), 1);
+
+		int totalPage = totalCount == 0 ? 1 : (int) Math.ceil((double) totalCount / pageSize);
+
+		int startPage = ((currentPage - 1) / 5) * 5 + 1;
+
+		int endPage = Math.min(startPage + 4, totalPage);
+
+		return new PageDomain(totalCount, currentPage, pageSize, totalPage, startPage, endPage);
 	}
 }

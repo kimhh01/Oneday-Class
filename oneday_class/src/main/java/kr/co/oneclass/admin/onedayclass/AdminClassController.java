@@ -22,6 +22,8 @@ public class AdminClassController {
 
 		model.addAttribute("classCount", classService.getClassCount(searchDTO));
 
+		model.addAttribute("page", classService.getPage(searchDTO));
+
 		return "admin/onedayclass/classList";
 	}
 

@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import kr.co.oneclass.admin.common.PageDomain;
+
 @Service
 public class AdminClassService {
 
@@ -128,7 +130,7 @@ public class AdminClassService {
 
 		return new AdminClassSummaryDomain(dto.getClassCode(), dto.getClassName(), dto.getRegion(),
 				dto.getRunningTime(), dto.getWriterName(), dto.getWorkshopName(), dto.getCategoryName(),
-				dto.getPeriodType(), dto.getRecruitmentStartDate(), dto.getRecruitmentEndDate(), dto.getSalePrice(),
+				dto.getRecruitmentStartDate(), dto.getRecruitmentEndDate(), dto.getSalePrice(), dto.getApprovalStatus(),
 				dto.getClassStatus());
 	}
 
@@ -140,5 +142,22 @@ public class AdminClassService {
 				dto.getDiscountRate(), dto.getMinimumPeople(), dto.getMaximumPeople(), dto.getRecruitmentStartDate(),
 				dto.getRecruitmentEndDate(), dto.getPeriodType(), dto.getSingleIntroduce(), dto.getIntroduce(),
 				dto.getFinishedProductDescription(), dto.getApprovalStatus());
+	}
+
+	public PageDomain getPage(AdminClassSearchDTO searchDTO) {
+
+		int currentPage = Math.max(searchDTO.getPage(), 1);
+
+		int totalCount = classDAO.selectClassCount(searchDTO);
+
+		int pageSize = Math.max(searchDTO.getPageSize(), 1);
+
+		int totalPage = totalCount == 0 ? 1 : (int) Math.ceil((double) totalCount / pageSize);
+
+		int startPage = ((currentPage - 1) / 5) * 5 + 1;
+
+		int endPage = Math.min(startPage + 4, totalPage);
+
+		return new PageDomain(totalCount, currentPage, pageSize, totalPage, startPage, endPage);
 	}
 }

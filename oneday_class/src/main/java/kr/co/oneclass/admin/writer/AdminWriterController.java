@@ -4,11 +4,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import kr.co.oneclass.admin.common.PageDomain;
+
 @Controller
 @RequestMapping("/admin/writer")
 public class AdminWriterController {
 
-	private AdminWriterService writerService;
+	private final AdminWriterService writerService;
 
 	public AdminWriterController(AdminWriterService writerService) {
 
@@ -21,6 +23,10 @@ public class AdminWriterController {
 		model.addAttribute("writers", writerService.getWriterList(searchDTO));
 
 		model.addAttribute("writerCount", writerService.getWriterCount(searchDTO));
+
+		PageDomain page = writerService.getWriterPage(searchDTO);
+
+		model.addAttribute("page", page);
 
 		return "admin/writer/writerList";
 	}

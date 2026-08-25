@@ -8,7 +8,7 @@ import lombok.Setter;
 public class AdminClassSearchDTO {
 
 	private String keyword;
-	private String periodType;
+	private String approvalStatus;
 	private String classStatus;
 
 	private int page = 1;

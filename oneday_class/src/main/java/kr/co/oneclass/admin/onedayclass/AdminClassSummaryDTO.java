@@ -19,11 +19,11 @@ public class AdminClassSummaryDTO {
 	private String workshopName;
 	private String categoryName;
 
-	private String periodType;
-
 	private Date recruitmentStartDate;
 	private Date recruitmentEndDate;
 
 	private int salePrice;
+	private String approvalStatus;
 	private String classStatus;
+	
 }

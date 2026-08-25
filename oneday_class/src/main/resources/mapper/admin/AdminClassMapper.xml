@@ -7,6 +7,7 @@
 	namespace="kr.co.oneclass.admin.onedayclass.AdminClassDAO">
 
 	<select id="selectClassCount" resultType="int">
+
 		SELECT COUNT(*)
 
 		FROM CLASS C
@@ -22,55 +23,45 @@
 		WHERE 1 =
 		1
 
-		<if
-			test="search.keyword != null
-                  and search.keyword != ''">
+		<if test="search.keyword != null
+			  and search.keyword != ''">
 
 			AND (
 			C.NAME LIKE '%' || #{search.keyword} || '%'
-			OR M.NAME LIKE
-			'%' || #{search.keyword} || '%'
+			OR M.NAME
+			LIKE '%' ||
+			#{search.keyword} || '%'
 			OR CR.ACTIVITY_NAME LIKE '%' ||
 			#{search.keyword} || '%'
 			)
+
+		</if>
+
+		<if
+			test="search.approvalStatus != null
+			  and search.approvalStatus != ''">
+
+			AND C.APPROVAL_STATUS =
+			#{search.approvalStatus}
+
 		</if>
 
 		<if
 			test="search.classStatus != null
-                  and search.classStatus != ''">
+			  and search.classStatus != ''">
 
 			AND C.STATUS =
 			#{search.classStatus}
+
 		</if>
 
-		<if
-			test="search.periodType != null
-                  and search.periodType != ''">
-
-			AND EXISTS (
-
-			SELECT 1
-
-			FROM CLASS_OFFERING_MAP COM
-
-			JOIN
-			CLASS_OFFERING CO
-			ON COM.CLASS_OFFERING_CODE =
-			CO.CLASS_OFFERING_CODE
-
-			WHERE COM.CLASS_CODE =
-			C.CLASS_CODE
-
-			AND CO.OFFERING_NAME =
-			#{search.periodType}
-			)
-		</if>
 	</select>
 
 	<select id="selectClassList"
 		resultType="kr.co.oneclass.admin.onedayclass.AdminClassSummaryDTO">
 
 		SELECT *
+
 		FROM (
 
 		SELECT
@@ -113,54 +104,40 @@
 		M.NAME AS
 		WRITER_NAME,
 
-		CR.ACTIVITY_NAME
-		AS WORKSHOP_NAME,
+		CR.ACTIVITY_NAME AS WORKSHOP_NAME,
 
 		CAT.NAME AS
 		CATEGORY_NAME,
 
 		(
-		SELECT LISTAGG(
-		CO.OFFERING_NAME,
-		', '
-		)
-		WITHIN GROUP (
-		ORDER BY
-		CO.CLASS_OFFERING_CODE
-		)
-
-		FROM CLASS_OFFERING_MAP COM
-
-		JOIN
-		CLASS_OFFERING CO
-		ON COM.CLASS_OFFERING_CODE =
-		CO.CLASS_OFFERING_CODE
-
-		WHERE COM.CLASS_CODE =
-		C.CLASS_CODE
-		) AS PERIOD_TYPE,
-
-		(
 		SELECT MIN(
 		CRR.OPERATION_START_DATE
 		)
-		FROM CLASS_REPEAT_RULE CRR
-		WHERE
-		CRR.CLASS_CODE =
+
+		FROM
+		CLASS_REPEAT_RULE CRR
+
+		WHERE CRR.CLASS_CODE =
 		C.CLASS_CODE
-		) AS RECRUITMENT_START_DATE,
+		) AS
+		RECRUITMENT_START_DATE,
 
 		(
 		SELECT MAX(
 		CRR.OPERATION_END_DATE
 		)
-		FROM CLASS_REPEAT_RULE CRR
-		WHERE CRR.CLASS_CODE
-		=
+
+		FROM
+		CLASS_REPEAT_RULE CRR
+
+		WHERE CRR.CLASS_CODE =
 		C.CLASS_CODE
-		) AS RECRUITMENT_END_DATE,
+		) AS
+		RECRUITMENT_END_DATE,
 
 		C.PRICE AS SALE_PRICE,
+
+		C.APPROVAL_STATUS,
 
 		C.STATUS
 		AS CLASS_STATUS,
@@ -189,56 +166,44 @@
 
 		WHERE 1 = 1
 
-		<if
-			test="search.keyword != null
-                      and search.keyword != ''">
+		<if test="search.keyword != null
+		  and search.keyword != ''">
 
 			AND (
 			C.NAME LIKE '%' || #{search.keyword} || '%'
-			OR M.NAME LIKE
-			'%' || #{search.keyword} || '%'
+			OR M.NAME
+			LIKE '%' || #{search.keyword} || '%'
 			OR CR.ACTIVITY_NAME LIKE '%' ||
 			#{search.keyword} || '%'
 			)
+
+		</if>
+
+		<if
+			test="search.approvalStatus != null
+		  and search.approvalStatus != ''">
+
+			AND C.APPROVAL_STATUS =
+			#{search.approvalStatus}
+
 		</if>
 
 		<if
 			test="search.classStatus != null
-                      and search.classStatus != ''">
+		  and search.classStatus != ''">
 
 			AND C.STATUS =
 			#{search.classStatus}
+
 		</if>
 
-		<if
-			test="search.periodType != null
-                      and search.periodType != ''">
-
-			AND EXISTS (
-
-			SELECT 1
-
-			FROM CLASS_OFFERING_MAP COM2
-
-			JOIN
-			CLASS_OFFERING CO2
-			ON COM2.CLASS_OFFERING_CODE =
-			CO2.CLASS_OFFERING_CODE
-
-			WHERE COM2.CLASS_CODE =
-			C.CLASS_CODE
-
-			AND
-			CO2.OFFERING_NAME =
-			#{search.periodType}
-			)
-		</if>
 		)
 
 		WHERE RN BETWEEN
 		#{search.startRow}
 		AND
 		#{search.endRow}
+
 	</select>
 
 	<select id="selectClassDetail"
@@ -660,12 +625,12 @@
 		UPDATE CLASS
 
 		SET APPROVAL_STATUS = '반려',
-		APPROVAL_MEMO
-		= #{dto.rejectMessage}
+		STATUS = '대기중',
+		APPROVAL_MEMO =
+		#{dto.rejectMessage}
 
 		WHERE CLASS_CODE = #{classCode}
-		AND
-		APPROVAL_STATUS != '승인'
+		AND APPROVAL_STATUS = '대기'
 
 	</update>
 </mapper>
