@@ -11,14 +11,7 @@
 <body>
 
 	<div class="container">
-		<!-- Header -->
-		<header class="header">
-			<div class="logo">Class 101</div>
-			<nav class="nav">
-				<a href="#">로그아웃</a> <a href="#">고객센터</a> <a href="#">마이페이지</a> <a
-					href="#">예약내역</a> <a href="#">관심목록</a> <span class="hamburger">☰</span>
-			</nav>
-		</header>
+		<div th:replace="~{common/header :: headerFragment}"></div>
 
 		<!-- Title Section -->
 		<section class="title-section">
@@ -104,19 +97,7 @@
 			</div>
 		</main>
 
-		<!-- Footer -->
-		<footer class="footer">
-			<div class="footer-left">
-				<p><strong>원데이클래스 주식회사</strong></p>
-				<p>주소: 06043 서울특별시 강남구 테헤란로 123, 클래스101 빌딩 5층 | 사업자 등록번호: 141-81-81254</p>
-				<p>통신판매업 신고번호: 제 2026-서울강남-1010호 | 대표: 김클래스 | 개인정보보호 책임자: 서클래스</p>
-				<p>이메일: cs@class101.co.kr | 전화: 1588-7822</p>
-			</div>
-			<div class="footer-right">
-				<span class="sns-icon">f</span> <span class="sns-icon">i</span> <span
-					class="sns-icon">y</span> <span class="sns-icon">c</span>
-			</div>
-		</footer>
+		<div th:replace="~{common/footer :: footerFragment}"></div>
 	</div>
 
 </body>

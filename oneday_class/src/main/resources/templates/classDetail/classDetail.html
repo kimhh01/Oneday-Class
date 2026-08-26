@@ -72,10 +72,16 @@
 						th:text="'#' + ${tag.tagName}">#태그</span>
 				</div>
 				<!-- 클래스 위치 -->
-				<div class="class-address">
-					<h3>클래스 위치</h3>
-					<span th:text="${detail?.classDetail?.address}" class="class-address1"></span> <span
-						th:text="${detail?.classDetail?.address2}" class="class-address2"></span>
+				<div class="class-address-section">
+					<!-- 1. 섹션 제목 (세로띠 스타일 적용) -->
+					<h3 class="section-heading">📍 클래스 위치</h3>
+
+					<!-- 2. 실제 주소 내용 박스 -->
+					<div class="class-address-box">
+						<span th:text="${detail?.classDetail?.address}"
+							class="class-address1"></span> <span
+							th:text="${detail?.classDetail?.address2}" class="class-address2"></span>
+					</div>
 				</div>
 				<!-- 2. 클래스 30초 요약 -->
 				<div class="green-check-badge">✔ 클래스 30초 요약</div>
@@ -184,11 +190,11 @@
 								th:src="${img.image}" alt="완성 작품" class="finish-img">
 						</th:block>
 					</th:block>
-					
+
 				</div>
 				<h3 class="finish">완성작 설명</h3>
-						<div class="intro-finish"
-							th:text="${detail.classDetail.finishIntroduce}">마무리 소개</div>
+				<div class="intro-finish"
+					th:text="${detail.classDetail.finishIntroduce}">마무리 소개</div>
 			</section>
 			<!-- 이미지를 크게 보여줄 모달 창 -->
 			<div id="myModal" class="modal">
@@ -385,9 +391,10 @@
 						</a>
 					</th:block>
 				</div>
-				<a th:href="@{category/class(categoryCode=${detail.classDetail.categoryCode})}" class="btn-more-similar"> <span>비슷한 클래스
-						더보기</span> <svg class="arrow-icon" viewBox="0 0 24 24" width="16"
-						height="16">
+				<a
+					th:href="@{category/class(categoryCode=${detail.classDetail.categoryCode})}"
+					class="btn-more-similar"> <span>비슷한 클래스 더보기</span> <svg
+						class="arrow-icon" viewBox="0 0 24 24" width="16" height="16">
         <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"
 							fill="currentColor" />
     </svg>
@@ -420,15 +427,15 @@
 						th:if="${detail?.classDetail?.price != null and detail.classDetail.price > 0}"
 						th:text="|${detail.scheduleList[0].diffHours != null && detail.scheduleList[0].diffHours > 0 ? #numbers.formatInteger(detail.classDetail.price / detail.scheduleList[0].diffHours, 0, 'COMMA') : 0}원/시간|"></div>
 					<div class="price-main">
-						
-						<span class="time-highlight" th:text="${detail.scheduleList[0].diffHours + '시간'}"></span><br> 
-							<span class="discount-rate" th:if="${detail?.classDetail?.discountRate != null and detail?.classDetail?.discountRate > 0}" th:text="|${detail?.classDetail?.discountRate}%|">7%</span>
-							<span
+
+						<span class="time-highlight"
+							th:text="${detail.scheduleList[0].diffHours + '시간'}"></span><br>
+						<span class="discount-rate"
+							th:if="${detail?.classDetail?.discountRate != null and detail?.classDetail?.discountRate > 0}"
+							th:text="|${detail?.classDetail?.discountRate}%|">7%</span> <span
 							class="desiredPrice-num"
 							th:text="${detail?.classDetail?.desiredPrice != null and detail.classDetail.desiredPrice > 0} ? |${#numbers.formatInteger(detail.classDetail.desiredPrice, 0, 'COMMA')} 원| : '가격 문의'">55,000
-							원</span> <br>
-							<span
-							class="price-num"
+							원</span> <br> <span class="price-num"
 							th:text="${detail?.classDetail?.price != null and detail.classDetail.price > 0} ? |${#numbers.formatInteger(detail.classDetail.price, 0, 'COMMA')} 원| : '가격 문의'">55,000
 							원</span>
 					</div>
@@ -766,6 +773,7 @@ function closeDetailModal(event) {
 }
 
 // 리뷰 정렬 및 화면 출력 함수
+// 리뷰 정렬 및 화면 출력 함수
 function sortReviews(type) {
     const container = document.getElementById('reviewListContainer');
     if (!container) return;
@@ -782,10 +790,18 @@ function sortReviews(type) {
     if (type === 'recommend') {
         if (btnRecommend) btnRecommend.classList.add('active');
         if (btnLatest) btnLatest.classList.remove('active');
-        reviewDataList.sort((a, b) => (b.starRating || 0) - (a.starRating || 0));
+        
+        // 💡 1차: 별점 내림차순 -> 2차(동점 시): 최신순(inputDate 내림차순)
+        reviewDataList.sort((a, b) => {
+            const ratingDiff = (b.starRating || 0) - (a.starRating || 0);
+            if (ratingDiff !== 0) return ratingDiff;
+            return new Date(b.inputDate || 0) - new Date(a.inputDate || 0);
+        });
     } else if (type === 'latest') {
         if (btnLatest) btnLatest.classList.add('active');
         if (btnRecommend) btnRecommend.classList.remove('active');
+        
+        // 최신순(inputDate 내림차순)
         reviewDataList.sort((a, b) => new Date(b.inputDate || 0) - new Date(a.inputDate || 0));
     }
 

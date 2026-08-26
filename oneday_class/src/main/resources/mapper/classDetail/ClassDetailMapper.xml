@@ -123,24 +123,25 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     ORDER BY CURRICULUM_CODE ASC  <!-- 필요 시 순서 정렬 -->
 </select>
 
-<!-- 7. 리뷰 리스트 조회(추천순, 조회순) -->
+<!-- 7. 리뷰 리스트 조회 -->
 <select id="selectReviewList" parameterType="int" resultType="kr.co.oneclass.classDetail.ReviewDTO">
     SELECT
-    r.review_code as reviewCode,
-    m.name          AS userName,
-    m.image         AS userImg,
-    c.activity_name AS operatorName,
-    c.profile_image AS operatorImg,
-    r.star_rating   AS starRating,
-    r.content       AS content,
-    r.input_date    AS inputDate,
-    r.reply_content AS replyContent,
-    r.reply_date    AS replyDate
-FROM review r
-JOIN member m ON r.member_code = m.member_code
-JOIN class cl ON r.class_code = cl.class_code
-JOIN creator c ON cl.operator_code = c.operator_code
-WHERE r.class_code = #{classCode}
+        r.review_code   AS reviewCode,
+        m.name          AS userName,
+        m.image         AS userImg,
+        c.activity_name AS operatorName,
+        c.profile_image AS operatorImg,
+        r.star_rating   AS starRating,
+        r.content       AS content,
+        r.input_date    AS inputDate,
+        r.reply_content AS replyContent,
+        r.reply_date    AS replyDate
+    FROM review r
+    JOIN member m ON r.member_code = m.member_code
+    JOIN class cl ON r.class_code = cl.class_code
+    JOIN creator c ON cl.operator_code = c.operator_code
+    WHERE r.class_code = #{classCode}
+    ORDER BY r.star_rating DESC, r.input_date DESC  <!-- 💡 기본 정렬 추가 -->
 </select>
 
 <select id="selectReviewImgList" parameterType="int" resultType="kr.co.oneclass.classDetail.ReviewImgDTO">

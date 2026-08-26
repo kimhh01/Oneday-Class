@@ -222,12 +222,6 @@ body.map-page-body {
     margin-top: 2rem;
 }
 
-.green-check-badge {
-    color: var(--brand-green);
-    font-size: 0.85rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-}
 
 .db-text-content {
     font-size: 0.9rem;
@@ -236,9 +230,17 @@ body.map-page-body {
 }
 
 .section-heading {
-    font-size: 1.1rem;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 1.05rem;
     font-weight: 700;
-    margin: 0 0 1rem 0;
+    color: var(--text-black, #212529);
+    padding: 0.75rem 1rem;
+    background-color: #f8fafc;
+    border-left: 4px solid var(--brand-green, #1B6931);
+    border-radius: 0 8px 8px 0;
+    margin: 2rem 0 1.25rem 0;
 }
 
 /* 커리큘럼 리스트 */
@@ -251,11 +253,13 @@ body.map-page-body {
 /* 커리큘럼 아이템 (세로 정렬로 변경) */
 .curriculum-item {
     display: flex;
-    flex-direction: column; /* STEP/글/이미지를 위에서 아래로 배치 */
+    flex-direction: column;
     gap: 0.75rem;
-    background-color: var(--gray-bg);
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
     padding: 1.25rem;
-    border-radius: 8px;
+    border-radius: 12px;
+    margin-bottom: 0.75rem;
 }
 
 /* 커리큘럼 이미지 박스 및 이미지 크기 설정 */
@@ -542,10 +546,10 @@ body.map-page-body {
 
 /* 튜터 프로필 카드 */
 .tutor-profile-card {
-    background-color: #f0fdf4; /* 연한 연두색 배경 */
-    border: 1px solid #bbf7d0; /* 은은한 연두색 테두리 */
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
-    padding: 2.5rem 1.5rem;
+    padding: 2.25rem 1.5rem;
     text-align: center;
 }
 
@@ -563,11 +567,12 @@ body.map-page-body {
 
 .tutor-region-badge {
     display: inline-block;
-    background-color: var(--brand-green);
+    background-color: var(--brand-green, #1B6931);
     color: #ffffff;
-    font-size: 0.7rem;
-    padding: 0.2rem 0.5rem;
-    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.65rem;
+    border-radius: 12px;
 }
 
 .tutor-bio-text {
@@ -1410,23 +1415,24 @@ a.btn-info-detail {
 
 /* 2. 클래스 30초 요약 뱃지 */
 .green-check-badge {
-    display: inline-flex;
-    align-items: center;
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--brand-green, #1B6931);
+    padding: 0.75rem 1rem;
     background-color: #f0fdf4;
-    color: var(--brand-green);
-    font-size: 0.9rem;
-    font-weight: 800;
-    padding: 0.5rem 0.9rem;
-    border-radius: 6px;
-    border: 1px solid #bbf7d0;
-    margin-bottom: 1.5rem;
+    border-left: 4px solid var(--brand-green, #1B6931);
+    border-radius: 0 8px 8px 0;
+    margin: 1.5rem 0 1.25rem 0;
 }
 
 /* 3. 추천대상 & 장점 섹션 (카드형 박스) */
 .recommend-section,
 .advantage-section {
-    background-color: var(--gray-bg);
-    border: 1px solid var(--border-line);
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
     padding: 1.25rem 1.5rem;
     margin-bottom: 1.25rem;
@@ -1434,9 +1440,9 @@ a.btn-info-detail {
 
 .recommend-section h3,
 .advantage-section h3 {
-    font-size: 1rem;
+    font-size: 0.95rem;
     font-weight: 700;
-    color: var(--text-black);
+    color: var(--text-black, #212529);
     margin: 0 0 0.75rem 0;
     display: flex;
     align-items: center;
@@ -1478,71 +1484,104 @@ a.btn-info-detail {
     position: absolute;
     left: 0.25rem;
     top: 0;
-    color: var(--brand-green);
+    color: var(--brand-green, #1B6931);
     font-weight: bold;
     font-size: 1.1rem;
 }
 
 /* 4. 본문 소개 글 (한 줄 소개 / 메인 소개 / 마무리) */
 .db-text-content {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     font-weight: 700;
-    color: var(--text-black);
+    color: var(--text-black, #212529);
     line-height: 1.6;
     margin-top: 2rem;
-    margin-bottom: 1rem;
+    margin-bottom: 1.25rem;
     word-break: keep-all;
+    padding: 1rem 1.25rem;
+    background-color: #f0fdf4;
+    border-left: 4px solid var(--brand-green, #1B6931);
+    border-radius: 0 8px 8px 0;
 }
 
 .intro-main {
     font-size: 0.95rem;
     color: #374151;
-    line-height: 1.75;
-    white-space: pre-line; /* DB 엔터값(줄바꿈) 유지 */
-    margin-bottom: 1.5rem;
+    line-height: 1.8;
+    white-space: pre-line;
+    margin-bottom: 2rem;
     word-break: keep-all;
+    letter-spacing: -0.01em;
 }
 
 .intro-finish {
     font-size: 0.925rem;
-    font-weight: 600;
-    color: var(--brand-green);
-    background-color: #f0fdf4;
-    padding: 1rem 1.25rem;
-    border-radius: 8px;
-    line-height: 1.6;
+    font-weight: 500;
+    color: #374151;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    line-height: 1.7;
     margin-bottom: 2rem;
     white-space: pre-line;
 }
 
 /* 5. 재료 / 기타 제공사항 테이블 및 리스트 */
-.material-info,
+.material-info{
+	margin-top: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+}
 .offering-info {
-    margin-top: 2rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border-line);
+    margin-top: 1.5rem;
+    padding: 1.25rem 1.5rem;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
 }
 
-.material-info h4,
-.offering-info h4 {
-    font-size: 1rem;
+
+.material-info h4{
+	font-size: 0.95rem;
     font-weight: 700;
-    color: var(--text-black);
-    margin: 0 0 1rem 0;
+    color: var(--text-black, #212529);
+    margin: 0 0 0.85rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+.offering-info h4 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-black, #212529);
+    margin: 0 0 0.85rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.offering-info h4::before {
+    content: "🎁";
+    font-size: 1rem;
+}
+
+.material-info h4::before {
+    content: "📦";
+    font-size: 1rem;
 }
 
 /* 재료 안내 테이블 */
 .material-table {
     width: 100%;
     border-collapse: collapse;
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid var(--border-line);
     font-size: 0.875rem;
 }
 
 .material-table tr {
-    border-bottom: 1px solid var(--border-line);
+    border-bottom: 1px solid #e2e8f0;
 }
 
 .material-table tr:last-child {
@@ -1550,19 +1589,20 @@ a.btn-info-detail {
 }
 
 .material-table td {
-    padding: 0.75rem 1rem;
+    padding: 0.75rem 0.5rem;
     vertical-align: middle;
+    background-color: transparent !important; /* 내부 흰색 배경 제거 */
 }
 
+/* 항목 이름 (왼쪽) */
 .material-table td:first-child {
     width: 30%;
-    background-color: var(--gray-bg);
-    font-weight: 600;
-    color: #343a40;
+    font-weight: 700;
+    color: var(--text-black, #212529);
 }
 
+/* 설명 내용 (오른쪽) */
 .material-table td:last-child {
-    background-color: #ffffff;
     color: #495057;
 }
 
@@ -1577,9 +1617,10 @@ a.btn-info-detail {
 }
 
 .offering-info li {
-    font-size: 0.875rem;
+   font-size: 0.875rem;
     color: #495057;
-    padding-left: 1.25rem;
+    line-height: 1.5;
+    padding-left: 1.35rem;
     position: relative;
 }
 
@@ -1587,9 +1628,10 @@ a.btn-info-detail {
     content: "✔";
     position: absolute;
     left: 0;
-    top: 0;
-    font-size: 0.75rem;
-    color: var(--brand-green);
+    top: 1px;
+    font-size: 0.8rem;
+    color: var(--brand-green, #1B6931);
+    font-weight: bold;
 }
 
 /* 모달 기본 스타일 (숨김 처리) */
@@ -1649,4 +1691,88 @@ a.btn-info-detail {
 	text-decoration-line: line-through;
 	color: #a8a8a8;
 	font-size: 16px;
+}
+/* =========================================
+   [수정/추가] 클래스 위치 (주소) 카드 스타일
+   ========================================= */
+.class-address-section {
+ margin-bottom: 1.5rem;
+}
+
+.class-address-box {
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin-top: 0.75rem;
+}
+
+
+.class-address1, 
+.class-address2 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-black, #212529);
+    line-height: 1.5;
+    display: block;
+}
+
+
+/* =========================================
+   [수정/추가] 본문 내용 및 완성작 소개 스타일 개선
+   ========================================= */
+/* 한 줄 소개 카드 스타일 */
+.db-text-content {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1.6;
+    margin-top: 2rem;
+    margin-bottom: 1.25rem;
+    word-break: keep-all;
+    padding: 1rem 1.25rem;
+    background-color: #f8fafc;
+    border-left: 4px solid var(--brand-green, #1B6931);
+    border-radius: 0 8px 8px 0;
+}
+
+/* 메인 본문 소개 글감 개선 */
+.intro-main {
+    font-size: 0.975rem;
+    color: #374151;              /* 너무 짙지 않은 눈이 편안한 먹색 */
+    line-height: 1.8;            /* 넉넉한 줄간격으로 긴 글 읽기 편하게 설정 */
+    white-space: pre-line;       /* DB 줄바꿈(엔터) 값 유지 */
+    margin-top: 1rem;
+    margin-bottom: 2.5rem;
+    word-break: keep-all;         /* 한글 단어 단위 줄바꿈 */
+    letter-spacing: -0.01em;
+}
+
+/* 완성작 타이틀 */
+.finish {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-black, #212529);
+    padding: 0.75rem 1rem;
+    background-color: #f8fafc;
+    border-left: 4px solid var(--brand-green, #1B6931);
+    border-radius: 0 8px 8px 0;
+    margin: 2rem 0 1.25rem 0;
+}
+
+/* 완성작 설명 박스 (연두색 박스 대체 -> 모던 카드형 디자인) */
+.intro-finish {
+    font-size: 0.925rem;
+    font-weight: 500;
+    color: #374151;
+    background-color: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+    white-space: pre-line;
 }
