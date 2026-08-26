@@ -19,7 +19,7 @@
         <h2 class="section-title">
             <span>
                 <th:block th:if="${scheduleDTO != null and scheduleDTO.date != null}" 
-                          th:text="${#dates.format(scheduleDTO.date, 'yyyy.MM.dd')} + '예약 가능 클래스'">
+                          th:text="${#dates.format(scheduleDTO.date, 'yyyy.MM.dd ')} + '예약 가능 클래스'">
                 </th:block>
                 <th:block th:if="${scheduleDTO == null or scheduleDTO.date == null}">
                     예약 가능 클래스
@@ -37,14 +37,14 @@
             <div class="class-item" th:each="cls : ${availableList}" style="position: relative;">
                 <!-- 찜(북마크) 버튼 -->
                 <button type="button" class="bookmark-btn" 
-                        th:data-class-code="${cls.classCode}" 
-                        onclick="toggleBookmark(event, this)">
-                    <svg width="20" height="20" viewBox="0 0 24 24" 
-                         th:fill="${bookmarkedClassCodes != null and #lists.contains(bookmarkedClassCodes, cls.classCode)} ? '#e33838' : 'none'" 
-                         stroke="#e33838" stroke-width="2">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                    </svg>
-                </button>
+        th:data-class-code="${cls.classCode}" 
+        onclick="toggleBookmark(event, this)">
+    <svg width="20" height="20" viewBox="0 0 24 24" 
+         th:fill="${bookmarkedClassCodes != null and #lists.contains(bookmarkedClassCodes, cls.classCode)} ? '#e33838' : 'none'" 
+         stroke="#e33838" stroke-width="2">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+    </svg>
+</button>
 
                 <a th:href="@{/class/detail(classCode=${cls.classCode})}" style="display: flex; gap: 20px; width: 100%; text-decoration: none; color: inherit;">
                     <img th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}" 

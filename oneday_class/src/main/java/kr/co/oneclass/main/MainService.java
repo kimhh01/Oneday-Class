@@ -2,6 +2,9 @@ package kr.co.oneclass.main;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import kr.co.oneclass.category.CategoryDTO;
+
 import java.util.List;
 
 @Service
@@ -65,5 +68,9 @@ public class MainService {
 
     public List<ClassImageDTO> searchImage(long classCode) { // 👈 int -> long 수정 (DTO 타입 통일)
         return mDAO.selectImage(classCode);
+    }
+    
+    public List<CategoryDTO> getCategoryList() {
+        return mDAO.selectCategoryList(); // 또는 categoryDAO.selectCategoryList()
     }
 }

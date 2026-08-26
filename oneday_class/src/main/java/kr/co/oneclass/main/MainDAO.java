@@ -2,6 +2,9 @@ package kr.co.oneclass.main;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+
+import kr.co.oneclass.category.CategoryDTO;
+
 import java.util.List;
 
 @Mapper
@@ -13,4 +16,5 @@ public interface MainDAO {
     List<ClassDTO> selectWeekendClass();
     List<ClassDTO> selectAvailableClass(@Param("categoryCode") long categoryCode, @Param("scheduleDTO") ScheduleDTO scheduleDTO);
     List<ClassImageDTO> selectImage(long classCode);
+	List<CategoryDTO> selectCategoryList();
 }
