@@ -73,4 +73,8 @@ public class MainService {
     public List<CategoryDTO> getCategoryList() {
         return mDAO.selectCategoryList(); // 또는 categoryDAO.selectCategoryList()
     }
+ // 특정 지역(키워드) 주소가 포함된 클래스 개수 조회
+    public int getRegionClassCount(String keyword) {
+        return mDAO.selectRegionClassCount(keyword); // 기존 mainDAO 변수명에 맞게 호출
+    }
 }

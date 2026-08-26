@@ -35,6 +35,19 @@ document.addEventListener("DOMContentLoaded", function() {
     const map = new kakao.maps.Map(mapContainer, mapOption);
     const geocoder = new kakao.maps.services.Geocoder();
     const ps = new kakao.maps.services.Places();
+	
+	//메인화면 지역 클릭 등으로 전달받은 keyword(홍대, 성수, 송파 등) 위치로 지도 중심 이동
+	    const initialKeyword = (typeof searchDTOData !== 'undefined' && searchDTOData.keyword) ? searchDTOData.keyword : '';
+
+	    if (initialKeyword && initialKeyword !== '지역 전체') {
+	        ps.keywordSearch(initialKeyword, function(data, status) {
+	            if (status === kakao.maps.services.Status.OK) {
+	                const moveCoords = new kakao.maps.LatLng(data[0].y, data[0].x);
+	                map.setCenter(moveCoords);
+	                map.setLevel(4);
+	            }
+	        });
+	    }
 
     // -------------------------------------------------------------
     // 2. 카테고리별 물방울 마커 스타일 & 생성 함수

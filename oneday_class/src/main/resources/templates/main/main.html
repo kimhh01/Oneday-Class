@@ -191,24 +191,121 @@
         </section>
 
         <!-- 5. 어디에서 놀까요? -->
-        <section class="content-section">
-            <div class="section-header">
-                <h2 class="section-title">어디에서 놀까요?</h2>
-            </div>
-            
-          <div class="location-circles">
-    <a th:href="@{/map(keyword='홍대')}" class="loc-circle"><span>홍대</span></a>
-    <a th:href="@{/map(keyword='강남')}" class="loc-circle"><span>강남</span></a>
-    <a th:href="@{/map(keyword='성수')}" class="loc-circle"><span>성수</span></a>
-    <a th:href="@{/map(keyword='송파')}" class="loc-circle"><span>송파</span></a>
-    <a th:href="@{/map(keyword='마포')}" class="loc-circle"><span>마포</span></a>
-    <a th:href="@{/map(keyword='잠실')}" class="loc-circle"><span>잠실</span></a>
-    <a th:href="@{/map(keyword='용산')}" class="loc-circle"><span>용산</span></a>
-    <a th:href="@{/map(keyword='부산')}" class="loc-circle"><span>부산</span></a>
-    <a th:href="@{/map(keyword='수원')}" class="loc-circle"><span>수원</span></a>
+<section class="content-section">
+    <div class="section-header">
+        <h2 class="section-title">어디에서 놀까요?</h2>
+    </div>
+    
+    <!-- 화살표 및 슬라이더 컨테이너 래퍼 -->
+    <div class="location-slider-wrapper">
+        <button type="button" class="slide-arrow prev-arrow" onclick="scrollLocations(-1)" aria-label="이전">&#10094;</button>
+        
+  <div class="location-circles" id="locationContainer">
+    <!-- 1. 내주변 -->
+    <a th:href="@{/map(useLocation=true)}" class="loc-circle my-location">
+        <div class="loc-content">
+            <span class="pin-icon">📍</span>
+            <span class="loc-name">내주변</span>
+        </div>
+    </a>
+
+    <!-- 2. DB 동적 클래스 개수 출력 (지역별 2줄 구성) -->
+    <a th:href="@{/map(keyword='마포')}" class="loc-circle">
+        <div class="loc-content">
+            <span class="loc-name">홍대</span>
+            <span class="loc-count" 
+                  th:text="${regionCounts != null ? regionCounts['홍대'] + '개 취미' : '0개 취미'}">0개 취미</span>
+        </div>
+    </a>
+
+    <a th:href="@{/map(keyword='강남')}" class="loc-circle">
+        <div class="loc-content">
+            <span class="loc-name">강남</span>
+            <span class="loc-count" 
+                  th:text="${regionCounts != null ? regionCounts['강남'] + '개 취미' : '0개 취미'}">0개 취미</span>
+        </div>
+    </a>
+
+    <a th:href="@{/map(keyword='성동')}" class="loc-circle">
+        <div class="loc-content">
+            <span class="loc-name">성수</span>
+            <span class="loc-count" 
+                  th:text="${regionCounts != null ? regionCounts['성수'] + '개 취미' : '0개 취미'}">0개 취미</span>
+        </div>
+    </a>
+
+    <a th:href="@{/map(keyword='송파')}" class="loc-circle">
+        <div class="loc-content">
+            <span class="loc-name">송파</span>
+            <span class="loc-count" 
+                  th:text="${regionCounts != null ? regionCounts['송파'] + '개 취미' : '0개 취미'}">0개 취미</span>
+        </div>
+    </a>
+
+    <a th:href="@{/map(keyword='마포')}" class="loc-circle">
+        <div class="loc-content">
+            <span class="loc-name">마포</span>
+            <span class="loc-count" 
+                  th:text="${regionCounts != null ? regionCounts['마포'] + '개 취미' : '0개 취미'}">0개 취미</span>
+        </div>
+    </a>
+
+    <a th:href="@{/map(keyword='잠실')}" class="loc-circle">
+        <div class="loc-content">
+            <span class="loc-name">잠실</span>
+            <span class="loc-count" 
+                  th:text="${regionCounts != null ? regionCounts['잠실'] + '개 취미' : '0개 취미'}">0개 취미</span>
+        </div>
+    </a>
+
+    <a th:href="@{/map(keyword='용산')}" class="loc-circle">
+        <div class="loc-content">
+            <span class="loc-name">용산</span>
+            <span class="loc-count" 
+                  th:text="${regionCounts != null ? regionCounts['용산'] + '개 취미' : '0개 취미'}">0개 취미</span>
+        </div>
+    </a>
+
+    <a th:href="@{/map(keyword='부산')}" class="loc-circle">
+        <div class="loc-content">
+            <span class="loc-name">부산</span>
+            <span class="loc-count" 
+                  th:text="${regionCounts != null ? regionCounts['부산'] + '개 취미' : '0개 취미'}">0개 취미</span>
+        </div>
+    </a>
+    
+    <a th:href="@{/map(keyword='수원')}" class="loc-circle">
+        <div class="loc-content">
+            <span class="loc-name">수원</span>
+            <span class="loc-count" 
+                  th:text="${regionCounts != null ? regionCounts['부산'] + '개 취미' : '0개 취미'}">0개 취미</span>
+        </div>
+    </a>
+    
+    <a th:href="@{/map(keyword='광주')}" class="loc-circle">
+        <div class="loc-content">
+            <span class="loc-name">광주</span>
+            <span class="loc-count" 
+                  th:text="${regionCounts != null ? regionCounts['부산'] + '개 취미' : '0개 취미'}">0개 취미</span>
+        </div>
+    </a>
+    
+    <a th:href="@{/map(keyword='대전')}" class="loc-circle">
+        <div class="loc-content">
+            <span class="loc-name">대전</span>
+            <span class="loc-count" 
+                  th:text="${regionCounts != null ? regionCounts['부산'] + '개 취미' : '0개 취미'}">0개 취미</span>
+        </div>
+    </a>
+    
+    
+    
+    
 </div>
 
-        </section>
+        <button type="button" class="slide-arrow next-arrow" onclick="scrollLocations(1)" aria-label="다음">&#10095;</button>
+    </div>
+</section>
 
         <!-- 6. 인기 디저트 클래스 (상위 5개) -->
         <section class="content-section">
@@ -334,7 +431,17 @@
             });
         });
     });
-
+ // 지역 동그라미 좌우 좌우 스크롤 함수
+    function scrollLocations(direction) {
+        const container = document.getElementById('locationContainer');
+        if (container) {
+            const scrollAmount = 300; // 한 번 클릭 시 이동할 거리(px)
+            container.scrollBy({
+                left: direction * scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    }
     // 관심 클래스 찜 토글 비동기 함수
     function toggleBookmark(event, btn) {
         event.stopPropagation();

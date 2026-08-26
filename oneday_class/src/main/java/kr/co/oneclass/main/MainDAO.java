@@ -17,4 +17,5 @@ public interface MainDAO {
     List<ClassDTO> selectAvailableClass(@Param("categoryCode") long categoryCode, @Param("scheduleDTO") ScheduleDTO scheduleDTO);
     List<ClassImageDTO> selectImage(long classCode);
 	List<CategoryDTO> selectCategoryList();
+	int selectRegionClassCount(@Param("keyword") String keyword);
 }

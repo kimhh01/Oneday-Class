@@ -326,12 +326,113 @@ ul, li { list-style: none; }
 .original { color: #b0b0b0; text-decoration: line-through; font-size: 12px; }
 .final { color: var(--text-black); font-weight: 800; }
 
-/* ================= 동그라미 지역 메뉴 ================= */
-.location-circles { display: flex; gap: 30px; overflow-x: auto; padding-bottom: 10px; }
-.loc-circle { width: 90px; height: 90px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 700; color: #fff; cursor: pointer; flex-shrink: 0; background-color: #8fb89a; background-size: cover; background-position: center; position: relative; }
-.loc-circle::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); border-radius: 50%; z-index: 1; }
-.loc-circle span { position: relative; z-index: 2; }
+/* ================= 동그라미 지역 메뉴 및 스크롤 슬라이더 ================= */
+.location-slider-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
 
+/* 못생긴 스크롤바 감추기 */
+.location-circles { 
+    display: flex; 
+    gap: 20px; 
+    overflow-x: auto; 
+    padding: 10px 5px; 
+    scroll-behavior: smooth;
+    -ms-overflow-style: none; /* IE, Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+.location-circles::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+/* 동그라미 내부 레이아웃 및 2줄 정렬 */
+.loc-circle { 
+    width: 100px; 
+    height: 100px; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    cursor: pointer; 
+    flex-shrink: 0; 
+    background-color: #4a6855; 
+    position: relative; 
+    transition: transform 0.2s ease;
+    text-align: center;
+}
+
+/* 2줄 레이아웃을 만드는 핵심 스타일 */
+.loc-content {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column; /* 위아래 2줄로 배치 */
+    align-items: center;
+    justify-content: center;
+    gap: 4px; /* 위아래 글자 간격 */
+    width: 100%;
+}
+
+/* 윗줄: 지역 이름 */
+.loc-name {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffffff;
+    line-height: 1.2;
+}
+
+/* 아랫줄: N개 취미 */
+.loc-count {
+    display: block;
+    font-size: 11px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.2;
+}
+
+/* 내주변 전용 */
+.my-location {
+    background-color: #3b5645;
+}
+
+.pin-icon {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 2px;
+}
+
+/* 양 옆 투명 흰색 화살표 버튼 */
+.slide-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.85); /* 투명한 흰색 배경 */
+    border: 1px solid #EAEAEA;
+    border-radius: 50%;
+    color: #333;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.2s ease;
+}
+
+.slide-arrow:hover {
+    background: #ffffff;
+    transform: translateY(-50%) scale(1.1);
+    color: var(--primary-green);
+}
+
+.prev-arrow { left: -18px; }
+.next-arrow { right: -18px; }
 
 
 .bookmark-btn {

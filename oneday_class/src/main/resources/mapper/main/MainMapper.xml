@@ -165,4 +165,12 @@
         ORDER BY category_code ASC
     </select>
 
+<!-- 지역별 등록된 클래스 개수 집계 -->
+<select id="selectRegionClassCount" parameterType="string" resultType="int">
+    SELECT COUNT(*) 
+    FROM CLASS 
+    WHERE ADDRESS LIKE '%' || #{keyword} || '%'
+</select>
+
+
 </mapper>
