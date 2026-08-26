@@ -37,6 +37,7 @@ public class AdminClassDetailDTO {
 	private String singleIntroduce;
 	private String introduce;
 	private String finishedProductDescription;
-	
+
 	private String approvalStatus;
+	private String approvalMemo;
 }

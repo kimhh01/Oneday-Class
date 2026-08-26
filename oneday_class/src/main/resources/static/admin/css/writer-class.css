@@ -637,3 +637,8 @@ textarea:disabled {
 	background: var(--primary);
 	color: #fff;
 }
+
+.status-badge.approval-editing {
+	color: #3f6fa8 !important;
+	background: #eaf2fb !important;
+}

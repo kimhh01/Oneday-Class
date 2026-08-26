@@ -19,7 +19,7 @@
 					<a th:href="@{/admin/onedayclass}">목록으로</a>
 					<form
 						th:action="@{/admin/onedayclass/{id}/status(id=${clazz.classCode})}"
-						method="post">
+						method="post" class="class-stop-form">
 
 						<button type="submit" class="class-action-btn sale-stop-btn"
 							th:disabled="${clazz.approvalStatus != '승인'}">판매 중지</button>
@@ -181,7 +181,6 @@
 						<img th:each="i:${images}" th:if="${i.imageType=='갤러리'}"
 							th:src="${i.imagePath}">
 					</div>
-
 				</div>
 			</section>
 			<section class="detail-section">
@@ -206,22 +205,27 @@
 				<div class="detail-body">
 					<form
 						th:action="@{/admin/onedayclass/{id}/reject(id=${clazz.classCode})}"
-						method="post">
+						method="post" class="class-reject-form">
+
 						<textarea name="rejectMessage" required
-							th:disabled="${clazz.approvalStatus == '승인'}"
-							placeholder="클래스 반려 사유 또는 수정 요청사항을 입력하세요."></textarea>
+							th:disabled="${clazz.approvalStatus != '대기'}"
+							th:text="${clazz.approvalMemo}"
+							placeholder="클래스 반려 사유 또는 수정 요청사항을 입력하세요.">
+			</textarea>
+
 						<div class="right">
 							<button type="submit" class="class-action-btn danger"
-								th:disabled="${clazz.approvalStatus == '승인'}">반려 처리</button>
+								th:disabled="${clazz.approvalStatus != '대기'}">반려 처리</button>
 						</div>
 					</form>
-
 				</div>
 			</section>
 			<section class="detail-section">
 				<h2>승인 처리</h2>
+
 				<div class="detail-body">
-					<form class="right"
+
+					<form class="right class-approve-form"
 						th:action="@{/admin/onedayclass/{id}/approve(id=${clazz.classCode})}"
 						method="post">
 
@@ -229,10 +233,87 @@
 							th:disabled="${clazz.approvalStatus != '대기'}">클래스 승인</button>
 
 					</form>
-
 				</div>
 			</section>
 		</main>
 	</div>
+	<script>
+	document.querySelector('.class-stop-form')
+		?.addEventListener('submit',
+			function(event) {
+
+				const confirmed =
+					confirm(
+						'클래스 판매를 중지하시겠습니까?\n\n'
+						+ '판매 중지 후 승인상태는 "중지", '
+						+ '공개상태는 "대기중"으로 변경됩니다.'
+					);
+
+				if (!confirmed) {
+					event.preventDefault();
+				}
+			}
+		);
+
+	document.querySelector('.class-reject-form')
+		?.addEventListener('submit',
+			function(event) {
+
+				const textarea =
+					this.querySelector(
+						'textarea[name="rejectMessage"]'
+					);
+
+				if (textarea.disabled) {
+					event.preventDefault();
+					return;
+				}
+
+				const rejectMessage =
+					textarea.value.trim();
+
+				if (rejectMessage === '') {
+
+					alert('반려 메시지를 입력해주세요.');
+
+					event.preventDefault();
+
+					return;
+				}
+
+				const confirmed =
+					confirm(
+						'클래스를 반려 처리하시겠습니까?\n\n'
+						+ '반려 메시지 : '
+						+ rejectMessage
+						+ '\n\n'
+						+ '반려 처리 후 승인상태는 "반려", '
+						+ '공개상태는 "대기중"으로 변경됩니다.'
+					);
+
+				if (!confirmed) {
+					event.preventDefault();
+				}
+			}
+		);
+
+	document.querySelector('.class-approve-form')
+		?.addEventListener('submit',
+			function(event) {
+
+				const confirmed =
+					confirm(
+						'이 클래스를 승인하시겠습니까?\n\n'
+						+ '승인 후 승인상태는 "승인", '
+						+ '공개상태는 "대기중"으로 변경됩니다.'
+					);
+
+				if (!confirmed) {
+					event.preventDefault();
+				}
+			}
+		);
+
+</script>
 </body>
 </html>

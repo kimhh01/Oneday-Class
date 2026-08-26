@@ -6,9 +6,9 @@
 
 		<div class="brand">
 			<div class="brand-mark">✦</div>
-			<span>Admin</span>
+			<span>OneClass</span>
 		</div>
-
+		
 		<div class="menu-label">MANAGEMENT</div>
 		<a class="nav-item"
 			th:classappend="${activeMenu == 'dashboard'} ? ' active'"
@@ -35,9 +35,8 @@
 
 			<div class="side-actions">
 
-				<!-- <a class="side-btn side-btn-primary" href="#"> 정보 변경 </a> --> <a
-					th:href="@{/admin/info/verify}" class="side-btn side-btn-primary"> 정보 변경
-				</a>
+				<a th:href="@{/admin/info/verify}" class="side-btn side-btn-primary">
+					정보 변경 </a>
 
 				<form th:action="@{/admin/logout}" method="post" class="logout-form">
 

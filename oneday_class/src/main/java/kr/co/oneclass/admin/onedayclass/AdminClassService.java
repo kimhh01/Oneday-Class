@@ -141,7 +141,7 @@ public class AdminClassService {
 				dto.getRunningTime(), dto.getClassStatus(), dto.getSalePrice(), dto.getMarketPrice(),
 				dto.getDiscountRate(), dto.getMinimumPeople(), dto.getMaximumPeople(), dto.getRecruitmentStartDate(),
 				dto.getRecruitmentEndDate(), dto.getPeriodType(), dto.getSingleIntroduce(), dto.getIntroduce(),
-				dto.getFinishedProductDescription(), dto.getApprovalStatus());
+				dto.getFinishedProductDescription(), dto.getApprovalStatus(), dto.getApprovalMemo());
 	}
 
 	public PageDomain getPage(AdminClassSearchDTO searchDTO) {

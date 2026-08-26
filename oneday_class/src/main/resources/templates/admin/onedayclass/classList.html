@@ -31,6 +31,9 @@
 					<option value="작성중"
 						th:selected="${searchDTO.approvalStatus == '작성중'}">작성중</option>
 
+					<option value="수정중"
+						th:selected="${searchDTO.approvalStatus == '수정중'}">수정중</option>
+
 					<option value="반려"
 						th:selected="${searchDTO.approvalStatus == '반려'}">반려</option>
 
@@ -121,8 +124,9 @@
 								th:classappend="${c.approvalStatus == '승인'} ? 'approval-approved' :
 						(${c.approvalStatus == '대기'} ? 'approval-waiting' :
 						(${c.approvalStatus == '작성중'} ? 'approval-writing' :
+						(${c.approvalStatus == '수정중'} ? 'approval-editing' :
 						(${c.approvalStatus == '반려'} ? 'approval-rejected' :
-						'approval-stopped')))"
+						'approval-stopped'))))"
 								th:text="${c.approvalStatus}"> </span></td>
 
 							<td><span class="status-badge"

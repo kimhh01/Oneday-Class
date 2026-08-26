@@ -259,6 +259,8 @@
 
 		C.APPROVAL_STATUS,
 
+		C.APPROVAL_MEMO,
+		
 		C.PRICE AS
 		SALE_PRICE,
 
@@ -266,7 +268,8 @@
 		AS MARKET_PRICE,
 
 		CASE
-		WHEN C.DESIRED_PRICE > 0
+		WHEN
+		C.DESIRED_PRICE > 0
 		THEN ROUND(
 		(
 		C.DESIRED_PRICE -
@@ -625,11 +628,13 @@
 		UPDATE CLASS
 
 		SET APPROVAL_STATUS = '반려',
-		STATUS = '대기중',
+		STATUS =
+		'대기중',
 		APPROVAL_MEMO =
 		#{dto.rejectMessage}
 
-		WHERE CLASS_CODE = #{classCode}
+		WHERE CLASS_CODE =
+		#{classCode}
 		AND APPROVAL_STATUS = '대기'
 
 	</update>
