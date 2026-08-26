@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", function() {
         '4': { icon: 'fa-solid fa-palette', name: '미술' },
         '5': { icon: 'fa-solid fa-sparkles', name: '뷰티' },
         '6': { icon: 'fa-solid fa-music', name: '음악' },
-        'DEFAULT': { icon: '/map/images/cook-marker.png', name: '클래스' }
+        'DEFAULT': { icon: 'fa-solid fa-circle', name: '클래스' }
     };
 
 	function createCustomMarker(item) {
@@ -106,9 +106,6 @@ document.addEventListener("DOMContentLoaded", function() {
 	    });
 	}
 
-    // -------------------------------------------------------------
-    // 3. 지도의 현재 범위(Bounds) + 필터 조건 동시 필터링
-    // -------------------------------------------------------------
     // -------------------------------------------------------------
     // 3. 지도의 현재 범위(Bounds) + 필터 조건 동시 필터링
     // -------------------------------------------------------------

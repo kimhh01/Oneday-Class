@@ -420,8 +420,14 @@
 						th:if="${detail?.classDetail?.price != null and detail.classDetail.price > 0}"
 						th:text="|${detail.scheduleList[0].diffHours != null && detail.scheduleList[0].diffHours > 0 ? #numbers.formatInteger(detail.classDetail.price / detail.scheduleList[0].diffHours, 0, 'COMMA') : 0}원/시간|"></div>
 					<div class="price-main">
-						<span class="time-highlight"
-							th:text="${detail.scheduleList[0].diffHours + '시간'}"></span> <span
+						
+						<span class="time-highlight" th:text="${detail.scheduleList[0].diffHours + '시간'}"></span><br> 
+							<span class="discount-rate" th:if="${detail?.classDetail?.discountRate != null and detail?.classDetail?.discountRate > 0}" th:text="|${detail?.classDetail?.discountRate}%|">7%</span>
+							<span
+							class="desiredPrice-num"
+							th:text="${detail?.classDetail?.desiredPrice != null and detail.classDetail.desiredPrice > 0} ? |${#numbers.formatInteger(detail.classDetail.desiredPrice, 0, 'COMMA')} 원| : '가격 문의'">55,000
+							원</span> <br>
+							<span
 							class="price-num"
 							th:text="${detail?.classDetail?.price != null and detail.classDetail.price > 0} ? |${#numbers.formatInteger(detail.classDetail.price, 0, 'COMMA')} 원| : '가격 문의'">55,000
 							원</span>

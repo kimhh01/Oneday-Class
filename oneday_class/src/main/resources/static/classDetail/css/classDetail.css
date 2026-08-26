@@ -1639,3 +1639,14 @@ a.btn-info-detail {
   text-decoration: none;
   cursor: pointer;
 }
+
+.discount-rate{
+	font-size: 16px;
+	color: #ff4b72;
+}
+
+.desiredPrice-num{
+	text-decoration-line: line-through;
+	color: #a8a8a8;
+	font-size: 16px;
+}

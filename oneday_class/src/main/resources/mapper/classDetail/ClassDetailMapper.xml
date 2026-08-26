@@ -26,7 +26,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         FINISH_INTRODUCE    AS finishIntroduce,
         LAT,
         LNG,
-        APPROVAL_STATUS AS approvalStatus
+        APPROVAL_STATUS AS approvalStatus,
+        CASE 
+                   WHEN price IS NOT NULL AND price > 0 AND desired_price IS NOT NULL AND desired_price > price
+                   THEN ROUND(((desired_price - price) / desired_price) * 100)
+                   ELSE 0 
+               END AS discountRate
     FROM class
     WHERE class_code = #{classCode}
 </select>
