@@ -40,129 +40,129 @@ document.addEventListener("DOMContentLoaded", function() {
     // 2. 카테고리별 물방울 마커 스타일 & 생성 함수
     // -------------------------------------------------------------
     const CATEGORY_STYLE = {
-        '1': { icon: '/map/images/free.png', name: '요리/베이킹' },
-        '2': { icon: '/map/images/craft.png', name: '공예' },
-        '3': { icon: '/images/category/flower.png', name: '플라워' },
-        '4': { icon: '/images/category/candle.png', name: '캔들' },
-        '5': { icon: '/images/category/beverage.png', name: '음료' },
+        '1': { icon: 'fa-solid fa-scissors', name: '공예' },
+        '2': { icon: 'fa-solid fa-utensils', name: '요리' },
+        '3': { icon: 'fa-solid fa-person-running', name: '액티비티' },
+        '4': { icon: 'fa-solid fa-palette', name: '미술' },
+        '5': { icon: 'fa-solid fa-sparkles', name: '뷰티' },
+        '6': { icon: 'fa-solid fa-music', name: '음악' },
         'DEFAULT': { icon: '/map/images/cook-marker.png', name: '클래스' }
     };
 
-    function createCustomMarker(item) {
-        let parentCategoryCode = 'DEFAULT';
-        if (item.categoryCode !== undefined && item.categoryCode !== null) {
-            parentCategoryCode = String(item.categoryCode).charAt(0);
-        }
+	function createCustomMarker(item) {
+	    let parentCategoryCode = 'DEFAULT';
+	    if (item.categoryCode !== undefined && item.categoryCode !== null) {
+	        parentCategoryCode = String(item.categoryCode).charAt(0);
+	    }
 
-        const style = CATEGORY_STYLE[parentCategoryCode] || CATEGORY_STYLE['DEFAULT'];
+	    const style = CATEGORY_STYLE[parentCategoryCode] || CATEGORY_STYLE['DEFAULT'];
 
-        const contentHtml = `
-            <div class="custom-pin-wrapper" title="${item.name || ''}" style="
-                position: relative;
-                width: 25px;
-                height: 25px;
-                background-color: #1B5E20;
-                border-radius: 50% 50% 50% 0;
-                transform: rotate(-45deg);
-                box-shadow: -2px 3px 6px rgba(0, 0, 0, 0.25);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                cursor: pointer;
-                transition: transform 0.2s ease;
-                overflow: hidden;
-            ">
-                <img src="${style.icon}" alt="${style.name}" style="
-                    transform: rotate(45deg);
-                    width: 15px;
-                    height: 15px;
-                    object-fit: contain;
-                    display: block;
-                    position: absolute;
-                "/>
-            </div>
-        `;
+	    const contentHtml = `
+	        <div class="custom-pin-wrapper" title="${item.name || ''}" style="
+	            position: relative;
+	            width: 28px;
+	            height: 28px;
+	            background-color: #1B5E20;
+	            border-radius: 50% 50% 50% 0;
+	            transform: rotate(-45deg);
+	            box-shadow: -2px 3px 6px rgba(0, 0, 0, 0.25);
+	            display: flex;
+	            align-items: center;
+	            justify-content: center;
+	            cursor: pointer;
+	            transition: transform 0.2s ease;
+	        ">
+	            <i class="${style.icon}" style="
+	                transform: rotate(45deg);
+	                font-size: 13px;
+	                color: #ffffff;
+	                display: flex;
+	                align-items: center;
+	                justify-content: center;
+	            "></i>
+	        </div>
+	    `;
 
-        const container = document.createElement('div');
-        container.innerHTML = contentHtml;
-        const markerElement = container.firstElementChild;
+	    const container = document.createElement('div');
+	    container.innerHTML = contentHtml;
+	    const markerElement = container.firstElementChild;
 
-        markerElement.addEventListener('mouseenter', function() {
-            this.style.transform = 'rotate(-45deg) scale(1.15)';
-        });
-        markerElement.addEventListener('mouseleave', function() {
-            this.style.transform = 'rotate(-45deg) scale(1.0)';
-        });
+	    markerElement.addEventListener('mouseenter', function() {
+	        this.style.transform = 'rotate(-45deg) scale(1.15)';
+	    });
+	    markerElement.addEventListener('mouseleave', function() {
+	        this.style.transform = 'rotate(-45deg) scale(1.0)';
+	    });
 
-        markerElement.addEventListener('click', function() {
-            map.panTo(new kakao.maps.LatLng(item.lat, item.lng));
-        });
+	    markerElement.addEventListener('click', function() {
+	        map.panTo(new kakao.maps.LatLng(item.lat, item.lng));
+	    });
 
-        return new kakao.maps.CustomOverlay({
-            position: new kakao.maps.LatLng(item.lat, item.lng),
-            content: markerElement,
-            xAnchor: 0.5,
-            yAnchor: 1.0
-        });
-    }
+	    return new kakao.maps.CustomOverlay({
+	        position: new kakao.maps.LatLng(item.lat, item.lng),
+	        content: markerElement,
+	        xAnchor: 0.5,
+	        yAnchor: 1.0
+	    });
+	}
 
     // -------------------------------------------------------------
     // 3. 지도의 현재 범위(Bounds) + 필터 조건 동시 필터링
     // -------------------------------------------------------------
-	// -------------------------------------------------------------
-	// 3. 지도의 현재 범위(Bounds) + 필터 조건 동시 필터링
-	// -------------------------------------------------------------
-	function filterClassesByMapBounds() {
-	    const bounds = map.getBounds();
-	    const swLatLng = bounds.getSouthWest();
-	    const neLatLng = bounds.getNorthEast();
+    // -------------------------------------------------------------
+    // 3. 지도의 현재 범위(Bounds) + 필터 조건 동시 필터링
+    // -------------------------------------------------------------
+    function filterClassesByMapBounds() {
+        const bounds = map.getBounds();
+        const swLatLng = bounds.getSouthWest();
+        const neLatLng = bounds.getNorthEast();
 
-	    const minLat = swLatLng.getLat();
-	    const maxLat = neLatLng.getLat();
-	    const minLng = swLatLng.getLng();
-	    const maxLng = neLatLng.getLng();
+        const minLat = swLatLng.getLat();
+        const maxLat = neLatLng.getLat();
+        const minLng = swLatLng.getLng();
+        const maxLng = neLatLng.getLng();
 
-	    const filteredClasses = allClassData.filter(item => {
-	        if (!item.lat || !item.lng) return false;
+        const filteredClasses = allClassData.filter(item => {
+            if (!item.lat || !item.lng) return false;
 
-	        // 1. 지도 화면 영역(Bounds) 내 존재 여부
-	        const isInMapBounds = (item.lat >= minLat && item.lat <= maxLat && item.lng >= minLng && item.lng <= maxLng);
+            // 1. 지도 화면 영역(Bounds) 내 존재 여부
+            const isInMapBounds = (item.lat >= minLat && item.lat <= maxLat && item.lng >= minLng && item.lng <= maxLng);
 
-	        // 2. 지역 (동/구) 필터링
-	        const targetAddress = item.address || item.oldAddress || '';
-	        const isMatchingRegion = !selectedDong || targetAddress.includes(selectedDong);
+            // 2. 지역 (동/구) 필터링
+            const targetAddress = item.address || item.oldAddress || '';
+            const isMatchingRegion = !selectedDong || targetAddress.includes(selectedDong);
 
-	        // 3. 카테고리 필터링
-	        const isMatchingCategory = !selectedCategoryCode ||
-	            (String(item.categoryCode) === String(selectedCategoryCode) ||
-	             String(item.parentCategoryCode) === String(selectedCategoryCode));
+            // 3. 카테고리 필터링
+            const isMatchingCategory = !selectedCategoryCode ||
+                (String(item.categoryCode) === String(selectedCategoryCode) ||
+                    String(item.parentCategoryCode) === String(selectedCategoryCode));
 
-	        // ---------------------------------------------------------
-	        // 4. 날짜 및 시간 필터링 (스케줄 리스트 1:1 정밀 검사)
-	        // ---------------------------------------------------------
-	        const dateList = item.classDate ? String(item.classDate).split(',') : [];
-	        const timeList = item.startTime ? String(item.startTime).split(',') : [];
+            // ---------------------------------------------------------
+            // 4. 날짜 및 시간 필터링 (스케줄 리스트 1:1 정밀 검사)
+            // ---------------------------------------------------------
+            const dateList = item.classDate ? String(item.classDate).split(',') : [];
+            const timeList = item.startTime ? String(item.startTime).split(',') : [];
 
-	        let isMatchingSchedule = true;
+            let isMatchingSchedule = true;
 
-	        if (selectedDate || selectedTime) {
-	            // 날짜와 시간 조건이 하나라도 걸려있으면 스케줄 목록 중 만족하는 스케줄이 1개라도 있는지 확인
-	            isMatchingSchedule = dateList.some((dStr, idx) => {
-	                const trimmedDate = dStr.trim();
-	                const trimmedTime = timeList[idx] ? timeList[idx].trim() : '';
+            if (selectedDate || selectedTime) {
+                // 날짜와 시간 조건이 하나라도 걸려있으면 스케줄 목록 중 만족하는 스케줄이 1개라도 있는지 확인
+                isMatchingSchedule = dateList.some((dStr, idx) => {
+                    const trimmedDate = dStr.trim();
+                    const trimmedTime = timeList[idx] ? timeList[idx].trim() : '';
 
-	                const datePass = !selectedDate || trimmedDate.includes(selectedDate);
-	                const timePass = !selectedTime || trimmedTime.includes(selectedTime);
+                    const datePass = !selectedDate || trimmedDate.includes(selectedDate);
+                    const timePass = !selectedTime || trimmedTime.includes(selectedTime);
 
-	                return datePass && timePass;
-	            });
-	        }
+                    return datePass && timePass;
+                });
+            }
 
-	        return isInMapBounds && isMatchingRegion && isMatchingCategory && isMatchingSchedule;
-	    });
+            return isInMapBounds && isMatchingRegion && isMatchingCategory && isMatchingSchedule;
+        });
 
-	    renderMarkersAndSidebar(filteredClasses);
-	}
+        renderMarkersAndSidebar(filteredClasses);
+    }
 
 
     function renderMarkersAndSidebar(classList) {
@@ -255,43 +255,43 @@ document.addEventListener("DOMContentLoaded", function() {
         regionModal?.classList.add('hidden');
     });
 
-	listSido?.addEventListener('click', function(e) {
-	    const target = e.target.closest('li');
-	    if (!target) return;
+    listSido?.addEventListener('click', function(e) {
+        const target = e.target.closest('li');
+        if (!target) return;
 
-	    listSido.querySelectorAll('li').forEach(el => el.classList.remove('active'));
-	    target.classList.add('active');
+        listSido.querySelectorAll('li').forEach(el => el.classList.remove('active'));
+        target.classList.add('active');
 
-	    selectedSido = target.getAttribute('data-sido') || "";
-	    selectedSigungu = "";
-	    selectedDong = "";
+        selectedSido = target.getAttribute('data-sido') || "";
+        selectedSigungu = "";
+        selectedDong = "";
 
-	    // 하위 구/동 선택 초기화
-	    listSigungu.innerHTML = '<li class="active" data-sigungu="">선택안함</li>';
-	    listDong.innerHTML = '<li class="active" data-dong="">선택안함</li>';
+        // 하위 구/동 선택 초기화
+        listSigungu.innerHTML = '<li class="active" data-sigungu="">선택안함</li>';
+        listDong.innerHTML = '<li class="active" data-dong="">선택안함</li>';
 
-	    // 시/도가 '전체'가 아니고 특정 지역일 때만 카카오 키워드 검색 실행
-	    if (selectedSido) {
-	        ps.keywordSearch(`${selectedSido}`, function(data, status) {
-	            listSigungu.innerHTML = '<li class="active" data-sigungu="">선택안함</li>';
-	            if (status === kakao.maps.services.Status.OK) {
-	                const sigunguSet = new Set();
-	                data.forEach(place => {
-	                    const parts = place.address_name.split(' ');
-	                    if (parts.length > 1 && (parts[1].endsWith('구') || parts[1].endsWith('군') || parts[1].endsWith('시'))) {
-	                        sigunguSet.add(parts[1]);
-	                    }
-	                });
-	                sigunguSet.forEach(sigungu => {
-	                    const li = document.createElement('li');
-	                    li.setAttribute('data-sigungu', sigungu);
-	                    li.textContent = sigungu;
-	                    listSigungu.appendChild(li);
-	                });
-	            }
-	        });
-	    }
-	});
+        // 시/도가 '전체'가 아니고 특정 지역일 때만 카카오 키워드 검색 실행
+        if (selectedSido) {
+            ps.keywordSearch(`${selectedSido}`, function(data, status) {
+                listSigungu.innerHTML = '<li class="active" data-sigungu="">선택안함</li>';
+                if (status === kakao.maps.services.Status.OK) {
+                    const sigunguSet = new Set();
+                    data.forEach(place => {
+                        const parts = place.address_name.split(' ');
+                        if (parts.length > 1 && (parts[1].endsWith('구') || parts[1].endsWith('군') || parts[1].endsWith('시'))) {
+                            sigunguSet.add(parts[1]);
+                        }
+                    });
+                    sigunguSet.forEach(sigungu => {
+                        const li = document.createElement('li');
+                        li.setAttribute('data-sigungu', sigungu);
+                        li.textContent = sigungu;
+                        listSigungu.appendChild(li);
+                    });
+                }
+            });
+        }
+    });
 
     listSigungu?.addEventListener('click', function(e) {
         const target = e.target.closest('li');
@@ -339,47 +339,47 @@ document.addEventListener("DOMContentLoaded", function() {
         if (selectedDong === '선택안함') selectedDong = '';
     });
 
-	// btnRegionSearch 클릭 이벤트 내부 수정
-	btnRegionSearch?.addEventListener('click', function(e) {
-	    e.stopPropagation();
-	    
-	    // 시/도가 빈값(전체)이거나 '선택안함'인 경우 -> '지역 전체'로 리셋
-	    if (!selectedSido || selectedSido === '선택안함') {
-	        selectedSido = "";
-	        selectedSigungu = "";
-	        selectedDong = "";
+    // btnRegionSearch 클릭 이벤트 내부 수정
+    btnRegionSearch?.addEventListener('click', function(e) {
+        e.stopPropagation();
 
-	        const textSpan = btnRegionToggle.querySelector('.select-text');
-	        if (textSpan) textSpan.innerText = "지역 전체";
+        // 시/도가 빈값(전체)이거나 '선택안함'인 경우 -> '지역 전체'로 리셋
+        if (!selectedSido || selectedSido === '선택안함') {
+            selectedSido = "";
+            selectedSigungu = "";
+            selectedDong = "";
 
-	        regionModal?.classList.add('hidden');
-	        filterClassesByMapBounds(); // 지역 조건 없이 현재 지도 범위 기준 조회
-	        return;
-	    }
+            const textSpan = btnRegionToggle.querySelector('.select-text');
+            if (textSpan) textSpan.innerText = "지역 전체";
 
-	    // 특정 지역(서울, 경기 등)을 선택한 경우 Geocoder 이동
-	    const fullAddress = `${selectedSido} ${selectedSigungu} ${selectedDong}`.trim();
+            regionModal?.classList.add('hidden');
+            filterClassesByMapBounds(); // 지역 조건 없이 현재 지도 범위 기준 조회
+            return;
+        }
 
-	    geocoder.addressSearch(fullAddress, function(result, status) {
-	        if (status === kakao.maps.services.Status.OK) {
-	            const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
-	            map.setCenter(coords);
-	            map.setLevel(4);
-	            regionModal?.classList.add('hidden');
+        // 특정 지역(서울, 경기 등)을 선택한 경우 Geocoder 이동
+        const fullAddress = `${selectedSido} ${selectedSigungu} ${selectedDong}`.trim();
 
-	            const textSpan = btnRegionToggle.querySelector('.select-text');
-	            if (textSpan) {
-	                textSpan.innerText = `${selectedSigungu || selectedSido} ${selectedDong}`.trim();
-	            }
+        geocoder.addressSearch(fullAddress, function(result, status) {
+            if (status === kakao.maps.services.Status.OK) {
+                const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+                map.setCenter(coords);
+                map.setLevel(4);
+                regionModal?.classList.add('hidden');
 
-	            setTimeout(() => {
-	                filterClassesByMapBounds();
-	            }, 100);
-	        } else {
-	            alert("해당 지역의 위치를 찾을 수 없습니다.");
-	        }
-	    });
-	});
+                const textSpan = btnRegionToggle.querySelector('.select-text');
+                if (textSpan) {
+                    textSpan.innerText = `${selectedSigungu || selectedSido} ${selectedDong}`.trim();
+                }
+
+                setTimeout(() => {
+                    filterClassesByMapBounds();
+                }, 100);
+            } else {
+                alert("해당 지역의 위치를 찾을 수 없습니다.");
+            }
+        });
+    });
 
     // -------------------------------------------------------------
     // 5. 날짜 및 시간 선택 관련
@@ -577,33 +577,33 @@ document.addEventListener("DOMContentLoaded", function() {
         categoryModal?.classList.add('hidden');
     });
 
-	listParentCategory?.addEventListener('click', function(e) {
-	    const target = e.target.closest('li');
-	    if (!target) return;
+    listParentCategory?.addEventListener('click', function(e) {
+        const target = e.target.closest('li');
+        if (!target) return;
 
-	    listParentCategory.querySelectorAll('li').forEach(el => el.classList.remove('active'));
-	    target.classList.add('active');
+        listParentCategory.querySelectorAll('li').forEach(el => el.classList.remove('active'));
+        target.classList.add('active');
 
-	    const parentCode = target.getAttribute('data-code');
-	    const parentName = target.innerText.trim();
+        const parentCode = target.getAttribute('data-code');
+        const parentName = target.innerText.trim();
 
-	    // parentCode가 빈값이면 "전체" 선택된 것으로 처리
-	    selectedCategoryCode = parentCode || "";
-	    selectedCategoryName = parentCode ? parentName : "카테고리 전체";
+        // parentCode가 빈값이면 "전체" 선택된 것으로 처리
+        selectedCategoryCode = parentCode || "";
+        selectedCategoryName = parentCode ? parentName : "카테고리 전체";
 
-	    listChildCategory.innerHTML = `<li class="active" data-code="${parentCode || ''}" data-name="${selectedCategoryName}">전체</li>`;
+        listChildCategory.innerHTML = `<li class="active" data-code="${parentCode || ''}" data-name="${selectedCategoryName}">전체</li>`;
 
-	    if (!parentCode) return;
+        if (!parentCode) return;
 
-	    const subCategories = allCategories.filter(cat => String(cat.parentCategoryCode) === String(parentCode));
-	    subCategories.forEach(sub => {
-	        const li = document.createElement('li');
-	        li.setAttribute('data-code', sub.categoryCode);
-	        li.setAttribute('data-name', sub.categoryName);
-	        li.textContent = sub.categoryName;
-	        listChildCategory.appendChild(li);
-	    });
-	});
+        const subCategories = allCategories.filter(cat => String(cat.parentCategoryCode) === String(parentCode));
+        subCategories.forEach(sub => {
+            const li = document.createElement('li');
+            li.setAttribute('data-code', sub.categoryCode);
+            li.setAttribute('data-name', sub.categoryName);
+            li.textContent = sub.categoryName;
+            listChildCategory.appendChild(li);
+        });
+    });
 
     listChildCategory?.addEventListener('click', function(e) {
         const target = e.target.closest('li');

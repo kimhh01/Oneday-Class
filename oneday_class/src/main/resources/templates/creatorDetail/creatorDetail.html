@@ -54,7 +54,9 @@
 					<th:block th:each="item : ${classList}">
 						<a class="horizontal-class-card" th:href="@{/classDetail(classCode=${item.classCode})}">
 							<div class="thumb-box">
-								
+								<img
+									th:src="${item.imageList != null and !#lists.isEmpty(item.imageList) ? item.imageList[0].image : 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=300'}"
+									alt="비슷한 클래스">
 							</div>
 							<div class="card-info">
 								<div class="card-sub-info">

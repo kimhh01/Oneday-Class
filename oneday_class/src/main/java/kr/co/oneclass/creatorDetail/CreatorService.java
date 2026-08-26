@@ -9,6 +9,7 @@ import kr.co.oneclass.classDetail.ReviewDTO;
 import kr.co.oneclass.classDetail.ReviewImgDTO;
 import kr.co.oneclass.classDetail.ReviewSummaryDTO;
 import kr.co.oneclass.common.ClassDTO;
+import kr.co.oneclass.common.ClassImageDTO;
 
 @Service
 public class CreatorService {
@@ -24,6 +25,14 @@ public class CreatorService {
 	
 	public List<ClassDTO> getClassList(long creatorCode){
 		List<ClassDTO> classList=cDAO.selectClassList(creatorCode);
+		 if (classList != null && !classList.isEmpty()) {
+		        for (ClassDTO cDTO : classList) {
+		            int classCode = cDTO.getClassCode(); 
+		            List<ClassImageDTO> classImg = cDAO.selectClassImgList(creatorCode, classCode);
+		            cDTO.setImageList(classImg);
+		        }
+		    }
+		
 		return classList;
 	}
 	
@@ -46,5 +55,6 @@ public class CreatorService {
 		
 		return reviewList;
 	}
+	
 	
 }

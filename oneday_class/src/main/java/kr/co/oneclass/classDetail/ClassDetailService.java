@@ -47,7 +47,15 @@ public class ClassDetailService {
 	    int categoryCode = classDto.getCategoryCode();
 
 	    OperatorDTO creatorDto = cDAO.selectCreator(creatorCode);
+	    
 	    List<ClassDTO> sameCategoryList = cDAO.selectSameCategoryList(classCode, categoryCode);
+
+	    if (sameCategoryList != null && !sameCategoryList.isEmpty()) {
+	        for (ClassDTO item : sameCategoryList) {
+	            List<ClassImageDTO> imgList = cDAO.selectClassImageList(item.getClassCode());
+	            item.setImageList(imgList);
+	        }
+	    }
 	    List<CurriculumDTO> curriculumList = cDAO.selectCurriculum(classCode);
 	    List<ReviewDTO> reviewList = cDAO.selectReviewList(classCode);
 	    // 2. 리뷰 리스트를 반복문 돌리며 각 reviewCode로 이미지를 조회해 세팅합니다.
