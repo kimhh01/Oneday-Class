@@ -48,8 +48,13 @@
 		<section class="section">
 			<div class="section-top">
 				<h2 class="section-title">지금 가장 인기있는 뷰티 클래스</h2>
-				<a th:href="@{/category}" class="more-link">전체보기 〉</a>
+				<a th:href="@{/category/class(categoryCode=5)}" class="more-link">전체보기 〉</a>
 			</div>
+
+ <span class="view-all">
+                </span>
+
+
 
 			<!-- DB 조회 데이터 없음 -->
 			<div th:if="${#lists.isEmpty(classList)}" style="text-align: center; padding: 60px 0; color: #888;">

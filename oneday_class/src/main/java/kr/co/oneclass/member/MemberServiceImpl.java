@@ -1,12 +1,6 @@
 package kr.co.oneclass.member;
 
-import kr.co.oneclass.member.MemberDAO;
-import kr.co.oneclass.member.Member;
-import kr.co.oneclass.member.IdFindDTO;
-import kr.co.oneclass.member.LoginDTO;
-import kr.co.oneclass.member.OAuthLoginDTO;
-import kr.co.oneclass.member.PassFindDTO;
-import kr.co.oneclass.member.SignUpDTO;
+import kr.co.oneclass.common.AESUtil; // 💡 암복호화 유틸 추가
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-// IP 자동 추출을 위한 Spring RequestContextHolder
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import jakarta.servlet.http.HttpServletRequest;
@@ -37,8 +30,19 @@ public class MemberServiceImpl implements MemberService {
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     /**
-     * 현재 HTTP 요청에서 클라이언트 IP 주소 추출 유틸
+     * 💡 [공통 헬퍼] Member 객체의 민감정보(이름, 이메일, 전화번호) 복호화
      */
+    private Member decryptMember(Member member) {
+        if (member == null) return null;
+        
+        // Member 엔티티에 Setter가 구현되어 있어야 합니다.
+        if (member.getName() != null) member.setName(AESUtil.decrypt(member.getName()));
+        if (member.getEmail() != null) member.setEmail(AESUtil.decrypt(member.getEmail()));
+        if (member.getPhone() != null) member.setPhone(AESUtil.decrypt(member.getPhone()));
+        
+        return member;
+    }
+
     private String getClientIp() {
         try {
             ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
@@ -56,9 +60,7 @@ public class MemberServiceImpl implements MemberService {
                 }
                 return ip;
             }
-        } catch (Exception e) {
-            // 요청 컨텍스트가 없을 경우 Fallback 처리
-        }
+        } catch (Exception e) { }
         return "127.0.0.1";
     }
 
@@ -88,10 +90,10 @@ public class MemberServiceImpl implements MemberService {
             return null;
         }
 
-        // 💡 로그인 성공 시 자동으로 클라이언트 IP를 추출하여 LOGIN_HISTORY 테이블에 기록
         memberDAO.insertLoginHistory(member.getMemberCode(), getClientIp());
 
-        return member;
+        // 💡 조회된 회원 객체의 민감정보 복호화 후 반환
+        return decryptMember(member);
     }
 
     @Override
@@ -103,8 +105,15 @@ public class MemberServiceImpl implements MemberService {
         if (signUpDTO.getEmailReceiveYN() == null) {
             signUpDTO.setEmailReceiveYN("N");
         }
-
+        
+        signUpDTO.setId(AESUtil.encrypt(signUpDTO.getId()));
+        // 비밀번호 단방향 암호화
         signUpDTO.setPass(passwordEncoder.encode(signUpDTO.getPass()));
+
+        // 💡 개인정보(이름, 이메일, 전화번호) 양방향 AES 암호화 후 DB 저장
+        signUpDTO.setName(AESUtil.encrypt(signUpDTO.getName()));
+        signUpDTO.setEmail(AESUtil.encrypt(signUpDTO.getEmail()));
+        signUpDTO.setPhone(AESUtil.encrypt(signUpDTO.getPhone()));
 
         int result1 = memberDAO.insertMember(signUpDTO);
         int result2 = memberDAO.insertMemberAuth(signUpDTO);
@@ -120,35 +129,48 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public Member oAuthLogin(OAuthLoginDTO oauthdto) {
-        return memberDAO.selectByOAuthId(oauthdto);
+        Member member = memberDAO.selectByOAuthId(oauthdto);
+        return decryptMember(member); // 💡 복호화 적용
     }
 
     @Override
     @Transactional
     public boolean oAuthSignUp(OAuthLoginDTO oauthdto) {
-        int result1 = memberDAO.insertOAuthMember(oauthdto);       // MEMBER 테이블 생성
-        int result2 = memberDAO.insertMemberAuthByOAuth(oauthdto); // MEMBER_AUTH 테이블 생성
+        // 💡 소셜 가입 시 민감정보(이름, 이메일) 암호화 후 DB 저장
+        OAuthLoginDTO encryptedDto = new OAuthLoginDTO();
+        encryptedDto.setMemberCode(oauthdto.getMemberCode());
+        encryptedDto.setOauthProviderId(oauthdto.getOauthProviderId()); // 💡 oauthId -> oauthProviderId 변경
+        encryptedDto.setProvider(oauthdto.getProvider());
+        
+        // 이름과 이메일만 암호화 (OAuthLoginDTO에는 phone 필드가 없으므로 제외)
+        if (oauthdto.getName() != null) {
+            encryptedDto.setName(AESUtil.encrypt(oauthdto.getName()));
+        }
+        if (oauthdto.getEmail() != null) {
+            encryptedDto.setEmail(AESUtil.encrypt(oauthdto.getEmail()));
+        }
+
+        int result1 = memberDAO.insertOAuthMember(encryptedDto);       // MEMBER 테이블 INSERT
+        int result2 = memberDAO.insertMemberAuthByOAuth(encryptedDto); // MEMBER_AUTH 테이블 INSERT
+        
         return result1 > 0 && result2 > 0;
     }
-
     @Override
     @Transactional
     public Member processOAuthLogin(OAuthLoginDTO oauthdto) {
         Member member = memberDAO.selectByOAuthId(oauthdto);
         if (member != null) {
-            // 💡 소셜 로그인 성공 시 접속 이력 기록
             memberDAO.insertLoginHistory(member.getMemberCode(), getClientIp());
-            return member;
+            return decryptMember(member); // 💡 복호화 적용
         }
 
         boolean isSignedUp = oAuthSignUp(oauthdto);
         if (isSignedUp) {
             Member newMember = memberDAO.selectMember(oauthdto.getMemberCode());
             if (newMember != null) {
-                // 💡 신규 소셜 가입 후 로그인 시 접속 이력 기록
                 memberDAO.insertLoginHistory(newMember.getMemberCode(), getClientIp());
             }
-            return newMember;
+            return decryptMember(newMember); // 💡 복호화 적용
         }
 
         return null;
@@ -159,13 +181,25 @@ public class MemberServiceImpl implements MemberService {
         if (idFindDTO == null || idFindDTO.getName() == null || idFindDTO.getEmail() == null) {
             return null;
         }
-        return memberDAO.selectId(idFindDTO);
+
+        // 💡 DB 검색을 위해 조건값(이름, 이메일) 암호화
+        IdFindDTO encryptedDto = new IdFindDTO();
+        encryptedDto.setName(AESUtil.encrypt(idFindDTO.getName()));
+        encryptedDto.setEmail(AESUtil.encrypt(idFindDTO.getEmail()));
+
+        return memberDAO.selectId(encryptedDto);
     }
 
     @Override
     @Transactional
     public boolean findPass(PassFindDTO passFindDTO) {
-        Member member = memberDAO.selectMemberForPassword(passFindDTO);
+        // 💡 DB 검색을 위해 암호화된 파라미터 전달
+        PassFindDTO encryptedDto = new PassFindDTO();
+        encryptedDto.setId(passFindDTO.getId());
+        encryptedDto.setName(AESUtil.encrypt(passFindDTO.getName()));
+        encryptedDto.setEmail(AESUtil.encrypt(passFindDTO.getEmail()));
+
+        Member member = memberDAO.selectMemberForPassword(encryptedDto);
         if (member == null) {
             return false;
         }
@@ -176,6 +210,7 @@ public class MemberServiceImpl implements MemberService {
         int result = memberDAO.updateTempPassword(member.getMemberCode(), encodedTempPassword);
 
         if (result > 0) {
+            // 💡 이메일 발송 시에는 평문 이메일(passFindDTO.getEmail())을 전달
             return emailAuthService.sendTempPassword(passFindDTO.getEmail(), tempPassword);
         }
 
@@ -184,7 +219,12 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public boolean existsMemberForPassword(PassFindDTO dto) {
-        return memberDAO.selectMemberForPassword(dto) != null;
+        PassFindDTO encryptedDto = new PassFindDTO();
+        encryptedDto.setId(dto.getId());
+        encryptedDto.setName(AESUtil.encrypt(dto.getName()));
+        encryptedDto.setEmail(AESUtil.encrypt(dto.getEmail()));
+
+        return memberDAO.selectMemberForPassword(encryptedDto) != null;
     }
 
     @Override
@@ -211,11 +251,7 @@ public class MemberServiceImpl implements MemberService {
         }
 
         int code = Integer.parseInt(memberCode);
-
-        // 1) MEMBER_AUTH 관련 데이터 완전히 삭제
         int result1 = memberDAO.deleteMemberAuth(code);
-        
-        // 2) MEMBER 테이블 회원 개인정보 마스킹 및 상태 변경(탈퇴)
         int result2 = memberDAO.deleteMember(code);
 
         return result1 > 0 || result2 > 0;
@@ -250,9 +286,11 @@ public class MemberServiceImpl implements MemberService {
         return UUID.randomUUID().toString().replace("-", "").substring(0, 10);
     }
 
-	@Override
-	public boolean isEmailDuplicate(String email) {
-        int count = memberDAO.countByLocalEmail(email);
+    @Override
+    public boolean isEmailDuplicate(String email) {
+        // 💡 이메일 중복 확인 시 DB에는 암호화된 이메일이 들어있으므로 암호화하여 조회
+        String encryptedEmail = AESUtil.encrypt(email);
+        int count = memberDAO.countByLocalEmail(encryptedEmail);
         return count > 0;
-	}
+    }
 }

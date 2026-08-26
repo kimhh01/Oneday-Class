@@ -40,14 +40,14 @@
                 AND c.CATEGORY_CODE = #{subCategoryCode}
             </if>
 
-            <!-- 최소 가격 (할인가 반영) -->
+           <!-- 최소 가격 -->
             <if test="minPrice != null and minPrice > 0">
-                AND (CASE WHEN c.DESIRED_PRICE > 0 AND c.PRICE > c.DESIRED_PRICE THEN c.DESIRED_PRICE ELSE c.PRICE END) &gt;= #{minPrice}
+                AND c.PRICE &gt;= #{minPrice}
             </if>
 
-            <!-- 최대 가격 (할인가 반영) -->
+            <!-- 최대 가격 -->
             <if test="maxPrice != null and maxPrice > 0">
-                AND (CASE WHEN c.DESIRED_PRICE > 0 AND c.PRICE > c.DESIRED_PRICE THEN c.DESIRED_PRICE ELSE c.PRICE END) &lt;= #{maxPrice}
+                AND c.PRICE &lt;= #{maxPrice}
             </if>
             
             <!-- 당일 예약 -->
@@ -91,21 +91,22 @@
             </if>
         </where>
 
-        <!-- 정렬 조건 -->
+       <!-- 정렬 조건 수정 -->
         <choose>
             <when test="sort == '추천순'"> 
                 ORDER BY c.STAR_RATING_AVG DESC NULLS LAST, c.CLASS_CODE DESC 
             </when>
             <when test="sort == '낮은 가격순'"> 
-                ORDER BY (CASE WHEN c.DESIRED_PRICE > 0 AND c.PRICE > c.DESIRED_PRICE THEN c.DESIRED_PRICE ELSE c.PRICE END) ASC 
+                ORDER BY c.PRICE ASC 
             </when>
             <when test="sort == '높은 가격순'"> 
-                ORDER BY (CASE WHEN c.DESIRED_PRICE > 0 AND c.PRICE > c.DESIRED_PRICE THEN c.DESIRED_PRICE ELSE c.PRICE END) DESC 
+                ORDER BY c.PRICE DESC 
             </when>
             <otherwise> 
                 ORDER BY c.CLASS_CODE DESC 
             </otherwise>
         </choose>
+        
     </select>
 
     <!-- 3. 클래스 이미지 목록 조회 -->

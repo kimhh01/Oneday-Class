@@ -1,6 +1,7 @@
 package kr.co.oneclass.bookmark;
 
 import kr.co.oneclass.board.RangeDTO;
+
 import kr.co.oneclass.common.CategoryDTO;
 
 import org.apache.ibatis.annotations.*;
@@ -41,4 +42,9 @@ public interface BookmarkDAO {
     int checkBookmark(@Param("memberCode") String memberCode, @Param("classCode") String classCode);
     
     List<CategoryDTO> selectBookmarkCategories(int memberCode);
+    
+ // 회원이 찜한 클래스 코드(classCode) 목록 조회
+    @Select("SELECT CLASS_CODE FROM BOOKMARK WHERE MEMBER_CODE = #{memberCode}")
+    List<Long> selectBookmarkClassCodes(int memberCode);
+    
 }

@@ -1,5 +1,6 @@
 package kr.co.oneclass.member;
 
+import kr.co.oneclass.common.AESUtil; // 💡 AESUtil 임포트 추가
 import kr.co.oneclass.member.EmailAuthDAO;
 import kr.co.oneclass.member.EmailAuthDomain;
 import kr.co.oneclass.member.EmailAuthDTO;
@@ -17,7 +18,6 @@ public class EmailAuthServiceImpl implements EmailAuthService {
     @Autowired
     private EmailAuthDAO emailAuthDAO;
 
-    // 메일 발송을 위해 spring-boot-starter-mail 및 SMTP 설정(application.yml)이 필요합니다.
     @Autowired
     private JavaMailSender mailSender;
 
@@ -28,7 +28,8 @@ public class EmailAuthServiceImpl implements EmailAuthService {
         String authCode = createAuthCode();
 
         EmailAuthDTO dto = new EmailAuthDTO();
-        dto.setEmail(email);
+        // 💡 1. DB 테이블 저장 시에는 암호화된 이메일 저장
+        dto.setEmail(AESUtil.encrypt(email));
         dto.setAuthCode(authCode);
         dto.setType(type);
         dto.setIssueDate(new Date());
@@ -40,12 +41,12 @@ public class EmailAuthServiceImpl implements EmailAuthService {
 
         try {
             SimpleMailMessage message = new SimpleMailMessage();
+            // 💡 2. 실제 SMTP 메일 발송 시에는 전달받은 평문 이메일(email) 사용
             message.setTo(email);
             message.setSubject("[인증코드] 이메일 인증번호 안내");
             message.setText("인증번호는 [" + authCode + "] 입니다. " + VALID_MINUTES + "분 이내에 입력해주세요.");
             mailSender.send(message);
         } catch (Exception e) {
-            // 발송 실패 시 저장된 인증코드는 그대로 두고 실패 응답 (재발송 유도)
             return false;
         }
         return true;
@@ -53,9 +54,10 @@ public class EmailAuthServiceImpl implements EmailAuthService {
 
     @Override
     public boolean verifyCode(String email, String authCode) {
-        // type을 별도로 넘기지 않는 컨트롤러 시그니처와 맞추기 위해 null로 조회
-        // (email 기준 가장 최근 인증코드를 가져옴 - 필요 시 type 파라미터를 추가해 좁힐 수 있습니다)
-        EmailAuthDomain saved = emailAuthDAO.selectEmailAuth(email, null);
+        // 💡 3. DB 조회 시에는 암호화된 이메일값으로 SELECT
+        String encryptedEmail = AESUtil.encrypt(email);
+        EmailAuthDomain saved = emailAuthDAO.selectEmailAuth(encryptedEmail, null);
+        
         if (saved == null || saved.getAuthCode() == null) {
             return false;
         }
@@ -66,12 +68,12 @@ public class EmailAuthServiceImpl implements EmailAuthService {
         long diffMinutes = diffMillis / (60 * 1000);
         return diffMinutes <= VALID_MINUTES;
     }
-    
- // 3. [추가] 임시 비밀번호 이메일 발송
+
     @Override
     public boolean sendTempPassword(String email, String tempPassword) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
+            // 💡 4. 실제 SMTP 메일 발송 시에는 평문 이메일 사용
             message.setTo(email);
             message.setSubject("[숨쉬당] 임시 비밀번호가 발급되었습니다.");
             message.setText("안녕하세요. 숨쉬당입니다.\n\n" +

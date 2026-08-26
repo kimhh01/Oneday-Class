@@ -26,4 +26,7 @@ public interface BookmarkService {
 	 */
     
 	List<CategoryDTO> getBookmarkCategories(int memberCode);
+	
+	//추 가: 회원이 찜한 클래스 코드 목록 조회
+	List<Long> getBookmarkClassCodes(int memberCode);
 }

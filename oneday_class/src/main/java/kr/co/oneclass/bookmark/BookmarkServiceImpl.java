@@ -70,4 +70,10 @@ public class BookmarkServiceImpl implements BookmarkService {
     public List<CategoryDTO> getBookmarkCategories(int memberCode) { 
         return bd.selectBookmarkCategories(memberCode);
     }
+    
+    @Override
+    public List<Long> getBookmarkClassCodes(int memberCode) {
+        return bd.selectBookmarkClassCodes(memberCode);
+    }
+    
 }
