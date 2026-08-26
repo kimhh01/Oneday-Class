@@ -1,5 +1,8 @@
 package kr.co.oneclass.author.classbasic;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,5 +20,7 @@ public class ClassBasicDTO {
     private String shortIntroduction;  // 한 줄 소개
     private String classIntroduction;  // 클래스 소개
     private String mainImagePath;      // 현재 대표 이미지
+    private List<ClassImageDTO> mainImageList = new ArrayList<>();
+    private List<Integer> removeMainImageCodeList = new ArrayList<>();
     private String registerStep;       // 마지막으로 열어 둔 등록 단계
 }

@@ -45,8 +45,8 @@
 						<div class="registration-class__info">
 							<h3 th:text="${classResult.classTitle}">클래스명</h3>
 							<div class="registration-class__meta">
-								<span><svg aria-hidden="true"><use href="#icon-bookmark"></use></svg>카테고리</span>
-								<span><svg aria-hidden="true"><use href="#icon-map-pin"></use></svg>주소</span>
+								<span><svg aria-hidden="true"><use href="#icon-bookmark"></use></svg><th:block th:text="${classResult.categoryName}">카테고리</th:block></span>
+								<span><svg aria-hidden="true"><use href="#icon-map-pin"></use></svg><th:block th:text="${classResult.address}">주소</th:block></span>
 							</div>
 							<p><svg aria-hidden="true"><use href="#icon-doc-text"></use></svg><span>클래스 코드</span><b th:text="${'CL' + classResult.classCode}">CL260805-0001</b></p>
 							<strong class="registration-class__badge"><svg aria-hidden="true"><use href="#icon-check-circle"></use></svg><th:block th:text="${classResult.classStatus == '대기' ? '검수 대기' : classResult.classStatus}">검수 대기</th:block></strong>

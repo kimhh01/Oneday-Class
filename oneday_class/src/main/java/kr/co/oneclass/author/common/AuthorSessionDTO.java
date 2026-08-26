@@ -12,6 +12,6 @@ public class AuthorSessionDTO {
     private long authorCode;
     private int memberCode;
     private String activityName;
-    private String approvalStatus;
     private String profileImagePath;
+    private boolean profileComplete;
 }

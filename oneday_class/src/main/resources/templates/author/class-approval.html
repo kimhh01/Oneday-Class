@@ -22,7 +22,7 @@
 				<header class="mgmt-head">
 					<div>
 						<h1 class="page-title">클래스 검수 현황</h1>
-						<p class="page-desc mgmt-head__desc">작성 중인 클래스를 이어서 등록하고 관리자 검수 결과를 확인할 수 있어요.</p>
+						<p class="page-desc mgmt-head__desc">수정 중인 클래스를 이어서 등록하고 관리자 검수 결과를 확인할 수 있어요.</p>
 					</div>
 					<a class="btn btn--primary" th:href="@{/author/classes/register-guide}">새 클래스 등록</a>
 				</header>
@@ -36,7 +36,7 @@
 						<div class="select">
 							<select id="approvalStatus" name="approvalStatus">
 								<option value="all" th:selected="${approvalStatus == null or approvalStatus == '' or approvalStatus == 'all'}">전체</option>
-								<option value="작성중" th:selected="${approvalStatus == '작성중'}">작성 중</option>
+								<option value="수정중" th:selected="${approvalStatus == '수정중'}">수정 중</option>
 								<option value="대기" th:selected="${approvalStatus == '대기'}">검수 대기</option>
 								<option value="반려" th:selected="${approvalStatus == '반려'}">반려</option>
 								<option value="승인" th:selected="${approvalStatus == '승인'}">승인</option>
@@ -65,10 +65,10 @@
 									<td th:text="${item.categoryName}">카테고리</td>
 									<td th:text="|${#numbers.formatInteger(item.desiredPrice, 1, 'COMMA')}원|">0원</td>
 									<td th:text="${item.registeredDate == null ? '-' : #dates.format(item.registeredDate, 'yyyy.MM.dd')}">-</td>
-									<td class="col-center"><span class="badge" th:classappend="${item.approvalStatus == '승인' ? 'badge--green' : ((item.approvalStatus == '반려' or item.approvalStatus == '중지') ? 'badge--red' : 'badge--amber')}" th:text="${item.approvalStatus}">대기</span></td>
+									<td class="col-center"><span class="badge" th:classappend="${item.approvalStatus == '승인' ? 'badge--green' : ((item.approvalStatus == '반려' or item.approvalStatus == '중지') ? 'badge--red' : 'badge--amber')}" th:text="${item.approvalStatus == '수정중' ? '수정 중' : item.approvalStatus}">대기</span></td>
 									<td class="col-center"><span class="badge" th:classappend="${item.classStatus == '모집중' ? 'badge--green' : (item.classStatus == '폐강' ? 'badge--red' : (item.classStatus == '대기중' ? 'badge--amber' : 'badge--gray'))}" th:text="${item.classStatus == '모집중' ? '모집 중' : (item.classStatus == '준비중' ? '준비 중' : (item.classStatus == '대기중' ? '확인 대기' : item.classStatus))}">준비 중</span></td>
 									<td class="approval-table__action">
-										<div th:if="${item.approvalStatus == '작성중' and item.classStatus == '준비중'}">
+										<div th:if="${item.approvalStatus == '수정중' and item.classStatus == '준비중'}">
 											<p>관리자 검수 결과를 반영해 수정 중입니다.</p>
 											<a class="btn btn--primary btn--sm" th:href="@{/author/classes/register/basic(classCode=${item.classCode})}">이어서 작성</a>
 										</div>

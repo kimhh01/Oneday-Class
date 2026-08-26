@@ -14,7 +14,6 @@ public class AuthorSummaryDTO {
     private String profileImagePath;  // 작가 프로필 이미지 경로
     private String authorIntroduction; // 작가 소개
     private String activityRegion;    // 활동 지역
-    private String approvalStatus;    // 작가 승인 상태
     private int classCount;           // 운영 클래스 수
     private double averageRating;     // 평균 별점
     private int reviewCount;          // 전체 리뷰 수

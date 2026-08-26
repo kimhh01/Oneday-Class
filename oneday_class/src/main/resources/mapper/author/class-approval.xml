@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<!-- 일반 등록 초안은 제외하고, 관리자 사유가 남은 재작성 클래스부터 운영 결과까지 표시한다. -->
+<!-- 일반 등록 초안은 제외하고, 수정 중인 클래스부터 검수·운영 결과까지 표시한다. -->
 <mapper namespace="kr.co.oneclass.author.classapproval.ClassApprovalDAO">
 
 	<select id="selectClassApprovalList" parameterType="map"
@@ -40,10 +40,7 @@
 			c.APPROVAL_MEMO AS REJECTION_REASON
 		FROM CLASS c
 		WHERE c.OPERATOR_CODE = #{authorCode}
-		  AND (
-			c.APPROVAL_STATUS &lt;&gt; '작성중'
-			OR c.APPROVAL_MEMO IS NOT NULL
-		  )
+		  AND c.APPROVAL_STATUS IN ('수정중', '대기', '승인', '반려', '중지')
 		<if test="approvalStatus != null and approvalStatus != '' and approvalStatus != 'all'">
 			AND c.APPROVAL_STATUS = #{approvalStatus}
 		</if>
@@ -82,7 +79,7 @@
 
 	<update id="reopenSuspendedClass" parameterType="map">
 		UPDATE CLASS
-		SET APPROVAL_STATUS = '작성중',
+		SET APPROVAL_STATUS = '수정중',
 			STATUS = '준비중',
 			REGISTER_STEP = 'basic',
 			WRITE_DATE = SYSDATE

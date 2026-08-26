@@ -52,7 +52,7 @@ public class ClassApprovalDAO {
         return sqlSession.selectOne(NAMESPACE + "selectSuspensionReason", param);
     }
 
-    // 작가가 중지를 확인한 뒤 같은 클래스 코드를 작성중 초안으로 전환한다
+    // 작가가 중지를 확인한 뒤 같은 클래스 코드를 수정중 상태로 전환한다
     public int reopenSuspendedClass(long authorCode, int classCode) {
         Map<String, Object> param = new HashMap<>();
         param.put("authorCode", authorCode);

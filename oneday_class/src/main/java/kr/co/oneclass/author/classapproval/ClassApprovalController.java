@@ -64,7 +64,7 @@ public class ClassApprovalController {
         return "redirect:/author/class-approval/" + classCode + "/rejection";
     }
 
-    // 재작성 버튼을 눌렀을 때만 반려 클래스를 작성중으로 되돌린다
+    // 재작성 버튼을 눌렀을 때만 반려 클래스를 수정중으로 전환한다
     @PostMapping("/author/class-approval/{classCode}/resubmit")
     public String resubmitClass(
             @PathVariable("classCode") int classCode,
@@ -96,7 +96,7 @@ public class ClassApprovalController {
         return "redirect:/author/class-approval";
     }
 
-    // 운영 중지를 확인한 뒤 작성중/준비중 상태로 바꾸고 수정 화면으로 이동한다
+    // 운영 중지를 확인한 뒤 수정중/준비중 상태로 바꾸고 수정 화면으로 이동한다
     @PostMapping("/author/class-approval/{classCode}/suspension/edit")
     public String editSuspendedClass(
             @PathVariable("classCode") int classCode,

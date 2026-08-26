@@ -116,7 +116,8 @@
 						</div>
 
 						<div class="card__body">
-							<label class="upload-zone" id="uploadZone">
+							<label class="upload-zone" id="uploadZone"
+								   th:classappend="${!#lists.isEmpty(basicForm.mainImageList)} ? ' has-image'">
 								<input type="file" class="sr-only" id="classImages" name="mainFiles" accept="image/jpeg,image/png" multiple>
 								<img class="upload-zone__preview"
 									 src="/author/images/photo/class-upload-placeholder.png"
@@ -132,14 +133,20 @@
 								</span>
 							</label>
 
-							<div class="upload-thumbs" id="uploadThumbs" aria-label="선택한 클래스 사진">
-								<button type="button" class="upload-thumb upload-thumb--preview" data-open-upload>
-								<img src="/author/images/photo/class-upload-placeholder.png" th:src="${#strings.isEmpty(basicForm.mainImagePath) ? '/author/images/photo/class-upload-placeholder.png' : basicForm.mainImagePath}" onerror="this.onerror=null;this.src='/author/images/photo/class-upload-placeholder.png';" alt="대표 사진 미리보기">
+							<div class="upload-photo-controls">
+								<div class="upload-thumbs" id="uploadThumbs" aria-label="선택한 클래스 사진">
+									<button type="button" class="upload-thumb upload-thumb--preview"
+											th:each="image, stat : ${basicForm.mainImageList}"
+											th:attr="data-existing-image=${image.imageCode},data-image-src=${image.imagePath}">
+										<img th:src="${image.imagePath}" th:alt="${stat.first ? '대표 사진' : '등록한 클래스 사진 ' + stat.count}"
+											 onerror="this.onerror=null;this.src='/author/images/photo/class-upload-placeholder.png';">
+										<span class="upload-thumb__badge" th:if="${stat.first}">대표</span>
+									</button>
+								</div>
+								<button type="button" class="upload-remove-button" id="removeSelectedImage" disabled>
+									<svg aria-hidden="true"><use href="#icon-trash"></use></svg>
+									선택 사진 삭제
 								</button>
-								<button type="button" class="upload-thumb" data-open-upload><span aria-hidden="true">+</span><span class="sr-only">사진 추가</span></button>
-								<button type="button" class="upload-thumb" data-open-upload><span aria-hidden="true">+</span><span class="sr-only">사진 추가</span></button>
-								<button type="button" class="upload-thumb" data-open-upload><span aria-hidden="true">+</span><span class="sr-only">사진 추가</span></button>
-								<button type="button" class="upload-thumb" data-open-upload><span aria-hidden="true">+</span><span class="sr-only">사진 추가</span></button>
 							</div>
 
 							<ul class="upload-notes">
@@ -223,8 +230,14 @@
 	var zone = document.getElementById('uploadZone');
 	var preview = zone ? zone.querySelector('.upload-zone__preview') : null;
 	var thumbs = document.getElementById('uploadThumbs');
+	var removeButton = document.getElementById('removeSelectedImage');
 	var objectUrls = [];
 	var selectedFiles = [];
+	var existingImages = thumbs ? Array.from(thumbs.querySelectorAll('[data-existing-image]')).map(function (button) {
+		return { code: button.dataset.existingImage, src: button.dataset.imageSrc };
+	}) : [];
+	var activeKey = existingImages.length ? 'existing:' + existingImages[0].code : null;
+	var placeholder = '/author/images/photo/class-upload-placeholder.png';
 
 	function clearObjectUrls() {
 		objectUrls.forEach(function (url) { URL.revokeObjectURL(url); });
@@ -243,39 +256,60 @@
 
 	function appendFiles(fileList) {
 		var known = new Set(selectedFiles.map(fileKey));
+		var firstAddedKey = null;
 		Array.from(fileList || []).filter(function (file) {
 			return (file.type === 'image/jpeg' || file.type === 'image/png')
 				&& file.size <= 5 * 1024 * 1024;
 		}).forEach(function (file) {
 			var key = fileKey(file);
-			if (selectedFiles.length >= 5 || known.has(key)) return;
+			if (existingImages.length + selectedFiles.length >= 5 || known.has(key)) return;
 			known.add(key);
 			selectedFiles.push(file);
+			if (!firstAddedKey) firstAddedKey = 'file:' + key;
 		});
+		if (firstAddedKey) activeKey = firstAddedKey;
 		syncInput();
 		renderFiles();
 	}
 
 	function renderFiles() {
 		if (!preview || !thumbs) return;
-		if (!selectedFiles.length) return;
 
 		clearObjectUrls();
 		thumbs.innerHTML = '';
-		selectedFiles.forEach(function (file, index) {
+		var items = existingImages.map(function (image) {
+			return { key: 'existing:' + image.code, src: image.src };
+		});
+		selectedFiles.forEach(function (file) {
 			var url = URL.createObjectURL(file);
 			objectUrls.push(url);
-			if (index === 0) preview.src = url;
+			items.push({ key: 'file:' + fileKey(file), src: url });
+		});
+		if (!items.some(function (item) { return item.key === activeKey; })) {
+			activeKey = items.length ? items[0].key : null;
+		}
+		var activeItem = items.find(function (item) { return item.key === activeKey; });
+		preview.src = activeItem ? activeItem.src : placeholder;
+		preview.alt = activeItem ? '선택한 클래스 사진 미리보기' : '대표 사진을 선택해주세요';
+		zone.classList.toggle('has-image', items.length > 0);
+		if (removeButton) removeButton.disabled = !activeItem;
 
+		items.forEach(function (item, index) {
+			var key = item.key;
+			var isRepresentative = index === 0;
 			var button = document.createElement('button');
 			button.type = 'button';
-			button.className = 'upload-thumb upload-thumb--preview';
-			button.setAttribute('data-open-upload', '');
+			button.className = 'upload-thumb upload-thumb--preview'
+				+ (key === activeKey ? ' is-active' : '');
+			button.addEventListener('click', function () {
+				activeKey = key;
+				renderFiles();
+			});
 			var image = document.createElement('img');
-			image.src = url;
-			image.alt = index === 0 ? '선택한 대표 사진' : '선택한 클래스 사진 ' + (index + 1);
+			image.src = item.src;
+			image.alt = isRepresentative ? '선택한 대표 사진' : '선택한 클래스 사진 ' + (index + 1);
 			button.appendChild(image);
-			if (index === 0) {
+			if (isRepresentative) {
 				var badge = document.createElement('span');
 				badge.className = 'upload-thumb__badge';
 				badge.textContent = '대표';
@@ -284,7 +318,7 @@
 			thumbs.appendChild(button);
 		});
 
-		for (var index = selectedFiles.length; index < 5; index += 1) {
+		for (var index = items.length; index < 5; index += 1) {
 			var empty = document.createElement('button');
 			empty.type = 'button';
 			empty.className = 'upload-thumb';
@@ -292,6 +326,35 @@
 			empty.innerHTML = '<span aria-hidden="true">+</span><span class="sr-only">사진 추가</span>';
 			thumbs.appendChild(empty);
 		}
+	}
+
+	function markExistingImageForRemoval(imageCode) {
+		var hidden = document.createElement('input');
+		hidden.type = 'hidden';
+		hidden.name = 'removeMainImageCodeList';
+		hidden.value = imageCode;
+		document.getElementById('basicInfoForm').appendChild(hidden);
+	}
+
+	if (removeButton) {
+		removeButton.addEventListener('click', function () {
+			if (!activeKey) return;
+			if (activeKey.indexOf('existing:') === 0) {
+				var imageCode = activeKey.substring('existing:'.length);
+				markExistingImageForRemoval(imageCode);
+				existingImages = existingImages.filter(function (image) {
+					return String(image.code) !== imageCode;
+				});
+			} else if (activeKey.indexOf('file:') === 0) {
+				var selectedKey = activeKey.substring('file:'.length);
+				selectedFiles = selectedFiles.filter(function (file) {
+					return fileKey(file) !== selectedKey;
+				});
+				syncInput();
+			}
+			activeKey = null;
+			renderFiles();
+		});
 	}
 
 	if (input && zone) {
@@ -311,6 +374,7 @@
 			if (button) input.click();
 		});
 	}
+	renderFiles();
 }());
 </script>
 

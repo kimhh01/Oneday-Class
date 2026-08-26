@@ -81,6 +81,15 @@ public class ClassController {
         if (basic == null) {
             return "redirect:/author/classes/register-guide";
         }
+        if ("새 클래스".equals(basic.getClassTitle())) {
+            basic.setClassTitle("");
+        }
+        if ("작성 중".equals(basic.getShortIntroduction())) {
+            basic.setShortIntroduction("");
+        }
+        if ("작성 중".equals(basic.getClassIntroduction())) {
+            basic.setClassIntroduction("");
+        }
         cService.markDraftStep(authorCode, code, "basic");
         model.addAttribute("basicForm", basic);
         model.addAttribute("categories", cService.getCategories());
@@ -122,6 +131,18 @@ public class ClassController {
         ClassLocationDTO location = cService.getClassLocation(authorCode, classCode);
         if (location == null) {
             return "redirect:/author/classes/register-guide";
+        }
+        if ("-".equals(location.getZipcode())) {
+            location.setZipcode("");
+        }
+        if ("-".equals(location.getAddress())) {
+            location.setAddress("");
+        }
+        if ("-".equals(location.getDetailAddress())) {
+            location.setDetailAddress("");
+        }
+        if ("-".equals(location.getOldAddress())) {
+            location.setOldAddress("");
         }
         cService.markDraftStep(authorCode, classCode, "location");
         model.addAttribute("locationForm", location);

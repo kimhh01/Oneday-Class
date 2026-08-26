@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import kr.co.oneclass.common.AESUtil;
 
 @Service
 public class DashboardService {
@@ -23,7 +24,10 @@ public class DashboardService {
 
     // 오늘 진행하는 클래스 일정 목록을 조회한다
     public List<TodayClassDTO> getTodayClassList(long authorCode) {
-        return dDAO.selectTodayClassList(authorCode);
+        List<TodayClassDTO> todayClasses = dDAO.selectTodayClassList(authorCode);
+        todayClasses.forEach(todayClass ->
+                todayClass.setAuthorName(AESUtil.decrypt(todayClass.getAuthorName())));
+        return todayClasses;
     }
 
     // 대시보드 알림 목록을 조회한다
@@ -47,7 +51,10 @@ public class DashboardService {
 
     // 최근 예약 내역을 조회한다
     public List<RecentReservationDTO> getRecentReservationList(long authorCode) {
-        return dDAO.selectRecentReservationList(authorCode);
+        List<RecentReservationDTO> reservations = dDAO.selectRecentReservationList(authorCode);
+        reservations.forEach(reservation ->
+                reservation.setMemberName(AESUtil.decrypt(reservation.getMemberName())));
+        return reservations;
     }
 
     // 최신 공지사항을 조회한다
@@ -59,6 +66,10 @@ public class DashboardService {
     public AuthorSummaryDTO getAuthorSummary(long authorCode) {
         AuthorSummaryDTO author = dDAO.selectAuthorSummary(authorCode);
         // 작가로 등록되지 않은 코드로 들어와도 화면이 깨지지 않도록 빈 객체를 돌려준다
-        return author == null ? new AuthorSummaryDTO() : author;
+        if (author == null) {
+            return new AuthorSummaryDTO();
+        }
+        author.setAuthorName(AESUtil.decrypt(author.getAuthorName()));
+        return author;
     }
 }

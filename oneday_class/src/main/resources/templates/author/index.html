@@ -152,7 +152,7 @@
 									<img src="/author/images/photo/studio-profile.png" th:src="${authorSummary.profileImagePath != null} ? ${authorSummary.profileImagePath} : @{/author/images/photo/studio-profile.png}" alt="" width="1256" height="1256" loading="lazy">
 								</span>
 								<div class="profile__info">
-									<p class="profile__name"><span th:text="${authorSummary.authorName}">작가</span> <span class="badge" th:classappend="${authorSummary.approvalStatus == '승인' ? 'badge--green' : 'badge--gray'}" th:text="${authorSummary.approvalStatus == '승인' ? '활동 중' : authorSummary.approvalStatus}">활동 중</span></p>
+									<p class="profile__name"><span th:text="${authorSummary.authorName}">작가</span> <span class="badge badge--green">활동 중</span></p>
 									<p class="profile__desc" th:text="${#strings.isEmpty(authorSummary.authorIntroduction) ? '등록된 작가 소개가 없습니다.' : authorSummary.authorIntroduction}">작가 소개</p>
 									<p class="profile__meta" th:text="${#strings.isEmpty(authorSummary.activityRegion) ? '활동 지역 미등록' : authorSummary.activityRegion}">활동 지역</p>
 									<p class="profile__summary">

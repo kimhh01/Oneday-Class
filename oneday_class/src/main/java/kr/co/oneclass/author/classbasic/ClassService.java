@@ -31,6 +31,7 @@ public class ClassService {
     private static final String RESULT_IMAGE_TYPE = "완성";
     private static final String LEGACY_DETAIL_IMAGE_TYPE = "상세";
     private static final String DRAFT_PLACEHOLDER = "작성 중";
+    private static final Set<String> EDITABLE_APPROVAL_STATUSES = Set.of("작성중", "수정중");
     private static final Set<String> REGISTER_STEPS = Set.of(
             "basic", "location", "schedule", "detail", "detail-extra", "curriculum", "preview");
 
@@ -49,7 +50,7 @@ public class ClassService {
         this.fileStorageService = fileStorageService;
     }
 
-    // 등록 시작 시 초안 클래스를 생성하고 클래스 코드를 발급한다
+    // 재작성 클래스와 별개로 일반 신규등록 초안을 하나만 생성한다
     @Transactional
     public int addDraftClass(long authorCode) {
         cDAO.lockDraftOwner(authorCode);
@@ -91,6 +92,7 @@ public class ClassService {
         cDAO.deleteClassNoticeList(classCode);
         cDAO.deleteClassTagList(classCode);
         cDAO.deleteClassMaterialList(classCode);
+        cDAO.deleteClassBookmarkList(classCode);
 
         if (cDAO.deleteDraftClass(authorCode, classCode) != 1) {
             throw new IllegalArgumentException("삭제할 수 있는 작성 중 클래스가 없습니다.");
@@ -108,7 +110,7 @@ public class ClassService {
         return newDraft.getClassCode();
     }
 
-    // 가장 최근에 저장한 초안을 조회한다
+    // 가장 최근에 저장한 일반 신규등록 초안을 조회한다
     public ClassBasicDTO getLatestDraftClass(long authorCode) {
         return cDAO.selectLatestDraftClass(authorCode);
     }
@@ -151,7 +153,12 @@ public class ClassService {
 
     // 기본정보 단계의 저장된 값을 조회한다
     public ClassBasicDTO getClassBasic(long authorCode, int classCode) {
-        return cDAO.selectClassBasic(authorCode, classCode);
+        ClassBasicDTO basic = cDAO.selectClassBasic(authorCode, classCode);
+        if (basic != null) {
+            basic.setMainImageList(
+                    ciDAO.selectClassImageListByType(classCode, MAIN_IMAGE_TYPE));
+        }
+        return basic;
     }
 
     // 승인 상태를 유지하면서 수정할 수 있는 본인 운영 클래스인지 확인한다
@@ -177,7 +184,7 @@ public class ClassService {
         if (saved == null
                 || (approvedEdit
                     ? !isApprovedClassEditable(cbDTO.getAuthorCode(), cbDTO.getClassCode())
-                    : !"작성중".equals(cDAO.selectClassStatus(
+                    : !isRegistrationEditableStatus(cDAO.selectClassStatus(
                             cbDTO.getAuthorCode(), cbDTO.getClassCode())))) {
             throw new IllegalArgumentException("수정할 수 없는 클래스입니다.");
         }
@@ -185,13 +192,29 @@ public class ClassService {
         validateDraftBasic(cbDTO);
 
         List<MultipartFile> files = nonEmptyFiles(mainFiles);
-        if (files.size() > 5) {
+        List<ClassImageDTO> oldImages = saved.getMainImageList();
+        List<Integer> requestedRemoveCodes = cbDTO.getRemoveMainImageCodeList() == null
+                ? List.of() : cbDTO.getRemoveMainImageCodeList();
+        Set<Integer> removeCodes = new HashSet<>(requestedRemoveCodes);
+        List<ClassImageDTO> removedImages = oldImages.stream()
+                .filter(image -> removeCodes.contains(image.getImageCode()))
+                .toList();
+        if (removedImages.size() != removeCodes.size()) {
+            throw new IllegalArgumentException("삭제할 대표 사진 정보를 확인해주세요.");
+        }
+        Set<Integer> removedCodeSet = removedImages.stream()
+                .map(ClassImageDTO::getImageCode)
+                .collect(java.util.stream.Collectors.toSet());
+        List<ClassImageDTO> remainingImages = oldImages.stream()
+                .filter(image -> !removedCodeSet.contains(image.getImageCode()))
+                .toList();
+        if (remainingImages.size() + files.size() > 5) {
             throw new IllegalArgumentException("대표 사진은 최대 5장까지 등록할 수 있습니다.");
         }
-
-        List<ClassImageDTO> oldImages = files.isEmpty()
-                ? new ArrayList<>()
-                : ciDAO.selectClassImageListByType(cbDTO.getClassCode(), MAIN_IMAGE_TYPE);
+        int nextImageOrder = remainingImages.stream()
+                .mapToInt(ClassImageDTO::getImageOrder)
+                .max()
+                .orElse(0) + 1;
         List<String> storedPaths = new ArrayList<>();
 
         try {
@@ -206,20 +229,22 @@ public class ClassService {
                 throw new IllegalArgumentException("수정할 수 없는 클래스입니다.");
             }
 
-            if (!storedPaths.isEmpty()) {
-                ciDAO.deleteClassImageListByType(cbDTO.getClassCode(), MAIN_IMAGE_TYPE);
-                for (int index = 0; index < storedPaths.size(); index++) {
-                    ClassImageDTO image = new ClassImageDTO();
-                    image.setClassCode(cbDTO.getClassCode());
-                    image.setImagePath(storedPaths.get(index));
-                    image.setImageType(MAIN_IMAGE_TYPE);
-                    image.setImageOrder(index + 1);
-                    if (ciDAO.insertClassImage(image) != 1) {
-                        throw new IllegalStateException("대표 사진 정보를 저장하지 못했습니다.");
-                    }
+            for (ClassImageDTO removedImage : removedImages) {
+                if (ciDAO.deleteClassImage(removedImage.getImageCode()) != 1) {
+                    throw new IllegalStateException("기존 대표 사진을 삭제하지 못했습니다.");
                 }
-                deleteAfterCommit(oldImages.stream().map(ClassImageDTO::getImagePath).toList());
             }
+            for (int index = 0; index < storedPaths.size(); index++) {
+                ClassImageDTO image = new ClassImageDTO();
+                image.setClassCode(cbDTO.getClassCode());
+                image.setImagePath(storedPaths.get(index));
+                image.setImageType(MAIN_IMAGE_TYPE);
+                image.setImageOrder(nextImageOrder + index);
+                if (ciDAO.insertClassImage(image) != 1) {
+                    throw new IllegalStateException("대표 사진 정보를 저장하지 못했습니다.");
+                }
+            }
+            deleteAfterCommit(removedImages.stream().map(ClassImageDTO::getImagePath).toList());
             return true;
         } catch (RuntimeException exception) {
             storedPaths.forEach(this::deleteQuietly);
@@ -249,7 +274,7 @@ public class ClassService {
         if (saved == null
                 || (approvedEdit
                     ? !isApprovedClassEditable(clDTO.getAuthorCode(), clDTO.getClassCode())
-                    : !"작성중".equals(cDAO.selectClassStatus(
+                    : !isRegistrationEditableStatus(cDAO.selectClassStatus(
                             clDTO.getAuthorCode(), clDTO.getClassCode())))) {
             throw new IllegalArgumentException("수정할 수 없는 클래스입니다.");
         }
@@ -373,7 +398,7 @@ public class ClassService {
         if (saved == null
                 || (approvedEdit
                     ? !isApprovedClassEditable(cdDTO.getAuthorCode(), cdDTO.getClassCode())
-                    : !"작성중".equals(cDAO.selectClassStatus(
+                    : !isRegistrationEditableStatus(cDAO.selectClassStatus(
                             cdDTO.getAuthorCode(), cdDTO.getClassCode())))) {
             throw new IllegalArgumentException("수정할 수 없는 클래스입니다.");
         }
@@ -468,7 +493,7 @@ public class ClassService {
         if (saved == null
                 || (approvedEdit
                     ? !isApprovedClassEditable(cdDTO.getAuthorCode(), cdDTO.getClassCode())
-                    : !"작성중".equals(cDAO.selectClassStatus(
+                    : !isRegistrationEditableStatus(cDAO.selectClassStatus(
                             cdDTO.getAuthorCode(), cdDTO.getClassCode())))) {
             throw new IllegalArgumentException("수정할 수 없는 클래스입니다.");
         }
@@ -534,7 +559,7 @@ public class ClassService {
         validateCurriculum(cfDTO);
         if (approvedEdit
                 ? !isApprovedClassEditable(cfDTO.getAuthorCode(), cfDTO.getClassCode())
-                : !"작성중".equals(cDAO.selectClassStatus(
+                : !isRegistrationEditableStatus(cDAO.selectClassStatus(
                         cfDTO.getAuthorCode(), cfDTO.getClassCode()))) {
             throw new IllegalArgumentException("수정할 수 없는 클래스입니다.");
         }
@@ -629,7 +654,8 @@ public class ClassService {
         if (!csDTO.isServiceTermsAgreed() || !csDTO.isOperationPrivacyAgreed()) {
             throw new IllegalArgumentException("필수 약관에 모두 동의해주세요.");
         }
-        if (!"작성중".equals(cDAO.selectClassStatus(csDTO.getAuthorCode(), csDTO.getClassCode()))) {
+        if (!isRegistrationEditableStatus(
+                cDAO.selectClassStatus(csDTO.getAuthorCode(), csDTO.getClassCode()))) {
             throw new IllegalArgumentException("이미 제출했거나 제출할 수 없는 클래스입니다.");
         }
 
@@ -652,6 +678,10 @@ public class ClassService {
     // 클래스 제공 항목 목록을 조회한다
     public List<OfferingDTO> getOfferings() {
         return cDAO.selectOfferingList();
+    }
+
+    private boolean isRegistrationEditableStatus(String approvalStatus) {
+        return EDITABLE_APPROVAL_STATUSES.contains(approvalStatus);
     }
 
     private String registerPath(String step, int classCode) {

@@ -10,15 +10,10 @@
 	- MEMBER  : 실명 / 이메일                                  → 조회만 한다
 
 	MEMBER 는 member 팀 테이블이고 프로필 폼도 실명·이메일을 th:field 로 묶지 않는다.
-	그래서 UPDATE 는 CREATOR 만 건드린다. APPROVAL_STATUS 도 관리자 소관이라 제외한다.
+	그래서 UPDATE 는 CREATOR 만 건드린다.
 -->
 <mapper namespace="kr.co.oneclass.author.profile.AuthorDAO">
 
-	<!--
-		작가 프로필 조회.
-		openStatus 는 CREATOR.APPROVAL_STATUS(승인 / 대기) 를 그대로 내려보낸다.
-		작가 공개 여부 전용 컬럼이 없고 화면 배지도 approval-badge 다.
-	-->
 	<select id="selectAuthorProfile" parameterType="long"
 		resultType="kr.co.oneclass.author.profile.AuthorProfileDTO">
 		SELECT
@@ -29,8 +24,7 @@
 			cr.CREATOR_INTRODUCTION AS INTRODUCTION,
 			cr.ACTIVITY_REGION AS ACTIVITY_FIELD,
 			cr.SNS_URL AS KAKAO_URL,
-			cr.PROFILE_IMAGE AS PROFILE_IMAGE_PATH,
-			cr.APPROVAL_STATUS AS OPEN_STATUS
+			cr.PROFILE_IMAGE AS PROFILE_IMAGE_PATH
 		FROM CREATOR cr
 		JOIN MEMBER m ON cr.MEMBER_CODE = m.MEMBER_CODE
 		WHERE cr.OPERATOR_CODE = #{authorCode}
@@ -39,7 +33,7 @@
 	<!--
 		작가 프로필 수정.
 		프로필 이미지는 새로 업로드한 경우에만 SET 한다 - 안 그러면 기존 이미지가 지워진다.
-		실명·이메일·승인상태는 SET 절에 넣지 말 것 (위 주석 참고).
+		실명·이메일은 SET 절에 넣지 말 것 (위 주석 참고).
 	-->
 	<update id="updateAuthorProfile"
 		parameterType="kr.co.oneclass.author.profile.AuthorProfileDTO">
@@ -55,5 +49,30 @@
 		</set>
 		WHERE OPERATOR_CODE = #{authorCode}
 	</update>
+
+	<insert id="insertAuthorProfile"
+		parameterType="kr.co.oneclass.author.profile.AuthorProfileDTO">
+		INSERT INTO CREATOR (
+			OPERATOR_CODE,
+			MEMBER_CODE,
+			ACTIVITY_NAME,
+			CREATOR_INTRODUCTION,
+			ACTIVITY_REGION,
+			SNS_URL,
+			PROFILE_IMAGE,
+			APPROVAL_STATUS,
+			JOIN_DATE
+		) VALUES (
+			SEQ_CREATOR.NEXTVAL,
+			#{memberCode},
+			#{authorNickname},
+			#{introduction},
+			#{activityField},
+			#{kakaoUrl},
+			#{profileImagePath},
+			'승인',
+			SYSDATE
+		)
+	</insert>
 
 </mapper>

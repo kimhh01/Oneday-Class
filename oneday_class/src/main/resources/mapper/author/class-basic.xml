@@ -74,6 +74,11 @@
 		  AND APPROVAL_MEMO IS NULL
 	</delete>
 
+	<delete id="deleteClassBookmarkList" parameterType="int">
+		DELETE FROM BOOKMARK
+		WHERE CLASS_CODE = #{classCode}
+	</delete>
+
 	<select id="selectClassBasic" parameterType="map"
 		resultType="kr.co.oneclass.author.classbasic.ClassBasicDTO">
 		SELECT
@@ -107,7 +112,7 @@
 		WHERE c.CLASS_CODE = #{classCode}
 		  AND c.OPERATOR_CODE = #{authorCode}
 		  AND c.STATUS = '준비중'
-		  AND c.APPROVAL_STATUS = '작성중'
+		  AND c.APPROVAL_STATUS IN ('작성중', '수정중')
 		  AND EXISTS (
 			  SELECT 1 FROM CATEGORY ct
 			  WHERE ct.CATEGORY_CODE = #{categoryCode}
@@ -163,7 +168,7 @@
 		WHERE CLASS_CODE = #{classCode}
 		  AND OPERATOR_CODE = #{authorCode}
 		  AND STATUS = '준비중'
-		  AND APPROVAL_STATUS = '작성중'
+		  AND APPROVAL_STATUS IN ('작성중', '수정중')
 	</update>
 
 	<update id="updateApprovedClassLocation"
@@ -243,7 +248,7 @@
 		WHERE CLASS_CODE = #{classCode}
 		  AND OPERATOR_CODE = #{authorCode}
 		  AND STATUS = '준비중'
-		  AND APPROVAL_STATUS = '작성중'
+		  AND APPROVAL_STATUS IN ('작성중', '수정중')
 	</update>
 
 	<!-- 예약이 참조하는 일정은 유지하고 새 예약에 적용할 가격만 변경한다 -->
@@ -335,7 +340,7 @@
 		WHERE CLASS_CODE = #{classCode}
 		  AND OPERATOR_CODE = #{authorCode}
 		  AND STATUS = '준비중'
-		  AND APPROVAL_STATUS = '작성중'
+		  AND APPROVAL_STATUS IN ('작성중', '수정중')
 	</update>
 
 	<update id="updateApprovedClassDetail"
@@ -462,13 +467,13 @@
 		WHERE CLASS_CODE = #{classCode}
 		  AND OPERATOR_CODE = #{authorCode}
 		  AND STATUS = '준비중'
-		  AND APPROVAL_STATUS = '작성중'
+		  AND APPROVAL_STATUS IN ('작성중', '수정중')
 	</update>
 
-	<!-- 반려 사유는 재작성 중에도 확인할 수 있게 두고, 재제출할 때 updateClassStatus가 지운다 -->
+	<!-- 반려 사유는 수정 중에도 확인할 수 있게 두고, 재제출할 때 updateClassStatus가 지운다 -->
 	<update id="reopenRejectedClass" parameterType="map">
 		UPDATE CLASS
-		SET APPROVAL_STATUS = '작성중',
+		SET APPROVAL_STATUS = '수정중',
 			STATUS = '준비중',
 			REGISTER_STEP = 'basic',
 			WRITE_DATE = SYSDATE
@@ -486,7 +491,7 @@
 		WHERE CLASS_CODE = #{classCode}
 		  AND OPERATOR_CODE = #{authorCode}
 		  AND STATUS = '준비중'
-		  AND APPROVAL_STATUS = '작성중'
+		  AND APPROVAL_STATUS IN ('작성중', '수정중')
 	</update>
 
 	<select id="selectRegisterResult" parameterType="map"
@@ -494,6 +499,8 @@
 		SELECT
 			c.CLASS_CODE,
 			c.NAME AS CLASS_TITLE,
+			ct.NAME AS CATEGORY_NAME,
+			c.ADDRESS,
 			(
 				SELECT MIN(ci.IMAGE) KEEP (DENSE_RANK FIRST ORDER BY ci.SORT_ORDER, ci.CLASS_IMG_CODE)
 				FROM CLASS_IMG ci
@@ -510,6 +517,7 @@
 			) AS SCHEDULE_SUMMARY,
 			c.DESIRED_PRICE
 		FROM CLASS c
+		JOIN CATEGORY ct ON ct.CATEGORY_CODE = c.CATEGORY_CODE
 		WHERE c.CLASS_CODE = #{classCode}
 		  AND c.OPERATOR_CODE = #{authorCode}
 		  AND c.APPROVAL_STATUS IN ('대기', '승인', '반려')
@@ -537,7 +545,7 @@
 		WHERE CLASS_CODE = #{classCode}
 		  AND OPERATOR_CODE = #{authorCode}
 		  AND STATUS = '준비중'
-		  AND APPROVAL_STATUS = '작성중'
+		  AND APPROVAL_STATUS IN ('작성중', '수정중')
 	</update>
 
 	<update id="guardApprovedClassEdit" parameterType="map">

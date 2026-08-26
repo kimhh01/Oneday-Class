@@ -28,7 +28,7 @@ public class ClassApprovalService {
         return caDAO.selectRejectionReason(authorCode, classCode);
     }
 
-    // 반려된 클래스를 재작성 가능한 작성중 상태로 되돌린다
+    // 반려된 클래스를 재작성 가능한 수정중 상태로 전환한다
     @Transactional
     public boolean reopenRejectedClass(long authorCode, int classCode) {
         return cDAO.reopenRejectedClass(authorCode, classCode) == 1;
@@ -44,7 +44,7 @@ public class ClassApprovalService {
         return caDAO.selectSuspensionReason(authorCode, classCode);
     }
 
-    // 중지/대기중 상태를 작가 확인 후 작성중/준비중으로 전환한다
+    // 중지/대기중 상태를 작가 확인 후 수정중/준비중으로 전환한다
     @Transactional
     public boolean reopenSuspendedClass(long authorCode, int classCode) {
         return caDAO.reopenSuspendedClass(authorCode, classCode) == 1;

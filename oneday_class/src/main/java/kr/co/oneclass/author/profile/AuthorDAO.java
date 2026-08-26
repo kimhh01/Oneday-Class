@@ -24,4 +24,8 @@ public class AuthorDAO {
     public int updateAuthorProfile(AuthorProfileDTO apDTO) {
         return sqlSession.update(NAMESPACE + "updateAuthorProfile", apDTO);
     }
+
+    public int insertAuthorProfile(AuthorProfileDTO apDTO) {
+        return sqlSession.insert(NAMESPACE + "insertAuthorProfile", apDTO);
+    }
 }

@@ -81,6 +81,36 @@ public class AuthorService {
         }
     }
 
+    @Transactional
+    public boolean registerAuthorProfile(int memberCode, AuthorProfileDTO apDTO,
+            MultipartFile profileFile) {
+        validateProfile(apDTO);
+        apDTO.setMemberCode(memberCode);
+
+        String storedPath = null;
+        if (profileFile != null && !profileFile.isEmpty()) {
+            storedPath = fileStorageService.store(profileFile, "creator");
+            apDTO.setProfileImagePath(storedPath);
+        }
+
+        try {
+            boolean inserted = aDAO.insertAuthorProfile(apDTO) == 1;
+            if (!inserted && storedPath != null) {
+                fileStorageService.delete(storedPath);
+            }
+            return inserted;
+        } catch (RuntimeException exception) {
+            if (storedPath != null) {
+                try {
+                    fileStorageService.delete(storedPath);
+                } catch (RuntimeException cleanupException) {
+                    exception.addSuppressed(cleanupException);
+                }
+            }
+            throw exception;
+        }
+    }
+
     private void validateProfile(AuthorProfileDTO profile) {
         String nickname = trimToNull(profile.getAuthorNickname());
         if (nickname == null || nickname.length() > 50) {

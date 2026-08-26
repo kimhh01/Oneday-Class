@@ -20,6 +20,7 @@ public class AuthorAccessWebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/author/**")
                 .excludePathPatterns(
                         "/author/access",
+						"/author/access/profile",
                         "/author/start",
                         "/author/css/**",
                         "/author/js/**",

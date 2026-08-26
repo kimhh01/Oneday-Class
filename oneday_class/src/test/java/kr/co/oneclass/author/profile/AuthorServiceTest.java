@@ -2,6 +2,7 @@ package kr.co.oneclass.author.profile;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -96,5 +97,29 @@ class AuthorServiceTest {
 
         assertEquals("https://pf.kakao.com/_creator", form.getKakaoUrl());
         verify(authorDAO).updateAuthorProfile(form);
+    }
+
+    @Test
+    void authorRegistrationRequiresProfileFields() {
+        AuthorProfileDTO form = new AuthorProfileDTO();
+        form.setAuthorNickname("신규 작가");
+        form.setActivityField("서울");
+
+        assertThrows(IllegalArgumentException.class,
+                () -> authorService.registerAuthorProfile(10, form, null));
+    }
+
+    @Test
+    void completeProfileCreatesAuthor() {
+        AuthorProfileDTO form = new AuthorProfileDTO();
+        form.setAuthorNickname("신규 작가");
+        form.setActivityField("서울");
+        form.setIntroduction("새로운 클래스를 준비하고 있습니다.");
+
+        when(authorDAO.insertAuthorProfile(form)).thenReturn(1);
+
+        assertTrue(authorService.registerAuthorProfile(10, form, null));
+        assertEquals(10, form.getMemberCode());
+        verify(authorDAO).insertAuthorProfile(form);
     }
 }

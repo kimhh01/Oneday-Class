@@ -38,6 +38,11 @@ public class ClassDAO {
         return sqlSession.delete(NAMESPACE + "deleteDraftClass", ownerParam(authorCode, classCode));
     }
 
+    // 초안에 잘못 연결된 찜 데이터가 클래스 삭제를 막지 않도록 함께 정리한다
+    public int deleteClassBookmarkList(int classCode) {
+        return sqlSession.delete(NAMESPACE + "deleteClassBookmarkList", classCode);
+    }
+
     // 기본정보를 조회한다
     public ClassBasicDTO selectClassBasic(long authorCode, int classCode) {
         return sqlSession.selectOne(NAMESPACE + "selectClassBasic", ownerParam(authorCode, classCode));
@@ -217,7 +222,7 @@ public class ClassDAO {
         return sqlSession.update(NAMESPACE + "updateRegisterStep", param);
     }
 
-    // 반려된 클래스를 같은 클래스 코드의 작성중 초안으로 되돌린다
+    // 반려된 클래스를 같은 클래스 코드의 수정중 상태로 전환한다
     public int reopenRejectedClass(long authorCode, int classCode) {
         return sqlSession.update(NAMESPACE + "reopenRejectedClass", ownerParam(authorCode, classCode));
     }

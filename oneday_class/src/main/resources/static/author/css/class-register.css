@@ -610,6 +610,10 @@
 	backdrop-filter: blur(4px);
 }
 
+.upload-zone.has-image .upload-zone__overlay {
+	display: none;
+}
+
 .upload-zone__cta {
 	display: flex;
 	align-items: center;
@@ -635,6 +639,49 @@
 	grid-template-columns: repeat(5, minmax(0, 1fr));
 	gap: 10px;
 	margin-top: 12px;
+}
+
+.upload-photo-controls {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 14px;
+}
+
+.upload-photo-controls .upload-thumbs {
+	flex: 1;
+}
+
+.upload-remove-button {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	min-width: 126px;
+	height: 38px;
+	margin-top: 14px;
+	padding: 0 12px;
+	border: 1px solid #e0c8c3;
+	border-radius: 8px;
+	background: #fff;
+	font-size: 12px;
+	font-weight: 700;
+	color: #a0443a;
+}
+
+.upload-remove-button:hover:not(:disabled) {
+	border-color: #bd6258;
+	background: #fff6f4;
+}
+
+.upload-remove-button:disabled {
+	opacity: .45;
+	cursor: not-allowed;
+}
+
+.upload-remove-button svg {
+	width: 15px;
+	height: 15px;
 }
 
 .upload-thumb {
@@ -665,6 +712,11 @@
 
 .upload-thumb--preview {
 	border-style: solid;
+}
+
+.upload-thumb--preview.is-active {
+	border: 2px solid var(--green-600);
+	box-shadow: 0 0 0 2px var(--green-100);
 }
 
 .upload-thumb__badge {
@@ -1125,6 +1177,10 @@
 	height: 100%;
 }
 
+.author-page .location-grid > .card + .card {
+    margin-top: 0;
+}
+
 .location-info-card, .location-map-card {
 	display: flex;
 	min-height: 430px;
@@ -1583,6 +1639,13 @@
 	}
 	.upload-thumbs {
 		gap: 6px;
+	}
+	.upload-photo-controls {
+		flex-direction: column;
+	}
+	.upload-remove-button {
+		align-self: flex-end;
+		margin-top: 0;
 	}
 	.upload-thumb {
 		border-radius: 8px;

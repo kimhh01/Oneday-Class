@@ -104,6 +104,7 @@ class ClassServiceDetailSplitTest {
         verify(classDAO).deleteClassNoticeList(10);
         verify(classDAO).deleteClassTagList(10);
         verify(classDAO).deleteClassMaterialList(10);
+        verify(classDAO).deleteClassBookmarkList(10);
         verify(classDAO).deleteDraftClass(7L, 10);
     }
 
@@ -140,6 +141,28 @@ class ClassServiceDetailSplitTest {
         assertThrows(IllegalArgumentException.class,
                 () -> classService.modifyClassBasic(form, List.of()));
         verify(classDAO, never()).updateClassBasic(any(ClassBasicDTO.class));
+    }
+
+    @Test
+    void removingSavedMainImageDeletesOnlySelectedImage() {
+        ClassBasicDTO saved = basic(10, 7L);
+        ClassImageDTO first = image(1, 1);
+        ClassImageDTO second = image(2, 2);
+        when(classDAO.selectClassBasic(7L, 10)).thenReturn(saved);
+        when(classImageDAO.selectClassImageListByType(10, "대표"))
+                .thenReturn(List.of(first, second));
+        when(classDAO.selectClassStatus(7L, 10)).thenReturn("작성중");
+        when(classDAO.updateClassBasic(any(ClassBasicDTO.class))).thenReturn(1);
+        when(classImageDAO.deleteClassImage(2)).thenReturn(1);
+
+        ClassBasicDTO form = basic(10, 7L);
+        form.setRemoveMainImageCodeList(List.of(2));
+
+        classService.modifyClassBasic(form, List.of());
+
+        verify(classImageDAO).deleteClassImage(2);
+        verify(classImageDAO, never()).deleteClassImage(1);
+        verify(classImageDAO, never()).deleteClassImageListByType(anyInt(), anyString());
     }
 
     @Test
@@ -224,6 +247,21 @@ class ClassServiceDetailSplitTest {
         ArgumentCaptor<ClassImageDTO> imageCaptor = ArgumentCaptor.forClass(ClassImageDTO.class);
         verify(classImageDAO).insertClassImage(imageCaptor.capture());
         assertEquals(4, imageCaptor.getValue().getImageOrder());
+    }
+
+    @Test
+    void revisedClassCanBeSubmittedForReview() {
+        ClassSubmitDTO form = new ClassSubmitDTO();
+        form.setClassCode(10);
+        form.setAuthorCode(7L);
+        form.setServiceTermsAgreed(true);
+        form.setOperationPrivacyAgreed(true);
+        when(classDAO.selectClassStatus(7L, 10)).thenReturn("수정중");
+        when(classDAO.updateClassStatus(7L, 10, "대기")).thenReturn(1);
+
+        classService.submitClass(form);
+
+        verify(classDAO).updateClassStatus(7L, 10, "대기");
     }
 
     private ClassDetailDTO detail(int classCode, long authorCode) {
