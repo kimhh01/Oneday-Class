@@ -106,7 +106,6 @@ public class MemberServiceImpl implements MemberService {
             signUpDTO.setEmailReceiveYN("N");
         }
         
-        signUpDTO.setId(AESUtil.encrypt(signUpDTO.getId()));
         // 비밀번호 단방향 암호화
         signUpDTO.setPass(passwordEncoder.encode(signUpDTO.getPass()));
 
