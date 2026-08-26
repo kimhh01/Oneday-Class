@@ -74,8 +74,8 @@
 				<!-- 클래스 위치 -->
 				<div class="class-address">
 					<h3>클래스 위치</h3>
-					<span th:text="${detail?.classDetail?.address}"></span> <span
-						th:text="${detail?.classDetail?.address2}"></span>
+					<span th:text="${detail?.classDetail?.address}" class="class-address1"></span> <span
+						th:text="${detail?.classDetail?.address2}" class="class-address2"></span>
 				</div>
 				<!-- 2. 클래스 30초 요약 -->
 				<div class="green-check-badge">✔ 클래스 30초 요약</div>
@@ -106,8 +106,7 @@
 					th:text="${detail.classDetail.singleIntroduce}">한 줄 소개</div>
 				<div class="intro-main" th:text="${detail.classDetail.introduce}">본문
 					소개</div>
-				<div class="intro-finish"
-					th:text="${detail.classDetail.finishIntroduce}">마무리 소개</div>
+
 
 				<!-- 6. 재료 및 기타 제공사항 -->
 				<div class="material-info"
@@ -138,36 +137,43 @@
 			</section>
 
 			<!-- (4) 커리큘럼 -->
-<section id="curriculum" class="content-section"
-	th:if="${detail?.curriculumList != null and !#lists.isEmpty(detail.curriculumList)}">
-	<h3 class="section-heading">커리큘럼</h3>
-	<div class="curriculum-list">
-		<th:block th:each="curr, stat : ${detail.curriculumList}">
+			<section id="curriculum" class="content-section"
+				th:if="${detail?.curriculumList != null and !#lists.isEmpty(detail.curriculumList)}">
+				<h3 class="section-heading">커리큘럼</h3>
+				<div class="curriculum-list">
+					<th:block th:each="curr, stat : ${detail.curriculumList}">
 
-			<div class="curriculum-item" th:if="${curr != null}">
-				<!-- 1. STEP 번호 -->
-				<div class="curr-step" th:text="|STEP ${stat.count}|">STEP 1</div>
+						<div class="curriculum-item" th:if="${curr != null}">
+							<!-- 1. STEP 번호 -->
+							<div class="curr-step" th:text="|STEP ${stat.count}|">STEP
+								1</div>
 
-				<!-- 2. 커리큘럼 내용 (제목 + 설명) -->
-				<div class="curr-body">
-					<h5 class="curr-title"
-						th:text="${curr.curriculumTitle != null ? curr.curriculumTitle : ''}">단계별 제목</h5>
-					<p class="curr-desc"
-						th:text="${curr.curriculumContent != null ? curr.curriculumContent : ''}">상세 설명 내용이 여기에 들어갑니다.</p>
+							<!-- 2. 커리큘럼 내용 (제목 + 설명) -->
+							<div class="curr-body">
+								<h5 class="curr-title"
+									th:text="${curr.curriculumTitle != null ? curr.curriculumTitle : ''}">단계별
+									제목</h5>
+								<p class="curr-desc"
+									th:text="${curr.curriculumContent != null ? curr.curriculumContent : ''}">상세
+									설명 내용이 여기에 들어갑니다.</p>
+							</div>
+
+							<!-- 3. 🔥 글 아래쪽 가로 전체 커리큘럼 이미지 영역 -->
+							<div class="curr-img-box"
+								th:if="${curr.curriculumImg != null and !#strings.isEmpty(curr.curriculumImg)}">
+								<img th:src="${curr.curriculumImg}" class="curr-img"
+									alt="커리큘럼 이미지">
+							</div>
+						</div>
+					</th:block>
 				</div>
+			</section>
 
-				<!-- 3. 🔥 글 아래쪽 가로 전체 커리큘럼 이미지 영역 -->
-				<div class="curr-img-box"
-					th:if="${curr.curriculumImg != null and !#strings.isEmpty(curr.curriculumImg)}">
-					<img th:src="${curr.curriculumImg}" class="curr-img" alt="커리큘럼 이미지">
-				</div>
-			</div>
-		</th:block>
-	</div>
-</section>
+
 
 			<!-- (5) 완성 작품 갤러리 -->
 			<section class="content-section">
+
 				<h3 class="section-heading">완성 작품 갤러리</h3>
 				<div class="gallery-grid-4x4">
 					<th:block th:if="${detail?.classDetail?.imageList != null}">
@@ -175,11 +181,24 @@
 						<th:block th:each="img : ${detail.classDetail.imageList}">
 							<img
 								th:if="${img != null and img.image != null and img.type == '완성'}"
-								th:src="${img.image}" alt="완성 작품">
+								th:src="${img.image}" alt="완성 작품" class="finish-img">
 						</th:block>
 					</th:block>
+					
 				</div>
+				<h3 class="finish">완성작 설명</h3>
+						<div class="intro-finish"
+							th:text="${detail.classDetail.finishIntroduce}">마무리 소개</div>
 			</section>
+			<!-- 이미지를 크게 보여줄 모달 창 -->
+			<div id="myModal" class="modal">
+				<!-- 모달 닫기 버튼 -->
+				<span class="close">&times;</span>
+				<!-- 모달에 들어갈 확대 이미지 -->
+				<img class="modal-content" id="img01">
+				<!-- 이미지 설명(선택사항) -->
+				<div id="caption"></div>
+			</div>
 
 			<!-- (6) 리뷰 및 리뷰 답변 -->
 			<section id="reviews" class="content-section">
@@ -259,6 +278,7 @@
 				<div id="reviewListContainer" class="review-list-wrapper"></div>
 
 			</section>
+
 
 			<!-- (7) 튜터 정보 -->
 			<section id="tutor" class="content-section">
@@ -352,7 +372,7 @@
 							th:href="@{/classDetail(classCode=${item.classCode})}">
 							<div class="thumb-box">
 								<img
-									th:src="${item.finishImg != null ? item.finishImg : 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=300'}"
+									th:src="${item.imageList != null and !#lists.isEmpty(item.imageList) ? item.imageList[0].image : 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=300'}"
 									alt="비슷한 클래스">
 							</div>
 							<div class="card-info">
@@ -365,7 +385,7 @@
 						</a>
 					</th:block>
 				</div>
-				<a th:href="@{#}" class="btn-more-similar"> <span>비슷한 클래스
+				<a th:href="@{category/class(categoryCode=${detail.classDetail.categoryCode})}" class="btn-more-similar"> <span>비슷한 클래스
 						더보기</span> <svg class="arrow-icon" viewBox="0 0 24 24" width="16"
 						height="16">
         <path d="M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z"
@@ -840,5 +860,37 @@ function renderReviewList(list) {
         container.insertAdjacentHTML('beforeend', cardHtml);
     });
 }
+
+
+//[수정 후]
+const modal = document.getElementById("myModal");
+const modalImg = document.getElementById("img01");
+const captionText = document.getElementById("caption");
+const closeBtn = document.getElementsByClassName("close")[0];
+
+//동적으로 생성된 리뷰 이미지를 클릭했을 때 모달을 열기 위한 이벤트 위임
+document.addEventListener("click", function (event) {
+ // 클릭된 요소가 리뷰 첨부 이미지(.review-attached-img)인 경우
+ if (event.target && event.target.classList.contains("review-attached-img")) {
+     modal.style.display = "block";
+     modalImg.src = event.target.src;
+     captionText.innerHTML = event.target.alt || "";
+ }
+});
+
+//닫기 버튼(X) 클릭 시 모달 닫기
+if (closeBtn) {
+ closeBtn.onclick = function() { 
+     modal.style.display = "none";
+ };
+}
+
+//모달 바깥 영역(어두운 배경) 클릭 시 닫기
+window.onclick = function(event) {
+ if (event.target === modal) {
+     modal.style.display = "none";
+ }
+};
+
 </script>
 </html>

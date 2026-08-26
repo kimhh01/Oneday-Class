@@ -3,12 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <title>클래스 지도</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <!-- 외부 스타일시트 연결 -->
 <link rel="stylesheet" th:href="@{/map/css/map.css}">
 </head>
 
 <body class="map-page-body">
-<div th:replace="~{common/header :: headerFragment}"></div>
+	<div th:replace="~{common/header :: headerFragment}"></div>
 	<!-- 2. 제목 & 필터 검색 영역 -->
 	<section class="filter-section">
 		<div class="filter-top">
@@ -17,13 +18,15 @@
 				<p class="page-subtitle">지도에서 원하는 원데이 클래스를 찾아보세요!</p>
 			</div>
 			<!-- 검색바 -->
-            <form th:action="@{/search}" method="get" class="search-box">
-                <div class="search-icon">
-                    <img th:src="@{/images/icon/search_icon.svg}" alt="아이콘" style="width: 20px; height: 20px;">
-                </div>
-                <input class="search-input" type="text" name="keyword" placeholder="원하는 키워드를 검색해보세요.">
-                <button type="submit" class="search-btn">검색</button>
-            </form>
+			<form th:action="@{/search}" method="get" class="search-box">
+				<div class="search-icon">
+					<img th:src="@{/images/icon/search_icon.svg}" alt="아이콘"
+						style="width: 20px; height: 20px;">
+				</div>
+				<input class="search-input" type="text" name="keyword"
+					placeholder="원하는 키워드를 검색해보세요.">
+				<button type="submit" class="search-btn">검색</button>
+			</form>
 		</div>
 
 		<!-- 필터 선택줄 1 (드롭다운 & 내 위치) -->
@@ -31,14 +34,12 @@
 
 			<!-- 1) 지역 선택 드롭다운 -->
 			<div class="filter-dropdown-container">
-			
-			<button id="btn-region-toggle" class="filter-select">
-    <span class="icon">📍</span> 
-    <span class="select-text" 
-          id="regionSelectText"
-          th:text="${searchDTO != null and searchDTO.keyword != null and searchDTO.keyword != '' ? searchDTO.keyword : (searchDTO != null and searchDTO.dong != null and searchDTO.dong != '' ? searchDTO.dong : '지역 전체')}">지역 전체</span>
-    <span class="arrow">∨</span>
-</button>
+
+				<button id="btn-region-toggle" class="filter-select">
+					<span class="select-text" id="regionSelectText"
+						th:text="${searchDTO != null and searchDTO.keyword != null and searchDTO.keyword != '' ? searchDTO.keyword : (searchDTO != null and searchDTO.dong != null and searchDTO.dong != '' ? searchDTO.dong : '지역 전체')}">지역
+						전체</span> <span class="arrow">∨</span>
+				</button>
 
 				<!-- 지역 선택 모달 -->
 				<div id="region-modal" class="region-modal-container hidden">
@@ -235,7 +236,7 @@
 					class="no-data-msg">조건에 맞는 클래스가 없습니다.</div>
 			</div>
 
-			<a th:href="@{/#void}"><button class="more-class-btn">더
+			<a th:href="@{category/class}"><button class="more-class-btn">더
 					많은 클래스 보기 +</button></a>
 		</div>
 		<!-- 우측 영역: 지도 -->
@@ -284,7 +285,7 @@
 		/*<![CDATA[*/
 		const classListData = /*[[${classList}]]*/[];
 		const categoryListData = /*[[${categoryList}]]*/[];
-		const searchDTOData = /*[[${searchDTO}]]*/ {};
+		const searchDTOData = /*[[${searchDTO}]]*/{};
 		/*]]>*/
 	</script>
 

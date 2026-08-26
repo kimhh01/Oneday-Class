@@ -63,4 +63,12 @@
 		from review_img
 		where review_code=#{reviewCode}
 	</select>
+	
+	<select id="selectClassImgList" resultType="kr.co.oneclass.common.ClassImageDTO">
+		select image
+from class_img ci
+join class c on ci.class_code=c.class_code
+join creator crea on c.operator_code=crea.operator_code
+where crea.operator_code=#{creatorCode} and c.class_code=#{classCode} and type='대표'
+	</select>
 </mapper>
