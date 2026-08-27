@@ -47,13 +47,15 @@
 			FROM SCHEDULE s
 			JOIN CLASS_REPEAT_RULE r ON s.REPEAT_RULE_CODE = r.REPEAT_RULE_CODE
 			WHERE r.CLASS_CODE = c.CLASS_CODE
-			  AND s.CLASS_DATE &gt;= TRUNC(SYSDATE)
+			  AND TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+				  || SUBSTR(s.START_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &gt; SYSDATE
 		) AS UPCOMING_SCHEDULE_COUNT,
 		(
 			SELECT NVL(SUM(rv.PEOPLE_NUMBER), 0)
 			FROM RESERVATION rv
 			WHERE rv.CLASS_CODE = c.CLASS_CODE
-			  AND rv.STATUS = '예약'
+			  AND rv.STATUS NOT LIKE '%취소%'
+			  AND rv.STATUS NOT LIKE '%환불%'
 		) AS APPLICANT_COUNT,
 		c.STATUS AS CLASS_STATUS
 	</sql>
@@ -168,7 +170,8 @@
 				JOIN CLASS c ON c.CLASS_CODE = rv.CLASS_CODE
 				WHERE c.OPERATOR_CODE = #{authorCode}
 				  AND c.APPROVAL_STATUS = '승인'
-				  AND rv.STATUS = '예약'
+				  AND rv.STATUS NOT LIKE '%취소%'
+				  AND rv.STATUS NOT LIKE '%환불%'
 			) AS TOTAL_APPLICANT_COUNT,
 			(
 				SELECT NVL(SUM(p.AMOUNT), 0)
@@ -202,11 +205,20 @@
 				SELECT SUM(rv.PEOPLE_NUMBER)
 				FROM RESERVATION rv
 				WHERE rv.SCHEDULE_CODE = s.SCHEDULE_CODE
-				  AND rv.STATUS = '예약'
+				  AND rv.STATUS NOT LIKE '%취소%'
+				  AND rv.STATUS NOT LIKE '%환불%'
 			), 0) AS RESERVED_COUNT,
 			s.REMAINING_PEOPLE,
 			CASE
-				WHEN TRUNC(s.CLASS_DATE) &lt; TRUNC(SYSDATE) THEN '진행 완료'
+				WHEN TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+					|| SUBSTR(s.START_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &gt; SYSDATE
+				THEN 'Y' ELSE 'N'
+			END AS EDITABLE_YN,
+			CASE
+				WHEN TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+					|| SUBSTR(s.END_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &lt;= SYSDATE THEN '진행 완료'
+				WHEN TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+					|| SUBSTR(s.START_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &lt;= SYSDATE THEN '진행 중'
 				WHEN s.SOLD_OUT_YN = 'Y' OR s.REMAINING_PEOPLE = 0 THEN '모집 마감'
 				ELSE '모집중'
 			END AS SCHEDULE_STATUS
@@ -217,16 +229,25 @@
 		  AND c.APPROVAL_STATUS = '승인'
 		  AND c.STATUS IN ('모집중', '준비중', '폐강')
 		<if test="scheduleStatus == '모집중'">
-			AND TRUNC(s.CLASS_DATE) &gt;= TRUNC(SYSDATE)
+			AND TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+				|| SUBSTR(s.START_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &gt; SYSDATE
 			AND s.SOLD_OUT_YN != 'Y'
 			AND s.REMAINING_PEOPLE &gt; 0
 		</if>
 		<if test="scheduleStatus == '모집 마감'">
-			AND TRUNC(s.CLASS_DATE) &gt;= TRUNC(SYSDATE)
+			AND TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+				|| SUBSTR(s.START_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &gt; SYSDATE
 			AND (s.SOLD_OUT_YN = 'Y' OR s.REMAINING_PEOPLE = 0)
 		</if>
+		<if test="scheduleStatus == '진행 중'">
+			AND TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+				|| SUBSTR(s.START_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &lt;= SYSDATE
+			AND TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+				|| SUBSTR(s.END_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &gt; SYSDATE
+		</if>
 		<if test="scheduleStatus == '진행 완료'">
-			AND TRUNC(s.CLASS_DATE) &lt; TRUNC(SYSDATE)
+			AND TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+				|| SUBSTR(s.END_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &lt;= SYSDATE
 		</if>
 		<if test="keyword != null and keyword != ''">
 			AND (
@@ -242,9 +263,12 @@
 			AND s.CLASS_DATE &lt; TO_DATE(#{toDate}, 'YYYY-MM-DD') + 1
 		</if>
 		ORDER BY
-			CASE WHEN TRUNC(s.CLASS_DATE) &gt;= TRUNC(SYSDATE) THEN 0 ELSE 1 END,
-			CASE WHEN TRUNC(s.CLASS_DATE) &gt;= TRUNC(SYSDATE) THEN s.CLASS_DATE END,
-			CASE WHEN TRUNC(s.CLASS_DATE) &lt; TRUNC(SYSDATE) THEN s.CLASS_DATE END DESC,
+			CASE WHEN TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+				|| SUBSTR(s.END_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &gt; SYSDATE THEN 0 ELSE 1 END,
+			CASE WHEN TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+				|| SUBSTR(s.END_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &gt; SYSDATE THEN s.CLASS_DATE END,
+			CASE WHEN TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+				|| SUBSTR(s.END_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &lt;= SYSDATE THEN s.CLASS_DATE END DESC,
 			s.START_TIME,
 			s.SCHEDULE_CODE
 	</select>
@@ -296,7 +320,8 @@
 			FROM SCHEDULE s
 			JOIN CLASS_REPEAT_RULE r ON r.REPEAT_RULE_CODE = s.REPEAT_RULE_CODE
 			WHERE r.CLASS_CODE = c.CLASS_CODE
-			  AND TRUNC(s.CLASS_DATE) &gt;= TRUNC(SYSDATE)
+			  AND TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+				  || SUBSTR(s.END_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &gt; SYSDATE
 			  AND (s.SOLD_OUT_YN != 'Y' OR s.REMAINING_PEOPLE &gt; 0)
 		  )
 		  AND NOT EXISTS (
@@ -304,8 +329,10 @@
 			FROM RESERVATION rv
 			JOIN SCHEDULE s ON s.SCHEDULE_CODE = rv.SCHEDULE_CODE
 			WHERE rv.CLASS_CODE = c.CLASS_CODE
-			  AND rv.STATUS = '예약'
-			  AND TRUNC(s.CLASS_DATE) &gt;= TRUNC(SYSDATE)
+			  AND rv.STATUS NOT LIKE '%취소%'
+			  AND rv.STATUS NOT LIKE '%환불%'
+			  AND TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+				  || SUBSTR(s.END_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &gt; SYSDATE
 		  )
 	</update>
 
@@ -337,7 +364,8 @@
 		SELECT NVL(SUM(rv.PEOPLE_NUMBER), 0)
 		FROM RESERVATION rv
 		WHERE rv.CLASS_CODE = #{classCode}
-		  AND rv.STATUS = '예약'
+		  AND rv.STATUS NOT LIKE '%취소%'
+		  AND rv.STATUS NOT LIKE '%환불%'
 	</select>
 
 	<!-- 클래스 폐강 전 취소되지 않은 향후 예약 수를 조회한다 -->
@@ -346,8 +374,10 @@
 		FROM RESERVATION rv
 		JOIN SCHEDULE s ON rv.SCHEDULE_CODE = s.SCHEDULE_CODE
 		WHERE rv.CLASS_CODE = #{classCode}
-		  AND rv.STATUS = '예약'
-		  AND s.CLASS_DATE &gt;= TRUNC(SYSDATE)
+		  AND rv.STATUS NOT LIKE '%취소%'
+		  AND rv.STATUS NOT LIKE '%환불%'
+		  AND TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+			  || SUBSTR(s.END_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &gt; SYSDATE
 	</select>
 
 	<!-- 클래스 폐강 전 아직 모집 가능한 향후 일정 수를 조회한다 -->
@@ -356,7 +386,8 @@
 		FROM SCHEDULE s
 		JOIN CLASS_REPEAT_RULE r ON s.REPEAT_RULE_CODE = r.REPEAT_RULE_CODE
 		WHERE r.CLASS_CODE = #{classCode}
-		  AND s.CLASS_DATE &gt;= TRUNC(SYSDATE)
+		  AND TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+			  || SUBSTR(s.END_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &gt; SYSDATE
 		  AND (s.SOLD_OUT_YN != 'Y' OR s.REMAINING_PEOPLE &gt; 0)
 	</select>
 

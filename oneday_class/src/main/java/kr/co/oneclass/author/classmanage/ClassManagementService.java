@@ -1,6 +1,7 @@
 package kr.co.oneclass.author.classmanage;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -71,7 +72,7 @@ public class ClassManagementService {
     // 승인 완료된 내 클래스의 전체 일정을 검색·필터링한다
     public List<ScheduleManageDTO> getAuthorScheduleList(long authorCode, String scheduleStatus,
             String keyword, LocalDate fromDate, LocalDate toDate) {
-        String normalizedStatus = Set.of("모집중", "모집 마감", "진행 완료")
+        String normalizedStatus = Set.of("모집중", "모집 마감", "진행 중", "진행 완료")
                 .contains(scheduleStatus) ? scheduleStatus : "all";
         String normalizedKeyword = trimToNull(keyword);
         if (fromDate != null && toDate != null && fromDate.isAfter(toDate)) {
@@ -98,7 +99,7 @@ public class ClassManagementService {
         validateOperationalClass(classInfo);
         operation.setScheduleCode(0);
         if (sDAO.countDuplicateSchedule(authorCode, operation) > 0) {
-            throw new IllegalArgumentException("같은 날짜와 시작 시간의 일정이 이미 있습니다.");
+            throw new IllegalArgumentException("해당 시간대에 예약된 클래스가 있습니다.");
         }
 
         java.sql.Date scheduleDate = java.sql.Date.valueOf(operation.getScheduleDate());
@@ -130,14 +131,14 @@ public class ClassManagementService {
         if (saved == null || saved.getClassCode() != operation.getClassCode()) {
             throw new IllegalArgumentException("수정할 수 없는 클래스 일정입니다.");
         }
-        if ("진행 완료".equals(saved.getScheduleStatus())) {
-            throw new IllegalArgumentException("이미 진행이 끝난 일정은 변경할 수 없습니다.");
+        if (!"Y".equals(saved.getEditableYn())) {
+            throw new IllegalArgumentException("이미 시작했거나 진행이 끝난 일정은 변경할 수 없습니다.");
         }
         if (saved.getReservedCount() > 0) {
             throw new IllegalArgumentException("예약자가 있는 일정은 날짜·시간·정원을 변경할 수 없습니다.");
         }
         if (sDAO.countDuplicateSchedule(authorCode, operation) > 0) {
-            throw new IllegalArgumentException("같은 날짜와 시작 시간의 일정이 이미 있습니다.");
+            throw new IllegalArgumentException("해당 시간대에 예약된 클래스가 있습니다.");
         }
         if (sDAO.updateManagedSchedule(authorCode, operation) != 1) {
             throw new IllegalArgumentException("일정 정보가 변경되었습니다. 새로고침 후 다시 시도해주세요.");
@@ -157,6 +158,9 @@ public class ClassManagementService {
         validateOperationalClass(classInfo);
         if (schedule == null || !"모집 마감".equals(schedule.getScheduleStatus())) {
             throw new IllegalArgumentException("다시 열 수 있는 마감 일정이 아닙니다.");
+        }
+        if (!"Y".equals(schedule.getEditableYn())) {
+            throw new IllegalArgumentException("이미 시작했거나 진행이 끝난 일정은 다시 열 수 없습니다.");
         }
         if (schedule.getMaxPeople() <= schedule.getReservedCount()) {
             throw new IllegalArgumentException("정원이 모두 예약되어 있어 일정을 다시 열 수 없습니다.");
@@ -230,8 +234,8 @@ public class ClassManagementService {
         if ("폐강".equals(classInfo.getClassStatus())) {
             throw new IllegalArgumentException("폐강한 클래스의 일정은 변경할 수 없습니다.");
         }
-        if ("진행 완료".equals(schedule.getScheduleStatus())) {
-            throw new IllegalArgumentException("이미 진행이 끝난 일정은 변경할 수 없습니다.");
+        if (!"Y".equals(schedule.getEditableYn())) {
+            throw new IllegalArgumentException("이미 시작했거나 진행이 끝난 일정은 변경할 수 없습니다.");
         }
 
         int maximumRemainingPeople = Math.max(
@@ -257,8 +261,8 @@ public class ClassManagementService {
         if ("폐강".equals(classInfo.getClassStatus())) {
             throw new IllegalArgumentException("이미 폐강한 클래스입니다.");
         }
-        if ("진행 완료".equals(schedule.getScheduleStatus())) {
-            throw new IllegalArgumentException("이미 진행이 끝난 일정은 취소할 수 없습니다.");
+        if (!"Y".equals(schedule.getEditableYn())) {
+            throw new IllegalArgumentException("이미 시작했거나 진행이 끝난 일정은 취소할 수 없습니다.");
         }
         if (schedule.getRemainingPeople() == 0 && schedule.getReservedCount() == 0) {
             throw new IllegalArgumentException("이미 모집이 마감된 일정입니다.");
@@ -353,11 +357,12 @@ public class ClassManagementService {
         if (operation.getClassCode() <= 0 || operation.getScheduleDate() == null) {
             throw new IllegalArgumentException("클래스와 수업일을 확인해주세요.");
         }
-        if (operation.getScheduleDate().isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException("지난 날짜에는 일정을 등록할 수 없습니다.");
-        }
         LocalTime startTime = parseTime(operation.getStartTime(), "시작");
         LocalTime endTime = parseTime(operation.getEndTime(), "종료");
+        if (LocalDateTime.of(operation.getScheduleDate(), startTime)
+                .isBefore(LocalDateTime.now())) {
+            throw new IllegalArgumentException("지난 시간에는 일정을 등록하거나 변경할 수 없습니다.");
+        }
         if (!startTime.isBefore(endTime)) {
             throw new IllegalArgumentException("종료 시간은 시작 시간보다 늦어야 합니다.");
         }

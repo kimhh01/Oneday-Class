@@ -9,7 +9,7 @@
 -->
 <mapper namespace="kr.co.oneclass.author.dashboard.DashboardDAO">
 
-	<!-- 모집중 클래스, 미답변 문의, 오늘 예약, 정산 가능금액을 한 행으로 집계한다 -->
+	<!-- 모집중 클래스, 신규 신청자, 방문 수강생, 정산 가능금액을 한 행으로 집계한다 -->
 	<select id="selectDashboardSummary" parameterType="long"
 		resultType="kr.co.oneclass.author.dashboard.DashboardSummaryDTO">
 		SELECT
@@ -27,35 +27,43 @@
 				  AND APPROVAL_STATUS = '승인'
 			) AS TOTAL_CLASS_COUNT,
 			(
-				SELECT COUNT(*)
-				FROM INQUIRY
-				WHERE OPERATOR_CODE = #{authorCode}
-				  AND WRITER_TYPE = '작가'
-				  AND ANSWER IS NULL
-			) AS UNANSWERED_INQUIRY_COUNT,
-			(
-				SELECT NVL(ROUND(AVG(ANSWER_DATE - INQUIRY_DATE), 1), 0)
-				FROM INQUIRY
-				WHERE OPERATOR_CODE = #{authorCode}
-				  AND WRITER_TYPE = '작가'
-				  AND ANSWER_DATE IS NOT NULL
-			) AS AVERAGE_RESPONSE_DAYS,
-			(
 				SELECT NVL(SUM(rv.PEOPLE_NUMBER), 0)
 				FROM RESERVATION rv
 				JOIN CLASS c ON rv.CLASS_CODE = c.CLASS_CODE
 				WHERE c.OPERATOR_CODE = #{authorCode}
-				  AND rv.STATUS = '예약'
+				  AND rv.STATUS NOT LIKE '%취소%'
+				  AND rv.STATUS NOT LIKE '%환불%'
 				  AND TRUNC(rv.RESERVATION_DATE) = TRUNC(SYSDATE)
-			) AS TODAY_RESERVATION_COUNT,
+			) AS TODAY_APPLICANT_COUNT,
 			(
 				SELECT NVL(SUM(rv.PEOPLE_NUMBER), 0)
 				FROM RESERVATION rv
 				JOIN CLASS c ON rv.CLASS_CODE = c.CLASS_CODE
 				WHERE c.OPERATOR_CODE = #{authorCode}
-				  AND rv.STATUS = '예약'
+				  AND rv.STATUS NOT LIKE '%취소%'
+				  AND rv.STATUS NOT LIKE '%환불%'
 				  AND TRUNC(rv.RESERVATION_DATE) = TRUNC(SYSDATE) - 1
-			) AS YESTERDAY_RESERVATION_COUNT,
+			) AS YESTERDAY_APPLICANT_COUNT,
+			(
+				SELECT NVL(SUM(rv.PEOPLE_NUMBER), 0)
+				FROM RESERVATION rv
+				JOIN CLASS c ON rv.CLASS_CODE = c.CLASS_CODE
+				JOIN SCHEDULE s ON rv.SCHEDULE_CODE = s.SCHEDULE_CODE
+				WHERE c.OPERATOR_CODE = #{authorCode}
+				  AND rv.STATUS NOT LIKE '%취소%'
+				  AND rv.STATUS NOT LIKE '%환불%'
+				  AND TRUNC(s.CLASS_DATE) = TRUNC(SYSDATE)
+			) AS TODAY_VISITOR_COUNT,
+			(
+				SELECT NVL(SUM(rv.PEOPLE_NUMBER), 0)
+				FROM RESERVATION rv
+				JOIN CLASS c ON rv.CLASS_CODE = c.CLASS_CODE
+				JOIN SCHEDULE s ON rv.SCHEDULE_CODE = s.SCHEDULE_CODE
+				WHERE c.OPERATOR_CODE = #{authorCode}
+				  AND rv.STATUS NOT LIKE '%취소%'
+				  AND rv.STATUS NOT LIKE '%환불%'
+				  AND TRUNC(s.CLASS_DATE) = TRUNC(SYSDATE) - 1
+			) AS YESTERDAY_VISITOR_COUNT,
 			(
 				SELECT NVL(SUM((p.AMOUNT - NVL(p.REFUND, 0))
 					- ROUND((p.AMOUNT - NVL(p.REFUND, 0)) * 0.1)), 0)
@@ -66,8 +74,10 @@
 				WHERE c.OPERATOR_CODE = #{authorCode}
 				  AND p.STATUS = '결제완료'
 				  AND NVL(p.REFUND, 0) = 0
-				  AND rv.STATUS = '예약'
-				  AND TRUNC(s.CLASS_DATE) &lt;= TRUNC(SYSDATE)
+				  AND rv.STATUS NOT LIKE '%취소%'
+				  AND rv.STATUS NOT LIKE '%환불%'
+				  AND TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+					  || SUBSTR(s.END_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &lt;= SYSDATE
 				  AND NOT EXISTS (
 					  SELECT 1
 					  FROM CALCULATE ca
@@ -83,8 +93,10 @@
 				WHERE c.OPERATOR_CODE = #{authorCode}
 				  AND p.STATUS = '결제완료'
 				  AND NVL(p.REFUND, 0) = 0
-				  AND rv.STATUS = '예약'
-				  AND TRUNC(s.CLASS_DATE) &lt;= TRUNC(SYSDATE)
+				  AND rv.STATUS NOT LIKE '%취소%'
+				  AND rv.STATUS NOT LIKE '%환불%'
+				  AND TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+					  || SUBSTR(s.END_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &lt;= SYSDATE
 				  AND NOT EXISTS (
 					  SELECT 1
 					  FROM CALCULATE ca
@@ -117,10 +129,18 @@
 				SELECT NVL(SUM(rv.PEOPLE_NUMBER), 0)
 				FROM RESERVATION rv
 				WHERE rv.SCHEDULE_CODE = s.SCHEDULE_CODE
-				  AND rv.STATUS = '예약'
+				  AND rv.STATUS NOT LIKE '%취소%'
+				  AND rv.STATUS NOT LIKE '%환불%'
 			) AS RESERVED_COUNT,
 			s.MAX_PEOPLE AS CAPACITY,
-			CASE WHEN s.SOLD_OUT_YN = 'Y' THEN '모집 마감' ELSE '진행 예정' END AS SCHEDULE_STATUS,
+			CASE
+				WHEN TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+					|| SUBSTR(s.END_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &lt;= SYSDATE THEN '진행 완료'
+				WHEN TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+					|| SUBSTR(s.START_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &lt;= SYSDATE THEN '진행 중'
+				WHEN s.SOLD_OUT_YN = 'Y' THEN '모집 마감'
+				ELSE '진행 예정'
+			END AS SCHEDULE_STATUS,
 			cr.ACTIVITY_NAME AS AUTHOR_NAME
 		FROM SCHEDULE s
 		JOIN CLASS_REPEAT_RULE r ON s.REPEAT_RULE_CODE = r.REPEAT_RULE_CODE
@@ -183,8 +203,10 @@
 					WHERE c.OPERATOR_CODE = #{authorCode}
 					  AND p.STATUS = '결제완료'
 					  AND NVL(p.REFUND, 0) = 0
-					  AND rv.STATUS = '예약'
-					  AND TRUNC(s.CLASS_DATE) &lt;= TRUNC(SYSDATE)
+					  AND rv.STATUS NOT LIKE '%취소%'
+					  AND rv.STATUS NOT LIKE '%환불%'
+					  AND TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+						  || SUBSTR(s.END_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &lt;= SYSDATE
 					  AND NOT EXISTS (
 						  SELECT 1
 						  FROM CALCULATE ca
@@ -215,7 +237,8 @@
 			FROM RESERVATION rv
 			JOIN CLASS c ON rv.CLASS_CODE = c.CLASS_CODE
 			WHERE c.OPERATOR_CODE = #{authorCode}
-			  AND rv.STATUS = '예약'
+			  AND rv.STATUS NOT LIKE '%취소%'
+			  AND rv.STATUS NOT LIKE '%환불%'
 			  AND rv.RESERVATION_DATE &gt;= TRUNC(SYSDATE) - 6
 			GROUP BY TRUNC(rv.RESERVATION_DATE)
 		) rv ON d.RESERVATION_DATE = rv.RESERVATION_DATE

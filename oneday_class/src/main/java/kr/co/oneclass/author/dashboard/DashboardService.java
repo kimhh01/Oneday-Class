@@ -15,7 +15,7 @@ public class DashboardService {
         this.dDAO = dDAO;
     }
 
-    // 모집중 클래스, 미답변 문의, 오늘 예약, 정산 가능금액 요약을 조회한다
+    // 모집중 클래스, 신규 신청자, 방문 수강생, 정산 가능금액 요약을 조회한다
     public DashboardSummaryDTO getDashboardSummary(long authorCode) {
         DashboardSummaryDTO summary = dDAO.selectDashboardSummary(authorCode);
         // 템플릿이 요약 지표를 바로 참조하므로 조회 결과가 없어도 빈 객체를 돌려준다

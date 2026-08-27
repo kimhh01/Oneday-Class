@@ -22,5 +22,6 @@ public class ScheduleManageDTO {
     private int maxPeople;          // 일정의 최대 모집 인원
     private int reservedCount;      // 현재 신청이 확정된 인원
     private int remainingPeople;    // 추가로 모집 가능한 남은 인원
-    private String scheduleStatus;  // SOLD_OUT_YN + CLASS_DATE 파생값: 모집중, 모집 마감, 진행 완료
+    private String scheduleStatus;  // 시작·종료 일시 파생값: 모집중, 모집 마감, 진행 중, 진행 완료
+    private String editableYn;      // 수업 시작 전이면 Y, 시작했거나 종료됐으면 N
 }

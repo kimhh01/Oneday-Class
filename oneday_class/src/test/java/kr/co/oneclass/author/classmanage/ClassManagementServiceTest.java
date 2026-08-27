@@ -53,6 +53,7 @@ class ClassManagementServiceTest {
         ScheduleManageDTO schedule = new ScheduleManageDTO();
         schedule.setClassCode(classCode);
         schedule.setScheduleStatus("모집중");
+        schedule.setEditableYn("Y");
         schedule.setRemainingPeople(4);
         schedule.setReservedCount(1);
 
@@ -86,6 +87,7 @@ class ClassManagementServiceTest {
         ScheduleManageDTO saved = new ScheduleManageDTO();
         saved.setClassCode(2);
         saved.setScheduleStatus("모집중");
+        saved.setEditableYn("Y");
         saved.setReservedCount(1);
 
         ClassManagementDTO classInfo = new ClassManagementDTO();
@@ -98,6 +100,75 @@ class ClassManagementServiceTest {
                 () -> service.modifySchedule(authorCode, scheduleCode, form));
 
         verify(scheduleDAO, never()).updateManagedSchedule(authorCode, form);
+    }
+
+    @Test
+    void scheduleThatAlreadyStartedCannotBeModified() {
+        long authorCode = 1L;
+        int scheduleCode = 3;
+        ScheduleManageDTO saved = new ScheduleManageDTO();
+        saved.setClassCode(2);
+        saved.setScheduleStatus("모집중");
+        saved.setEditableYn("N");
+
+        ClassManagementDTO classInfo = new ClassManagementDTO();
+        classInfo.setClassStatus("모집중");
+        when(scheduleDAO.selectScheduleManage(scheduleCode)).thenReturn(saved);
+        when(classManagementDAO.selectClassManagementInfo(authorCode, 2)).thenReturn(classInfo);
+
+        ScheduleOperationDTO form = validScheduleForm(2);
+        assertThrows(IllegalArgumentException.class,
+                () -> service.modifySchedule(authorCode, scheduleCode, form));
+
+        verify(scheduleDAO, never()).updateManagedSchedule(authorCode, form);
+    }
+
+    @Test
+    void scheduleThatAlreadyStartedCannotChangeSeats() {
+        long authorCode = 1L;
+        int scheduleCode = 3;
+        ScheduleManageDTO saved = startedSchedule(2);
+        ClassManagementDTO classInfo = operationalClass();
+        when(scheduleDAO.selectScheduleManage(scheduleCode)).thenReturn(saved);
+        when(classManagementDAO.selectClassManagementInfo(authorCode, 2)).thenReturn(classInfo);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.modifySchedulePeople(authorCode, scheduleCode, 3));
+
+        verify(scheduleDAO, never()).updateRemainingPeople(authorCode, scheduleCode, 3);
+    }
+
+    @Test
+    void scheduleThatAlreadyStartedCannotReopen() {
+        long authorCode = 1L;
+        int scheduleCode = 3;
+        ScheduleManageDTO saved = startedSchedule(2);
+        saved.setScheduleStatus("모집 마감");
+        when(scheduleDAO.selectScheduleManage(scheduleCode)).thenReturn(saved);
+        when(classManagementDAO.selectClassManagementInfo(authorCode, 2))
+                .thenReturn(operationalClass());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.reopenSchedule(authorCode, scheduleCode));
+
+        verify(scheduleDAO, never()).reopenSchedule(authorCode, scheduleCode);
+    }
+
+    @Test
+    void scheduleThatAlreadyStartedCannotBeCanceled() {
+        long authorCode = 1L;
+        int classCode = 2;
+        int scheduleCode = 3;
+        ScheduleManageDTO saved = startedSchedule(classCode);
+        when(scheduleDAO.selectScheduleManage(scheduleCode)).thenReturn(saved);
+        when(classManagementDAO.selectClassManagementInfo(authorCode, classCode))
+                .thenReturn(operationalClass());
+
+        assertThrows(IllegalArgumentException.class,
+                () -> service.cancelSchedule(authorCode, classCode, scheduleCode));
+
+        verify(scheduleDAO, never()).closeSchedule(authorCode, scheduleCode);
+        verify(classManagementDAO, never()).refundSchedulePayments(authorCode, scheduleCode);
     }
 
     @Test
@@ -125,6 +196,22 @@ class ClassManagementServiceTest {
     }
 
     @Test
+    void duplicateScheduleExplainsWhyItCannotBeSaved() {
+        long authorCode = 1L;
+        when(classManagementDAO.selectClassManagementInfo(authorCode, 2))
+                .thenReturn(operationalClass());
+        when(scheduleDAO.countDuplicateSchedule(eq(authorCode), any(ScheduleOperationDTO.class)))
+                .thenReturn(1);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+                () -> service.addSchedule(authorCode, validScheduleForm(2)));
+
+        assertEquals("해당 시간대에 예약된 클래스가 있습니다.", exception.getMessage());
+        verify(scheduleDAO, never()).insertRepeatSchedule(any(RepeatScheduleDTO.class));
+        verify(scheduleDAO, never()).insertSchedule(any(ScheduleDTO.class));
+    }
+
+    @Test
     void openingHiddenClassRequestsApprovalWithoutPublishingImmediately() {
         long authorCode = 1L;
         int classCode = 2;
@@ -145,5 +232,21 @@ class ClassManagementServiceTest {
         form.setMinPeople(1);
         form.setMaxPeople(6);
         return form;
+    }
+
+    private ScheduleManageDTO startedSchedule(int classCode) {
+        ScheduleManageDTO schedule = new ScheduleManageDTO();
+        schedule.setClassCode(classCode);
+        schedule.setScheduleStatus("진행 중");
+        schedule.setEditableYn("N");
+        schedule.setMaxPeople(6);
+        schedule.setRemainingPeople(4);
+        return schedule;
+    }
+
+    private ClassManagementDTO operationalClass() {
+        ClassManagementDTO classInfo = new ClassManagementDTO();
+        classInfo.setClassStatus("모집중");
+        return classInfo;
     }
 }

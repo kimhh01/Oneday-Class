@@ -125,8 +125,9 @@
 				) THEN (
 					SELECT MAX(ca.STATUS) FROM CALCULATE ca WHERE ca.PAYMENT_CODE = p.PAYMENT_CODE
 				)
-				WHEN r.STATUS != '예약' THEN '정산제외'
-				WHEN TRUNC(s.CLASS_DATE) &gt; TRUNC(SYSDATE) THEN '정산대기'
+				WHEN r.STATUS LIKE '%취소%' OR r.STATUS LIKE '%환불%' THEN '정산제외'
+				WHEN TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+					|| SUBSTR(s.END_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &gt; SYSDATE THEN '정산대기'
 				ELSE '정산가능'
 			END AS SETTLEMENT_STATUS,
 			p.STATUS AS PAYMENT_STATUS,
@@ -149,8 +150,10 @@
 				WHERE c.OPERATOR_CODE = #{authorCode}
 				  AND p.STATUS = '결제완료'
 				  AND NVL(p.REFUND, 0) = 0
-				  AND r.STATUS = '예약'
-				  AND TRUNC(s.CLASS_DATE) &lt;= TRUNC(SYSDATE)
+				  AND r.STATUS NOT LIKE '%취소%'
+				  AND r.STATUS NOT LIKE '%환불%'
+				  AND TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+					  || SUBSTR(s.END_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &lt;= SYSDATE
 				  AND NOT EXISTS (SELECT 1 FROM CALCULATE ca WHERE ca.PAYMENT_CODE = p.PAYMENT_CODE)
 			), 0) AS AVAILABLE_AMOUNT,
 			NVL((
@@ -163,8 +166,10 @@
 				WHERE c.OPERATOR_CODE = #{authorCode}
 				  AND p.STATUS = '결제완료'
 				  AND NVL(p.REFUND, 0) = 0
-				  AND r.STATUS = '예약'
-				  AND TRUNC(s.CLASS_DATE) &gt; TRUNC(SYSDATE)
+				  AND r.STATUS NOT LIKE '%취소%'
+				  AND r.STATUS NOT LIKE '%환불%'
+				  AND TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+					  || SUBSTR(s.END_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &gt; SYSDATE
 				  AND NOT EXISTS (SELECT 1 FROM CALCULATE ca WHERE ca.PAYMENT_CODE = p.PAYMENT_CODE)
 			), 0) AS WAITING_AMOUNT,
 			NVL((
@@ -254,8 +259,10 @@
 		WHERE c.OPERATOR_CODE = #{authorCode}
 		  AND p.STATUS = '결제완료'
 		  AND NVL(p.REFUND, 0) = 0
-		  AND r.STATUS = '예약'
-		  AND TRUNC(s.CLASS_DATE) &lt;= TRUNC(SYSDATE)
+		  AND r.STATUS NOT LIKE '%취소%'
+		  AND r.STATUS NOT LIKE '%환불%'
+		  AND TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+			  || SUBSTR(s.END_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &lt;= SYSDATE
 		  AND NOT EXISTS (SELECT 1 FROM CALCULATE ca WHERE ca.PAYMENT_CODE = p.PAYMENT_CODE)
 	</sql>
 
@@ -310,8 +317,10 @@
 		  </foreach>
 		  AND p.STATUS = '결제완료'
 		  AND NVL(p.REFUND, 0) = 0
-		  AND r.STATUS = '예약'
-		  AND TRUNC(s.CLASS_DATE) &lt;= TRUNC(SYSDATE)
+		  AND r.STATUS NOT LIKE '%취소%'
+		  AND r.STATUS NOT LIKE '%환불%'
+		  AND TO_DATE(TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') || ' '
+			  || SUBSTR(s.END_TIME, 1, 5), 'YYYY-MM-DD HH24:MI') &lt;= SYSDATE
 		  AND NOT EXISTS (SELECT 1 FROM CALCULATE ca WHERE ca.PAYMENT_CODE = p.PAYMENT_CODE)
 	</insert>
 

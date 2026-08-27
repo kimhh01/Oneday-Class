@@ -9,6 +9,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 
@@ -308,7 +310,7 @@ public class ClassService {
             throw new IllegalArgumentException("수정할 수 없는 클래스입니다.");
         }
         mergeDraftSchedule(csDTO, saved);
-        validateDraftSchedule(csDTO);
+        validateDraftSchedule(csDTO, true);
 
         // 소유자이면서 아직 검수 전인 초안만 수정할 수 있다. 이 검사를 먼저 통과해야
         // 아래의 기존 일정 삭제가 실행되므로 다른 작가·운영 중 클래스는 건드리지 않는다.
@@ -359,7 +361,7 @@ public class ClassService {
             throw new IllegalArgumentException("수정할 수 없는 클래스입니다.");
         }
         mergeDraftSchedule(csDTO, saved);
-        validateDraftSchedule(csDTO);
+        validateDraftSchedule(csDTO, false);
         if (cDAO.updateApprovedClassPricing(csDTO) != 1) {
             throw new IllegalArgumentException("수정할 수 없는 클래스입니다.");
         }
@@ -790,7 +792,7 @@ public class ClassService {
         }
     }
 
-    private void validateDraftSchedule(ClassScheduleDTO csDTO) {
+    private void validateDraftSchedule(ClassScheduleDTO csDTO, boolean rejectPastSchedules) {
         if (csDTO.getClassCode() <= 0) {
             throw new IllegalArgumentException("클래스 정보를 확인해주세요.");
         }
@@ -816,12 +818,19 @@ public class ClassService {
         }
 
         Set<String> uniqueSchedules = new HashSet<>();
+        LocalDateTime validationTime = LocalDateTime.now();
         for (ScheduleDTO schedule : schedules) {
             if (schedule.getScheduleDate() == null) {
                 throw new IllegalArgumentException("수업 날짜를 확인해주세요.");
             }
             String startTime = validTime(schedule.getStartTime(), "시작 시간을 확인해주세요.");
             String endTime = validTime(schedule.getEndTime(), "종료 시간을 확인해주세요.");
+            LocalDate scheduleDate = new java.sql.Date(schedule.getScheduleDate().getTime())
+                    .toLocalDate();
+            if (rejectPastSchedules && !LocalDateTime.of(scheduleDate, LocalTime.parse(startTime))
+                    .isAfter(validationTime)) {
+                throw new IllegalArgumentException("지난 시간에는 클래스 일정을 등록할 수 없습니다.");
+            }
             if (!LocalTime.parse(endTime).isAfter(LocalTime.parse(startTime))) {
                 throw new IllegalArgumentException("종료 시간은 시작 시간보다 늦어야 합니다.");
             }

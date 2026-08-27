@@ -818,6 +818,10 @@
 				alert('수업 날짜를 선택해주세요.');
 				return;
 			}
+			if (new Date(date + 'T' + start).getTime() <= Date.now()) {
+				alert('현재 시간 이후의 일정을 선택해주세요.');
+				return;
+			}
 			if (!addSchedule(date, start, duration, currentPeople())) {
 				alert('이미 같은 날짜·시간의 일정이 있습니다.');
 				return;
@@ -862,7 +866,11 @@
 
 			while (cursor <= last) {
 				if (picked.indexOf(cursor.getDay()) !== -1) {
-					if (addSchedule(toKey(cursor), start, duration, people)) { added += 1; }
+					var scheduleDate = toKey(cursor);
+					if (new Date(scheduleDate + 'T' + start).getTime() > Date.now()
+							&& addSchedule(scheduleDate, start, duration, people)) {
+						added += 1;
+					}
 				}
 				cursor.setDate(cursor.getDate() + 1);
 			}
@@ -940,14 +948,18 @@
 
 	function init() {
 		var today = new Date();
+		var todayKey = toKey(today);
 		viewYear = today.getFullYear();
 		viewMonth = today.getMonth();
 
 		fillTimeOptions();
 
 		/* 날짜 입력의 기본값 : 오늘 / 오늘+2개월 */
-		document.getElementById('onceDate').value = toKey(today);
-		document.getElementById('repeatFrom').value = toKey(today);
+		document.getElementById('onceDate').value = todayKey;
+		document.getElementById('onceDate').min = todayKey;
+		document.getElementById('repeatFrom').value = todayKey;
+		document.getElementById('repeatFrom').min = todayKey;
+		document.getElementById('repeatTo').min = todayKey;
 		var later = new Date(today.getFullYear(), today.getMonth() + 2, today.getDate());
 		document.getElementById('repeatTo').value = toKey(later);
 

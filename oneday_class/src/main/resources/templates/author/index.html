@@ -58,17 +58,16 @@
 						<p class="stat__delta">전체 운영 <span th:text="${dashboardSummary.totalClassCount}">0</span>개</p>
 					</div>
 					<div class="stat">
-						<span class="stat__icon"><svg aria-hidden="true"><use href="#icon-chat"></use></svg></span>
-						<p class="stat__label">문의 답변 대기</p>
-						<p class="stat__value"><span th:text="${dashboardSummary.unansweredInquiryCount}">0</span><small>건</small></p>
-						<p class="stat__delta" th:if="${dashboardSummary.averageResponseDays > 0}">평균 응답시간 <span th:text="${#numbers.formatDecimal(dashboardSummary.averageResponseDays, 1, 1)}">0.0</span>일</p>
-						<p class="stat__delta" th:unless="${dashboardSummary.averageResponseDays > 0}">답변 완료 이력 없음</p>
+						<span class="stat__icon"><svg aria-hidden="true"><use href="#icon-user-check"></use></svg></span>
+						<p class="stat__label">오늘의 신청자 수</p>
+						<p class="stat__value"><span th:text="${dashboardSummary.todayApplicantCount}">0</span><small>명</small></p>
+						<p class="stat__delta">어제 신청자 수 <span th:text="${dashboardSummary.yesterdayApplicantCount}">0</span>명</p>
 					</div>
 					<div class="stat">
 						<span class="stat__icon stat__icon--green"><svg aria-hidden="true"><use href="#icon-calendar"></use></svg></span>
-						<p class="stat__label">오늘 예약</p>
-						<p class="stat__value"><span th:text="${dashboardSummary.todayReservationCount}">0</span><small>명</small></p>
-						<p class="stat__delta">어제 예약 <span th:text="${dashboardSummary.yesterdayReservationCount}">0</span>명</p>
+						<p class="stat__label">오늘 방문하는 수강생</p>
+						<p class="stat__value"><span th:text="${dashboardSummary.todayVisitorCount}">0</span><small>명</small></p>
+						<p class="stat__delta">어제 방문한 수강생 <span th:text="${dashboardSummary.yesterdayVisitorCount}">0</span>명</p>
 					</div>
 					<div class="stat">
 						<span class="stat__icon stat__icon--green"><svg aria-hidden="true"><use href="#icon-wallet"></use></svg></span>
@@ -135,7 +134,9 @@
 											<span class="recent__name" th:text="${'[' + reservation.categoryName + '] ' + reservation.classTitle}">클래스명</span>
 											<span class="recent__meta"><span th:text="${reservation.memberName}">회원</span> · <span th:text="${reservation.peopleNumber}">0</span>명 · <span th:text="${#dates.format(reservation.reservationDate, 'MM.dd HH:mm')}">00.00 00:00</span></span>
 										</span>
-										<span class="badge" th:classappend="${reservation.reservationStatus == '예약' ? 'badge--green' : 'badge--gray'}" th:text="${reservation.reservationStatus == '예약' ? '예약 완료' : '예약 취소'}">예약 완료</span>
+										<span class="badge"
+											  th:classappend="${reservation.reservationStatus == '예약' ? 'badge--green' : ((reservation.reservationStatus == '수강완료' or reservation.reservationStatus == '이용 완료') ? 'badge--blue' : 'badge--gray')}"
+											  th:text="${reservation.reservationStatus == '예약' ? '예약 완료' : ((reservation.reservationStatus == '수강완료' or reservation.reservationStatus == '이용 완료') ? '수강 완료' : '예약 취소')}">예약 완료</span>
 									</li>
 									<li th:if="${#lists.isEmpty(recentReservations)}"><span class="recent__meta">최근 예약 내역이 없습니다.</span></li>
 								</ul>

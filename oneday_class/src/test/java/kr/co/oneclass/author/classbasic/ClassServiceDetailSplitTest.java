@@ -9,6 +9,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -218,6 +219,30 @@ class ClassServiceDetailSplitTest {
         verify(scheduleDAO).deleteScheduleList(10);
         verify(scheduleDAO).deleteRepeatScheduleList(10);
         verify(scheduleDAO, never()).insertSchedule(any());
+    }
+
+    @Test
+    void pastScheduleIsRejectedBeforeDraftScheduleUpdate() {
+        ClassScheduleDTO saved = schedule(10, 7L);
+        when(classDAO.selectClassSchedule(7L, 10)).thenReturn(saved);
+        when(scheduleDAO.selectRepeatScheduleList(10)).thenReturn(List.of());
+        when(scheduleDAO.selectScheduleList(10)).thenReturn(List.of());
+
+        ScheduleDTO pastSchedule = new ScheduleDTO();
+        pastSchedule.setScheduleDate(java.sql.Date.valueOf(LocalDate.now().minusDays(1)));
+        pastSchedule.setStartTime("10:00");
+        pastSchedule.setEndTime("12:00");
+        pastSchedule.setMinPeople(1);
+        pastSchedule.setMaxPeople(6);
+
+        ClassScheduleDTO form = schedule(10, 7L);
+        form.setScheduleList(List.of(pastSchedule));
+
+        assertThrows(IllegalArgumentException.class,
+                () -> classService.modifyClassSchedule(form));
+
+        verify(classDAO, never()).updateClassSchedule(any(ClassScheduleDTO.class));
+        verify(scheduleDAO, never()).deleteScheduleList(anyInt());
     }
 
     @Test

@@ -152,7 +152,7 @@
 							</thead>
 							<tbody id="scheduleRows">
 								<tr class="schedule-row" th:each="schedule, stat : ${classDetail.scheduleList}"
-									th:attr="data-no=${stat.count},data-code=${schedule.scheduleCode},data-capacity-url=@{/author/classes/schedules/{scheduleCode}/people(scheduleCode=${schedule.scheduleCode})},data-cancel-url=@{/author/classes/schedules/{scheduleCode}/cancel(scheduleCode=${schedule.scheduleCode})},data-date=${schedule.scheduleDate},data-time=${schedule.startTime + ' ~ ' + schedule.endTime},data-min=${schedule.minPeople},data-max=${schedule.maxPeople},data-applied=${schedule.reservedCount},data-seats=${schedule.remainingPeople},data-state=${schedule.scheduleStatus}">
+									th:attr="data-no=${stat.count},data-code=${schedule.scheduleCode},data-capacity-url=@{/author/classes/schedules/{scheduleCode}/people(scheduleCode=${schedule.scheduleCode})},data-cancel-url=@{/author/classes/schedules/{scheduleCode}/cancel(scheduleCode=${schedule.scheduleCode})},data-date=${schedule.scheduleDate},data-time=${schedule.startTime + ' ~ ' + schedule.endTime},data-min=${schedule.minPeople},data-max=${schedule.maxPeople},data-applied=${schedule.reservedCount},data-seats=${schedule.remainingPeople},data-state=${schedule.scheduleStatus},data-editable=${schedule.editableYn}">
 									<td class="col-num" th:text="${stat.count}">1</td>
 									<td th:text="${#dates.format(schedule.scheduleDate, 'yyyy.MM.dd')}">2026.08.08</td>
 									<td class="col-muted" th:text="${schedule.startTime + ' ~ ' + schedule.endTime}">14:00 ~ 16:00</td>
@@ -510,6 +510,7 @@
 	var STATES = {
 		'모집중':   { label: '모집 중',   badge: 'badge--green', editable: true, recruiting: true },
 		'모집 마감': { label: '모집 마감', badge: 'badge--blue',  editable: true, recruiting: false },
+		'진행 중':  { label: '진행 중',   badge: 'badge--amber', editable: false, recruiting: false },
 		'진행 완료': { label: '진행 완료', badge: 'badge--gray',  editable: false, recruiting: false }
 	};
 
@@ -584,7 +585,7 @@
 
 		/* 끝난 일정과 폐강한 클래스는 더 손댈 수 없다 */
 		var action = row.querySelector('[data-open-schedule]');
-		var editable = state.editable && !classClosed;
+		var editable = state.editable && row.dataset.editable === 'Y' && !classClosed;
 		action.disabled = !editable;
 		action.classList.toggle('btn--ghost', !editable);
 		action.classList.toggle('btn--outline', editable);
@@ -597,7 +598,7 @@
 		rows.forEach(function (row) {
 			var state = STATES[row.dataset.state];
 			applied += Number(row.dataset.applied);
-			if (state.editable) {
+			if (state.editable && row.dataset.editable === 'Y') {
 				seats += Number(row.dataset.seats);
 				activeReservations += Number(row.dataset.applied);
 			}
@@ -669,6 +670,7 @@
 			&& Number(current.dataset.applied) === 0;
 		cancelButton.disabled = classClosed
 			|| !STATES[current.dataset.state].editable
+			|| current.dataset.editable !== 'Y'
 			|| alreadyClosedWithoutReservation;
 		cancelButton.title = cancelButton.disabled
 			? '이미 종료되었거나 예약 없이 마감된 일정입니다.'

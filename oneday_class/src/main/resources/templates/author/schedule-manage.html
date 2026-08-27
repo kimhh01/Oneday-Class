@@ -109,6 +109,7 @@
 								<option value="all" th:selected="${scheduleStatus == null or scheduleStatus == 'all'}">전체</option>
 								<option value="모집중" th:selected="${scheduleStatus == '모집중'}">모집 중</option>
 								<option value="모집 마감" th:selected="${scheduleStatus == '모집 마감'}">모집 마감</option>
+								<option value="진행 중" th:selected="${scheduleStatus == '진행 중'}">진행 중</option>
 								<option value="진행 완료" th:selected="${scheduleStatus == '진행 완료'}">진행 완료</option>
 							</select>
 							<svg class="select__arrow" aria-hidden="true"><use href="#icon-chevron-down"></use></svg>
@@ -159,8 +160,8 @@
 									<td class="col-num" th:text="${schedule.remainingPeople + '석'}">6석</td>
 									<td class="col-badge"><span class="badge" th:classappend="${schedule.scheduleStatus == '모집중'} ? ' badge--green' : (${schedule.scheduleStatus == '모집 마감'} ? ' badge--blue' : ' badge--gray')" th:text="${schedule.scheduleStatus == '모집중' ? '모집 중' : schedule.scheduleStatus}">모집 중</span></td>
 									<td class="schedule-actions col-action">
-										<div th:if="${schedule.scheduleStatus != '진행 완료' and schedule.classStatus != '폐강'}">
-											<button th:if="${schedule.scheduleStatus == '모집중' and schedule.reservedCount == 0}" type="button" class="btn btn--ghost btn--sm schedule-edit-button"
+										<div th:if="${schedule.editableYn == 'Y' and schedule.classStatus != '폐강'}">
+											<button th:if="${schedule.scheduleStatus == '모집중' and schedule.editableYn == 'Y' and schedule.reservedCount == 0}" type="button" class="btn btn--ghost btn--sm schedule-edit-button"
 												th:attr="data-url=@{/author/classes/schedules/{scheduleCode}/details(scheduleCode=${schedule.scheduleCode})},data-class-code=${schedule.classCode},data-date=${#dates.format(schedule.scheduleDate, 'yyyy-MM-dd')},data-start=${schedule.startTime},data-end=${schedule.endTime},data-min=${schedule.minPeople},data-max=${schedule.maxPeople}">일정 수정</button>
 											<form th:if="${schedule.scheduleStatus == '모집 마감' and schedule.maxPeople > schedule.reservedCount}" class="schedule-reopen-form" method="post" th:action="@{/author/classes/schedules/{scheduleCode}/reopen(scheduleCode=${schedule.scheduleCode})}">
 												<button type="submit" class="btn btn--outline btn--sm">다시 열기</button>
@@ -171,7 +172,7 @@
 												<button type="submit" class="btn btn--danger btn--sm">일정 취소</button>
 											</form>
 										</div>
-										<span class="col-muted" th:unless="${schedule.scheduleStatus != '진행 완료' and schedule.classStatus != '폐강'}">변경 불가</span>
+										<span class="col-muted" th:unless="${schedule.editableYn == 'Y' and schedule.classStatus != '폐강'}">변경 불가</span>
 									</td>
 								</tr>
 							</tbody>
@@ -200,6 +201,7 @@
 
 				<dialog class="schedule-edit-dialog" id="scheduleEditDialog" aria-labelledby="scheduleEditTitle">
 					<form method="post" id="scheduleEditForm" class="schedule-operation-form schedule-operation-form--dialog">
+						<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
 						<header><div><small>예약 없는 일정만 변경 가능</small><h2 id="scheduleEditTitle">일정 정보 수정</h2></div><button type="button" data-close-schedule-edit aria-label="닫기">×</button></header>
 						<input type="hidden" name="classCode" id="editClassCode">
 						<label>수업일<input type="date" name="scheduleDate" id="editScheduleDate" required></label>
@@ -211,6 +213,20 @@
 					</form>
 				</dialog>
 
+				<dialog class="mgmt-dialog mgmt-dialog--center" id="scheduleFeedbackDialog" aria-labelledby="scheduleFeedbackTitle">
+					<div class="mgmt-dialog__head"></div>
+					<div class="mgmt-dialog__body">
+						<span class="mgmt-dialog__mark mgmt-dialog__mark--warn" aria-hidden="true">
+							<svg><use href="#icon-alert"></use></svg>
+						</span>
+						<h2 class="mgmt-dialog__title" id="scheduleFeedbackTitle">일정을 저장할 수 없습니다</h2>
+						<p class="mgmt-dialog__desc" id="scheduleFeedbackMessage">일정 정보를 다시 확인해주세요.</p>
+					</div>
+					<div class="mgmt-dialog__foot">
+						<button type="button" class="btn btn--primary" data-close-schedule-feedback>확인</button>
+					</div>
+				</dialog>
+
 				<footer class="site-footer" th:replace="~{author/fragments/footer :: footer}"></footer>
 			</div>
 		</main>
@@ -220,6 +236,109 @@
 <script>
 (function () {
 	'use strict';
+	var feedbackDialog = document.getElementById('scheduleFeedbackDialog');
+	var feedbackTitle = document.getElementById('scheduleFeedbackTitle');
+	var feedbackMessage = document.getElementById('scheduleFeedbackMessage');
+
+	function showScheduleFeedback(message, title) {
+		feedbackTitle.textContent = title || '일정을 저장할 수 없습니다';
+		feedbackMessage.textContent = message;
+		if (!feedbackDialog.open) { feedbackDialog.showModal(); }
+	}
+
+	function twoDigits(number) { return String(number).padStart(2, '0'); }
+	function localDateKey(date) {
+		return date.getFullYear() + '-' + twoDigits(date.getMonth() + 1) + '-' + twoDigits(date.getDate());
+	}
+	function nextMinuteKey() {
+		var minute = new Date();
+		minute.setSeconds(0, 0);
+		minute.setMinutes(minute.getMinutes() + 1);
+		return twoDigits(minute.getHours()) + ':' + twoDigits(minute.getMinutes());
+	}
+	function minuteAfter(time) {
+		var parts = time.split(':').map(Number);
+		var minutes = parts[0] * 60 + parts[1] + 1;
+		return twoDigits(Math.floor(minutes / 60) % 24) + ':' + twoDigits(minutes % 60);
+	}
+
+	function syncScheduleLimits(form) {
+		var dateInput = form.querySelector('input[name="scheduleDate"]');
+		var startInput = form.querySelector('input[name="startTime"]');
+		var endInput = form.querySelector('input[name="endTime"]');
+		var today = localDateKey(new Date());
+		dateInput.min = today;
+		if (dateInput.value === today) {
+			startInput.min = nextMinuteKey();
+		} else {
+			startInput.removeAttribute('min');
+		}
+		if (startInput.value) {
+			endInput.min = minuteAfter(startInput.value);
+		} else {
+			endInput.removeAttribute('min');
+		}
+	}
+
+	function validateScheduleForm(form) {
+		var date = form.querySelector('input[name="scheduleDate"]').value;
+		var start = form.querySelector('input[name="startTime"]').value;
+		var end = form.querySelector('input[name="endTime"]').value;
+		if (!date || !start || !end) { return true; }
+		if (new Date(date + 'T' + start).getTime() <= Date.now()) {
+			showScheduleFeedback('이미 지난 시간은 선택할 수 없습니다. 현재 시간 이후로 다시 선택해주세요.');
+			return false;
+		}
+		if (end <= start) {
+			showScheduleFeedback('종료 시간은 시작 시간보다 늦게 선택해주세요.');
+			return false;
+		}
+		return true;
+	}
+
+	document.querySelectorAll('.schedule-operation-form').forEach(function (form) {
+		var dateInput = form.querySelector('input[name="scheduleDate"]');
+		var startInput = form.querySelector('input[name="startTime"]');
+		var endInput = form.querySelector('input[name="endTime"]');
+		if (!dateInput || !startInput) { return; }
+		syncScheduleLimits(form);
+		dateInput.addEventListener('change', function () { syncScheduleLimits(form); });
+		startInput.addEventListener('focus', function () { syncScheduleLimits(form); });
+		startInput.addEventListener('change', function () { syncScheduleLimits(form); });
+		dateInput.addEventListener('invalid', function (event) {
+			if (dateInput.validity.rangeUnderflow) {
+				event.preventDefault();
+				showScheduleFeedback('이미 지난 날짜는 선택할 수 없습니다.');
+			}
+		});
+		startInput.addEventListener('invalid', function (event) {
+			if (startInput.validity.rangeUnderflow) {
+				event.preventDefault();
+				showScheduleFeedback('이미 지난 시간은 선택할 수 없습니다. 현재 시간 이후로 다시 선택해주세요.');
+			}
+		});
+		endInput.addEventListener('invalid', function (event) {
+			if (endInput.validity.rangeUnderflow) {
+				event.preventDefault();
+				showScheduleFeedback('종료 시간은 시작 시간보다 늦게 선택해주세요.');
+			}
+		});
+		form.addEventListener('submit', function (event) {
+			if (!validateScheduleForm(form)) { event.preventDefault(); }
+		});
+	});
+
+	document.querySelectorAll('[data-close-schedule-feedback]').forEach(function (button) {
+		button.addEventListener('click', function () { feedbackDialog.close(); });
+	});
+	feedbackDialog.addEventListener('click', function (event) {
+		if (event.target === feedbackDialog) { feedbackDialog.close(); }
+	});
+	var serverError = document.querySelector('.form-error');
+	if (serverError && serverError.textContent.trim()) {
+		showScheduleFeedback(serverError.textContent.trim());
+	}
+
 	document.querySelectorAll('.schedule-cancel-form').forEach(function (form) {
 		form.addEventListener('submit', function (event) {
 			var reserved = Number(form.dataset.reserved || 0);
@@ -241,6 +360,7 @@
 			document.getElementById('editEndTime').value = button.dataset.end;
 			document.getElementById('editMinPeople').value = button.dataset.min;
 			document.getElementById('editMaxPeople').value = button.dataset.max;
+			syncScheduleLimits(editForm);
 			editDialog.showModal();
 		});
 	});
