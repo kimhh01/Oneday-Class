@@ -38,27 +38,33 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <!-- 2. 비슷한 클래스 리스트 조회 -->
 <select id="selectSameCategoryList" resultType="kr.co.oneclass.common.ClassDTO">
     SELECT 
-        CLASS_CODE          AS classCode,
-        OPERATOR_CODE       AS operatorCode,
-        CATEGORY_CODE       AS categoryCode,
-        NAME,
-        PRICE,
-        DESIRED_PRICE       AS desiredPrice,
-        ZIPCODE,
-        ADDRESS,
-        OLD_ADDRESS         AS oldAddress,
-        STATUS,
-        REVIEW_SUM          AS reviewSum,
-        STAR_RATING_AVG     AS starRatingAvg,
-        VIEWS_CNT           AS viewsCnt,
-        SINGLE_INTRODUCE    AS singleIntroduce,
-        INTRODUCE,
-        FINISH_INTRODUCE    AS finishIntroduce,
-        LAT,
-        LNG
-    FROM class
-    WHERE category_code = #{categoryCode}
-      AND class_code != #{classCode}
+        c.CLASS_CODE          AS classCode,
+        c.OPERATOR_CODE       AS operatorCode,
+        c.CATEGORY_CODE       AS categoryCode,
+        c.NAME,
+        c.PRICE,
+        c.DESIRED_PRICE       AS desiredPrice,
+        c.ZIPCODE,
+        c.ADDRESS,
+        c.OLD_ADDRESS         AS oldAddress,
+        c.STATUS,
+        c.REVIEW_SUM          AS reviewSum,
+        c.STAR_RATING_AVG     AS starRatingAvg,
+        c.VIEWS_CNT           AS viewsCnt,
+        c.SINGLE_INTRODUCE    AS singleIntroduce,
+        c.INTRODUCE,
+        c.FINISH_INTRODUCE    AS finishIntroduce,
+        c.LAT,
+        c.LNG,
+        
+        (SELECT ci.image 
+         FROM class_img ci 
+         WHERE ci.class_code = c.class_code 
+           AND ci.sort_order = 1 
+           AND ROWNUM = 1) AS mainImage
+    FROM class c
+    WHERE c.category_code = #{categoryCode}
+      AND c.class_code != #{classCode}
 </select>
 
 <!-- 3. 작가 조회 -->

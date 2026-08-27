@@ -10,7 +10,13 @@
         c.name          AS name,
         c.address       AS address,
         c.address2      AS address2,
-        c.price         AS price
+        c.price         AS price,
+        /* 메인 이미지 추가 */
+        (SELECT ci.image 
+         FROM CLASS_IMG ci 
+         WHERE ci.class_code = c.class_code 
+           AND ci.sort_order = 1 
+           AND ROWNUM = 1) AS mainImage
     FROM class c
     JOIN class_repeat_rule crr ON c.class_code = crr.class_code
     JOIN schedule s ON s.repeat_rule_code = crr.repeat_rule_code

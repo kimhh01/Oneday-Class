@@ -39,7 +39,8 @@
 
 		<!-- Main Payment Form -->
 		<form th:action="@{/checkout/submit}" method="POST">
-			<input type="hidden" name="scheduleCode" th:value="${schedule.scheduleCode}" />
+			<input type="hidden" name="scheduleCode"
+				th:value="${schedule.scheduleCode}" />
 
 			<!-- Layout Container -->
 			<div class="checkout-layout">
@@ -53,14 +54,17 @@
 						<div class="order-info-block">
 							<img class="class-image"
 								src="https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=300&auto=format&fit=crop"
-								th:src="${classImage}" alt="클래스 이미지">
+								th:src="${classInfo.mainImage != null and !classInfo.mainImage.isEmpty() ? classInfo.mainImage : '/images/default.jpg'}"
+								alt="클래스 이미지">
 							<div class="class-details">
-								<h3 class="class-title" th:text="${classInfo.name}">토끼 빵 만들기</h3>
+								<h3 class="class-title" th:text="${classInfo.name}">토끼 빵
+									만들기</h3>
 								<span class="class-badge" th:text="${category.categoryName}">베이킹</span>
 
 								<div class="class-meta-item">
 									<span class="meta-icon">📅</span> <span
-										th:text="${schedule.classDate}">2026.07.25 (토) 14:00 ~ 16:30</span>
+										th:text="${schedule.classDate}">2026.07.25 (토) 14:00 ~
+										16:30</span>
 								</div>
 								<div class="class-meta-item">
 									<span class="meta-icon">📍</span> <span
@@ -123,14 +127,14 @@
 							<label class="payment-option" id="naverLabel"> <input
 								type="radio" name="paymentMethod" value="네이버페이"
 								onclick="togglePayment(this)"> <span
-								class="radio-circle"></span> <span class="pay-icon npay">N Pay</span> 
-								<span class="pay-text"> <span class="pay-title">네이버페이</span>
+								class="radio-circle"></span> <span class="pay-icon npay">N
+									Pay</span> <span class="pay-text"> <span class="pay-title">네이버페이</span>
 									<span class="pay-desc">네이버페이로 간편하게 결제</span>
 							</span>
 							</label>
 						</div>
 
-						
+
 					</div>
 
 					<!-- 결제 버튼 -->
@@ -155,9 +159,11 @@
 						<div class="mini-class-block">
 							<img class="mini-class-image"
 								src="https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=150&auto=format&fit=crop"
-								th:src="${classImage}" alt="미니 썸네일">
+								th:src="${classInfo.mainImage != null and !classInfo.mainImage.isEmpty() ? classInfo.mainImage : '/images/default.jpg'}"
+								alt="미니 썸네일">
 							<div class="mini-class-info">
-								<h4 class="mini-class-title" th:text="${classInfo.name}">토끼 빵 만들기</h4>
+								<h4 class="mini-class-title" th:text="${classInfo.name}">토끼
+									빵 만들기</h4>
 								<span class="mini-class-badge"
 									th:text="${category.categoryName}">베이킹</span> <span
 									class="mini-class-date" th:text="${schedule.classDate}">2026.07.25
@@ -199,13 +205,15 @@
 						<div class="info-item">
 							<span class="info-icon">⏰</span>
 							<div class="info-item-text">
-								<strong>예약 변경 / 환불</strong> <span>클래스 시작 3일 전까지 변경 및 환불이 가능합니다.</span>
+								<strong>예약 변경 / 환불</strong> <span>클래스 시작 3일 전까지 변경 및 환불이
+									가능합니다.</span>
 							</div>
 						</div>
 						<div class="info-item">
 							<span class="info-icon">🎧</span>
 							<div class="info-item-text">
-								<strong>고객센터</strong> <span>결제 관련 문의는 고객센터로 연락해주세요. (평일 09:00 - 18:00)</span>
+								<strong>고객센터</strong> <span>결제 관련 문의는 고객센터로 연락해주세요. (평일
+									09:00 - 18:00)</span>
 							</div>
 						</div>
 					</div>

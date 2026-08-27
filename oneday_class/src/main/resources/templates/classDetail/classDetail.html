@@ -128,26 +128,25 @@
 					</table>
 				</div>
 
-			<!-- [수정 후] 6. 기타 제공사항 및 추가 정보 -->
-<div class="offering-info"
-    th:if="${(detail?.offeringList != null and !#lists.isEmpty(detail.offeringList)) or (detail?.additionalInfoList != null and !#lists.isEmpty(detail.additionalInfoList))}">
-    <h4>기타 제공사항</h4>
-    <ul>
-        <!-- offering 객체가 null이 아닐 때만 렌더링 -->
-        <th:block th:if="${detail?.offeringList != null}">
-            <li th:each="offering : ${detail.offeringList}"
-                th:if="${offering != null}"
-                th:text="${offering.offeringName}"></li>
-        </th:block>
-        
-        <!-- additionalInfo 객체가 null이 아닐 때만 렌더링 (닫는 태그 </li> 보완) -->
-        <th:block th:if="${detail?.additionalInfoList != null}">
-            <li th:each="additinalInfo : ${detail.additionalInfoList}"
-                th:if="${additinalInfo != null}"
-                th:text="${additinalInfo.additionalInfoContent}"></li>
-        </th:block>
-    </ul>
-</div>
+				<!-- [수정 후] 6. 기타 제공사항 및 추가 정보 -->
+				<div class="offering-info"
+					th:if="${(detail?.offeringList != null and !#lists.isEmpty(detail.offeringList)) or (detail?.additionalInfoList != null and !#lists.isEmpty(detail.additionalInfoList))}">
+					<h4>기타 제공사항</h4>
+					<ul>
+						<!-- offering 객체가 null이 아닐 때만 렌더링 -->
+						<th:block th:if="${detail?.offeringList != null}">
+							<li th:each="offering : ${detail.offeringList}"
+								th:if="${offering != null}" th:text="${offering.offeringName}"></li>
+						</th:block>
+
+						<!-- additionalInfo 객체가 null이 아닐 때만 렌더링 (닫는 태그 </li> 보완) -->
+						<th:block th:if="${detail?.additionalInfoList != null}">
+							<li th:each="additinalInfo : ${detail.additionalInfoList}"
+								th:if="${additinalInfo != null}"
+								th:text="${additinalInfo.additionalInfoContent}"></li>
+						</th:block>
+					</ul>
+				</div>
 
 			</section>
 
@@ -385,7 +384,7 @@
 							th:href="@{/classDetail(classCode=${item.classCode})}">
 							<div class="thumb-box">
 								<img
-									th:src="${item.imageList != null and !#lists.isEmpty(item.imageList) ? item.imageList[0].image : 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=300'}"
+									th:src="${item.mainImage != null and !item.mainImage.isEmpty() ? item.mainImage : 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=300'}"
 									alt="비슷한 클래스">
 							</div>
 							<div class="card-info">
@@ -431,10 +430,11 @@
 				<!-- 3. 가격 영역 -->
 				<div class="widget-price-box">
 					<div class="price-sub"
-    th:if="${detail?.classDetail?.price != null and detail.classDetail.price > 0 and detail?.scheduleList != null and !#lists.isEmpty(detail.scheduleList)}">
-    <span th:text="${detail.scheduleList[0]?.diffHours != null and detail.scheduleList[0].diffHours > 0 ? #numbers.formatInteger(detail.classDetail.price / detail.scheduleList[0].diffHours, 0, 'COMMA') + '원/시간' : ''}"></span>
-</div>
-					
+						th:if="${detail?.classDetail?.price != null and detail.classDetail.price > 0 and detail?.scheduleList != null and !#lists.isEmpty(detail.scheduleList)}">
+						<span
+							th:text="${detail.scheduleList[0]?.diffHours != null and detail.scheduleList[0].diffHours > 0 ? #numbers.formatInteger(detail.classDetail.price / detail.scheduleList[0].diffHours, 0, 'COMMA') + '원/시간' : ''}"></span>
+					</div>
+
 					<div class="price-main">
 
 						<span class="time-highlight"
