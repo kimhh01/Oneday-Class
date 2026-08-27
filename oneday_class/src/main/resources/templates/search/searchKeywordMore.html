@@ -37,7 +37,7 @@
                th:classappend="${activeTab == 'class' ? 'active' : ''}">클래스</a>
         </div>
 
-        <!-- ================= [1] 작가 탭 컨텐츠 ================= -->
+     <!-- ================= [1] 작가 탭 컨텐츠 ================= -->
         <div id="tab-artist" class="tab-content" th:classappend="${activeTab == 'artist' ? 'active' : ''}">
             
             <div th:if="${#lists.isEmpty(creatorList)}" style="color: #888; padding: 40px 0; text-align: center;">
@@ -47,8 +47,10 @@
             <!-- 작가 리스트 반복 -->
             <div class="artist-group" th:each="creator : ${creatorList}" th:if="${!#lists.isEmpty(creatorList)}">
                 
-                <!-- 작가 프로필 헤더 -->
-                <div class="artist-profile">
+                <!-- 💡 div.artist-profile -> a.artist-profile 로 변경 -->
+                <a th:href="@{/creatorDetail(creatorCode=${creator.operatorCode})}" 
+                   class="artist-profile" 
+                   style="text-decoration: none; color: inherit; cursor: pointer;">
                     <img th:src="${creator.profileImage != null ? creator.profileImage : '/images/tutor/default_tutor.png'}" 
                          th:alt="${creator.activityName}" class="artist-img">
                     <div>
@@ -58,21 +60,21 @@
                             진행중 클래스 0개
                         </div>
                     </div>
-                </div>
+                </a>
 
                 <!-- 작가별 클래스 목록 그리드 -->
                 <div class="artist-classes-grid" th:if="${creator.classList != null and !#lists.isEmpty(creator.classList)}">
                     <div class="sub-class-card" th:each="cls : ${creator.classList}" style="position: relative;">
                         <!-- 찜(북마크) 버튼 -->
                         <button type="button" class="bookmark-btn" 
-        th:data-class-code="${cls.classCode}" 
-        onclick="toggleBookmark(event, this)">
-    <svg width="20" height="20" viewBox="0 0 24 24" 
-         th:fill="${bookmarkedClassCodes != null and #lists.contains(bookmarkedClassCodes, cls.classCode)} ? '#e33838' : 'none'" 
-         stroke="#e33838" stroke-width="2">
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-    </svg>
-</button>
+                                th:data-class-code="${cls.classCode}" 
+                                onclick="toggleBookmark(event, this)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" 
+                                 th:fill="${bookmarkedClassCodes != null and #lists.contains(bookmarkedClassCodes, cls.classCode)} ? '#e33838' : 'none'" 
+                                 stroke="#e33838" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </button>
 
                         <a th:href="@{/classDetail(classCode=${cls.classCode})}">
                             <img th:src="${cls.mainImage != null ? cls.mainImage : '/images/class/default_class.png'}" 
@@ -94,7 +96,7 @@
                 <button class="page-btn page-arrow">&gt;</button>
             </div>
         </div>
-
+        
         <!-- ================= [2] 클래스 탭 컨텐츠 ================= -->
         <div id="tab-class" class="tab-content" th:classappend="${activeTab == 'class' ? 'active' : ''}">
             

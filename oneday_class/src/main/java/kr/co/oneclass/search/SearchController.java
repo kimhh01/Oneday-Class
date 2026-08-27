@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import jakarta.servlet.http.HttpSession;
 import kr.co.oneclass.bookmark.BookmarkService;
+import kr.co.oneclass.creatorDetail.CreatorDAO;
 import kr.co.oneclass.main.ClassDTO;
 import kr.co.oneclass.member.Member;
 
@@ -19,6 +20,7 @@ public class SearchController {
 
     private final SearchService ss;
     private final BookmarkService bookmarkService;
+    private final CreatorDAO creatorDAO;
     
     /**
      * 통합 검색 미리보기 (클래스 + 작가)
@@ -63,6 +65,10 @@ public class SearchController {
         Member loginMember = (Member) session.getAttribute("loginMember");
         if (loginMember != null) {
             model.addAttribute("loginMember", loginMember);
+            
+            List<Long> bookmarkedClassCodes = bookmarkService.getBookmarkClassCodes(loginMember.getMemberCode());
+            model.addAttribute("bookmarkedClassCodes", bookmarkedClassCodes);
+            
         }
 
         int pageSize = 10;
