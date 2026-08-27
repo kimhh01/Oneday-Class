@@ -58,29 +58,52 @@
 				</div>
 			</section>
 			<section class="detail-section">
+
 				<h2>가격 및 인원</h2>
+
 				<div class="detail-body">
+
 					<div class="grid five">
+
 						<div class="info">
-							<small>판매가</small><b
-								th:text="${#numbers.formatInteger(clazz.salePrice,0,'COMMA')}+'원'"></b>
+							<small>정상가</small> <b
+								th:text="${#numbers.formatInteger(
+						clazz.marketPrice,
+						0,
+						'COMMA'
+					)} + '원'">
+							</b>
 						</div>
+
 						<div class="info">
-							<small>실제가</small><b
-								th:text="${#numbers.formatInteger(clazz.marketPrice,0,'COMMA')}+'원'"></b>
+							<small>판매가</small> <b
+								th:text="${#numbers.formatInteger(
+						clazz.salePrice,
+						0,
+						'COMMA'
+					)} + '원'">
+							</b>
 						</div>
+
 						<div class="info">
-							<small>할인율</small><b th:text="${clazz.discountRate}+'%'"></b>
+							<small>할인율</small> <b th:text="${clazz.discountRate} + '%'">
+							</b>
 						</div>
+
 						<div class="info">
-							<small>최소 인원</small><b th:text="${clazz.minimumPeople}+'명'"></b>
+							<small>최소 인원</small> <b th:text="${clazz.minimumPeople} + '명'">
+							</b>
 						</div>
+
 						<div class="info">
-							<small>최대 인원</small><b th:text="${clazz.maximumPeople}+'명'"></b>
+							<small>최대 인원</small> <b th:text="${clazz.maximumPeople} + '명'">
+							</b>
 						</div>
+
 					</div>
 
 				</div>
+
 			</section>
 			<section class="detail-section">
 				<h2>대표사진</h2>
