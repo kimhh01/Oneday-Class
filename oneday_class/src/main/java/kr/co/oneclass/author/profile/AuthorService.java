@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import kr.co.oneclass.author.common.LocalFileStorageService;
+import kr.co.oneclass.common.AESUtil;
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -31,7 +32,12 @@ public class AuthorService {
     public AuthorProfileDTO getAuthorProfile(long authorCode) {
         AuthorProfileDTO profile = aDAO.selectAuthorProfile(authorCode);
         // 템플릿이 프로필 값을 바로 참조하므로 작가로 등록되지 않은 코드에도 빈 객체를 돌려준다
-        return profile == null ? new AuthorProfileDTO() : profile;
+        if (profile == null) {
+            return new AuthorProfileDTO();
+        }
+        profile.setAuthorName(AESUtil.decrypt(profile.getAuthorName()));
+        profile.setEmail(AESUtil.decrypt(profile.getEmail()));
+        return profile;
     }
 
     // 프로필 이미지를 저장하고 작가 프로필 정보를 수정한다

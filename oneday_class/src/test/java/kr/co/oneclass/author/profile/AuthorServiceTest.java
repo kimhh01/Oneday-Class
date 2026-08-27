@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
 
 import kr.co.oneclass.author.common.LocalFileStorageService;
+import kr.co.oneclass.common.AESUtil;
 
 @ExtendWith(MockitoExtension.class)
 class AuthorServiceTest {
@@ -30,6 +31,19 @@ class AuthorServiceTest {
     @BeforeEach
     void setUp() {
         authorService = new AuthorService(fileStorageService, authorDAO);
+    }
+
+    @Test
+    void profileNameAndEmailAreDecryptedForDisplay() {
+        AuthorProfileDTO stored = new AuthorProfileDTO();
+        stored.setAuthorName(AESUtil.encrypt("테스트1"));
+        stored.setEmail(AESUtil.encrypt("test@naver.com"));
+        when(authorDAO.selectAuthorProfile(7L)).thenReturn(stored);
+
+        AuthorProfileDTO profile = authorService.getAuthorProfile(7L);
+
+        assertEquals("테스트1", profile.getAuthorName());
+        assertEquals("test@naver.com", profile.getEmail());
     }
 
     @Test
