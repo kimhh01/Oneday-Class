@@ -8,9 +8,8 @@ services:
       - "8080"
     environment:
       FILE_UPLOAD_DIR: /app/upload/
-      ONEDAY_UPLOAD_ROOT: /app/upload/author
     volumes:
-      - upload-data:/app/upload
+      - /home/ubuntu/upload:/app/upload
     restart: unless-stopped
     networks:
       - app-network
@@ -31,6 +30,3 @@ services:
 networks:
   app-network:
     driver: bridge
-
-volumes:
-  upload-data:

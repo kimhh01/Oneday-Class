@@ -276,7 +276,7 @@ class ClassServiceDetailSplitTest {
         MultipartFile newFile = org.mockito.Mockito.mock(MultipartFile.class);
         when(newFile.isEmpty()).thenReturn(false);
         when(fileStorageService.store(newFile, "class-result"))
-                .thenReturn("/upload/author/class-result/new.jpg");
+                .thenReturn("/upload/class-result/new.jpg");
 
         ClassDetailDTO form = detail(10, 7L);
         form.setResultDescription("완성작 설명");
@@ -338,7 +338,7 @@ class ClassServiceDetailSplitTest {
         ClassImageDTO image = new ClassImageDTO();
         image.setImageCode(imageCode);
         image.setImageOrder(imageOrder);
-        image.setImagePath("/upload/author/class-result/" + imageCode + ".jpg");
+        image.setImagePath("/upload/class-result/" + imageCode + ".jpg");
         return image;
     }
 }

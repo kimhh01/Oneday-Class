@@ -49,7 +49,7 @@ class AuthorServiceTest {
     @Test
     void successfulProfileImageChangeDeletesPreviousFile() {
         AuthorProfileDTO existing = new AuthorProfileDTO();
-        existing.setProfileImagePath("/upload/author/creator/old.jpg");
+        existing.setProfileImagePath("/upload/creator/old.jpg");
         AuthorProfileDTO form = new AuthorProfileDTO();
         form.setAuthorCode(7L);
         form.setAuthorNickname("테스트 작가");
@@ -60,12 +60,12 @@ class AuthorServiceTest {
         when(authorDAO.selectAuthorProfile(7L)).thenReturn(existing);
         when(profileFile.isEmpty()).thenReturn(false);
         when(fileStorageService.store(profileFile, "creator"))
-                .thenReturn("/upload/author/creator/new.jpg");
+                .thenReturn("/upload/creator/new.jpg");
         when(authorDAO.updateAuthorProfile(form)).thenReturn(1);
 
         authorService.modifyAuthorProfile(form, profileFile);
 
-        verify(fileStorageService).delete("/upload/author/creator/old.jpg");
+        verify(fileStorageService).delete("/upload/creator/old.jpg");
     }
 
     @Test

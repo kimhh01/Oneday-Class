@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class LocalFileStorageService {
 
     // 저장된 파일을 가리키는 웹 경로 접두사. DB 에는 이 형태로 들어간다
-    public static final String WEB_PREFIX = "/upload/author/";
+    public static final String WEB_PREFIX = "/upload/";
 
     // 업로드 허용 확장자와 최대 크기
     private static final Set<String> ALLOWED_EXTENSIONS = Set.of("jpg", "jpeg", "png");
@@ -28,7 +28,7 @@ public class LocalFileStorageService {
     private final Path uploadRoot;
 
     public LocalFileStorageService(
-            @Value("${oneday.author.upload-root:uploads/author}") String uploadRootPath) {
+            @Value("${file.upload-dir:uploads/}") String uploadRootPath) {
         this.uploadRoot = Paths.get(uploadRootPath).toAbsolutePath().normalize();
     }
 
