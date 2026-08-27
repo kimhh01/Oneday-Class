@@ -6,6 +6,7 @@ import kr.co.oneclass.profile.ProfileDTO;
 import kr.co.oneclass.profile.ProfileService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +39,9 @@ public class ProfileController {
 
         return "profile/profile";
     }
+ // 💡 properties의 /app/upload/ (마운트 경로) 주입
+    @Value("${file.upload-dir}")
+    private String uploadDir;
 
     @GetMapping("/changeProfileImg")
     public String changeProfileImgForm(HttpSession session) {
@@ -58,9 +62,8 @@ public class ProfileController {
         }
 
         if ("DEFAULT".equals(imageMode)) {
-            // [수정 위치] 원하는 기본 이미지 경로로 지정합니다.
-            // 예시: "/images/default_profile.png" 또는 null (null 저장 시 View에서 기본 SVG 출력)
-            String defaultPath = "/uploads/profile/default/default_profile.png"; // 원하는 경로 작성
+            // 웹 브라우저에서 접근할 기본 프로필 이미지 URL
+            String defaultPath = "/upload/profile/default/default_profile.png";
 
             ps.changeProfileImg(String.valueOf(loginMember.getMemberCode()), defaultPath);
             loginMember.setProfileImg(defaultPath);
@@ -69,19 +72,22 @@ public class ProfileController {
             rttr.addFlashAttribute("msg", "기본 프로필 이미지로 변경되었습니다.");
         } else if (image != null && !image.isEmpty()) {
             try {
-                // 루트 디렉토리 내 uploads/profile/ 경로에 저장
-                String uploadDir = System.getProperty("user.dir") + "/uploads/profile/";
-                File dir = new File(uploadDir);
+                // 1. 실제 파일이 저장될 물리 디렉터리 경로 (/app/upload/profile/)
+                String saveDirPath = uploadDir + "profile/";
+                File dir = new File(saveDirPath);
                 if (!dir.exists()) {
-                    dir.mkdirs();
+                    dir.mkdirs(); // 디렉터리가 없으면 생성
                 }
 
+                // 2. 파일명 중복 방지 처리
                 String savedFilename = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
-                File dest = new File(uploadDir + savedFilename);
+                File dest = new File(saveDirPath + savedFilename);
 
+                // 3. 파일 저장 실행
                 image.transferTo(dest);
 
-                String imgPath = "/uploads/profile/" + savedFilename;
+                // 4. DB 및 웹 브라우저에서 사용할 URL 경로 (/upload/profile/파일명)
+                String imgPath = "/upload/profile/" + savedFilename;
                 boolean isImgChanged = ps.changeProfileImg(String.valueOf(loginMember.getMemberCode()), imgPath);
 
                 if (isImgChanged) {

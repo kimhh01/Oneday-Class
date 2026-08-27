@@ -1,27 +1,29 @@
 package kr.co.oneclass.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
 import java.io.File;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 1. 프로젝트 루트 하위 uploads/ 폴더 경로 생성 및 매핑 (기존 유지)
-        String uploadPath = System.getProperty("user.dir").replace("\\", "/") + "/uploads/";
-        File uploadDir = new File(uploadPath);
-        if (!uploadDir.exists()) {
-            uploadDir.mkdirs();
+        // 1. 실제 업로드 파일 저장 경로와 동일한 file.upload-dir 사용
+        File dir = new File(uploadDir);
+        if (!dir.exists()) {
+            dir.mkdirs();
         }
 
-        registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:///" + uploadPath);
+        registry.addResourceHandler("/upload/**")   // ← 컨트롤러가 쓰는 경로(단수)로 통일
+                .addResourceLocations("file:" + uploadDir);
 
-        // 2. [추가] src/main/resources/static/images/ 폴더 매핑
+        // 2. static/images 매핑 (기존 유지)
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("classpath:/static/images/");
     }

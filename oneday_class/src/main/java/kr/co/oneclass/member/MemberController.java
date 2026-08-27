@@ -70,7 +70,7 @@ public class MemberController {
     @GetMapping("/member/signUp")
     public String signUpForm(Model model) {
         model.addAttribute("signUpDTO", new SignUpDTO());
-        return "member/signUp";
+        return "member/signup";
     }
 
     @PostMapping("/member/signUp")
@@ -81,7 +81,7 @@ public class MemberController {
             return "redirect:/member/signUpSuccess";
         } else {
             ra.addFlashAttribute("errorMsg", "회원가입 처리에 실패했습니다. 다시 시도해 주세요.");
-            return "redirect:/member/signUp";
+            return "redirect:/member/signup";
         }
     }
 
