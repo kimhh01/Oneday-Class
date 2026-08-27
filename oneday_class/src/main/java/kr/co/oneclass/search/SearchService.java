@@ -17,7 +17,9 @@ public class SearchService {
      * 통합검색 작가 프리뷰
      */
     public List<CreatorDTO> searchCreatorPreview(String keyword) {
-        return sDAO.selectCreatorPreview(keyword);
+        List<CreatorDTO> creatorList = sDAO.selectCreatorPreview(keyword);
+        bindClassListToCreator(creatorList);
+        return creatorList;
     }
 
     /**
@@ -31,7 +33,9 @@ public class SearchService {
      * 작가 더보기 페이지
      */
     public List<CreatorDTO> searchCreatorList(String keyword, int startNum, int endNum) {
-        return sDAO.selectCreatorList(keyword, startNum, endNum);
+        List<CreatorDTO> creatorList = sDAO.selectCreatorList(keyword, startNum, endNum);
+        bindClassListToCreator(creatorList); 
+        return creatorList;
     }
 
     /**
@@ -68,4 +72,27 @@ public class SearchService {
     public List<ClassImageDTO> searchImage(long classCode) {
         return sDAO.selectImage(classCode);
     }
+    
+    private void bindClassListToCreator(List<CreatorDTO> creatorList) {
+        if (creatorList != null && !creatorList.isEmpty()) {
+            for (CreatorDTO creator : creatorList) {
+                // 1. 작가의 클래스 목록 조회
+                List<ClassDTO> classList = sDAO.selectClassByCreator(creator.getOperatorCode());
+                
+                if (classList != null && !classList.isEmpty()) {
+                    for (ClassDTO cls : classList) {
+                        // 2. 클래스 대표 이미지 조회 및 세팅
+                        List<ClassImageDTO> imgList = sDAO.selectImage(cls.getClassCode());
+                        if (imgList != null && !imgList.isEmpty()) {
+                            // 대표 이미지가 설정되어 있다면 mainImage 변수에 세팅
+                            cls.setMainImage(imgList.get(0).getImage());
+                        }
+                    }
+                }
+                // 3. 작가 DTO에 클래스 리스트 전달
+                creator.setClassList(classList);
+            }
+        }
+    }
+    
 }

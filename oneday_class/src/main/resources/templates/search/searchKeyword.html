@@ -30,7 +30,7 @@
         
         <hr class="main-divider">
 
-        <!-- 1. 작가 섹션 -->
+       <!-- 1. 작가 섹션 -->
         <section class="result-section">
             <h2 class="section-title"><span>작가</span></h2>
             
@@ -39,7 +39,11 @@
             </div>
 
             <div class="artist-grid" th:if="${!#lists.isEmpty(creatorList)}">
-                <div class="artist-item" th:each="creator : ${creatorList}">
+                <!-- 💡 div 대신 a 태그로 변경하여 이동 링크 처리 -->
+               <a th:each="creator : ${creatorList}" 
+   th:href="@{/creatorDetail(creatorCode=${creator.operatorCode})}" 
+   class="artist-item" 
+   style="text-decoration: none; color: inherit; cursor: pointer;">
                     <img th:src="${creator.profileImage != null and creator.profileImage != '' ? creator.profileImage : '/images/tutor/default_tutor.png'}" 
                          th:alt="${creator.activityName}" class="artist-img">
                     <div class="artist-info">
@@ -49,7 +53,7 @@
                             진행중 클래스 0개
                         </div>
                     </div>
-                </div>
+                </a>
             </div>
 
             <!-- 작가 더보기 -->

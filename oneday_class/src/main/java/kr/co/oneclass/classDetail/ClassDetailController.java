@@ -78,6 +78,6 @@ public class ClassDetailController {
     //환불규정
     @GetMapping("/refundPolicy")
     public String refundPolicy() {
-    	return "/refundPolicy/refundPolicy";
+    	return "refundPolicy/refundPolicy";
     }
 }
