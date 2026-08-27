@@ -137,7 +137,7 @@
 								<tr th:each="item : ${classes}" th:attr="data-state=${item.classStatus},data-name=${item.classTitle},data-code=${'CL' + item.classCode}">
 									<td><img class="mgmt-thumb" th:src="${#strings.isEmpty(item.thumbnailPath)} ? @{/author/images/photo/class-upload-placeholder.png} : ${item.thumbnailPath}" alt="" width="76" height="58" loading="lazy"></td>
 									<td class="col-name"><th:block th:text="${item.classTitle}">클래스명</th:block><span class="mgmt-table__sub" th:text="${'CL' + item.classCode}">CL260805-0001</span></td>
-									<td class="col-num" th:text="${#numbers.formatInteger(item.desiredPrice, 1, 'COMMA') + '원'}">65,000원</td>
+									<td class="col-num" th:text="${#numbers.formatInteger(item.regularPrice, 1, 'COMMA') + '원'}">65,000원</td>
 									<td class="col-muted col-center" th:text="${item.recruitStartDate == null ? '-' : #dates.format(item.recruitStartDate,'yy.MM.dd') + (item.recruitEndDate == null ? '' : ' ~ ' + #dates.format(item.recruitEndDate,'yy.MM.dd'))}">-</td>
 									<td class="col-num" th:text="${item.upcomingScheduleCount + '건'}">0건</td>
 									<td class="col-num" th:text="${item.applicantCount + '명'}">0명</td>

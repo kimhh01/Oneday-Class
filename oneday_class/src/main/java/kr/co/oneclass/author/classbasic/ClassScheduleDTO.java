@@ -18,8 +18,8 @@ public class ClassScheduleDTO {
     private String scheduleType;                                             // 요일반복 / 개별일정
     private Date recruitStartDate;                                           // 모집 시작일
     private Date recruitEndDate;                                             // 모집 종료일
-    private Integer regularPrice;                                            // 정가
-    private Integer desiredPrice;                                            // 희망가
+    private Integer regularPrice;                                            // 수강생이 실제 결제하는 정가 (CLASS.PRICE)
+    private Integer desiredPrice;                                            // 작가 희망가 (CLASS.DESIRED_PRICE, 정가 이상)
     private Integer minPeople;                                               // 최소인원
     private Integer maxPeople;                                               // 최대인원
     private int refundPolicyCode;                                            // 환불 기준

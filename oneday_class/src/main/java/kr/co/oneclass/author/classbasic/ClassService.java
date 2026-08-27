@@ -803,6 +803,9 @@ public class ClassService {
                 || csDTO.getRegularPrice() < 0 || csDTO.getDesiredPrice() < 0) {
             throw new IllegalArgumentException("가격은 0원 이상 입력해주세요.");
         }
+        if (csDTO.getDesiredPrice() < csDTO.getRegularPrice()) {
+            throw new IllegalArgumentException("희망가는 정가보다 같거나 높게 입력해주세요.");
+        }
         if (!isPositive(csDTO.getMinPeople()) || !isPositive(csDTO.getMaxPeople())
                 || csDTO.getMaxPeople() < csDTO.getMinPeople()) {
             throw new IllegalArgumentException("최소·최대 인원을 확인해주세요.");

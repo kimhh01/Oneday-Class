@@ -226,31 +226,30 @@
 								<!--
 									가격은 두 컬럼이다 (AGENTS.md 10장).
 									  정가   = CLASS.PRICE
-									  희망가 = CLASS.DESIRED_PRICE  ← 수강생 화면에 실제로 노출되는 값
+									  희망가 = CLASS.DESIRED_PRICE  ← 작가가 받고 싶은 기준 가격
 									하나로 합치지 않는다.
-									TODO: 희망가가 정가보다 높아도 되는지는 팀 정책 미확정.
-									      확정되면 Service 에서 검증한다(화면 검증만 믿지 않는다).
+									희망가는 정가보다 같거나 높아야 한다.
 								-->
 								<div class="price-row">
 									<div class="sched-cell">
 										<label class="sched-cell__label" for="price">정가 <span class="req">*</span></label>
 										<div class="unit-input">
 											<input class="input" type="text" id="price" name="regularPrice" inputmode="numeric"
-												   value="80,000" th:value="${#numbers.formatInteger(scheduleForm.regularPrice, 1, 'COMMA')}" autocomplete="off" required>
+											   value="58,000" th:value="${#numbers.formatInteger(scheduleForm.regularPrice, 1, 'COMMA')}" autocomplete="off" required>
 											<span class="unit-input__unit">원</span>
 										</div>
 									</div>
 									<div class="sched-cell">
 										<label class="sched-cell__label" for="desiredPrice">
 											희망가 <span class="req">*</span>
-											<span class="sched-cell__label-sub">(수강생에게 표시됨)</span>
+											<span class="sched-cell__label-sub">(작가 희망 가격)</span>
 										</label>
 										<div class="unit-input">
 											<input class="input" type="text" id="desiredPrice" name="desiredPrice" inputmode="numeric"
-												   value="58,000" th:value="${#numbers.formatInteger(scheduleForm.desiredPrice, 1, 'COMMA')}" autocomplete="off" required>
+											   value="80,000" th:value="${#numbers.formatInteger(scheduleForm.desiredPrice, 1, 'COMMA')}" autocomplete="off" required>
 											<span class="unit-input__unit">원</span>
 										</div>
-										<p class="field__help">클래스 가격으로 표시됩니다.</p>
+										<p class="field__help">정가보다 같거나 높게 입력해주세요.</p>
 									</div>
 								</div>
 
@@ -347,8 +346,8 @@
 							</div>
 
 							<div class="preview-price">
-								<!-- 미리보기는 수강생이 보는 화면이므로 희망가를 띄운다 -->
-								<p class="preview-price__label">클래스 가격 <span class="preview-price__sub">(희망가)</span></p>
+								<!-- 수강생이 실제 결제하는 정가를 표시한다 -->
+								<p class="preview-price__label">클래스 가격 <span class="preview-price__sub">(실제 판매가)</span></p>
 								<p class="preview-price__amount">
 									<span id="statPrice">0</span><small>원</small> <em>/ 1인</em>
 								</p>
@@ -735,9 +734,8 @@
 	}
 
 	function renderPreview() {
-		/* 미리보기에 띄우는 값은 정가(price)가 아니라 희망가(desiredPrice)다.
-		   수강생 화면에 실제로 노출되는 값이 희망가이기 때문 (AGENTS.md 10장). */
-		var desiredPrice = onlyDigits(document.getElementById('desiredPrice').value);
+		/* 수강생이 실제 결제하는 CLASS.PRICE 값을 미리보기에 표시한다. */
+		var regularPrice = onlyDigits(document.getElementById('price').value);
 		var material = document.getElementById('materialIncluded').checked;
 
 		document.getElementById('statCount').textContent = schedules.length + '회';
@@ -746,7 +744,7 @@
 		var total = schedules.reduce(function (sum, s) { return sum + s.max; }, 0);
 		document.getElementById('statPeople').textContent = '최대 ' + total + '명';
 
-		document.getElementById('statPrice').textContent = comma(desiredPrice);
+		document.getElementById('statPrice').textContent = comma(regularPrice);
 		document.getElementById('statPriceNote').textContent =
 			(material ? '재료비 포함' : '재료비 별도') + ' · 1인 기준';
 
@@ -988,6 +986,16 @@
 
 		document.getElementById('scheduleForm').addEventListener('submit', function (event) {
 			var form = this;
+			var regularPrice = Number(onlyDigits(document.getElementById('price').value) || 0);
+			var desiredPriceInput = document.getElementById('desiredPrice');
+			var desiredPrice = Number(onlyDigits(desiredPriceInput.value) || 0);
+			desiredPriceInput.setCustomValidity(
+				desiredPrice < regularPrice ? '희망가는 정가보다 같거나 높게 입력해주세요.' : '');
+			if (!desiredPriceInput.checkValidity()) {
+				event.preventDefault();
+				desiredPriceInput.reportValidity();
+				return;
+			}
 			form.querySelectorAll('[data-server-schedule]').forEach(function (element) { element.remove(); });
 			schedules.forEach(function (item, index) {
 				var values = {

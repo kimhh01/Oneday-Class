@@ -222,6 +222,21 @@ class ClassServiceDetailSplitTest {
     }
 
     @Test
+    void desiredPriceLowerThanRegularPriceIsRejected() {
+        ClassScheduleDTO saved = schedule(10, 7L);
+        when(classDAO.selectClassSchedule(7L, 10)).thenReturn(saved);
+        when(scheduleDAO.selectRepeatScheduleList(10)).thenReturn(List.of());
+        when(scheduleDAO.selectScheduleList(10)).thenReturn(List.of());
+
+        ClassScheduleDTO form = schedule(10, 7L);
+        form.setDesiredPrice(45000);
+
+        assertThrows(IllegalArgumentException.class,
+				() -> classService.modifyClassSchedule(form));
+        verify(classDAO, never()).updateClassSchedule(any(ClassScheduleDTO.class));
+    }
+
+    @Test
     void pastScheduleIsRejectedBeforeDraftScheduleUpdate() {
         ClassScheduleDTO saved = schedule(10, 7L);
         when(classDAO.selectClassSchedule(7L, 10)).thenReturn(saved);
@@ -313,7 +328,7 @@ class ClassServiceDetailSplitTest {
         schedule.setAuthorCode(authorCode);
         schedule.setScheduleType("ONCE");
         schedule.setRegularPrice(50000);
-        schedule.setDesiredPrice(45000);
+        schedule.setDesiredPrice(70000);
         schedule.setMinPeople(1);
         schedule.setMaxPeople(6);
         return schedule;

@@ -16,7 +16,7 @@ public class ClassManagementDTO {
     private String classTitle;          // 클래스명
     private String thumbnailPath;       // 목록에 출력할 대표 이미지 경로
     private String categoryName;        // 클래스 카테고리명
-    private int desiredPrice;           // 클래스 희망가
+    private int regularPrice;           // 수강생이 실제 결제하는 클래스 정가
     private Date registeredDate;        // 클래스 등록일
     private Date recruitStartDate;      // 모집 시작일
     private Date recruitEndDate;        // 모집 종료일

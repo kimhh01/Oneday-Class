@@ -113,8 +113,9 @@
 
 								<aside class="customer-booking" aria-label="수강생 예약 영역">
 									<span>1인 클래스 가격</span>
-									<strong><th:block th:text="${#numbers.formatInteger(preview.classSchedule.desiredPrice, 1, 'COMMA')}">58,000</th:block><small>원</small></strong>
-									<del th:text="${#numbers.formatInteger(preview.classSchedule.regularPrice, 1, 'COMMA') + '원'}">80,000원</del>
+									<strong><th:block th:text="${#numbers.formatInteger(preview.classSchedule.regularPrice, 1, 'COMMA')}">58,000</th:block><small>원</small></strong>
+									<del th:if="${preview.classSchedule.desiredPrice > preview.classSchedule.regularPrice}"
+										 th:text="${#numbers.formatInteger(preview.classSchedule.desiredPrice, 1, 'COMMA') + '원'}">80,000원</del>
 									<div class="customer-booking__schedule">
 										<h4><svg aria-hidden="true"><use href="#icon-calendar"></use></svg>일정 선택</h4>
 									<label th:each="schedule, stat : ${preview.classSchedule.scheduleList}" th:if="${stat.index < 4}"><input type="radio" name="customerSchedule" th:checked="${stat.first}"><span><b th:text="${(schedule.scheduleDate == null ? '-' : #dates.format(schedule.scheduleDate,'yyyy.MM.dd')) + ' ' + schedule.startTime}">일정</b><small th:text="${'정원 ' + schedule.maxPeople + '명'}">정원</small></span></label>

@@ -37,7 +37,7 @@
 							<span class="icon-box"><svg aria-hidden="true"><use href="#icon-won"></use></svg></span>
 							<div>
 								<h2 class="card-head-icon__title" id="pricingTitle">가격 정보</h2>
-								<p class="card-head-icon__desc">클래스 정가와 실제 판매 희망가를 입력해주세요.</p>
+								<p class="card-head-icon__desc">실제 판매 정가와 작가 희망가를 입력해주세요.</p>
 							</div>
 						</div>
 						<div class="card__body">
@@ -46,20 +46,20 @@
 									<label class="field__label" for="regularPrice">정가</label>
 									<div class="field__control">
 										<input class="input" id="regularPrice" type="number" min="0" step="100" inputmode="numeric" th:field="*{regularPrice}" required>
-										<p class="field__help">할인 전 기준 가격입니다.</p>
+										<p class="field__help">수강생이 실제 결제하는 가격입니다.</p>
 									</div>
 								</div>
 								<div class="field">
 									<label class="field__label" for="desiredPrice">판매 희망가</label>
 									<div class="field__control">
 										<input class="input" id="desiredPrice" type="number" min="0" step="100" inputmode="numeric" th:field="*{desiredPrice}" required>
-										<p class="field__help">수강생에게 표시할 실제 판매 가격입니다.</p>
+										<p class="field__help">정가보다 같거나 높게 입력해주세요.</p>
 									</div>
 								</div>
 							</div>
 							<label class="class-edit-checkbox" for="materialIncluded">
 								<input id="materialIncluded" type="checkbox" th:field="*{materialIncluded}">
-								<span>판매 희망가에 재료비가 포함되어 있습니다.</span>
+								<span>정가에 재료비가 포함되어 있습니다.</span>
 							</label>
 						</div>
 					</section>
@@ -78,5 +78,25 @@
 		</main>
 	</div>
 </div>
+<script>
+(function () {
+	var regularPrice = document.getElementById('regularPrice');
+	var desiredPrice = document.getElementById('desiredPrice');
+	var form = document.querySelector('.class-edit-pricing');
+	function validatePriceOrder() {
+		desiredPrice.setCustomValidity(Number(desiredPrice.value) < Number(regularPrice.value)
+			? '희망가는 정가보다 같거나 높게 입력해주세요.' : '');
+	}
+	regularPrice.addEventListener('input', validatePriceOrder);
+	desiredPrice.addEventListener('input', validatePriceOrder);
+	form.addEventListener('submit', function (event) {
+		validatePriceOrder();
+		if (!desiredPrice.checkValidity()) {
+			event.preventDefault();
+			desiredPrice.reportValidity();
+		}
+	});
+}());
+</script>
 </body>
 </html>
