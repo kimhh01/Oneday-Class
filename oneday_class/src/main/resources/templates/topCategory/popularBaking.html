@@ -56,7 +56,7 @@
       <!-- DB 동적 리스트 반복 -->
       <div class="class-list" th:if="${!#lists.isEmpty(classList)}">
         <article class="class-card" th:each="cls, stat : ${classList}">
-          <a th:href="@{/class/detail(classCode=${cls.classCode})}" style="display: flex; width: 100%; text-decoration: none; color: inherit;">
+          <a th:href="@{/classDetail(classCode=${cls.classCode})}" style="display: flex; width: 100%; text-decoration: none; color: inherit;">
             <div class="class-thumb-wrap">
               <span class="rank-badge" th:text="${stat.count}">1</span>
               <div class="class-thumb">

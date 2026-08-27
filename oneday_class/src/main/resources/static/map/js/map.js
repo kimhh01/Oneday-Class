@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function() {
 	            if (status === kakao.maps.services.Status.OK) {
 	                const moveCoords = new kakao.maps.LatLng(data[0].y, data[0].x);
 	                map.setCenter(moveCoords);
-	                map.setLevel(4);
+	                map.setLevel(7);
 	            }
 	        });
 	    }

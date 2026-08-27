@@ -74,7 +74,7 @@
       </svg>
     </button>
 
-    <a th:href="@{/class/detail(classCode=${cls.classCode})}">
+    <a th:href="@{/classDetail(classCode=${cls.classCode})}">
       <div class="class-thumb">
         <img th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}" 
              th:alt="${cls.name}">
@@ -82,7 +82,7 @@
     </a>
   </div>
 
-  <a th:href="@{/class/detail(classCode=${cls.classCode})}" style="display: flex; flex: 1; text-decoration: none; color: inherit;">
+  <a th:href="@{/classDetail(classCode=${cls.classCode})}" style="display: flex; flex: 1; text-decoration: none; color: inherit;">
     <div class="class-info">
       <div class="location" th:text="${cls.address}">위치</div>
       <div class="class-name" th:text="${cls.name}">클래스 제목</div>

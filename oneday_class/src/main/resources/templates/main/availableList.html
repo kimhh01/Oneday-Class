@@ -46,7 +46,7 @@
     </svg>
 </button>
 
-                <a th:href="@{/class/detail(classCode=${cls.classCode})}" style="display: flex; gap: 20px; width: 100%; text-decoration: none; color: inherit;">
+                <a th:href="@{/classDetail(classCode=${cls.classCode})}" style="display: flex; gap: 20px; width: 100%; text-decoration: none; color: inherit;">
                     <img th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}" 
                          th:alt="${cls.name}" class="class-img">
                     
