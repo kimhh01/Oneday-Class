@@ -1,11 +1,11 @@
 package kr.co.oneclass.admin.onedayclass;
 
 import java.util.List;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import kr.co.oneclass.admin.common.PageDomain;
+import kr.co.oneclass.common.AESUtil;
 
 @Service
 public class AdminClassService {
@@ -129,7 +129,7 @@ public class AdminClassService {
 	private AdminClassSummaryDomain toClassSummaryDomain(AdminClassSummaryDTO dto) {
 
 		return new AdminClassSummaryDomain(dto.getClassCode(), dto.getClassName(), dto.getRegion(),
-				dto.getRunningTime(), dto.getWriterName(), dto.getWorkshopName(), dto.getCategoryName(),
+				dto.getRunningTime(), decrypt(dto.getWriterName()), dto.getWorkshopName(), dto.getCategoryName(),
 				dto.getRecruitmentStartDate(), dto.getRecruitmentEndDate(), dto.getSalePrice(), dto.getApprovalStatus(),
 				dto.getClassStatus());
 	}
@@ -137,7 +137,7 @@ public class AdminClassService {
 	private AdminClassDetailDomain toClassDetailDomain(AdminClassDetailDTO dto) {
 
 		return new AdminClassDetailDomain(dto.getClassCode(), dto.getClassName(), dto.getWriterCode(),
-				dto.getWriterName(), dto.getWorkshopName(), dto.getCategoryName(), dto.getRegion(),
+				decrypt(dto.getWriterName()), dto.getWorkshopName(), dto.getCategoryName(), dto.getRegion(),
 				dto.getRunningTime(), dto.getClassStatus(), dto.getSalePrice(), dto.getMarketPrice(),
 				dto.getDiscountRate(), dto.getMinimumPeople(), dto.getMaximumPeople(), dto.getRecruitmentStartDate(),
 				dto.getRecruitmentEndDate(), dto.getPeriodType(), dto.getSingleIntroduce(), dto.getIntroduce(),
@@ -159,5 +159,14 @@ public class AdminClassService {
 		int endPage = Math.min(startPage + 4, totalPage);
 
 		return new PageDomain(totalCount, currentPage, pageSize, totalPage, startPage, endPage);
+	}
+
+	private String decrypt(String value) {
+
+		if (value == null || value.isBlank()) {
+			return value;
+		}
+
+		return AESUtil.decrypt(value);
 	}
 }

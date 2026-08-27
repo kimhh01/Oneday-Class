@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import kr.co.oneclass.admin.common.PageDomain;
+import kr.co.oneclass.common.AESUtil;
 
 @Service
 public class AdminWriterService {
@@ -52,6 +53,7 @@ public class AdminWriterService {
 	private void setPage(AdminWriterSearchDTO dto) {
 
 		int page = Math.max(dto.getPage(), 1);
+
 		int pageSize = Math.max(dto.getPageSize(), 1);
 
 		dto.setStartRow((page - 1) * pageSize + 1);
@@ -61,15 +63,16 @@ public class AdminWriterService {
 
 	private AdminWriterSummaryDomain toSummaryDomain(AdminWriterSummaryDTO dto) {
 
-		return new AdminWriterSummaryDomain(dto.getWriterCode(), dto.getWriterName(), dto.getWorkshopName(),
-				dto.getRegion(), dto.getPhone(), dto.getClassCount());
+		return new AdminWriterSummaryDomain(dto.getWriterCode(), decrypt(dto.getWriterName()), dto.getWorkshopName(),
+				dto.getRegion(), decrypt(dto.getPhone()), dto.getClassCount());
 	}
 
 	private AdminWriterDetailDomain toDetailDomain(AdminWriterDetailDTO dto) {
 
-		return new AdminWriterDetailDomain(dto.getWriterCode(), dto.getWriterName(), dto.getWorkshopName(),
-				dto.getEmail(), dto.getMobilePhone(), dto.getProfileImage(), dto.getActivityRegion(), dto.getSnsUrl(),
-				dto.getJoinDate(), dto.getSettlementAccount(), dto.getSettlementAccountImg(), dto.getIntroduction());
+		return new AdminWriterDetailDomain(dto.getWriterCode(), decrypt(dto.getWriterName()), dto.getWorkshopName(),
+				decrypt(dto.getEmail()), decrypt(dto.getMobilePhone()), dto.getProfileImage(), dto.getActivityRegion(),
+				dto.getSnsUrl(), dto.getJoinDate(), dto.getSettlementAccount(), dto.getSettlementAccountImg(),
+				dto.getIntroduction());
 	}
 
 	private AdminWriterClassDomain toWriterClassDomain(AdminWriterClassDTO dto) {
@@ -94,5 +97,17 @@ public class AdminWriterService {
 		int endPage = Math.min(startPage + 4, totalPage);
 
 		return new PageDomain(totalCount, currentPage, pageSize, totalPage, startPage, endPage);
+	}
+
+	/**
+	 * 암호화된 개인정보 복호화
+	 */
+	private String decrypt(String value) {
+
+		if (value == null || value.isBlank()) {
+			return value;
+		}
+
+		return AESUtil.decrypt(value);
 	}
 }
