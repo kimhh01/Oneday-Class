@@ -6,7 +6,7 @@
     <!-- CSRF 토큰 메타 태그 -->
     <meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}"/>
     <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : ''}"/>
-    <title>클래스101 메인</title>
+    <title>Oneclass 메인</title>
     <link rel="stylesheet" th:href="@{/main/css/main.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
@@ -28,8 +28,8 @@
         <!-- 2. 히어로 섹션 및 히어로 검색 바 -->
         <section class="hero-section">
             <div class="hero-text">
-                <h1><span>솜씨당</span>에서<br>당신의 취미를 찾아보세요</h1>
-                <p>소통을 갈망하고, 입시와 취업에 지친 일상 속에서 나를 찾는 시간.<br>솜씨당에서 특별한 클래스를 만나보세요.</p>
+                <h1><span>Oneclass</span>에서<br>당신의 취미를 찾아보세요</h1>
+                <p>소통을 갈망하고, 입시와 취업에 지친 일상 속에서 나를 찾는 시간.<br>Oneclass에서 특별한 클래스를 만나보세요.</p>
             </div>
             
             <div class="hero-banner">
@@ -140,7 +140,7 @@
         <!-- 4. 이달의 인기클래스 (상위 3개) -->
         <section class="content-section">
             <div class="section-header">
-                <h2 class="section-title">솜씨당이 검증한 이달의 인기클래스!</h2>
+                <h2 class="section-title">Oneclass가 검증한 이달의 인기클래스!</h2>
                 <span class="view-all">
                     <a th:href="@{/category/class}">전체보기 &gt;</a>
                 </span>
