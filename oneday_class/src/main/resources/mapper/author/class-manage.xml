@@ -9,11 +9,7 @@
 -->
 <mapper namespace="kr.co.oneclass.author.classmanage.ClassManagementDAO">
 
-	<!--
-		목록과 상세 상단이 공유하는 컬럼.
-		SCHEDULE_TYPE 은 대응 컬럼이 없다 - CLASS_REPEAT_RULE 에 반복 유형 컬럼이
-		없으므로 고정값으로 내려보낸다. 컬럼이 생기면 이 한 줄만 바꾸면 된다.
-	-->
+	<!-- 목록과 상세 상단이 공유하는 컬럼 -->
 	<sql id="classManagementColumns">
 		c.CLASS_CODE,
 		c.OPERATOR_CODE AS AUTHOR_CODE,
@@ -29,7 +25,6 @@
 			FROM CATEGORY ct
 			WHERE ct.CATEGORY_CODE = c.CATEGORY_CODE
 		) AS CATEGORY_NAME,
-		'등록 일정' AS SCHEDULE_TYPE,
 		c.DESIRED_PRICE,
 		c.WRITE_DATE AS REGISTERED_DATE,
 		(

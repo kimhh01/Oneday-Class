@@ -27,7 +27,7 @@ public class ClassManagementController {
         this.cmService = cmService;
     }
 
-    // 승인된 클래스 목록을 운영 상태·일정 유형·검색어 기준으로 조회한다
+    // 승인된 클래스 목록을 운영 상태·검색어 기준으로 조회한다
     @GetMapping("/author/classes")
     public String classManagementList(
             @RequestParam(value = "classStatus", required = false, defaultValue = "all") String classStatus,
