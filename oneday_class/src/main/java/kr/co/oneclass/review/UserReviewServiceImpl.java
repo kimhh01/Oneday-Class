@@ -1,6 +1,7 @@
 package kr.co.oneclass.review;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value; // 💡 추가
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,6 +17,10 @@ public class UserReviewServiceImpl implements UserReviewService {
     @Autowired
     private UserReviewDAO reviewDAO;
 
+    // 💡 properties의 /app/upload/ 경로 주입
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
     @Override
     @Transactional
     public boolean writeReview(ReviewDTO rdto) {
@@ -29,17 +34,21 @@ public class UserReviewServiceImpl implements UserReviewService {
 
             // 3. 다중 이미지 파일 업로드 및 DB 저장
             if (images != null && !images.isEmpty()) {
-                String uploadDir = System.getProperty("user.dir") + "/uploads/review/";
-                File dir = new File(uploadDir);
-                if (!dir.exists()) dir.mkdirs();
+                // 💡 실제 파일이 저장될 물리 경로 (/app/upload/review/)
+                String saveDirPath = uploadDir + "review/";
+                File dir = new File(saveDirPath);
+                if (!dir.exists()) {
+                    dir.mkdirs(); // 디렉터리가 없으면 생성
+                }
 
                 for (MultipartFile image : images) {
                     if (!image.isEmpty()) {
                         String savedFilename = UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
-                        File dest = new File(uploadDir + savedFilename);
+                        File dest = new File(saveDirPath + savedFilename);
                         image.transferTo(dest);
 
-                        String imagePath = "/uploads/review/" + savedFilename;
+                        // 💡 DB에 저장될 웹 접근 URL 경로 (WebConfig의 /upload/** 와 매칭)
+                        String imagePath = "/upload/review/" + savedFilename;
 
                         // 생성된 reviewCode와 이미지 경로를 테이블에 각각 저장
                         reviewDAO.insertReviewImg(rdto.getReviewCode(), imagePath);

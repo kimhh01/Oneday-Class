@@ -23,7 +23,15 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/upload/**")   // ← 컨트롤러가 쓰는 경로(단수)로 통일
                 .addResourceLocations("file:" + uploadDir);
 
-        // 2. static/images 매핑 (기존 유지)
+        // 1. 신규 규격 단수형 (/upload/inquiry/...)
+        registry.addResourceHandler("/upload/**")
+                .addResourceLocations("file:" + uploadDir);
+
+        // 2. 기존 DB 데이터 호환용 복수형 (/uploads/inquiry/...)
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:" + uploadDir);
+
+        // 3. static/images 매핑
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("classpath:/static/images/");
     }
