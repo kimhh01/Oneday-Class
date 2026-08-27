@@ -448,17 +448,16 @@
    패널 안에서 가로로 스크롤된다.
    ============================================================= */
 
-/* 목록 : 여유를 열당 10.9px 씩 나눠 가진다 */
-.mgmt-table--list { min-width: 956px; }
-.mgmt-table--list th:nth-child(1) { width: 11.3%; }  /* 대표 이미지 */
-.mgmt-table--list th:nth-child(2) { width: 18.7%; }  /* 클래스명 */
-.mgmt-table--list th:nth-child(3) { width: 8.6%; }   /* 가격 */
-.mgmt-table--list th:nth-child(4) { width: 9.2%; }   /* 일정 유형 */
-.mgmt-table--list th:nth-child(5) { width: 17.2%; }  /* 모집기간 */
-.mgmt-table--list th:nth-child(6) { width: 7.7%; }   /* 예정 일정 */
-.mgmt-table--list th:nth-child(7) { width: 7.7%; }   /* 신청자 */
-.mgmt-table--list th:nth-child(8) { width: 9.2%; }   /* 상태 */
-.mgmt-table--list th:nth-child(9) { width: 10.4%; }  /* 관리 */
+/* 목록 : 숫자와 기간 열의 중심 간격이 고르게 보이도록 폭을 배분한다 */
+.mgmt-table--list { min-width: 880px; }
+.mgmt-table--list th:nth-child(1) { width: 11%; }    /* 대표 이미지 */
+.mgmt-table--list th:nth-child(2) { width: 18%; }    /* 클래스명 */
+.mgmt-table--list th:nth-child(3) { width: 12%; }    /* 가격 */
+.mgmt-table--list th:nth-child(4) { width: 17%; }    /* 모집기간 */
+.mgmt-table--list th:nth-child(5) { width: 11%; }    /* 예정 일정 */
+.mgmt-table--list th:nth-child(6) { width: 9%; }     /* 신청자 */
+.mgmt-table--list th:nth-child(7) { width: 10%; }    /* 상태 */
+.mgmt-table--list th:nth-child(8) { width: 12%; }    /* 관리 */
 
 /* 일정별 운영 현황 */
 .mgmt-table--schedule {

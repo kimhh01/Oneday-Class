@@ -126,8 +126,7 @@
 									<th scope="col">대표 이미지</th>
 									<th scope="col">클래스명</th>
 									<th scope="col" class="col-right">가격</th>
-									<th scope="col" class="col-badge">일정 유형</th>
-									<th scope="col">모집기간</th>
+									<th scope="col" class="col-center">모집기간</th>
 									<th scope="col" class="col-right">예정 일정</th>
 									<th scope="col" class="col-right">신청자</th>
 									<th scope="col" class="col-badge">상태</th>
@@ -139,8 +138,7 @@
 									<td><img class="mgmt-thumb" th:src="${#strings.isEmpty(item.thumbnailPath)} ? @{/author/images/photo/class-upload-placeholder.png} : ${item.thumbnailPath}" alt="" width="76" height="58" loading="lazy"></td>
 									<td class="col-name"><th:block th:text="${item.classTitle}">클래스명</th:block><span class="mgmt-table__sub" th:text="${'CL' + item.classCode}">CL260805-0001</span></td>
 									<td class="col-num" th:text="${#numbers.formatInteger(item.desiredPrice, 1, 'COMMA') + '원'}">65,000원</td>
-									<td class="col-badge"><span class="badge badge--gray" th:text="${item.scheduleType}">등록 일정</span></td>
-									<td class="col-muted" th:text="${item.recruitStartDate == null ? '-' : #dates.format(item.recruitStartDate,'yy.MM.dd') + (item.recruitEndDate == null ? '' : ' ~ ' + #dates.format(item.recruitEndDate,'yy.MM.dd'))}">-</td>
+									<td class="col-muted col-center" th:text="${item.recruitStartDate == null ? '-' : #dates.format(item.recruitStartDate,'yy.MM.dd') + (item.recruitEndDate == null ? '' : ' ~ ' + #dates.format(item.recruitEndDate,'yy.MM.dd'))}">-</td>
 									<td class="col-num" th:text="${item.upcomingScheduleCount + '건'}">0건</td>
 									<td class="col-num" th:text="${item.applicantCount + '명'}">0명</td>
 									<td class="col-badge"><span class="badge" th:classappend="${item.classStatus == '모집중'} ? ' badge--green' : (${item.classStatus == '폐강'} ? ' badge--red' : ' badge--gray')" th:text="${item.classStatus == '모집중' ? '모집 중' : (item.classStatus == '준비중' ? '비공개' : item.classStatus)}">모집 중</span></td>
@@ -150,8 +148,7 @@
 									<td><img class="mgmt-thumb" src="/author/images/photo/class-flower.png" th:src="@{/author/images/photo/class-flower.png}" alt="" width="76" height="58" loading="lazy"></td>
 									<td class="col-name">계절 꽃다발 원데이 클래스<span class="mgmt-table__sub">CLS-2505-0012</span></td>
 									<td class="col-num">65,000원</td>
-									<td class="col-badge"><span class="badge badge--gray">요일 반복</span></td>
-									<td class="col-muted">2025.05.01 ~ 2025.05.15</td>
+									<td class="col-muted col-center">2025.05.01 ~ 2025.05.15</td>
 									<td class="col-num">3건</td>
 									<td class="col-num">24명</td>
 									<td class="col-badge"><span class="badge badge--green">모집 중</span></td>
@@ -163,8 +160,7 @@
 									<td><img class="mgmt-thumb" src="/author/images/photo/class-upload-placeholder.png" th:src="@{/author/images/photo/class-upload-placeholder.png}" alt="" width="76" height="58" loading="lazy"></td>
 									<td class="col-name">홈카페 라떼 아트 클래스<span class="mgmt-table__sub">CLS-2504-0008</span></td>
 									<td class="col-num">55,000원</td>
-									<td class="col-badge"><span class="badge badge--gray">개별 일정</span></td>
-									<td class="col-muted">2025.05.20</td>
+									<td class="col-muted col-center">2025.05.20</td>
 									<td class="col-num col-muted">—</td>
 									<td class="col-num">16명</td>
 									<td class="col-badge"><span class="badge badge--green">모집 중</span></td>
@@ -176,8 +172,7 @@
 									<td><img class="mgmt-thumb" src="/author/images/photo/curriculum-pottery-steps.png" th:src="@{/author/images/photo/curriculum-pottery-steps.png}" alt="" width="76" height="58" loading="lazy"></td>
 									<td class="col-name">도자기 핸드빌딩 클래스<span class="mgmt-table__sub">CLS-2504-0003</span></td>
 									<td class="col-num">70,000원</td>
-									<td class="col-badge"><span class="badge badge--gray">요일 반복</span></td>
-									<td class="col-muted">2025.04.01 ~ 2025.04.14</td>
+									<td class="col-muted col-center">2025.04.01 ~ 2025.04.14</td>
 									<td class="col-num">4건</td>
 									<td class="col-num">32명</td>
 									<td class="col-badge"><span class="badge badge--blue">모집 마감</span></td>
@@ -189,8 +184,7 @@
 									<td><img class="mgmt-thumb" src="/author/images/photo/class-candle.png" th:src="@{/author/images/photo/class-candle.png}" alt="" width="76" height="58" loading="lazy"></td>
 									<td class="col-name">천연 소이캔들 만들기<span class="mgmt-table__sub">CLS-2505-0015</span></td>
 									<td class="col-num">45,000원</td>
-									<td class="col-badge"><span class="badge badge--gray">개별 일정</span></td>
-									<td class="col-muted">2025.05.18</td>
+									<td class="col-muted col-center">2025.05.18</td>
 									<td class="col-num col-muted">—</td>
 									<td class="col-num">18명</td>
 									<td class="col-badge"><span class="badge badge--green">모집 중</span></td>
@@ -202,8 +196,7 @@
 									<td><img class="mgmt-thumb" src="/author/images/photo/class-upload-placeholder.png" th:src="@{/author/images/photo/class-upload-placeholder.png}" alt="" width="76" height="58" loading="lazy"></td>
 									<td class="col-name">수제 티라미수 클래스<span class="mgmt-table__sub">CLS-2504-0009</span></td>
 									<td class="col-num">60,000원</td>
-									<td class="col-badge"><span class="badge badge--gray">요일 반복</span></td>
-									<td class="col-muted">2025.03.28 ~ 2025.04.11</td>
+									<td class="col-muted col-center">2025.03.28 ~ 2025.04.11</td>
 									<td class="col-num">2건</td>
 									<td class="col-num">12명</td>
 									<td class="col-badge"><span class="badge badge--gray">운영 종료</span></td>

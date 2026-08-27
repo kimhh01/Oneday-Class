@@ -19,7 +19,7 @@ public class ClassManagementDAO {
         this.sqlSession = sqlSession;
     }
 
-    // 운영 클래스 목록을 상태·일정 유형·클래스명 기준으로 검색한다
+    // 운영 클래스 목록을 상태·클래스명 기준으로 검색한다
     public List<ClassManagementDTO> selectClassManagementList(long authorCode, String classStatus,
             String keyword, String fromDate, String toDate, int startRow, int endRow) {
         Map<String, Object> param = new HashMap<>();
