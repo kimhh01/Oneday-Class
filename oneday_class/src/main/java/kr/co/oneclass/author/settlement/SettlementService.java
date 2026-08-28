@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import kr.co.oneclass.author.common.LocalFileStorageService;
+import kr.co.oneclass.common.AESUtil;
 
 @Service
 public class SettlementService {
@@ -33,7 +34,9 @@ public class SettlementService {
 
     // 결제상태, 기간, 검색어와 페이지 조건에 맞는 매출 목록을 조회한다
     public List<SalesListDTO> getSalesList(SalesSearchDTO searchDTO) {
-        return sDAO.selectSalesList(searchDTO);
+        List<SalesListDTO> sales = sDAO.selectSalesList(searchDTO);
+        sales.forEach(sale -> sale.setMemberName(AESUtil.decrypt(sale.getMemberName())));
+        return sales;
     }
 
     // 현재 검색 조건에 해당하는 전체 매출 개수를 조회한다
@@ -43,7 +46,12 @@ public class SettlementService {
 
     // 현재 작가의 클래스 결제인지 확인한 후 결제 상세정보를 조회한다
     public SalesDetailDTO getSalesDetail(long authorCode, int paymentCode) {
-        return sDAO.selectSalesDetail(authorCode, paymentCode);
+        SalesDetailDTO detail = sDAO.selectSalesDetail(authorCode, paymentCode);
+        if (detail != null) {
+            detail.setMemberName(AESUtil.decrypt(detail.getMemberName()));
+            detail.setMemberEmail(AESUtil.decrypt(detail.getMemberEmail()));
+        }
+        return detail;
     }
 
     // 정산 가능금액과 아직 정산 가능일이 되지 않은 대기금액을 조회한다
@@ -59,6 +67,7 @@ public class SettlementService {
             account = new SettlementAccountDTO();
             account.setAuthorCode(authorCode);
         }
+        account.setAuthorName(AESUtil.decrypt(account.getAuthorName()));
         account.setMaskedAccountNumber(maskAccountNumber(account.getAccountNumber()));
         return account;
     }
@@ -211,6 +220,7 @@ public class SettlementService {
     public SettlementDetailDTO getSettlementDetail(long authorCode, int settlementCode) {
         SettlementDetailDTO detail = sDAO.selectSettlementDetail(authorCode, settlementCode);
         if (detail != null) {
+            detail.setAuthorName(AESUtil.decrypt(detail.getAuthorName()));
             detail.setTargetList(sDAO.selectSettlementDetailTargetList(settlementCode));
         }
         return detail;

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import kr.co.oneclass.common.AESUtil;
 
 @Service
 public class ReviewService {
@@ -28,7 +29,10 @@ public class ReviewService {
 
     // 답글 상태, 클래스, 정렬 조건과 페이지 번호에 맞는 리뷰 목록을 조회한다
     public List<ReviewListDTO> getReviewList(ReviewSearchDTO searchDTO) {
-        return rDAO.selectReviewList(searchDTO);
+        List<ReviewListDTO> reviews = rDAO.selectReviewList(searchDTO);
+        reviews.forEach(review ->
+                review.setMemberName(AESUtil.decrypt(review.getMemberName())));
+        return reviews;
     }
 
     // 현재 필터 조건에 해당하는 전체 리뷰 수를 조회하여 페이지 계산에 사용한다
@@ -43,6 +47,7 @@ public class ReviewService {
         if (review == null) {
             return null;
         }
+        review.setMemberName(AESUtil.decrypt(review.getMemberName()));
         review.setImageList(rDAO.selectReviewImageList(reviewCode));
         return review;
     }
