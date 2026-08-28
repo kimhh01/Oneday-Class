@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1:1 문의</title>
+<link rel="stylesheet" th:href="@{/admin/css/admin-common.css}">
+<link rel="stylesheet" th:href="@{/admin/css/admin-layout.css}">
+<link rel="stylesheet" th:href="@{/admin/css/admin-inquiry.css}">
+</head>
+<body>
+
+	<div th:replace="~{admin/fragments/sideMenu :: sideMenu('inquiry')}"></div>
+
+	<main class="main inquiry-page">
+		<div class="page-head">
+			<h1>1:1 문의</h1>
+		</div>
+
+		<section class="inquiry-stat-grid">
+			<div class="inquiry-stat-card">
+				<span>전체 문의</span><strong th:text="${statistics.totalCount}">0</strong>
+			</div>
+			<div class="inquiry-stat-card">
+				<span>답변 대기</span><strong th:text="${statistics.waitingCount}">0</strong>
+			</div>
+			<div class="inquiry-stat-card">
+				<span>답변 완료</span><strong th:text="${statistics.completedCount}">0</strong>
+			</div>
+		</section>
+
+		<form class="search-box" th:action="@{/admin/inquiries}" method="get">
+			<input type="text" name="keyword" th:value="${searchDTO.keyword}"
+				placeholder="제목, 작성자 검색"> <select name="inquiryTypeCode">
+				<option value="">전체 유형</option>
+				<option th:each="type : ${inquiryTypes}"
+					th:value="${type.inquiryTypeCode}"
+					th:text="${type.inquiryTypeName}"
+					th:selected="${searchDTO.inquiryTypeCode == type.inquiryTypeCode}">
+				</option>
+			</select> <select name="answerStatus">
+				<option value="">전체 상태</option>
+				<option value="WAITING"
+					th:selected="${searchDTO.answerStatus == 'WAITING'}">답변 대기</option>
+				<option value="COMPLETED"
+					th:selected="${searchDTO.answerStatus == 'COMPLETED'}">답변
+					완료</option>
+			</select>
+
+			<button type="submit" class="btn btn-primary">검색</button>
+			<a class="btn btn-secondary" th:href="@{/admin/inquiries}">초기화</a>
+		</form>
+
+		<section class="table-panel">
+			<div class="table-summary">
+				전체 <strong th:text="${page.totalCount}">0</strong>건
+			</div>
+
+			<table>
+				<thead>
+					<tr>
+						<th>번호</th>
+						<th>유형</th>
+						<th>제목</th>
+						<th>작성자</th>
+						<th>등록일</th>
+						<th>상태</th>
+						<th>관리</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr th:each="inquiry : ${inquiries}">
+						<td th:text="${inquiry.inquiryCode}"></td>
+						<td th:text="${inquiry.inquiryTypeName}"></td>
+						<td class="inquiry-title" th:text="${inquiry.title}"></td>
+						<td th:text="${inquiry.writerName}"></td>
+						<td
+							th:text="${inquiry.inquiryDate != null ? #dates.format(inquiry.inquiryDate,'yyyy.MM.dd') : '-'}"></td>
+						<td><span class="answer-status"
+							th:classappend="${inquiry.answerStatus == '답변완료'} ? ' answer-complete' : ' answer-waiting'"
+							th:text="${inquiry.answerStatus}"></span></td>
+						<td><a class="detail-link"
+							th:href="@{/admin/inquiries/{code}(code=${inquiry.inquiryCode})}">답변</a>
+						</td>
+					</tr>
+
+					<tr th:if="${#lists.isEmpty(inquiries)}">
+						<td colspan="7" class="empty">조회된 문의가 없습니다.</td>
+					</tr>
+				</tbody>
+			</table>
+
+			<div class="pagination">
+				<a th:if="${page.currentPage > 1}"
+					th:href="@{/admin/inquiries(page=${page.currentPage-1},keyword=${searchDTO.keyword},inquiryTypeCode=${searchDTO.inquiryTypeCode},answerStatus=${searchDTO.answerStatus})}">‹</a>
+
+				<a
+					th:each="pageNo : ${#numbers.sequence(page.startPage,page.endPage)}"
+					th:classappend="${pageNo == page.currentPage} ? ' active'"
+					th:text="${pageNo}"
+					th:href="@{/admin/inquiries(page=${pageNo},keyword=${searchDTO.keyword},inquiryTypeCode=${searchDTO.inquiryTypeCode},answerStatus=${searchDTO.answerStatus})}">1</a>
+
+				<a th:if="${page.currentPage < page.totalPage}"
+					th:href="@{/admin/inquiries(page=${page.currentPage+1},keyword=${searchDTO.keyword},inquiryTypeCode=${searchDTO.inquiryTypeCode},answerStatus=${searchDTO.answerStatus})}">›</a>
+			</div>
+		</section>
+	</main>
+</body>
+</html>

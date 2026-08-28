@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title th:text="${editMode == true ? '클래스 수정 · 기본 정보 | Oneclass' : '클래스 등록 · 기본 정보 | Oneclass'}">클래스 등록 · 기본 정보 | Oneclass</title>
+<link rel="stylesheet" href="/author/css/common.css" th:href="@{/author/css/common.css}">
+<link rel="stylesheet" href="/author/css/header.css" th:href="@{/author/css/header.css}">
+<link rel="stylesheet" href="/author/css/sidebar.css" th:href="@{/author/css/sidebar.css}">
+<link rel="stylesheet" href="/author/css/class-register.css" th:href="@{/author/css/class-register.css}">
+<link rel="stylesheet" href="/author/css/class-edit.css" th:href="@{/author/css/class-edit.css}">
+<script src="/author/js/layout.js" th:src="@{/author/js/layout.js}" defer></script>
+<script src="/author/js/class-register-draft.js" th:src="@{/author/js/class-register-draft.js}" defer></script>
+</head>
+<!--
+	클래스 등록 2단계(기본 정보).
+	단계별 임시 저장을 서비스와 연결할 때는 CLASS.STATUS="준비중"을 사용한다.
+	DB에 없는 DRAFT 상태를 새로 만들지 않는다.
+-->
+<body class="author-page register-form-page" data-menu="class-register" data-page="클래스 등록"
+	  th:attr="data-menu=${editMode == true ? 'class-manage' : 'class-register'},data-page=${editMode == true ? '클래스 수정' : '클래스 등록'}">
+
+<div class="app">
+	<div th:replace="~{author/fragments/icons :: icons}"></div>
+	<div th:replace="~{author/fragments/header :: header}"></div>
+
+	<div class="app-body">
+		<div th:replace="~{author/fragments/sidebar :: sidebar}"></div>
+
+		<main class="content">
+			<div class="content__inner">
+				<header class="register-page-head register-page-head--compact">
+					<h1 class="page-title"><span th:text="${editMode == true ? '클래스 수정' : '클래스 등록하기'}">클래스 등록하기</span> <svg class="title-leaf" aria-hidden="true"><use href="#icon-title-leaf"></use></svg></h1>
+					<p class="page-desc" th:text="${editMode == true ? '운영 중인 클래스의 기본 정보를 수정합니다.' : '원데이 클래스 등록을 위한 기본 정보를 입력해주세요.'}">원데이 클래스 등록을 위한 기본 정보를 입력해주세요.</p>
+					<p class="reply-error" th:if="${registerError}" th:text="${registerError}">입력값을 확인해주세요.</p>
+					<p class="reply-error" th:if="${rejectionNotice}" th:text="${rejectionNotice}">반려 사유를 확인해주세요.</p>
+				</header>
+				<p class="class-edit-notice" th:if="${editMode == true}">수정 내용은 별도 관리자 검수 없이 저장 즉시 반영됩니다. 클래스의 승인 상태는 그대로 유지됩니다.</p>
+				<div th:replace="~{author/fragments/class-register-steps :: steps(${basicForm.classCode}, 2, ${editMode}, ${editStep})}"></div>
+
+				<form class="register-grid" id="basicInfoForm" enctype="multipart/form-data" method="post" novalidate data-draft-form
+					  th:object="${basicForm}"
+					  th:action="${editMode == true ? editFormAction : '/author/classes/register/basic'}">
+					<input type="hidden" name="classCode" th:value="${basicForm.classCode}">
+					<section class="card register-info-card" aria-labelledby="basicInfoTitle">
+						<div class="card-head-icon">
+							<span class="icon-box"><svg aria-hidden="true"><use href="#icon-doc-text"></use></svg></span>
+							<div>
+								<h2 class="card-head-icon__title" id="basicInfoTitle">기본 정보</h2>
+								<p class="card-head-icon__desc">클래스의 기본 정보를 자세히 입력해주세요.</p>
+							</div>
+						</div>
+
+						<div class="card__body">
+							<div class="field">
+								<label class="field__label" for="category">카테고리</label>
+								<div class="field__control">
+									<div class="select">
+						<select id="category" th:field="*{categoryCode}" required>
+							<option value="0" selected disabled>카테고리를 선택해주세요</option>
+							<option th:each="category : ${categories}" th:value="${category.categoryCode}" th:text="${category.name}">공예</option>
+										</select>
+										<svg class="select__arrow" aria-hidden="true"><use href="#icon-chevron-down"></use></svg>
+									</div>
+									<p class="field__help">가장 잘 맞는 카테고리를 선택하면 수강생이 클래스를 찾기 쉬워요.</p>
+								</div>
+							</div>
+
+							<div class="field">
+								<label class="field__label" for="className">클래스 이름</label>
+								<div class="field__control">
+									<input class="input" type="text" id="className" th:field="*{classTitle}"
+										   maxlength="30" data-byte-limit="30" data-byte-counter="classNameBytes" placeholder="예: 감성 도자기 핸드빌딩 클래스" required>
+									<div class="field__foot">
+										<p class="field__help">클래스 이름을 입력해주세요.(최대 10자)</p>
+										<p class="field__count"><span id="classNameBytes">0</span> / 30 byte</p>
+									</div>
+								</div>
+							</div>
+
+							<div class="field">
+								<label class="field__label" for="summary">한 줄 소개</label>
+								<div class="field__control">
+									<input class="input" type="text" id="summary" th:field="*{shortIntroduction}"
+										   maxlength="100" data-byte-limit="100" data-byte-counter="summaryBytes" placeholder="예: 흙으로 빚는 나만의 따뜻한 작품" required>
+									<div class="field__foot">
+										<p class="field__help">클래스를 한 줄로 표현해주세요.(최대 33자)</p>
+										<p class="field__count"><span id="summaryBytes">0</span> / 100 byte</p>
+									</div>
+								</div>
+							</div>
+
+							<div class="field">
+								<label class="field__label" for="intro">클래스 소개</label>
+								<div class="field__control">
+									<textarea class="textarea" id="intro" th:field="*{classIntroduction}" maxlength="500"
+											  data-counter="introCount"
+											  placeholder="클래스의 매력과 특별한 경험을 소개해주세요" required></textarea>
+									<div class="field__foot">
+										<p class="field__help">특징, 진행 방식, 기대 효과 등을 자세히 작성해주세요. (최대 500자)</p>
+										<p class="field__count"><span id="introCount">0</span> / 500</p>
+									</div>
+								</div>
+							</div>
+
+						</div>
+					</section>
+
+					<section class="card register-photo-card" aria-labelledby="photoTitle">
+						<div class="card-head-icon">
+							<span class="icon-box"><svg aria-hidden="true"><use href="#icon-image"></use></svg></span>
+							<div>
+								<h2 class="card-head-icon__title" id="photoTitle">대표 사진 등록</h2>
+								<p class="card-head-icon__desc">클래스를 가장 잘 보여줄 대표 사진을 등록해주세요.</p>
+							</div>
+						</div>
+
+						<div class="card__body">
+							<label class="upload-zone" id="uploadZone"
+								   th:classappend="${!#lists.isEmpty(basicForm.mainImageList)} ? ' has-image'">
+								<input type="file" class="sr-only" id="classImages" name="mainFiles" accept="image/jpeg,image/png" multiple>
+								<img class="upload-zone__preview"
+									 src="/author/images/photo/class-upload-placeholder.png"
+									 th:src="${#strings.isEmpty(basicForm.mainImagePath) ? '/author/images/photo/class-upload-placeholder.png' : basicForm.mainImagePath}"
+									 onerror="this.onerror=null;this.src='/author/images/photo/class-upload-placeholder.png';"
+									 alt="따뜻한 분위기의 도자기 클래스 대표 사진 예시">
+								<span class="upload-zone__overlay">
+									<span class="upload-zone__cta">
+										<svg aria-hidden="true"><use href="#icon-image"></use></svg>
+										사진 선택 또는 드래그 앤 드롭
+									</span>
+									<span class="upload-zone__hint">JPG, PNG 파일 (각 최대 5MB · 최대 5장)</span>
+								</span>
+							</label>
+
+							<div class="upload-photo-controls">
+								<div class="upload-thumbs" id="uploadThumbs" aria-label="선택한 클래스 사진">
+									<button type="button" class="upload-thumb upload-thumb--preview"
+											th:each="image, stat : ${basicForm.mainImageList}"
+											th:attr="data-existing-image=${image.imageCode},data-image-src=${image.imagePath}">
+										<img th:src="${image.imagePath}" th:alt="${stat.first ? '대표 사진' : '등록한 클래스 사진 ' + stat.count}"
+											 onerror="this.onerror=null;this.src='/author/images/photo/class-upload-placeholder.png';">
+										<span class="upload-thumb__badge" th:if="${stat.first}">대표</span>
+									</button>
+								</div>
+								<button type="button" class="upload-remove-button" id="removeSelectedImage" disabled>
+									<svg aria-hidden="true"><use href="#icon-trash"></use></svg>
+									선택 사진 삭제
+								</button>
+							</div>
+
+							<ul class="upload-notes">
+								<li><svg aria-hidden="true"><use href="#icon-check-circle"></use></svg> 밝고 선명한 가로형 사진을 권장해요.</li>
+								<li><svg aria-hidden="true"><use href="#icon-check-circle"></use></svg> 클래스 분위기와 내용을 잘 보여주는 사진을 선택해주세요.</li>
+								<li><svg aria-hidden="true"><use href="#icon-check-circle"></use></svg> 인물, 작품, 공간 등 클래스의 매력을 담아보세요.</li>
+							</ul>
+						</div>
+					</section>
+
+					<div class="step-actions">
+						<button type="submit" name="saveMode" value="stay" class="btn btn--ghost btn--lg step-actions__save">
+							<svg aria-hidden="true"><use href="#icon-bookmark"></use></svg>
+							<span th:text="${editMode == true ? '저장' : '임시 저장'}">임시 저장</span>
+						</button>
+						<div class="step-actions__nav">
+							<a href="class-register.html" th:href="${editMode == true ? '/author/classes/' + editClassCode : '/author/classes/register-guide'}" class="btn btn--ghost btn--lg step-actions__previous">이전 단계</a>
+							<button type="submit" name="saveMode" value="next" class="btn btn--primary btn--lg step-actions__next">
+								<span>다음 단계</span>
+								<span class="step-actions__next-icon"><svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg></span>
+							</button>
+						</div>
+					</div>
+				</form>
+
+				<footer class="site-footer" th:replace="~{author/fragments/footer :: footer}">
+					<div class="site-footer__links">
+						<a href="guide.html" th:href="@{/author/guide}">작가 가이드</a>
+						<a href="notice.html" th:href="@{/author/notices}">공지사항</a>
+						<a href="qna.html" th:href="@{/author/qna}">사업자 문의</a>
+						<a href="#">이용약관</a>
+						<a href="#">개인정보처리방침</a>
+					</div>
+					<p class="site-footer__copy">
+						<b>Oneclass</b> 작가센터 · 평일 10:00 ~ 18:00 (점심 12:00 ~ 13:00)<br>
+						© 2026 Oneclass. All rights reserved.
+					</p>
+				</footer>
+			</div>
+		</main>
+	</div>
+</div>
+
+<script>
+(function () {
+	document.querySelectorAll('[data-byte-limit]').forEach(function (element) {
+		var limit = Number(element.dataset.byteLimit);
+		var output = document.getElementById(element.dataset.byteCounter);
+		var update = function () {
+			var length = new TextEncoder().encode(element.value).length;
+			if (output) output.textContent = length;
+			element.setCustomValidity(length > limit ? limit + '바이트 이내로 입력해주세요.' : '');
+		};
+		element.addEventListener('input', update);
+		update();
+	});
+
+	var counters = document.querySelectorAll('[data-counter]');
+	counters.forEach(function (element) {
+		var output = document.getElementById(element.dataset.counter);
+		if (!output) return;
+		var update = function () { output.textContent = element.value.length; };
+		element.addEventListener('input', update);
+		update();
+	});
+
+	var tagInput = document.getElementById('tags');
+	var tagCount = document.getElementById('tagCount');
+	if (tagInput && tagCount) {
+		var updateTags = function () {
+			var count = tagInput.value.split(',')
+				.map(function (tag) { return tag.trim(); })
+				.filter(Boolean).slice(0, 8).length;
+			tagCount.textContent = count + ' / 8';
+		};
+		tagInput.addEventListener('input', updateTags);
+		updateTags();
+	}
+
+	var input = document.getElementById('classImages');
+	var zone = document.getElementById('uploadZone');
+	var preview = zone ? zone.querySelector('.upload-zone__preview') : null;
+	var thumbs = document.getElementById('uploadThumbs');
+	var removeButton = document.getElementById('removeSelectedImage');
+	var objectUrls = [];
+	var selectedFiles = [];
+	var existingImages = thumbs ? Array.from(thumbs.querySelectorAll('[data-existing-image]')).map(function (button) {
+		return { code: button.dataset.existingImage, src: button.dataset.imageSrc };
+	}) : [];
+	var activeKey = existingImages.length ? 'existing:' + existingImages[0].code : null;
+	var placeholder = '/author/images/photo/class-upload-placeholder.png';
+
+	function clearObjectUrls() {
+		objectUrls.forEach(function (url) { URL.revokeObjectURL(url); });
+		objectUrls = [];
+	}
+
+	function fileKey(file) {
+		return file.name + ':' + file.size + ':' + file.lastModified;
+	}
+
+	function syncInput() {
+		var transfer = new DataTransfer();
+		selectedFiles.forEach(function (file) { transfer.items.add(file); });
+		input.files = transfer.files;
+	}
+
+	function appendFiles(fileList) {
+		var known = new Set(selectedFiles.map(fileKey));
+		var firstAddedKey = null;
+		Array.from(fileList || []).filter(function (file) {
+			return (file.type === 'image/jpeg' || file.type === 'image/png')
+				&& file.size <= 5 * 1024 * 1024;
+		}).forEach(function (file) {
+			var key = fileKey(file);
+			if (existingImages.length + selectedFiles.length >= 5 || known.has(key)) return;
+			known.add(key);
+			selectedFiles.push(file);
+			if (!firstAddedKey) firstAddedKey = 'file:' + key;
+		});
+		if (firstAddedKey) activeKey = firstAddedKey;
+		syncInput();
+		renderFiles();
+	}
+
+	function renderFiles() {
+		if (!preview || !thumbs) return;
+
+		clearObjectUrls();
+		thumbs.innerHTML = '';
+		var items = existingImages.map(function (image) {
+			return { key: 'existing:' + image.code, src: image.src };
+		});
+		selectedFiles.forEach(function (file) {
+			var url = URL.createObjectURL(file);
+			objectUrls.push(url);
+			items.push({ key: 'file:' + fileKey(file), src: url });
+		});
+		if (!items.some(function (item) { return item.key === activeKey; })) {
+			activeKey = items.length ? items[0].key : null;
+		}
+		var activeItem = items.find(function (item) { return item.key === activeKey; });
+		preview.src = activeItem ? activeItem.src : placeholder;
+		preview.alt = activeItem ? '선택한 클래스 사진 미리보기' : '대표 사진을 선택해주세요';
+		zone.classList.toggle('has-image', items.length > 0);
+		if (removeButton) removeButton.disabled = !activeItem;
+
+		items.forEach(function (item, index) {
+			var key = item.key;
+			var isRepresentative = index === 0;
+			var button = document.createElement('button');
+			button.type = 'button';
+			button.className = 'upload-thumb upload-thumb--preview'
+				+ (key === activeKey ? ' is-active' : '');
+			button.addEventListener('click', function () {
+				activeKey = key;
+				renderFiles();
+			});
+			var image = document.createElement('img');
+			image.src = item.src;
+			image.alt = isRepresentative ? '선택한 대표 사진' : '선택한 클래스 사진 ' + (index + 1);
+			button.appendChild(image);
+			if (isRepresentative) {
+				var badge = document.createElement('span');
+				badge.className = 'upload-thumb__badge';
+				badge.textContent = '대표';
+				button.appendChild(badge);
+			}
+			thumbs.appendChild(button);
+		});
+
+		for (var index = items.length; index < 5; index += 1) {
+			var empty = document.createElement('button');
+			empty.type = 'button';
+			empty.className = 'upload-thumb';
+			empty.setAttribute('data-open-upload', '');
+			empty.innerHTML = '<span aria-hidden="true">+</span><span class="sr-only">사진 추가</span>';
+			thumbs.appendChild(empty);
+		}
+	}
+
+	function markExistingImageForRemoval(imageCode) {
+		var hidden = document.createElement('input');
+		hidden.type = 'hidden';
+		hidden.name = 'removeMainImageCodeList';
+		hidden.value = imageCode;
+		document.getElementById('basicInfoForm').appendChild(hidden);
+	}
+
+	if (removeButton) {
+		removeButton.addEventListener('click', function () {
+			if (!activeKey) return;
+			if (activeKey.indexOf('existing:') === 0) {
+				var imageCode = activeKey.substring('existing:'.length);
+				markExistingImageForRemoval(imageCode);
+				existingImages = existingImages.filter(function (image) {
+					return String(image.code) !== imageCode;
+				});
+			} else if (activeKey.indexOf('file:') === 0) {
+				var selectedKey = activeKey.substring('file:'.length);
+				selectedFiles = selectedFiles.filter(function (file) {
+					return fileKey(file) !== selectedKey;
+				});
+				syncInput();
+			}
+			activeKey = null;
+			renderFiles();
+		});
+	}
+
+	if (input && zone) {
+		input.addEventListener('change', function () { appendFiles(input.files); });
+		zone.addEventListener('dragover', function (event) {
+			event.preventDefault();
+			zone.classList.add('is-dragging');
+		});
+		zone.addEventListener('dragleave', function () { zone.classList.remove('is-dragging'); });
+		zone.addEventListener('drop', function (event) {
+			event.preventDefault();
+			zone.classList.remove('is-dragging');
+			appendFiles(event.dataTransfer.files);
+		});
+		document.addEventListener('click', function (event) {
+			var button = event.target.closest('[data-open-upload]');
+			if (button) input.click();
+		});
+	}
+	renderFiles();
+}());
+</script>
+
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>리뷰 관리 | 숨쉬당 원데이 클래스</title>
+<link rel="stylesheet" th:href="@{/author/css/common.css}">
+<link rel="stylesheet" th:href="@{/author/css/header.css}">
+<link rel="stylesheet" th:href="@{/author/css/sidebar.css}">
+<link rel="stylesheet" th:href="@{/author/css/management.css}">
+<link rel="stylesheet" th:href="@{/author/css/review.css}">
+<script th:src="@{/author/js/layout.js}" defer></script>
+</head>
+<body class="author-page management-page review-page" data-menu="review" data-page="리뷰 관리">
+<div class="app">
+	<div th:replace="~{author/fragments/icons :: icons}"></div>
+	<div th:replace="~{author/fragments/header :: header}"></div>
+	<div class="app-body">
+		<div th:replace="~{author/fragments/sidebar :: sidebar}"></div>
+		<main class="content">
+			<div class="content__inner review-content">
+				<section class="review-board" aria-label="리뷰 관리">
+					<header class="review-page-head">
+						<h1>리뷰 관리</h1>
+						<p>클래스 후기를 확인하고 답글을 관리할 수 있습니다.</p>
+					</header>
+					<div class="review-toolbar">
+						<nav class="review-status-tabs" aria-label="답글 상태별 보기">
+							<a th:href="@{/author/reviews(classCode=${search.classCode},sortType=${search.sortType},replyStatus='all')}" th:attr="aria-current=${search.replyStatus == 'all'} ? 'page' : null">전체</a>
+							<a th:href="@{/author/reviews(classCode=${search.classCode},sortType=${search.sortType},replyStatus='replied')}" th:attr="aria-current=${search.replyStatus == 'replied'} ? 'page' : null">답글 단 리뷰</a>
+							<a th:href="@{/author/reviews(classCode=${search.classCode},sortType=${search.sortType},replyStatus='pending')}" th:attr="aria-current=${search.replyStatus == 'pending'} ? 'page' : null">답글 안 단 리뷰</a>
+						</nav>
+						<form class="review-sort" method="get" th:action="@{/author/reviews}">
+							<input type="hidden" name="classCode" th:value="${search.classCode}">
+							<input type="hidden" name="replyStatus" th:value="${search.replyStatus}">
+							<label class="sr-only" for="reviewSort">정렬</label>
+							<div class="select">
+								<select id="reviewSort" name="sortType" onchange="this.form.submit()">
+									<option value="latest" th:selected="${search.sortType == 'latest'}">최신순</option>
+									<option value="oldest" th:selected="${search.sortType == 'oldest'}">오래된순</option>
+									<option value="ratingDesc" th:selected="${search.sortType == 'ratingDesc'}">별점 높은 순</option>
+									<option value="ratingAsc" th:selected="${search.sortType == 'ratingAsc'}">별점 낮은 순</option>
+								</select>
+								<svg class="select__arrow" aria-hidden="true"><use href="#icon-chevron-down"></use></svg>
+							</div>
+						</form>
+					</div>
+
+					<nav class="review-class-chips" aria-label="클래스별 리뷰 보기">
+						<a th:href="@{/author/reviews(replyStatus=${search.replyStatus},sortType=${search.sortType})}" th:attr="aria-current=${search.classCode == 0} ? 'page' : null">전체 클래스</a>
+						<a th:each="item : ${classes}" th:href="@{/author/reviews(classCode=${item.classCode},replyStatus=${search.replyStatus},sortType=${search.sortType})}" th:attr="aria-current=${search.classCode == item.classCode} ? 'page' : null" th:text="${item.classTitle}">클래스명</a>
+					</nav>
+
+					<div class="review-summary" aria-label="리뷰 요약">
+						<div><span>전체</span><strong th:text="${summary.totalReviewCount}">0</strong></div>
+						<div><span>답글 완료</span><strong class="is-green" th:text="${summary.repliedReviewCount}">0</strong></div>
+						<div><span>미답글</span><strong th:text="${summary.unansweredReviewCount}">0</strong></div>
+					</div>
+
+					<section class="review-list" aria-label="리뷰 목록" th:unless="${#lists.isEmpty(reviews)}">
+						<article class="review-card" th:each="review : ${reviews}" th:with="replied=${review.replyContent != null and !#strings.isEmpty(review.replyContent)}">
+							<img class="review-card__thumb" th:src="${review.thumbnailPath != null and !#strings.isEmpty(review.thumbnailPath)} ? ${review.thumbnailPath} : @{/author/images/photo/class-upload-placeholder.png}" alt="" loading="lazy" onerror="this.onerror=null;this.src='/author/images/photo/class-upload-placeholder.png';">
+							<div class="review-card__body">
+								<h2><a th:href="@{/author/reviews/{code}(code=${review.reviewCode})}" th:text="${review.classTitle}">클래스명</a></h2>
+								<div class="review-card__reviewer">
+									<strong th:text="${review.memberName}">작성자</strong>
+									<span class="review-stars" th:attr="aria-label=|별점 ${#numbers.formatDecimal(review.rating, 1, 1)}점|">
+										<span aria-hidden="true" th:each="star : ${#numbers.sequence(1, 5)}" th:classappend="${star <= review.rating} ? ' is-filled'">★</span>
+										<small th:text="${#numbers.formatDecimal(review.rating, 1, 1)}">5.0</small>
+									</span>
+								</div>
+								<p class="review-card__text" th:text="${review.reviewContent}">리뷰 내용</p>
+							</div>
+							<div class="review-reply" th:if="${replied}">
+								<strong>내 답글</strong>
+								<p th:text="${review.replyContent}">답글 내용</p>
+								<time th:text="${review.replyDate == null ? '' : #dates.format(review.replyDate, 'yyyy.MM.dd')}">답글일</time>
+							</div>
+							<div class="review-card__side">
+								<time th:text="${review.reviewDate == null ? '' : #dates.format(review.reviewDate, 'yyyy.MM.dd')}">작성일</time>
+								<span class="badge" th:classappend="${replied} ? 'badge--green'" th:text="${replied} ? '답글 완료' : '미답글'">상태</span>
+								<a class="btn" th:classappend="${replied} ? 'btn--ghost' : 'btn--outline'" th:href="@{/author/reviews/{code}(code=${review.reviewCode},mode=${replied ? 'view' : 'create'})}" th:text="${replied} ? '상세 보기' : '답글 작성'">상세 보기</a>
+							</div>
+						</article>
+					</section>
+					<div class="review-empty" th:if="${#lists.isEmpty(reviews)}">
+						<span><svg aria-hidden="true"><use href="#icon-chat"></use></svg></span>
+						<strong>조건에 맞는 리뷰가 없습니다.</strong>
+						<p>다른 클래스나 답글 상태를 선택해보세요.</p>
+					</div>
+				</section>
+				<div th:replace="~{author/fragments/footer :: footer}"></div>
+			</div>
+		</main>
+	</div>
+</div>
+</body>
+</html>

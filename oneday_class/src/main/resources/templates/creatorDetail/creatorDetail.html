@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title th:text="${creator?.activityName != null ? creator.activityName + ' 작가 홈' : '작가 프로필'}">작가 프로필</title>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<link rel="stylesheet" th:href="@{/creatorDetail/css/creatorDetail.css}">
+</head>
+<div th:replace="~{common/header :: headerFragment}"></div>
+<body class="map-page-body">
+
+	<!-- 메인 2컬럼 본문 영역 -->
+	<main class="main-container">
+
+		<!-- [좌측 영역] -->
+		<div class="left-content-area">
+
+			<!-- 1. 작가 프로필 메인 헤더 -->
+			<div class="creator-profile-container">
+				<!-- 프로필 정보 줄 -->
+				<div class="creator-info-header">
+					<div class="creator-avatar-circle">
+						<img th:src="${creator?.profileImage != null ? creator.profileImage : 'https://cdn-icons-png.flaticon.com/512/847/847969.png'}" alt="작가 프로필">
+					</div>
+					<div class="creator-meta-box">
+						<h2 class="creator-title-name" th:text="${creator?.activityName}">메이크업 소은</h2>
+						<div class="creator-sub-meta">
+							<span class="meta-label">지역</span>
+							<strong class="meta-value" th:text="${creator?.activityRegion ?: '성수동2가'}">성수동2가</strong>
+						</div>
+					</div>
+				</div>
+
+				<!-- 작가 소개글 박스 -->
+				<div class="creator-intro-card" th:text="${creator?.creatorIntroduction ?: '등록된 작가 소개글이 없습니다.'}">
+					성수에서 메이크업샵 '메이크업세미'를 운영중인 메이크업아티스트 소은입니다:)
+				</div>
+			</div>
+
+			<!-- 2. 탭 메뉴 (클래스 / 후기) -->
+			<div class="sticky-tab-menu image-style-tabs">
+				<a href="#classes" class="tab-link active">
+					클래스 <span class="tab-count" th:text="${classList != null ? classList.size() : 0}">0</span>
+				</a>
+				<a href="#reviews" class="tab-link">
+					후기 <span class="tab-count" th:text="${reviewSummary?.totalReviewCount ?: 0}">0</span>
+				</a>
+			</div>
+
+			<!-- 3. 개설 클래스 섹션 (가로형 리스트) -->
+			<section id="classes" class="content-section">
+				<div class="horizontal-class-list" th:if="${classList != null and !#lists.isEmpty(classList)}">
+					<th:block th:each="item : ${classList}">
+						<a class="horizontal-class-card" th:href="@{/classDetail(classCode=${item.classCode})}">
+							<div class="thumb-box">
+								<img
+									th:src="${item.imageList != null and !#lists.isEmpty(item.imageList) ? item.imageList[0].image : 'https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=300'}"
+									alt="비슷한 클래스">
+							</div>
+							<div class="card-info">
+								<div class="card-sub-info">
+									<span th:text="${item.address ?: '성동구 성수동2가'}">성동구 성수동2가</span>
+								</div>
+								<h3 class="class-title" th:text="${item.name}">[클래스] 나의 외적 페르소나 찾기</h3>
+								<div class="price-row">
+									<span class="discount-rate" th:if="${item.discountRate != null and item.discountRate > 0}" th:text="|${item.discountRate}%|">7%</span>
+									<span class="class-price" th:text="${item.price != null and item.price > 0} ? |${#numbers.formatInteger(item.price, 0, 'COMMA')}원| : '가격 문의'">37,000원</span>
+								</div>
+							</div>
+						</a>
+					</th:block>
+				</div>
+			</section>
+
+			<!-- 4. 작가 수강생 리뷰 섹션 -->
+			<section id="reviews" class="content-section">
+				<div class="review-header">
+					<h3 class="section-heading">
+						수강생 후기 <span class="count-pink" th:text="${reviewSummary?.totalReviewCount ?: 0}">0</span>
+					</h3>
+				</div>
+
+				<div class="rating-summary-box">
+					<div class="score-large">
+						<span class="num" th:text="${#numbers.formatDecimal(reviewSummary?.averageRating ?: 0.0, 1, 1)}">0.0</span>
+						<div class="star-rating">
+							<th:block th:each="i : ${#numbers.sequence(1, 5)}">
+								<span th:if="${i <= (reviewSummary?.averageRating ?: 0)}">★</span>
+								<span th:unless="${i <= (reviewSummary?.averageRating ?: 0)}" class="star-empty">★</span>
+							</th:block>
+						</div>
+					</div>
+				</div>
+
+				<div class="review-list-wrapper" th:if="${reviewList != null and !#lists.isEmpty(reviewList)}">
+					<th:block th:each="review : ${reviewList}">
+						<div class="review-card">
+							<div class="review-card-header">
+								<div class="review-user-info">
+									<img th:src="${review.userImg != null ? review.userImg : 'https://cdn-icons-png.flaticon.com/512/847/847969.png'}" class="user-avatar" alt="사용자">
+									<span class="user-name" th:text="${review.userName ?: '익명'}">수강생</span>
+								</div>
+								<div class="card-star-rating">
+									<span class="stars">
+										<th:block th:each="i : ${#numbers.sequence(1, 5)}">
+											<span th:if="${i <= (review.starRating ?: 0)}">★</span>
+											<span th:unless="${i <= (review.starRating ?: 0)}" class="star-empty">★</span>
+										</th:block>
+									</span>
+								</div>
+							</div>
+							<p class="review-text" th:text="${review.content}">후기 내용입니다.</p>
+							<div class="review-card-footer">
+								<span class="review-date" th:text="${review.inputDate}">2026.08.01</span>
+							</div>
+						</div>
+					</th:block>
+				</div>
+			</section>
+
+		</div>
+
+		<!-- [우측 영역: 스티키 사이드바] -->
+		<div class="right-sidebar-area">
+			<div class="sticky-booking-widget">
+
+				<h2 class="widget-class-title" th:text="${creator?.activityName}">메이크업 소은</h2>
+
+				<div class="widget-sub-info">
+					<span class="star-icon">★</span>
+					<span class="rating-val" th:text="${#numbers.formatDecimal(reviewSummary?.averageRating ?: 0.0, 1, 1)}">0.0</span>
+					<span class="divider">|</span>
+					<a href="#reviews" class="review-cnt" th:text="|리뷰 ${reviewSummary?.totalReviewCount ?: 0}건|">리뷰 0건</a>
+				</div>
+
+				<div class="widget-meta-info">
+					<div class="meta-item">
+						<span class="meta-icon">📍</span>
+						<span th:text="${creator?.activityRegion ?: '성수동2가'}">성수동2가</span>
+					</div>
+					<div class="meta-item">
+						<span class="meta-icon">🎨</span>
+						<span th:text="|총 ${classList != null ? classList.size() : 0}개의 클래스 운영 중|">클래스 0개</span>
+					</div>
+				</div>
+
+				<!-- 액션 버튼 영역 -->
+				<div class="widget-btn-group">
+					<button type="button" class="btn-submit-green" style="width: 100%;" onclick="goToInquiry()">
+						작가에게 문의하기 💬
+					</button>
+				</div>
+
+
+			</div>
+		</div>
+
+	</main>
+<div th:replace="~{common/footer :: footerFragment}"></div>
+	<!-- 스크립트 영역 -->
+	<script th:inline="javascript">
+		function goToInquiry() {
+			const snsUrl = /*[[${creator?.snsUrl}]]*/ '';
+			if (snsUrl) {
+				window.open(snsUrl, '_blank');
+			} else {
+				alert('등록된 작가의 문의 채널 링크가 없습니다.');
+			}
+		}
+	</script>
+</body>
+</html>

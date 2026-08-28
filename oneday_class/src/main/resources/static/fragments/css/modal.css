@@ -1,0 +1,120 @@
+@charset "UTF-8";
+
+/* =========================================================
+   [공통 성공 모달 팝업]
+   ========================================================= */
+
+/* 모달 배경 어둡게 (오버레이) */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: modalFadeIn 0.2s ease-out;
+}
+
+/* 모달 중앙 카드 */
+.modal-card {
+    background-color: #ffffff;
+    width: 90%;
+    max-width: 380px;
+    border-radius: 20px;
+    padding: 36px 28px 28px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    animation: modalSlideUp 0.2s ease-out;
+}
+
+/* 상단 연초록 원형 체크 아이콘 배경 */
+.modal-icon-circle {
+    width: 60px;
+    height: 60px;
+    background-color: #eaf3ed;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+}
+
+/* 제목 및 안내 문구 */
+.modal-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #111111;
+    margin-bottom: 12px;
+}
+
+.modal-desc {
+    font-size: 13.5px;
+    color: #666666;
+    line-height: 1.55;
+    margin-bottom: 8px;
+}
+
+.modal-subdesc {
+    font-size: 13.5px;
+    color: #356846;
+    font-weight: 600;
+    margin-bottom: 28px;
+}
+
+/* 하단 버튼 그룹 (2개 배치) */
+.modal-btn-group {
+    display: flex;
+    gap: 10px;
+}
+
+/* 왼쪽 [확인] 버튼 (테두리형) */
+.btn-modal-confirm {
+    flex: 1;
+    height: 46px;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    color: #356846;
+    font-size: 14.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-modal-confirm:hover {
+    background-color: #f4f8f4;
+    border-color: #356846;
+}
+
+/* 오른쪽 [문의 내역 보기 / 상세 보기] 버튼 (채우기형) */
+.btn-modal-detail {
+    flex: 1;
+    height: 46px;
+    border-radius: 10px;
+    border: none;
+    background-color: #356846;
+    color: #ffffff;
+    font-size: 14.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.btn-modal-detail:hover {
+    background-color: #2a5237;
+}
+
+/* 등장 애니메이션 */
+@keyframes modalFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes modalSlideUp {
+    from { transform: translateY(12px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}

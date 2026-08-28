@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>페이지를 찾을 수 없습니다</title>
+
+<link rel="stylesheet" th:href="@{/admin/css/admin-common.css}">
+
+<link rel="stylesheet" th:href="@{/admin/css/admin-layout.css}">
+
+<link rel="stylesheet" th:href="@{/admin/css/admin-error.css}">
+</head>
+
+<body>
+
+	<div th:replace="~{admin/fragments/sideMenu :: sideMenu('')}"></div>
+
+	<main class="main admin-error-page">
+
+		<section class="admin-error-panel">
+
+			<div class="admin-error-icon">!</div>
+
+			<h1>페이지를 찾을 수 없습니다.</h1>
+
+			<p>요청하신 관리자 페이지가 존재하지 않거나 이동된 페이지입니다.</p>
+
+			<div class="admin-error-actions">
+
+				<button type="button" class="error-btn secondary"
+					onclick="history.back()">뒤로가기</button>
+
+				<a class="error-btn primary" th:href="@{/admin/login}"> 로그인 화면으로
+					이동 </a>
+
+			</div>
+
+		</section>
+
+	</main>
+
+</body>
+</html>

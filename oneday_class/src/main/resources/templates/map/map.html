@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>클래스 지도 | Oneclass</title>
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<!-- 외부 스타일시트 연결 -->
+<link rel="stylesheet" th:href="@{/map/css/map.css}">
+</head>
+
+<body class="map-page-body">
+	<div th:replace="~{common/header :: headerFragment}"></div>
+	<!-- 2. 제목 & 필터 검색 영역 -->
+	<section class="filter-section">
+		<div class="filter-top">
+			<div>
+				<h1 class="page-title">클래스 지도</h1>
+				<p class="page-subtitle">지도에서 원하는 원데이 클래스를 찾아보세요!</p>
+			</div>
+			<!-- 검색바 -->
+			<form th:action="@{/search}" method="get" class="search-box">
+				<div class="search-icon">
+					<img th:src="@{/images/icon/search_icon.svg}" alt="아이콘"
+						style="width: 20px; height: 20px;">
+				</div>
+				<input class="search-input" type="text" name="keyword"
+					placeholder="원하는 키워드를 검색해보세요.">
+				<button type="submit" class="search-btn">검색</button>
+			</form>
+		</div>
+
+		<!-- 필터 선택줄 1 (드롭다운 & 내 위치) -->
+		<div class="region-filter-wrapper">
+
+			<!-- 1) 지역 선택 드롭다운 -->
+			<div class="filter-dropdown-container">
+
+				<button id="btn-region-toggle" class="filter-select">
+					<span class="select-text" id="regionSelectText"
+						th:text="${searchDTO != null and searchDTO.keyword != null and searchDTO.keyword != '' ? searchDTO.keyword : (searchDTO != null and searchDTO.dong != null and searchDTO.dong != '' ? searchDTO.dong : '지역 전체')}">지역
+						전체</span> <span class="arrow">∨</span>
+				</button>
+
+				<!-- 지역 선택 모달 -->
+				<div id="region-modal" class="region-modal-container hidden">
+					<div class="region-columns-header">
+						<div>시·도</div>
+						<div>구·군</div>
+						<div>동·읍·면</div>
+					</div>
+
+					<div class="region-columns-body">
+						<!-- 1컬럼: 시·도 (시/도 기본값만 유지) -->
+						<ul id="list-sido" class="region-list">
+							<li data-sido="" class="active">전체</li>
+							<li data-sido="서울">서울</li>
+							<li data-sido="경기">경기</li>
+							<li data-sido="인천">인천</li>
+							<li data-sido="대전">대전</li>
+							<li data-sido="대구">대구</li>
+							<li data-sido="부산">부산</li>
+							<li data-sido="광주">광주</li>
+							<li data-sido="울산">울산</li>
+						</ul>
+
+						<!-- 2컬럼: 구·군 (JS가 동적 생성하므로 초기화) -->
+						<ul id="list-sigungu" class="region-list">
+							<li class="active" data-sigungu="선택안함">선택안함</li>
+						</ul>
+
+						<!-- 3컬럼: 동·읍·면 (JS가 동적 생성하므로 초기화) -->
+						<ul id="list-dong" class="region-list">
+							<li class="active" data-dong="선택안함">선택안함</li>
+						</ul>
+					</div>
+
+					<div class="region-modal-footer">
+						<button id="btn-region-cancel" class="btn-cancel">취소</button>
+						<button id="btn-region-search" class="btn-search">검색</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- 2) 카테고리 선택 드롭다운 -->
+			<div class="filter-dropdown-container">
+				<button id="btn-category-toggle" class="filter-select">
+					<span class="select-text">카테고리 전체</span> <span class="arrow">∨</span>
+				</button>
+
+				<!-- 카테고리 선택 모달 (2칸 구성) -->
+				<div id="category-modal" class="region-modal-container hidden">
+					<div class="region-columns-header"
+						style="grid-template-columns: 1fr 1fr;">
+						<div>대분류</div>
+						<div>소분류</div>
+					</div>
+
+					<div class="region-columns-body"
+						style="grid-template-columns: 1fr 1fr;">
+						<!-- 1번째 칸: 대분류 (parentCategoryCode가 null인 항목) -->
+						<ul id="list-parent-category" class="region-list">
+							<li class="active" data-code="">전체</li>
+							<th:block th:if="${categoryList != null}">
+								<th:block th:each="cat : ${categoryList}"
+									th:if="${cat.parentCategoryCode == null}">
+									<li th:data-code="${cat.categoryCode}"
+										th:text="${cat.categoryName}">공예</li>
+								</th:block>
+							</th:block>
+						</ul>
+
+						<!-- 2번째 칸: 소분류 (대분류 선택 시 오른쪽 칸에 뿌려짐) -->
+						<ul id="list-child-category" class="region-list">
+							<li class="active" data-code="" data-name="전체">전체</li>
+						</ul>
+					</div>
+
+					<div class="region-modal-footer">
+						<button id="btn-category-cancel" class="btn-cancel">취소</button>
+						<button id="btn-category-search" class="btn-search">검색</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- 3) 날짜 선택 드롭다운 -->
+			<div class="filter-dropdown-container">
+				<button id="btn-date-toggle" class="filter-select">
+					<span class="select-text">날짜 선택</span> <span class="arrow">∨</span>
+				</button>
+
+				<!-- 날짜 선택 모달 -->
+				<div id="date-modal" class="region-modal-container hidden"
+					style="width: 220px;">
+					<div class="region-columns-header"
+						style="grid-template-columns: 1fr;">
+						<div>날짜 선택 (오늘부터 7일)</div>
+					</div>
+					<div class="region-columns-body"
+						style="grid-template-columns: 1fr; max-height: 250px; overflow-y: auto;">
+						<ul id="list-date" class="region-list">
+							<!-- JS에서 오늘부터 일주일 치 날짜 동적 생성 -->
+						</ul>
+					</div>
+					<div class="region-modal-footer">
+						<button id="btn-date-cancel" class="btn-cancel">취소</button>
+						<button id="btn-date-search" class="btn-search">검색</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- 4) 시간 선택 드롭다운 -->
+			<div class="filter-dropdown-container">
+				<button id="btn-time-toggle" class="filter-select">
+					<span class="select-text">시간 선택</span> <span class="arrow">∨</span>
+				</button>
+
+				<!-- 시간 선택 모달 -->
+				<div id="time-modal" class="region-modal-container hidden"
+					style="width: 200px;">
+					<div class="region-columns-header"
+						style="grid-template-columns: 1fr;">
+						<div>시간 선택 (1시간 단위)</div>
+					</div>
+					<div class="region-columns-body"
+						style="grid-template-columns: 1fr; max-height: 250px; overflow-y: auto;">
+						<ul id="list-time" class="region-list">
+							<!-- JS에서 00:00 ~ 23:00 동적 생성 -->
+						</ul>
+					</div>
+					<div class="region-modal-footer">
+						<button id="btn-time-cancel" class="btn-cancel">취소</button>
+						<button id="btn-time-search" class="btn-search">검색</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- 5) 내 위치 중심 버튼 -->
+			<button id="btn-my-location" class="location-btn">
+				<span class="icon">🎯</span> 내 위치 중심
+			</button>
+
+		</div>
+
+	</section>
+
+	<!-- 3. 메인 컨텐츠 영역 (사이드바 & 지도) -->
+	<div class="main-container">
+
+		<!-- 좌측 사이드바: 클래스 목록 -->
+		<div class="sidebar">
+			<div class="sidebar-header">
+				<div class="class-count">
+					총 <span id="class-count-num"
+						th:text="${classList != null ? classList.size() : 0}">0</span>개의
+					클래스
+				</div>
+			</div>
+
+			<!-- 클래스 카드 리스트 컨테이너 -->
+			<div id="card-list-container" class="card-list-container">
+				<!-- 데이터가 있는 경우 반복 출력 -->
+				<th:block
+					th:if="${classList != null and !#lists.isEmpty(classList)}">
+					<div th:each="item : ${classList}" class="class-card"
+						th:data-id="${item.classCode}" th:data-lat="${item.lat}"
+						th:data-lng="${item.lng}" th:data-title="${item.name}">
+
+						<div class="img-wrapper">
+							<img
+								th:src="${item.mainImage != null and !item.mainImage.isEmpty() ? (item.mainImage.startsWith('/') or item.mainImage.startsWith('http') ? item.mainImage : '/' + item.mainImage) : '/images/default.jpg'}"
+								class="class-img" alt="클래스 이미지">
+						</div>
+
+						<div class="card-info">
+							<div>
+								<h3 class="class-title" th:text="${item.name}">토끼 빵 만들기</h3>
+								<!-- 카테고리 코드가 아닌 카테고리의 이름이 들어가야함 -->
+								<span class="category-badge" th:text="${item.categoryName}">베이킹</span>
+								<p class="class-address" th:text="${item.address}">서울 마포구</p>
+								<p class="class-date"
+									th:text="${#dates.format(item.writeDate, 'yyyy.MM.dd (E) HH:mm')}">2026.07.25
+									(토) 14:00</p>
+							</div>
+							<div class="price-row">
+								<span class="class-price"
+									th:text="${#numbers.formatInteger(item.price, 3, 'COMMA') + '원'}">45,000원</span>
+								<span class="class-distance">📍 800m</span>
+							</div>
+						</div>
+					</div>
+				</th:block>
+
+				<!-- 데이터가 없을 때 표시할 예외 문구 -->
+				<div th:if="${classList == null or #lists.isEmpty(classList)}"
+					class="no-data-msg">조건에 맞는 클래스가 없습니다.</div>
+			</div>
+
+			<a th:href="@{category/class}"><button class="more-class-btn">더
+					많은 클래스 보기 +</button></a>
+		</div>
+		<!-- 우측 영역: 지도 -->
+		<div class="map-container">
+			<div id="map"></div>
+		</div>
+	</div>
+
+	<!-- 4. 하단 안내 & 신뢰 배너 영역 -->
+	<section class="recommend-section">
+		<div class="trust-banners">
+			<div class="banner-inner">
+				<div class="banner-item">
+					<span class="banner-icon">⏱️</span>
+					<div>
+						<h4>최대 7일 전 취소 가능</h4>
+						<p>유연한 취소 정책</p>
+					</div>
+				</div>
+				<div class="banner-item">
+					<span class="banner-icon">🛡️</span>
+					<div>
+						<h4>클래스 100% 보장</h4>
+						<p>클래스 불만족 시 환불</p>
+					</div>
+				</div>
+				<div class="banner-item">
+					<span class="banner-icon">🎧</span>
+					<div>
+						<h4>고객센터 1:1 문의</h4>
+						<p>평일 09:00 - 18:00</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<div th:replace="~{common/footer :: footerFragment}"></div>
+
+	<!-- 카카오 지도 API 로드 (libraries=services 포함) -->
+	<script type="text/javascript"
+		src="//dapi.kakao.com/v2/maps/sdk.js?appkey=26fc77ce3cbd848f1a576a8dcbe68fc5&libraries=services"></script>
+
+	<!-- 타임리프 데이터 자바스크립트 전역 변수 전달 -->
+	<script th:inline="javascript">
+		/*<![CDATA[*/
+		const classListData = /*[[${classList}]]*/[];
+		const categoryListData = /*[[${categoryList}]]*/[];
+		const searchDTOData = /*[[${searchDTO}]]*/{};
+		/*]]>*/
+	</script>
+
+	<!-- 외부 자바스크립트 연결 -->
+	<script th:src="@{/map/js/map.js}"></script>
+</body>
+</html>

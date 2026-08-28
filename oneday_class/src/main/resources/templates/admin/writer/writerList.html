@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+
+<title>작가 관리</title>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
+<link rel="stylesheet" th:href="@{/admin/css/admin-common.css}">
+<link rel="stylesheet" th:href="@{/admin/css/admin-layout.css}">
+<link rel="stylesheet" th:href="@{/admin/css/writer-class.css}">
+
+</head>
+
+<body>
+
+	<div class="shell">
+
+		<aside th:replace="~{admin/fragments/sideMenu :: sideMenu('writer')}">
+		</aside>
+
+		<main>
+
+			<h1 class="page-title">작가 관리</h1>
+
+			<form class="search" th:action="@{/admin/writer}" method="get">
+
+				<input name="keyword" th:value="${searchDTO.keyword}"
+					placeholder="작가명, 활동명, 이메일, 연락처 검색">
+
+				<button type="submit">검색</button>
+
+				<a th:href="@{/admin/writer}"> 초기화 </a>
+
+			</form>
+
+
+			<section class="panel">
+
+				<div class="summary">
+
+					전체 작가 <b th:text="${writerCount} + '명'"> 0명 </b>
+
+				</div>
+
+
+				<table>
+
+					<thead>
+
+						<tr>
+
+							<th>작가</th>
+							<th>활동명</th>
+							<th>활동지역</th>
+							<th>연락처</th>
+							<th>운영 클래스</th>
+							<th>관리</th>
+
+						</tr>
+
+					</thead>
+
+
+					<tbody>
+
+						<tr th:each="w : ${writers}">
+
+							<td th:text="${w.writerName}"></td>
+
+							<td th:text="${w.workshopName}"></td>
+
+							<td th:text="${w.region}"></td>
+
+							<td th:text="${w.phone}"></td>
+
+							<td th:text="${w.classCount} + '개'"></td>
+
+							<td><a class="action"
+								th:href="@{/admin/writer/{id}(
+										id=${w.writerCode}
+									)}">
+
+									상세 </a></td>
+
+						</tr>
+
+						<tr th:if="${#lists.isEmpty(writers)}">
+
+							<td colspan="6" class="empty">조회된 작가가 없습니다.</td>
+
+						</tr>
+
+					</tbody>
+
+				</table>
+
+			</section>
+
+			<div class="pagination">
+
+				<a th:if="${page.startPage > 1}"
+					th:href="@{/admin/writer(
+						page=${page.startPage - 1},
+						keyword=${searchDTO.keyword}
+					)}">
+
+					이전 </a> <a
+					th:each="pageNum :
+					${#numbers.sequence(
+						page.startPage,
+						page.endPage
+					)}"
+					th:href="@{/admin/writer(
+						page=${pageNum},
+						keyword=${searchDTO.keyword}
+					)}"
+					th:text="${pageNum}"
+					th:classappend="${pageNum == page.currentPage}
+						? ' active'
+						: ''">
+				</a> <a th:if="${page.endPage < page.totalPage}"
+					th:href="@{/admin/writer(
+						page=${page.endPage + 1},
+						keyword=${searchDTO.keyword}
+					)}">
+
+					다음 </a>
+
+			</div>
+
+		</main>
+
+	</div>
+
+</body>
+
+</html>

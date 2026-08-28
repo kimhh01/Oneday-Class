@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title th:text="${editMode == true ? '클래스 수정 · 장소 | Oneclass' : '클래스 등록 · 위치 설정 | Oneclass'}">클래스 등록 · 위치 설정 | Oneclass</title>
+<link rel="stylesheet" href="/author/css/common.css" th:href="@{/author/css/common.css}">
+<link rel="stylesheet" href="/author/css/header.css" th:href="@{/author/css/header.css}">
+<link rel="stylesheet" href="/author/css/sidebar.css" th:href="@{/author/css/sidebar.css}">
+<link rel="stylesheet" href="/author/css/class-register.css?v=20260820-1" th:href="@{/author/css/class-register.css(v='20260820-1')}">
+<link rel="stylesheet" href="/author/css/class-edit.css" th:href="@{/author/css/class-edit.css}">
+<script src="/author/js/layout.js" th:src="@{/author/js/layout.js}" defer></script>
+<script src="/author/js/class-register-draft.js" th:src="@{/author/js/class-register-draft.js}" defer></script>
+<script src="//t1.kakaocdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+<script th:if="${!#strings.isEmpty(kakaoMapAppKey)}"
+		th:src="|https://dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoMapAppKey}&amp;libraries=services&amp;autoload=false|"></script>
+</head>
+<body class="author-page register-form-page register-location-page" data-menu="class-register" data-page="클래스 등록"
+	  th:attr="data-menu=${editMode == true ? 'class-manage' : 'class-register'},data-page=${editMode == true ? '클래스 수정' : '클래스 등록'}">
+
+<div class="app">
+	<div th:replace="~{author/fragments/icons :: icons}"></div>
+	<div th:replace="~{author/fragments/header :: header}"></div>
+
+	<div class="app-body">
+		<div th:replace="~{author/fragments/sidebar :: sidebar}"></div>
+
+		<main class="content">
+			<div class="content__inner">
+				<header class="register-page-head register-page-head--compact">
+					<h1 class="page-title"><span th:text="${editMode == true ? '클래스 수정' : '클래스 등록하기'}">클래스 등록하기</span> <svg class="title-leaf" aria-hidden="true"><use href="#icon-title-leaf"></use></svg></h1>
+					<p class="page-desc" th:text="${editMode == true ? '운영 중인 클래스의 장소 정보를 수정합니다.' : '클래스가 진행되는 위치 정보를 입력해주세요.'}">클래스가 진행되는 위치 정보를 입력해주세요.</p>
+					<p class="reply-error" th:if="${registerError}" th:text="${registerError}">입력값을 확인해주세요.</p>
+				</header>
+				<p class="class-edit-notice" th:if="${editMode == true}">수정 내용은 별도 관리자 검수 없이 저장 즉시 반영됩니다. 이미 생성된 일정은 일정 관리에서 따로 조정해주세요.</p>
+				<div th:replace="~{author/fragments/class-register-steps :: steps(${locationForm.classCode}, 2, ${editMode}, ${editStep})}"></div>
+
+				<form class="location-grid" id="locationForm" method="post" novalidate data-draft-form th:action="${editMode == true ? editFormAction : '/author/classes/register/location'}" th:object="${locationForm}">
+					<input type="hidden" name="classCode" th:value="${locationForm.classCode}">
+					<input type="hidden" id="locationZipcode" th:field="*{zipcode}">
+					<input type="hidden" id="locationLatitude" th:field="*{latitude}">
+					<input type="hidden" id="locationLongitude" th:field="*{longitude}">
+					<section class="card location-info-card" aria-labelledby="locationInfoTitle">
+						<div class="card-head-icon">
+							<span class="icon-box"><svg aria-hidden="true"><use href="#icon-map-pin"></use></svg></span>
+							<div>
+								<h2 class="card-head-icon__title" id="locationInfoTitle">기본 정보</h2>
+								<p class="card-head-icon__desc">클래스가 진행되는 장소를 정확히 입력해주세요.</p>
+							</div>
+						</div>
+
+						<div class="card__body">
+							<div class="location-section">
+								<h3 class="location-section__title">클래스 위치</h3>
+
+								<div class="location-field">
+									<label class="location-field__label" for="locationAddress">주소 검색</label>
+									<div class="location-address-control">
+										<input class="input" type="text" id="locationAddress" th:field="*{address}"
+											   placeholder="도로명, 지번, 건물명 등으로 검색해주세요." readonly required>
+										<button type="button" class="location-address-control__button" id="openPostcode">주소 검색</button>
+									</div>
+									<p class="location-field__help">클래스가 진행되는 주소를 입력해주세요.</p>
+								</div>
+
+								<div class="location-field">
+									<label class="location-field__label" for="locationDetail">상세 주소</label>
+									<input class="input" type="text" id="locationDetail" th:field="*{detailAddress}"
+										   maxlength="100" placeholder="건물명, 층수, 호수 등 상세주소" required>
+								</div>
+
+								<div class="location-field">
+									<label class="location-field__label" for="locationOldAddress">지번 주소</label>
+									<input class="input" type="text" id="locationOldAddress" th:field="*{oldAddress}"
+										   maxlength="100" placeholder="주소 검색 시 자동으로 입력됩니다." readonly>
+								</div>
+
+								<div class="selected-location" aria-live="polite">
+									<span class="selected-location__icon"><svg aria-hidden="true"><use href="#icon-map-pin"></use></svg></span>
+									<div class="selected-location__copy">
+										<span class="selected-location__label">선택된 위치</span>
+										<strong id="selectedAddress" th:text="${#strings.isEmpty(locationForm.address) ? '선택된 위치가 없습니다.' : locationForm.address}">선택된 위치가 없습니다.</strong>
+										<span id="selectedDetail" th:text="${#strings.isEmpty(locationForm.address) ? '주소 검색 후 위치를 확인해주세요.' : locationForm.detailAddress}">주소 검색 후 위치를 확인해주세요.</span>
+									</div>
+									<button type="button" class="selected-location__change" id="changeLocation">위치 변경</button>
+								</div>
+							</div>
+						</div>
+					</section>
+
+					<section class="card location-map-card" aria-labelledby="locationMapTitle">
+						<div class="card-head-icon">
+							<span class="icon-box"><svg aria-hidden="true"><use href="#icon-map-pin"></use></svg></span>
+							<div>
+								<h2 class="card-head-icon__title" id="locationMapTitle">지도 위치 설정</h2>
+								<p class="card-head-icon__desc">클래스가 진행되는 정확한 위치를 지도에서 설정해주세요.</p>
+							</div>
+						</div>
+
+						<div class="card__body">
+							<div class="location-map-placeholder" id="locationMap" aria-label="선택한 클래스 위치 지도"></div>
+							<p class="location-map-note">
+								<svg aria-hidden="true"><use href="#icon-info"></use></svg>
+								<span id="mapStatus" th:text="${#strings.isEmpty(kakaoMapAppKey) ? 'KAKAO_MAP_APP_KEY를 설정하면 주소의 지도 위치와 좌표가 표시됩니다.' : '주소를 검색하면 정확한 위치가 지도에 표시됩니다.'}">주소를 검색하면 지도에 표시됩니다.</span>
+							</p>
+						</div>
+					</section>
+
+					<div class="step-actions">
+						<button type="submit" name="saveMode" value="stay" class="btn btn--ghost btn--lg step-actions__save">
+							<svg aria-hidden="true"><use href="#icon-bookmark"></use></svg>
+							<span th:text="${editMode == true ? '저장' : '임시 저장'}">임시 저장</span>
+						</button>
+						<div class="step-actions__nav">
+							<a href="class-register-basic.html" th:href="${editMode == true ? '/author/classes/' + editClassCode + '/edit/pricing' : '/author/classes/register/basic?classCode=' + locationForm.classCode}" class="btn btn--ghost btn--lg step-actions__previous">이전 단계</a>
+							<button type="submit" name="saveMode" value="next" class="btn btn--primary btn--lg step-actions__next">
+								<span>다음 단계</span>
+								<span class="step-actions__next-icon"><svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg></span>
+							</button>
+						</div>
+					</div>
+				</form>
+
+				<footer class="site-footer" th:replace="~{author/fragments/footer :: footer}">
+					<div class="site-footer__links">
+						<a href="guide.html" th:href="@{/author/guide}">작가 가이드</a>
+						<a href="notice.html" th:href="@{/author/notices}">공지사항</a>
+						<a href="qna.html" th:href="@{/author/qna}">사업자 문의</a>
+						<a href="#">이용약관</a>
+						<a href="#">개인정보처리방침</a>
+					</div>
+					<p class="site-footer__copy">
+						<b>Oneclass</b> 작가센터 · 평일 10:00 ~ 18:00 (점심 12:00 ~ 13:00)<br>
+						© 2026 Oneclass. All rights reserved.
+					</p>
+				</footer>
+			</div>
+		</main>
+	</div>
+</div>
+
+<script>
+(function () {
+	'use strict';
+	var form = document.getElementById('locationForm');
+	var postcode = document.getElementById('locationZipcode');
+	var address = document.getElementById('locationAddress');
+	var oldAddress = document.getElementById('locationOldAddress');
+	var detailAddress = document.getElementById('locationDetail');
+	var latitude = document.getElementById('locationLatitude');
+	var longitude = document.getElementById('locationLongitude');
+	var selectedAddress = document.getElementById('selectedAddress');
+	var selectedDetail = document.getElementById('selectedDetail');
+	var mapStatus = document.getElementById('mapStatus');
+	var mapContainer = document.getElementById('locationMap');
+	var map = null;
+	var marker = null;
+	var geocoder = null;
+
+	function numberValue(input) {
+		var value = Number(input.value);
+		return Number.isFinite(value) ? value : 0;
+	}
+
+	function updateSelectedLocation() {
+		selectedAddress.textContent = address.value || '선택된 위치가 없습니다.';
+		selectedDetail.textContent = address.value
+			? (detailAddress.value || '상세 주소를 입력해주세요.')
+			: '주소 검색 후 위치를 확인해주세요.';
+	}
+
+	function showMap(lat, lng) {
+		if (!map || !marker) return;
+		var coords = new kakao.maps.LatLng(lat, lng);
+		mapContainer.style.background = '#eef3ed';
+		map.relayout();
+		map.setCenter(coords);
+		marker.setPosition(coords);
+		marker.setMap(map);
+		mapStatus.textContent = '선택한 주소의 지도 위치입니다.';
+	}
+
+	function findCoordinates(searchAddress) {
+		if (!geocoder) {
+			latitude.value = '0';
+			longitude.value = '0';
+			mapStatus.textContent = 'KAKAO_MAP_APP_KEY 설정 후 지도 좌표를 확인할 수 있습니다.';
+			return;
+		}
+		geocoder.addressSearch(searchAddress, function (result, status) {
+			if (status !== kakao.maps.services.Status.OK || !result.length) {
+				latitude.value = '0';
+				longitude.value = '0';
+				mapStatus.textContent = '주소의 지도 좌표를 찾지 못했습니다. 다른 주소로 검색해주세요.';
+				return;
+			}
+			latitude.value = result[0].y;
+			longitude.value = result[0].x;
+			showMap(Number(result[0].y), Number(result[0].x));
+		});
+	}
+
+	function initializeMap() {
+		if (!window.kakao || !kakao.maps || typeof kakao.maps.load !== 'function') return;
+		kakao.maps.load(function () {
+			var initialLat = numberValue(latitude);
+			var initialLng = numberValue(longitude);
+			var hasSavedCoordinates = initialLat !== 0 || initialLng !== 0;
+			var center = new kakao.maps.LatLng(
+				hasSavedCoordinates ? initialLat : 37.5665,
+				hasSavedCoordinates ? initialLng : 126.9780
+			);
+			map = new kakao.maps.Map(mapContainer, { center: center, level: 4 });
+			marker = new kakao.maps.Marker({ position: center });
+			geocoder = new kakao.maps.services.Geocoder();
+			if (hasSavedCoordinates) {
+				marker.setMap(map);
+				mapStatus.textContent = '저장된 클래스 위치입니다.';
+			}
+		});
+	}
+
+	function openPostcode() {
+		if (!window.kakao || typeof kakao.Postcode !== 'function') {
+			alert('주소 검색 서비스를 불러오지 못했습니다. 인터넷 연결을 확인해주세요.');
+			return;
+		}
+		new kakao.Postcode({
+			oncomplete: function (data) {
+				var roadAddress = data.roadAddress || data.address;
+				var jibunAddress = data.jibunAddress || data.autoJibunAddress || roadAddress;
+				postcode.value = data.zonecode || '-';
+				address.value = roadAddress;
+				oldAddress.value = jibunAddress;
+				updateSelectedLocation();
+				findCoordinates(roadAddress);
+				detailAddress.focus();
+			}
+		}).open();
+	}
+
+	document.getElementById('openPostcode').addEventListener('click', openPostcode);
+	document.getElementById('changeLocation').addEventListener('click', openPostcode);
+	detailAddress.addEventListener('input', updateSelectedLocation);
+	updateSelectedLocation();
+	initializeMap();
+}());
+</script>
+
+</body>
+</html>

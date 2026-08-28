@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입 완료 | Oneclass</title>
+    <link rel="stylesheet" th:href="@{/member/css/signUpSuccess.css}">
+</head>
+<body>
+
+<!-- 회원가입 완료 메인 영역 (헤더 / 풋터 제외) -->
+<main class="success-wrapper">
+    <div class="success-container">
+
+        <!-- 상단 체크 아이콘 -->
+        <div class="success-icon-wrap">
+            <div class="success-icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M20 6L9 17L4 12" stroke="#526848" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 제목 및 안내 메시지 -->
+        <h1 class="success-title">회원가입이 <span>완료</span>되었습니다!</h1>
+        <p class="success-subtitle">
+            Oneclass의 새로운 가족이 되신 것을 환영합니다.<br>
+            다양한 클래스와 함께 즐거운 시간을 보내세요!
+        </p>
+
+        <!-- 센터 일러스트 그래픽 영역 -->
+        <div class="success-illustration">
+            <svg viewBox="0 0 320 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- 테이블 베이스 -->
+                <ellipse cx="160" cy="162" rx="140" ry="12" fill="#e2e8df" opacity="0.6"/>
+                
+                <!-- 이젤 & 화판 -->
+                <path d="M135 155L145 90M185 155L175 90M160 85V155" stroke="#bc926c" stroke-width="4" stroke-linecap="round"/>
+                <rect x="125" y="70" width="70" height="52" rx="4" fill="#ffffff" stroke="#e0d6c3" stroke-width="2"/>
+                <!-- 화판 나뭇잎 그림 -->
+                <path d="M160 110C160 110 152 98 160 82C168 98 160 110 160 110Z" fill="#7c9070"/>
+                <path d="M160 102C154 98 148 97 146 100C148 103 154 104 160 102Z" fill="#7c9070"/>
+                <path d="M160 94C166 90 172 89 174 92C172 95 166 96 160 94Z" fill="#7c9070"/>
+
+                <!-- 화분 (좌측) -->
+                <path d="M92 145L95 160H115L118 145H92Z" fill="#ded7ca"/>
+                <path d="M105 145C105 145 92 130 96 115C108 128 105 145 105 145Z" fill="#9bb08f"/>
+                <path d="M105 140C105 140 118 128 114 112C102 122 105 140 105 140Z" fill="#7c9070"/>
+
+                <!-- 화병 & 꽃/화초 (우측) -->
+                <path d="M210 160C205 160 202 145 206 135C209 128 217 128 220 135C224 145 221 160 210 160Z" fill="#e7ebded0"/>
+                <path d="M213 130V105M213 118L205 110M213 114L222 108" stroke="#68805e" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="213" cy="102" r="3.5" fill="#a4b899"/>
+                <circle cx="203" cy="108" r="3" fill="#a4b899"/>
+                <circle cx="224" cy="106" r="3" fill="#a4b899"/>
+
+                <!-- 팔레트 & 물컵 -->
+                <ellipse cx="145" cy="160" rx="16" ry="8" fill="#e8dfce"/>
+                <circle cx="138" cy="159" r="2" fill="#c17a4e"/>
+                <circle cx="144" cy="161" r="2" fill="#7c9070"/>
+                <circle cx="150" cy="159" r="2" fill="#647a5a"/>
+                <path d="M178 150H188L186 162H180L178 150Z" fill="#cbd6c5"/>
+            </svg>
+        </div>
+
+        <!-- 하단 이동 버튼 (홈으로 이동 / 로그인 하기) -->
+        <div class="success-buttons">
+            <a th:href="@{/}" class="btn btn--home">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1V9.5z"/>
+                </svg>
+                홈으로 이동
+            </a>
+            <a th:href="@{/member/login/general}" class="btn btn--login">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                로그인 하기
+            </a>
+        </div>
+
+    </div>
+</main>
+
+</body>
+</html>

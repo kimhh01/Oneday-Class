@@ -1,0 +1,637 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper
+	namespace="kr.co.oneclass.admin.onedayclass.AdminClassDAO">
+
+	<select id="selectClassCount" resultType="int">
+
+		SELECT COUNT(*)
+
+		FROM CLASS C
+
+		JOIN CREATOR CR
+		ON C.OPERATOR_CODE =
+		CR.OPERATOR_CODE
+
+		JOIN MEMBER M
+		ON CR.MEMBER_CODE =
+		M.MEMBER_CODE
+
+		WHERE 1 =
+		1
+
+		<if test="search.keyword != null
+			  and search.keyword != ''">
+
+			AND (
+			C.NAME LIKE '%' || #{search.keyword} || '%'
+			OR M.NAME
+			LIKE '%' ||
+			#{search.keyword} || '%'
+			OR CR.ACTIVITY_NAME LIKE '%' ||
+			#{search.keyword} || '%'
+			)
+
+		</if>
+
+		<if
+			test="search.approvalStatus != null
+			  and search.approvalStatus != ''">
+
+			AND C.APPROVAL_STATUS =
+			#{search.approvalStatus}
+
+		</if>
+
+		<if
+			test="search.classStatus != null
+			  and search.classStatus != ''">
+
+			AND C.STATUS =
+			#{search.classStatus}
+
+		</if>
+
+	</select>
+
+	<select id="selectClassList"
+		resultType="kr.co.oneclass.admin.onedayclass.AdminClassSummaryDTO">
+
+		SELECT *
+
+		FROM (
+
+		SELECT
+		C.CLASS_CODE,
+		C.NAME AS CLASS_NAME,
+
+		C.ADDRESS AS
+		REGION,
+
+		NVL(
+		(
+		SELECT ROUND(
+		(
+		TO_DATE(
+		MAX(S.END_TIME),
+		'HH24:MI'
+		)
+		-
+		TO_DATE(
+		MIN(S.START_TIME),
+		'HH24:MI'
+		)
+		) * 1440
+		)
+
+		FROM SCHEDULE S
+
+		JOIN
+		CLASS_REPEAT_RULE CRR
+		ON S.REPEAT_RULE_CODE =
+		CRR.REPEAT_RULE_CODE
+
+		WHERE
+		CRR.CLASS_CODE =
+		C.CLASS_CODE
+		),
+		0
+		) AS RUNNING_TIME,
+
+		M.NAME AS
+		WRITER_NAME,
+
+		CR.ACTIVITY_NAME AS WORKSHOP_NAME,
+
+		CAT.NAME AS
+		CATEGORY_NAME,
+
+		(
+		SELECT MIN(
+		CRR.OPERATION_START_DATE
+		)
+
+		FROM
+		CLASS_REPEAT_RULE CRR
+
+		WHERE CRR.CLASS_CODE =
+		C.CLASS_CODE
+		) AS
+		RECRUITMENT_START_DATE,
+
+		(
+		SELECT MAX(
+		CRR.OPERATION_END_DATE
+		)
+
+		FROM
+		CLASS_REPEAT_RULE CRR
+
+		WHERE CRR.CLASS_CODE =
+		C.CLASS_CODE
+		) AS
+		RECRUITMENT_END_DATE,
+
+		C.DESIRED_PRICE AS SALE_PRICE,
+
+		C.APPROVAL_STATUS,
+
+		C.STATUS
+		AS CLASS_STATUS,
+
+		ROW_NUMBER() OVER (
+		ORDER BY
+		C.WRITE_DATE DESC,
+		C.CLASS_CODE DESC
+		) AS RN
+
+		FROM CLASS C
+
+		JOIN CREATOR CR
+		ON C.OPERATOR_CODE
+		=
+		CR.OPERATOR_CODE
+
+		JOIN MEMBER M
+		ON CR.MEMBER_CODE =
+		M.MEMBER_CODE
+
+		JOIN
+		CATEGORY CAT
+		ON C.CATEGORY_CODE =
+		CAT.CATEGORY_CODE
+
+		WHERE 1 = 1
+
+		<if test="search.keyword != null
+		  and search.keyword != ''">
+
+			AND (
+			C.NAME LIKE '%' || #{search.keyword} || '%'
+			OR M.NAME
+			LIKE '%' || #{search.keyword} || '%'
+			OR CR.ACTIVITY_NAME LIKE '%' ||
+			#{search.keyword} || '%'
+			)
+
+		</if>
+
+		<if
+			test="search.approvalStatus != null
+		  and search.approvalStatus != ''">
+
+			AND C.APPROVAL_STATUS =
+			#{search.approvalStatus}
+
+		</if>
+
+		<if
+			test="search.classStatus != null
+		  and search.classStatus != ''">
+
+			AND C.STATUS =
+			#{search.classStatus}
+
+		</if>
+
+		)
+
+		WHERE RN BETWEEN
+		#{search.startRow}
+		AND
+		#{search.endRow}
+
+	</select>
+
+	<select id="selectClassDetail"
+		resultType="kr.co.oneclass.admin.onedayclass.AdminClassDetailDTO">
+
+		SELECT
+		C.CLASS_CODE,
+		C.NAME AS CLASS_NAME,
+
+		C.OPERATOR_CODE
+		AS
+		WRITER_CODE,
+
+		M.NAME AS WRITER_NAME,
+
+		CR.ACTIVITY_NAME
+		AS WORKSHOP_NAME,
+
+		CAT.NAME AS CATEGORY_NAME,
+
+		C.ADDRESS AS REGION,
+
+		NVL(
+		(
+		SELECT ROUND(
+		(
+		TO_DATE(
+		MAX(S.END_TIME),
+		'HH24:MI'
+		)
+		-
+		TO_DATE(
+		MIN(S.START_TIME),
+		'HH24:MI'
+		)
+		) * 1440
+		)
+
+		FROM SCHEDULE S
+
+		JOIN CLASS_REPEAT_RULE CRR
+		ON
+		S.REPEAT_RULE_CODE =
+		CRR.REPEAT_RULE_CODE
+
+		WHERE CRR.CLASS_CODE =
+		C.CLASS_CODE
+		),
+		0
+		) AS RUNNING_TIME,
+
+		C.STATUS AS CLASS_STATUS,
+
+		C.APPROVAL_STATUS,
+
+		C.APPROVAL_MEMO,
+
+		C.DESIRED_PRICE AS SALE_PRICE,
+
+		C.PRICE AS MARKET_PRICE,
+
+		CASE
+		WHEN C.PRICE > 0
+		AND C.DESIRED_PRICE IS NOT NULL
+		THEN ROUND(
+		(
+		C.PRICE - C.DESIRED_PRICE
+		)
+		/
+		C.PRICE
+		* 100
+		)
+		ELSE 0
+		END AS DISCOUNT_RATE,
+
+		(
+		SELECT
+		MIN(S.MIN_PEOPLE)
+
+		FROM SCHEDULE S
+
+		JOIN
+		CLASS_REPEAT_RULE CRR
+		ON
+		S.REPEAT_RULE_CODE =
+		CRR.REPEAT_RULE_CODE
+
+		WHERE
+		CRR.CLASS_CODE =
+		C.CLASS_CODE
+		) AS MINIMUM_PEOPLE,
+
+		(
+		SELECT
+		MAX(S.MAX_PEOPLE)
+
+		FROM SCHEDULE
+		S
+
+		JOIN CLASS_REPEAT_RULE CRR
+		ON
+		S.REPEAT_RULE_CODE =
+		CRR.REPEAT_RULE_CODE
+
+		WHERE CRR.CLASS_CODE =
+		C.CLASS_CODE
+		) AS MAXIMUM_PEOPLE,
+
+		(
+		SELECT MIN(
+		CRR.OPERATION_START_DATE
+		)
+		FROM CLASS_REPEAT_RULE CRR
+		WHERE
+		CRR.CLASS_CODE =
+		C.CLASS_CODE
+		) AS
+		RECRUITMENT_START_DATE,
+
+		(
+		SELECT MAX(
+		CRR.OPERATION_END_DATE
+		)
+		FROM
+		CLASS_REPEAT_RULE CRR
+		WHERE CRR.CLASS_CODE =
+		C.CLASS_CODE
+		) AS
+		RECRUITMENT_END_DATE,
+
+		(
+		SELECT LISTAGG(
+		CO.OFFERING_NAME,
+		', '
+		)
+		WITHIN
+		GROUP (
+		ORDER BY
+		CO.CLASS_OFFERING_CODE
+		)
+
+		FROM CLASS_OFFERING_MAP COM
+
+		JOIN
+		CLASS_OFFERING CO
+		ON
+		COM.CLASS_OFFERING_CODE =
+		CO.CLASS_OFFERING_CODE
+
+		WHERE COM.CLASS_CODE =
+		C.CLASS_CODE
+		) AS PERIOD_TYPE,
+
+		C.SINGLE_INTRODUCE,
+
+		C.INTRODUCE,
+
+		C.FINISH_INTRODUCE
+		AS
+		FINISHED_PRODUCT_DESCRIPTION
+
+		FROM CLASS C
+
+		JOIN
+		CREATOR CR
+		ON
+		C.OPERATOR_CODE =
+		CR.OPERATOR_CODE
+
+		JOIN MEMBER M
+		ON
+		CR.MEMBER_CODE =
+		M.MEMBER_CODE
+
+		JOIN CATEGORY CAT
+		ON C.CATEGORY_CODE =
+		CAT.CATEGORY_CODE
+
+		WHERE C.CLASS_CODE =
+		#{classCode}
+	</select>
+
+	<select id="selectClassImageList"
+		resultType="kr.co.oneclass.admin.onedayclass.AdminClassImageDTO">
+
+		SELECT
+		CLASS_IMG_CODE
+		AS IMAGE_CODE,
+
+		CLASS_CODE,
+
+		TYPE AS
+		IMAGE_TYPE,
+
+		IMAGE AS IMAGE_PATH,
+
+		SORT_ORDER AS IMAGE_ORDER
+
+		FROM CLASS_IMG
+
+		WHERE CLASS_CODE =
+		#{classCode}
+
+		AND TYPE IN (
+		'대표',
+		'갤러리'
+		)
+
+		ORDER BY
+		CASE
+		TYPE
+		WHEN '대표' THEN 1
+		WHEN '갤러리' THEN 2
+		ELSE 3
+		END,
+		SORT_ORDER,
+		CLASS_IMG_CODE
+	</select>
+
+	<select id="selectFinishedProductList"
+		resultType="kr.co.oneclass.admin.onedayclass.AdminFinishedProductDTO">
+
+		SELECT
+		CLASS_IMG_CODE
+		AS FINISHED_PRODUCT_CODE,
+
+		CLASS_CODE,
+
+		IMAGE
+		AS FINISHED_PRODUCT_IMAGE
+
+		FROM CLASS_IMG
+
+		WHERE CLASS_CODE =
+		#{classCode}
+
+		AND TYPE = '완성'
+
+		ORDER BY
+		SORT_ORDER,
+		CLASS_IMG_CODE
+	</select>
+
+	<select id="selectClassTagList"
+		resultType="kr.co.oneclass.admin.onedayclass.AdminClassTagDTO">
+
+		SELECT
+		TAG_CODE,
+		CLASS_CODE,
+		TAG_NAME
+
+		FROM TAG
+
+		WHERE CLASS_CODE
+		=
+		#{classCode}
+
+		ORDER BY TAG_CODE
+	</select>
+
+	<select id="selectClassScheduleList"
+		resultType="kr.co.oneclass.admin.onedayclass.AdminClassScheduleDTO">
+
+		SELECT
+		S.SCHEDULE_CODE,
+		CRR.CLASS_CODE,
+		S.CLASS_DATE,
+		S.START_TIME,
+		S.END_TIME,
+
+		S.MIN_PEOPLE
+		AS MINIMUM_PEOPLE,
+
+		S.MAX_PEOPLE
+		AS
+		MAXIMUM_PEOPLE
+
+		FROM SCHEDULE S
+
+		JOIN CLASS_REPEAT_RULE CRR
+		ON
+		S.REPEAT_RULE_CODE =
+		CRR.REPEAT_RULE_CODE
+
+		WHERE CRR.CLASS_CODE =
+		#{classCode}
+
+		ORDER BY
+		S.CLASS_DATE,
+		S.START_TIME,
+		S.SCHEDULE_CODE
+	</select>
+
+	<select id="selectClassCurriculumList"
+		resultType="kr.co.oneclass.admin.onedayclass.AdminClassCurriculumDTO">
+
+		SELECT
+		CURRICULUM_CODE,
+		CLASS_CODE,
+
+		CURRICULUM_TYPE
+		AS
+		STEP_NUMBER,
+
+		CURRICULUM_TITLE,
+
+		CURRICULUM_CONTENT
+		AS
+		CURRICULUM_DESCRIPTION,
+
+		CURRICULUM_IMG
+		AS CURRICULUM_IMAGE
+
+		FROM
+		CLASS_CURRICULUM
+
+		WHERE CLASS_CODE = #{classCode}
+
+		ORDER BY
+		CURRICULUM_TYPE,
+		CURRICULUM_CODE
+	</select>
+
+	<select id="selectClassMaterialList"
+		resultType="kr.co.oneclass.admin.onedayclass.AdminClassMaterialDTO">
+
+		SELECT
+		CLASS_MATERIAL_CODE
+		AS MATERIAL_CODE,
+
+		CLASS_CODE,
+
+		MATERIAL_NAME,
+
+		MATERIAL_CONTENT
+
+		FROM CLASS_MATERIAL
+
+		WHERE CLASS_CODE =
+		#{classCode}
+
+		ORDER BY
+		CLASS_MATERIAL_CODE
+	</select>
+
+	<select id="selectClassOfferingList"
+		resultType="kr.co.oneclass.admin.onedayclass.AdminClassOfferingDTO">
+
+		SELECT
+		CO.CLASS_OFFERING_CODE
+		AS OFFERING_CODE,
+
+		COM.CLASS_CODE,
+
+		CO.OFFERING_NAME
+
+		FROM CLASS_OFFERING_MAP COM
+
+		JOIN
+		CLASS_OFFERING CO
+		ON COM.CLASS_OFFERING_CODE =
+		CO.CLASS_OFFERING_CODE
+
+		WHERE COM.CLASS_CODE =
+		#{classCode}
+
+		ORDER BY
+		CO.CLASS_OFFERING_CODE
+	</select>
+
+	<select id="selectClassAdditionalInfoList"
+		resultType="kr.co.oneclass.admin.onedayclass.AdminClassAdditionalInfoDTO">
+
+		SELECT
+		ADDITIONAL_INFO_CODE,
+
+		CLASS_CODE,
+
+		ADDITIONAL_INFO_CONTENT
+		AS CONTENT
+
+		FROM CLASS_ADDITIONAL_INFO
+
+		WHERE
+		CLASS_CODE =
+		#{classCode}
+
+		ORDER BY
+		ADDITIONAL_INFO_CODE
+	</select>
+
+	<update id="updateClassStatus">
+
+		UPDATE CLASS
+
+		SET APPROVAL_STATUS = '중지',
+		STATUS = '대기중'
+
+		WHERE CLASS_CODE = #{classCode}
+		AND APPROVAL_STATUS = '승인'
+
+	</update>
+
+	<update id="updateClassApproval">
+
+		UPDATE CLASS
+
+		SET APPROVAL_STATUS = '승인',
+		STATUS = '대기중'
+
+		WHERE CLASS_CODE = #{classCode}
+		AND APPROVAL_STATUS = '대기'
+
+	</update>
+
+	<update id="updateClassRejection">
+
+		UPDATE CLASS
+
+		SET APPROVAL_STATUS = '반려',
+		STATUS =
+		'대기중',
+		APPROVAL_MEMO =
+		#{dto.rejectMessage}
+
+		WHERE CLASS_CODE =
+		#{classCode}
+		AND APPROVAL_STATUS = '대기'
+
+	</update>
+</mapper>

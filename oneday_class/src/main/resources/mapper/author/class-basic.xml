@@ -1,0 +1,560 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 클래스 등록 기본정보·장소정보 Mapper -->
+<mapper namespace="kr.co.oneclass.author.classbasic.ClassDAO">
+
+	<!-- 신규 PK는 보정된 Oracle 시퀀스의 NEXTVAL만 사용한다 -->
+	<insert id="insertDraftClass"
+		parameterType="kr.co.oneclass.author.classbasic.ClassBasicDTO">
+		<selectKey keyProperty="classCode" resultType="int" order="BEFORE">
+			SELECT SEQ_CLASS_CODE.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO CLASS (
+			CLASS_CODE, OPERATOR_CODE, CATEGORY_CODE, NAME, PRICE, DESIRED_PRICE,
+			ZIPCODE, ADDRESS, OLD_ADDRESS, ADDRESS2, INGREDIENTS_INCLUDE, STATUS,
+			REVIEW_SUM, STAR_RATING_AVG, VIEWS_CNT, SINGLE_INTRODUCE, INTRODUCE,
+			FINISH_INTRODUCE, LAT, LNG, APPROVAL_STATUS, APPROVAL_MEMO, WRITE_DATE,
+			REGISTER_STEP
+		) VALUES (
+			#{classCode}, #{authorCode},
+			(SELECT MIN(CATEGORY_CODE) FROM CATEGORY WHERE PARENTS_CATEGORY IS NOT NULL),
+			'새 클래스', 0, 0,
+			'-', '-', '-', '-', 'N', '준비중',
+			0, 0, 0, '작성 중', '작성 중',
+			'작성 중', 0, 0, '작성중', NULL, SYSDATE, 'basic'
+		)
+	</insert>
+
+	<select id="lockDraftOwner" parameterType="long" resultType="long">
+		SELECT OPERATOR_CODE
+		FROM CREATOR
+		WHERE OPERATOR_CODE = #{authorCode}
+		FOR UPDATE
+	</select>
+
+	<select id="selectLatestDraftClass" parameterType="long"
+		resultType="kr.co.oneclass.author.classbasic.ClassBasicDTO">
+		SELECT CLASS_CODE, AUTHOR_CODE, CATEGORY_CODE, CATEGORY_NAME,
+			CLASS_TITLE, SHORT_INTRODUCTION, CLASS_INTRODUCTION, MAIN_IMAGE_PATH,
+			REGISTER_STEP
+		FROM (
+			SELECT
+				c.CLASS_CODE,
+				c.OPERATOR_CODE AS AUTHOR_CODE,
+				c.CATEGORY_CODE,
+				(SELECT ct.NAME FROM CATEGORY ct WHERE ct.CATEGORY_CODE = c.CATEGORY_CODE) AS CATEGORY_NAME,
+				c.NAME AS CLASS_TITLE,
+				c.SINGLE_INTRODUCE AS SHORT_INTRODUCTION,
+				c.INTRODUCE AS CLASS_INTRODUCTION,
+				c.REGISTER_STEP,
+				(
+					SELECT MIN(ci.IMAGE) KEEP (DENSE_RANK FIRST ORDER BY ci.SORT_ORDER, ci.CLASS_IMG_CODE)
+					FROM CLASS_IMG ci
+					WHERE ci.CLASS_CODE = c.CLASS_CODE AND ci.TYPE = '대표'
+				) AS MAIN_IMAGE_PATH
+			FROM CLASS c
+			WHERE c.OPERATOR_CODE = #{authorCode}
+			  AND c.STATUS = '준비중'
+			  AND c.APPROVAL_STATUS = '작성중'
+			  AND c.APPROVAL_MEMO IS NULL
+			ORDER BY c.WRITE_DATE DESC, c.CLASS_CODE DESC
+		)
+		WHERE ROWNUM = 1
+	</select>
+
+	<delete id="deleteDraftClass" parameterType="map">
+		DELETE FROM CLASS
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND STATUS = '준비중'
+		  AND APPROVAL_STATUS = '작성중'
+		  AND APPROVAL_MEMO IS NULL
+	</delete>
+
+	<delete id="deleteClassBookmarkList" parameterType="int">
+		DELETE FROM BOOKMARK
+		WHERE CLASS_CODE = #{classCode}
+	</delete>
+
+	<select id="selectClassBasic" parameterType="map"
+		resultType="kr.co.oneclass.author.classbasic.ClassBasicDTO">
+		SELECT
+			c.CLASS_CODE,
+			c.OPERATOR_CODE AS AUTHOR_CODE,
+			c.CATEGORY_CODE,
+			(SELECT ct.NAME FROM CATEGORY ct WHERE ct.CATEGORY_CODE = c.CATEGORY_CODE) AS CATEGORY_NAME,
+			c.NAME AS CLASS_TITLE,
+			c.SINGLE_INTRODUCE AS SHORT_INTRODUCTION,
+			c.INTRODUCE AS CLASS_INTRODUCTION,
+			c.REGISTER_STEP,
+			(
+				SELECT MIN(ci.IMAGE) KEEP (DENSE_RANK FIRST ORDER BY ci.SORT_ORDER, ci.CLASS_IMG_CODE)
+				FROM CLASS_IMG ci
+				WHERE ci.CLASS_CODE = c.CLASS_CODE
+				  AND ci.TYPE = '대표'
+			) AS MAIN_IMAGE_PATH
+		FROM CLASS c
+		WHERE c.CLASS_CODE = #{classCode}
+		  AND c.OPERATOR_CODE = #{authorCode}
+	</select>
+
+	<update id="updateClassBasic"
+		parameterType="kr.co.oneclass.author.classbasic.ClassBasicDTO">
+		UPDATE CLASS c
+		SET c.CATEGORY_CODE = #{categoryCode},
+			c.NAME = #{classTitle},
+			c.SINGLE_INTRODUCE = #{shortIntroduction},
+			c.INTRODUCE = #{classIntroduction},
+			c.WRITE_DATE = SYSDATE
+		WHERE c.CLASS_CODE = #{classCode}
+		  AND c.OPERATOR_CODE = #{authorCode}
+		  AND c.STATUS = '준비중'
+		  AND c.APPROVAL_STATUS IN ('작성중', '수정중')
+		  AND EXISTS (
+			  SELECT 1 FROM CATEGORY ct
+			  WHERE ct.CATEGORY_CODE = #{categoryCode}
+			    AND ct.PARENTS_CATEGORY IS NOT NULL
+		  )
+	</update>
+
+	<!-- 관리자 재검수 없이 승인 상태를 유지하는 운영 클래스 기본정보 수정 -->
+	<update id="updateApprovedClassBasic"
+		parameterType="kr.co.oneclass.author.classbasic.ClassBasicDTO">
+		UPDATE CLASS c
+		SET c.CATEGORY_CODE = #{categoryCode},
+			c.NAME = #{classTitle},
+			c.SINGLE_INTRODUCE = #{shortIntroduction},
+			c.INTRODUCE = #{classIntroduction}
+		WHERE c.CLASS_CODE = #{classCode}
+		  AND c.OPERATOR_CODE = #{authorCode}
+		  AND c.STATUS IN ('모집중', '준비중')
+		  AND c.APPROVAL_STATUS = '승인'
+		  AND EXISTS (
+			  SELECT 1 FROM CATEGORY ct
+			  WHERE ct.CATEGORY_CODE = #{categoryCode}
+			    AND ct.PARENTS_CATEGORY IS NOT NULL
+		  )
+	</update>
+
+	<select id="selectClassLocation" parameterType="map"
+		resultType="kr.co.oneclass.author.classbasic.ClassLocationDTO">
+		SELECT
+			c.CLASS_CODE,
+			c.OPERATOR_CODE AS AUTHOR_CODE,
+			c.ZIPCODE,
+			c.ADDRESS,
+			c.OLD_ADDRESS,
+			c.ADDRESS2 AS DETAIL_ADDRESS,
+			c.LAT AS LATITUDE,
+			c.LNG AS LONGITUDE
+		FROM CLASS c
+		WHERE c.CLASS_CODE = #{classCode}
+		  AND c.OPERATOR_CODE = #{authorCode}
+	</select>
+
+	<update id="updateClassLocation"
+		parameterType="kr.co.oneclass.author.classbasic.ClassLocationDTO">
+		UPDATE CLASS
+		SET ZIPCODE = #{zipcode},
+			ADDRESS = #{address},
+			OLD_ADDRESS = #{oldAddress},
+			ADDRESS2 = #{detailAddress},
+			LAT = #{latitude},
+			LNG = #{longitude},
+			WRITE_DATE = SYSDATE
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND STATUS = '준비중'
+		  AND APPROVAL_STATUS IN ('작성중', '수정중')
+	</update>
+
+	<update id="updateApprovedClassLocation"
+		parameterType="kr.co.oneclass.author.classbasic.ClassLocationDTO">
+		UPDATE CLASS
+		SET ZIPCODE = #{zipcode},
+			ADDRESS = #{address},
+			OLD_ADDRESS = #{oldAddress},
+			ADDRESS2 = #{detailAddress},
+			LAT = #{latitude},
+			LNG = #{longitude}
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND STATUS IN ('모집중', '준비중')
+		  AND APPROVAL_STATUS = '승인'
+	</update>
+
+	<select id="selectCategoryList"
+		resultType="kr.co.oneclass.author.classbasic.CategoryDTO">
+		SELECT CATEGORY_CODE, NAME
+		FROM CATEGORY
+		WHERE PARENTS_CATEGORY IS NOT NULL
+		ORDER BY PARENTS_CATEGORY, CATEGORY_CODE
+	</select>
+
+	<select id="selectClassSchedule" parameterType="map"
+		resultType="kr.co.oneclass.author.classbasic.ClassScheduleDTO">
+		SELECT
+			c.CLASS_CODE,
+			c.OPERATOR_CODE AS AUTHOR_CODE,
+			'ONCE' AS SCHEDULE_TYPE,
+			(
+				SELECT MIN(r.OPERATION_START_DATE)
+				FROM CLASS_REPEAT_RULE r
+				WHERE r.CLASS_CODE = c.CLASS_CODE
+			) AS RECRUIT_START_DATE,
+			(
+				SELECT MAX(r.OPERATION_END_DATE)
+				FROM CLASS_REPEAT_RULE r
+				WHERE r.CLASS_CODE = c.CLASS_CODE
+			) AS RECRUIT_END_DATE,
+			c.PRICE AS REGULAR_PRICE,
+			c.DESIRED_PRICE,
+			NVL((
+				SELECT MIN(s.MIN_PEOPLE) KEEP (
+					DENSE_RANK FIRST ORDER BY s.CLASS_DATE, s.START_TIME, s.SCHEDULE_CODE
+				)
+				FROM SCHEDULE s
+				JOIN CLASS_REPEAT_RULE r ON r.REPEAT_RULE_CODE = s.REPEAT_RULE_CODE
+				WHERE r.CLASS_CODE = c.CLASS_CODE
+			), 2) AS MIN_PEOPLE,
+			NVL((
+				SELECT MIN(s.MAX_PEOPLE) KEEP (
+					DENSE_RANK FIRST ORDER BY s.CLASS_DATE, s.START_TIME, s.SCHEDULE_CODE
+				)
+				FROM SCHEDULE s
+				JOIN CLASS_REPEAT_RULE r ON r.REPEAT_RULE_CODE = s.REPEAT_RULE_CODE
+				WHERE r.CLASS_CODE = c.CLASS_CODE
+			), 6) AS MAX_PEOPLE,
+			CASE WHEN c.INGREDIENTS_INCLUDE = 'Y' THEN 1 ELSE 0 END AS MATERIAL_INCLUDED
+		FROM CLASS c
+		WHERE c.CLASS_CODE = #{classCode}
+		  AND c.OPERATOR_CODE = #{authorCode}
+	</select>
+
+	<update id="updateClassSchedule"
+		parameterType="kr.co.oneclass.author.classbasic.ClassScheduleDTO">
+		UPDATE CLASS
+		SET PRICE = #{regularPrice},
+			DESIRED_PRICE = #{desiredPrice},
+			WRITE_DATE = SYSDATE,
+			INGREDIENTS_INCLUDE =
+			<choose>
+				<when test="materialIncluded">'Y'</when>
+				<otherwise>'N'</otherwise>
+			</choose>
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND STATUS = '준비중'
+		  AND APPROVAL_STATUS IN ('작성중', '수정중')
+	</update>
+
+	<!-- 예약이 참조하는 일정은 유지하고 새 예약에 적용할 가격만 변경한다 -->
+	<update id="updateApprovedClassPricing"
+		parameterType="kr.co.oneclass.author.classbasic.ClassScheduleDTO">
+		UPDATE CLASS
+		SET PRICE = #{regularPrice},
+			DESIRED_PRICE = #{desiredPrice},
+			INGREDIENTS_INCLUDE =
+			<choose>
+				<when test="materialIncluded">'Y'</when>
+				<otherwise>'N'</otherwise>
+			</choose>
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND STATUS IN ('모집중', '준비중')
+		  AND APPROVAL_STATUS = '승인'
+	</update>
+
+	<resultMap id="classDetailMap"
+		type="kr.co.oneclass.author.classbasic.ClassDetailDTO">
+		<id property="classCode" column="CLASS_CODE"/>
+		<result property="authorCode" column="AUTHOR_CODE"/>
+		<result property="resultDescription" column="RESULT_DESCRIPTION"/>
+		<collection property="advantageList" column="CLASS_CODE"
+			ofType="string" select="selectAdvantageList"/>
+		<collection property="recommendList" column="CLASS_CODE"
+			ofType="string" select="selectRecommendList"/>
+		<collection property="optionCodeList" column="CLASS_CODE"
+			ofType="int" select="selectClassOptionCodeList"/>
+		<collection property="noticeList" column="CLASS_CODE"
+			ofType="string" select="selectClassNoticeList"/>
+		<collection property="tagList" column="CLASS_CODE"
+			ofType="string" select="selectClassTagList"/>
+	</resultMap>
+
+	<select id="selectClassDetail" parameterType="map" resultMap="classDetailMap">
+		SELECT
+			c.CLASS_CODE,
+			c.OPERATOR_CODE AS AUTHOR_CODE,
+			c.FINISH_INTRODUCE AS RESULT_DESCRIPTION
+		FROM CLASS c
+		WHERE c.CLASS_CODE = #{classCode}
+		  AND c.OPERATOR_CODE = #{authorCode}
+	</select>
+
+	<select id="selectAdvantageList" parameterType="int" resultType="string">
+		SELECT INGREDIENTS
+		FROM DETAIL_INFO
+		WHERE CLASS_CODE = #{classCode}
+		  AND CHARACTER = '장점'
+		ORDER BY DETAIL_INFO_CODE
+	</select>
+
+	<select id="selectRecommendList" parameterType="int" resultType="string">
+		SELECT INGREDIENTS
+		FROM DETAIL_INFO
+		WHERE CLASS_CODE = #{classCode}
+		  AND CHARACTER = '추천'
+		ORDER BY DETAIL_INFO_CODE
+	</select>
+
+	<select id="selectClassOptionCodeList" parameterType="int" resultType="int">
+		SELECT CLASS_OFFERING_CODE
+		FROM CLASS_OFFERING_MAP
+		WHERE CLASS_CODE = #{classCode}
+		ORDER BY CLASS_OFFERING_CODE
+	</select>
+
+	<select id="selectClassNoticeList" parameterType="int" resultType="string">
+		SELECT ADDITIONAL_INFO_CONTENT
+		FROM CLASS_ADDITIONAL_INFO
+		WHERE CLASS_CODE = #{classCode}
+		ORDER BY ADDITIONAL_INFO_CODE
+	</select>
+
+	<select id="selectClassTagList" parameterType="int" resultType="string">
+		SELECT TAG_NAME
+		FROM TAG
+		WHERE CLASS_CODE = #{classCode}
+		ORDER BY TAG_CODE
+	</select>
+
+	<update id="updateClassDetail"
+		parameterType="kr.co.oneclass.author.classbasic.ClassDetailDTO">
+		UPDATE CLASS
+		SET FINISH_INTRODUCE = #{resultDescription},
+			WRITE_DATE = SYSDATE
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND STATUS = '준비중'
+		  AND APPROVAL_STATUS IN ('작성중', '수정중')
+	</update>
+
+	<update id="updateApprovedClassDetail"
+		parameterType="kr.co.oneclass.author.classbasic.ClassDetailDTO">
+		UPDATE CLASS
+		SET FINISH_INTRODUCE = #{resultDescription}
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND STATUS IN ('모집중', '준비중')
+		  AND APPROVAL_STATUS = '승인'
+	</update>
+
+	<delete id="deleteDetailInfoList" parameterType="map">
+		DELETE FROM DETAIL_INFO
+		WHERE CLASS_CODE = #{classCode}
+		  AND CHARACTER = #{detailType}
+	</delete>
+
+	<delete id="deleteClassDetailInfoList" parameterType="int">
+		DELETE FROM DETAIL_INFO
+		WHERE CLASS_CODE = #{classCode}
+	</delete>
+
+	<insert id="insertDetailInfo" parameterType="map">
+		<selectKey keyProperty="generatedCode" resultType="int" order="BEFORE">
+			SELECT SEQ_DETAIL_INFO_CODE.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO DETAIL_INFO (DETAIL_INFO_CODE, CLASS_CODE, CHARACTER, INGREDIENTS)
+		VALUES (
+			#{generatedCode}, #{classCode}, #{detailType}, #{content}
+		)
+	</insert>
+
+	<delete id="deleteClassOptionList" parameterType="int">
+		DELETE FROM CLASS_OFFERING_MAP
+		WHERE CLASS_CODE = #{classCode}
+	</delete>
+
+	<insert id="insertClassOption" parameterType="map">
+		INSERT INTO CLASS_OFFERING_MAP (CLASS_OFFERING_CODE, CLASS_CODE)
+		SELECT CLASS_OFFERING_CODE, #{classCode}
+		FROM CLASS_OFFERING
+		WHERE CLASS_OFFERING_CODE = #{optionCode}
+		  AND USE_YN = 'Y'
+	</insert>
+
+	<delete id="deleteClassNoticeList" parameterType="int">
+		DELETE FROM CLASS_ADDITIONAL_INFO
+		WHERE CLASS_CODE = #{classCode}
+	</delete>
+
+	<insert id="insertClassNotice" parameterType="map">
+		<selectKey keyProperty="generatedCode" resultType="int" order="BEFORE">
+			SELECT SEQ_CLASS_ADDITIONAL_INFO_CODE.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO CLASS_ADDITIONAL_INFO (
+			ADDITIONAL_INFO_CODE, CLASS_CODE, ADDITIONAL_INFO_CONTENT
+		) VALUES (
+			#{generatedCode}, #{classCode}, #{content}
+		)
+	</insert>
+
+	<delete id="deleteClassTagList" parameterType="int">
+		DELETE FROM TAG
+		WHERE CLASS_CODE = #{classCode}
+	</delete>
+
+	<insert id="insertClassTag" parameterType="map">
+		<selectKey keyProperty="generatedCode" resultType="int" order="BEFORE">
+			SELECT SEQ_TAG_CODE.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO TAG (TAG_CODE, CLASS_CODE, TAG_NAME)
+		VALUES (
+			#{generatedCode}, #{classCode}, #{content}
+		)
+	</insert>
+
+	<select id="selectClassMaterialList" parameterType="int"
+		resultType="kr.co.oneclass.author.classbasic.ClassMaterialDTO">
+		SELECT
+			CLASS_MATERIAL_CODE AS MATERIAL_CODE,
+			CLASS_CODE,
+			MATERIAL_NAME,
+			MATERIAL_CONTENT
+		FROM CLASS_MATERIAL
+		WHERE CLASS_CODE = #{classCode}
+		ORDER BY CLASS_MATERIAL_CODE
+	</select>
+
+	<delete id="deleteClassMaterialList" parameterType="int">
+		DELETE FROM CLASS_MATERIAL
+		WHERE CLASS_CODE = #{classCode}
+	</delete>
+
+	<insert id="insertClassMaterial" parameterType="map">
+		<selectKey keyProperty="generatedCode" resultType="int" order="BEFORE">
+			SELECT SEQ_CLASS_MATERIAL_CODE.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO CLASS_MATERIAL (
+			CLASS_MATERIAL_CODE, CLASS_CODE, MATERIAL_NAME, MATERIAL_CONTENT
+		) VALUES (
+			#{generatedCode}, #{classCode}, #{materialName}, #{materialContent}
+		)
+	</insert>
+
+	<select id="selectOfferingList"
+		resultType="kr.co.oneclass.author.classbasic.OfferingDTO">
+		SELECT
+			CLASS_OFFERING_CODE AS OFFERING_CODE,
+			OFFERING_NAME
+		FROM CLASS_OFFERING
+		WHERE USE_YN = 'Y'
+		ORDER BY CLASS_OFFERING_CODE
+	</select>
+
+	<update id="updateRegisterStep" parameterType="map">
+		UPDATE CLASS
+		SET REGISTER_STEP = #{step},
+			WRITE_DATE = SYSDATE
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND STATUS = '준비중'
+		  AND APPROVAL_STATUS IN ('작성중', '수정중')
+	</update>
+
+	<!-- 반려 사유는 수정 중에도 확인할 수 있게 두고, 재제출할 때 updateClassStatus가 지운다 -->
+	<update id="reopenRejectedClass" parameterType="map">
+		UPDATE CLASS
+		SET APPROVAL_STATUS = '수정중',
+			STATUS = '준비중',
+			REGISTER_STEP = 'basic',
+			WRITE_DATE = SYSDATE
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND STATUS = '대기중'
+		  AND APPROVAL_STATUS = '반려'
+	</update>
+
+	<update id="updateClassStatus" parameterType="map">
+		UPDATE CLASS
+		SET APPROVAL_STATUS = #{status},
+			APPROVAL_MEMO = NULL,
+			WRITE_DATE = SYSDATE
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND STATUS = '준비중'
+		  AND APPROVAL_STATUS IN ('작성중', '수정중')
+	</update>
+
+	<select id="selectRegisterResult" parameterType="map"
+		resultType="kr.co.oneclass.author.classbasic.ClassRegisterResultDTO">
+		SELECT
+			c.CLASS_CODE,
+			c.NAME AS CLASS_TITLE,
+			ct.NAME AS CATEGORY_NAME,
+			c.ADDRESS,
+			(
+				SELECT MIN(ci.IMAGE) KEEP (DENSE_RANK FIRST ORDER BY ci.SORT_ORDER, ci.CLASS_IMG_CODE)
+				FROM CLASS_IMG ci
+				WHERE ci.CLASS_CODE = c.CLASS_CODE
+				  AND ci.TYPE = '대표'
+			) AS THUMBNAIL_PATH,
+			c.APPROVAL_STATUS AS CLASS_STATUS,
+			c.WRITE_DATE AS REGISTERED_DATE,
+			(
+				SELECT TO_CHAR(MIN(s.CLASS_DATE), 'YYYY.MM.DD') || '부터 ' || COUNT(*) || '개 일정'
+				FROM SCHEDULE s
+				JOIN CLASS_REPEAT_RULE r ON r.REPEAT_RULE_CODE = s.REPEAT_RULE_CODE
+				WHERE r.CLASS_CODE = c.CLASS_CODE
+			) AS SCHEDULE_SUMMARY,
+			c.DESIRED_PRICE
+		FROM CLASS c
+		JOIN CATEGORY ct ON ct.CATEGORY_CODE = c.CATEGORY_CODE
+		WHERE c.CLASS_CODE = #{classCode}
+		  AND c.OPERATOR_CODE = #{authorCode}
+		  AND c.APPROVAL_STATUS IN ('대기', '승인', '반려')
+	</select>
+
+	<select id="selectClassStatus" parameterType="map" resultType="string">
+		SELECT APPROVAL_STATUS
+		FROM CLASS
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+	</select>
+
+	<select id="countApprovedEditableClass" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+		FROM CLASS
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND STATUS IN ('모집중', '준비중')
+		  AND APPROVAL_STATUS = '승인'
+	</select>
+
+	<update id="touchDraftClass" parameterType="map">
+		UPDATE CLASS
+		SET WRITE_DATE = SYSDATE
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND STATUS = '준비중'
+		  AND APPROVAL_STATUS IN ('작성중', '수정중')
+	</update>
+
+	<update id="guardApprovedClassEdit" parameterType="map">
+		UPDATE CLASS
+		SET WRITE_DATE = WRITE_DATE
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND STATUS IN ('모집중', '준비중')
+		  AND APPROVAL_STATUS = '승인'
+	</update>
+
+</mapper>

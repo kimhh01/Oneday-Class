@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+	<aside class="sidebar" th:fragment="sideMenu(activeMenu)">
+
+		<div class="brand">
+			<div class="brand-mark">✦</div>
+			<span>OneClass</span>
+		</div>
+		
+		<div class="menu-label">MANAGEMENT</div>
+		<a class="nav-item"
+			th:classappend="${activeMenu == 'dashboard'} ? ' active'"
+			th:href="@{/admin/dashboard}"> 대시보드 </a> <a class="nav-item"
+			th:classappend="${activeMenu == 'member'} ? ' active'"
+			th:href="@{/admin/members}"> 회원관리 </a> <a class="nav-item"
+			th:classappend="${activeMenu == 'writer'} ? ' active'"
+			th:href="@{/admin/writer}"> 작가관리 </a> <a class="nav-item"
+			th:classappend="${activeMenu == 'ondayclass'} ? ' active'"
+			th:href="@{/admin/onedayclass}"> 클래스관리 </a> <a class="nav-item"
+			th:classappend="${activeMenu == 'inquiry'} ? ' active'"
+			th:href="@{/admin/inquiries}"> 1:1 문의 </a> <a class="nav-item"
+			th:classappend="${activeMenu == 'notice'} ? ' active'"
+			th:href="@{/admin/notices}"> 공지사항 </a>
+
+		<div class="side-bottom">
+
+			<div class="admin-mini">
+				<div class="avatar">A</div>
+				<div>
+					<strong>관리자</strong> <span>Administrator</span>
+				</div>
+			</div>
+
+			<div class="side-actions">
+
+				<a th:href="@{/admin/info/verify}" class="side-btn side-btn-primary">
+					정보 변경 </a>
+
+				<form th:action="@{/admin/logout}" method="post" class="logout-form">
+
+					<button type="submit" class="side-btn side-btn-logout">
+						로그아웃</button>
+
+				</form>
+			</div>
+		</div>
+
+	</aside>
+
+</body>
+</html>

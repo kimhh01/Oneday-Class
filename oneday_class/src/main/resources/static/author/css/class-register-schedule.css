@@ -1,0 +1,839 @@
+@charset "UTF-8";
+
+/* =============================================================
+   클래스 등록 03 · 일정 및 가격
+   - class-register.css 다음에 불러온다.
+     (페이지 제목 / 단계 표시 / 하단 버튼 바는 거기서 상속)
+   - 이 파일에는 03 화면에서만 쓰는 것만 둔다.
+   ============================================================= */
+
+/* ---------- 2열 레이아웃 ----------
+   왼쪽 = 입력, 오른쪽 = 미리보기.
+   align-items:start 라서 오른쪽 카드가 왼쪽 높이만큼 늘어나지 않는다. */
+.schedule-grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1.85fr) minmax(318px, 1fr);
+	gap: 16px;
+	align-items: start;
+}
+
+.schedule-grid > .card {
+	min-width: 0;
+	border-color: #ECE8E0;
+	border-radius: 12px;
+	box-shadow: 0 4px 16px rgba(60, 45, 30, .045);
+}
+
+.schedule-grid > .card + .card {
+	margin-top: 0;
+}
+
+.schedule-grid .card-head-icon {
+	padding: 20px 22px 0;
+}
+
+/* 카드 제목 폰트를 본문 폰트로 되돌린다.
+   common.css 는 카드 제목에 고운바탕(명조)을 쓰는데, 같은 파일 주석에도
+   "감성 명조. 인사말·로고에만 사용" 이라고 적혀 있다.
+   입력이 빽빽한 이 화면에서는 명조가 읽기 힘들어서 Pretendard 로 바꾼다. */
+.schedule-card .card-head-icon__title,
+.preview-card .card__title {
+	font-family: var(--font-body);
+	font-weight: 700;
+	letter-spacing: -.015em;
+}
+
+.schedule-card > .card__body {
+	padding: 20px 22px 24px;
+}
+
+/* ---------- 입력 블록 (일정 등록 / 등록된 일정 / 가격 정보) ---------- */
+.sched-block + .sched-block {
+	margin-top: 22px;
+}
+
+/* 가격 정보 위에만 구분선 */
+.sched-block--divided {
+	margin-top: 22px;
+	padding-top: 22px;
+	border-top: 1px solid var(--border-soft);
+}
+
+.sched-block__title {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-bottom: 12px;
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--text-strong);
+}
+
+.sched-block__count {
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--green-600);
+	font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 개별 일정 / 요일 반복 전환 ---------- */
+.sched-mode {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
+	margin-bottom: 16px;
+}
+
+.sched-mode__btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 7px;
+	height: 42px;
+	border: 1px solid var(--border);
+	border-radius: 9px;
+	background: #fff;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--text-body);
+	transition: border-color .15s, background .15s, color .15s;
+}
+
+.sched-mode__btn svg {
+	width: 16px;
+	height: 16px;
+	flex: none;
+}
+
+.sched-mode__btn:hover {
+	border-color: var(--border-strong);
+	background: var(--bg-soft);
+}
+
+/* aria-selected 를 그대로 상태 선택자로 쓴다.
+   클래스와 접근성 속성이 따로 놀지 않아서 JS 가 한 줄 줄어든다. */
+.sched-mode__btn[aria-selected="true"] {
+	border-color: var(--green-600);
+	background: #F1F7F2;
+	color: var(--green-700);
+}
+
+/* ---------- 입력 한 줄 (라벨이 입력 위에 오는 형태) ---------- */
+.sched-panel[hidden] {
+	display: none;
+}
+
+.sched-row {
+	display: flex;
+	align-items: flex-end;
+	gap: 12px;
+}
+
+.sched-row + .sched-row {
+	margin-top: 12px;
+}
+
+.sched-cell {
+	flex: 1;
+	min-width: 0;
+}
+
+.sched-cell--grow {
+	flex: 1.4;
+}
+
+.sched-cell--auto {
+	flex: none;
+}
+
+.sched-cell__label {
+	display: block;
+	margin-bottom: 6px;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--text-body);
+}
+
+.sched-cell__label .req {
+	margin-left: 2px;
+	color: var(--red-600);
+}
+
+/* 라벨 아래 붙는 작은 보조 설명 — "희망가 (수강생에게 표시됨)" */
+.sched-cell__label-sub {
+	display: block;
+	margin-top: 1px;
+	font-size: var(--fs-caption);
+	font-weight: 500;
+	color: var(--text-muted);
+}
+
+.schedule-grid .input,
+.schedule-grid .select select {
+	height: 40px;
+	border-radius: 8px;
+	font-size: 13px;
+}
+
+/* 날짜 입력의 브라우저 기본 달력 아이콘 위치 정리 */
+.schedule-grid input[type="date"] {
+	padding-right: 10px;
+}
+
+.schedule-grid input[type="date"]::-webkit-calendar-picker-indicator {
+	cursor: pointer;
+	opacity: .55;
+}
+
+.sched-add {
+	height: 40px;
+	min-width: 112px;
+	border-radius: 8px;
+}
+
+.sched-add svg {
+	width: 14px;
+	height: 14px;
+}
+
+/* ---------- 요일 선택 칩 ---------- */
+.day-chips {
+	display: grid;
+	grid-template-columns: repeat(7, minmax(0, 1fr));
+	gap: 8px;
+}
+
+.day-chip {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	height: 38px;
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	background: #fff;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--text-body);
+	transition: border-color .15s, background .15s, color .15s;
+}
+
+.day-chip svg {
+	width: 13px;
+	height: 13px;
+	flex: none;
+	opacity: 0;
+}
+
+.day-chip:hover {
+	border-color: var(--green-500);
+}
+
+.day-chip[aria-pressed="true"] {
+	border-color: var(--green-600);
+	background: var(--green-600);
+	color: #fff;
+}
+
+.day-chip[aria-pressed="true"] svg {
+	opacity: 1;
+}
+
+/* ---------- 등록된 일정 표 ---------- */
+.sched-table-wrap {
+	overflow-x: auto;
+}
+
+.sched-table {
+	min-width: 480px;
+	font-size: 13px;
+}
+
+.sched-table th,
+.sched-table td {
+	padding: 11px 10px;
+	text-align: center;
+	white-space: nowrap;
+}
+
+.sched-table thead th {
+	background: #F7F4EE;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--text-muted);
+}
+
+.sched-table thead th:first-child { border-radius: 8px 0 0 8px; }
+.sched-table thead th:last-child  { border-radius: 0 8px 8px 0; }
+
+.sched-table tbody td {
+	border-bottom: 1px solid var(--border-soft);
+	color: var(--text-body);
+}
+
+.sched-table tbody tr:last-child td {
+	border-bottom: 0;
+}
+
+.sched-table tbody tr:hover td {
+	background: #FCFAF6;
+}
+
+.sched-table__no {
+	width: 52px;
+}
+
+.sched-table__date {
+	font-weight: 600;
+	color: var(--text-strong);
+}
+
+.sched-table__group-row td {
+	background: #FCFAF6;
+}
+
+.sched-group-toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	font: inherit;
+	font-weight: 700;
+	color: var(--text-strong);
+}
+
+.sched-group-toggle svg {
+	width: 15px;
+	height: 15px;
+	color: var(--green-700);
+	transition: transform .15s ease;
+}
+
+.sched-group-toggle[aria-expanded="true"] svg {
+	transform: rotate(180deg);
+}
+
+.sched-group-count {
+	display: inline-flex;
+	padding: 4px 9px;
+	border-radius: 999px;
+	background: var(--green-50);
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--green-700);
+}
+
+.sched-group-time {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+}
+
+.sched-table__detail-row td {
+	background: #fff;
+}
+
+.sched-table__detail-row .sched-table__date {
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--text-muted);
+}
+
+.sched-no {
+	display: inline-grid;
+	place-items: center;
+	width: 22px;
+	height: 22px;
+	border-radius: 50%;
+	background: var(--green-50);
+	font-size: var(--fs-caption);
+	font-weight: 700;
+	color: var(--green-700);
+	font-variant-numeric: tabular-nums;
+}
+
+.sched-del {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	height: 28px;
+	padding: 0 10px;
+	border: 1px solid var(--border);
+	border-radius: 7px;
+	background: #fff;
+	font-size: 12px;
+	color: var(--text-muted);
+	transition: border-color .15s, color .15s, background .15s;
+}
+
+.sched-pagination {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 14px 10px 2px;
+}
+
+.sched-pagination[hidden] {
+	display: none;
+}
+
+.sched-pagination__button {
+	display: inline-grid;
+	place-items: center;
+	min-width: 30px;
+	height: 30px;
+	padding: 0 9px;
+	border: 1px solid var(--border);
+	border-radius: 7px;
+	background: #fff;
+	font-size: 12px;
+	color: var(--text-body);
+}
+
+.sched-pagination__button[aria-current="page"] {
+	border-color: var(--green-600);
+	background: var(--green-50);
+	font-weight: 700;
+	color: var(--green-700);
+}
+
+.sched-pagination__button:disabled {
+	cursor: default;
+	opacity: .4;
+}
+
+.sched-del svg {
+	width: 13px;
+	height: 13px;
+}
+
+.sched-del:hover {
+	border-color: #E3B7C6;
+	background: var(--red-100);
+	color: var(--on-red);
+}
+
+/* 일정이 하나도 없을 때 */
+.sched-empty {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	padding: 30px 16px;
+	border: 1px dashed #DED6C7;
+	border-radius: 10px;
+	background: #FCFAF6;
+	text-align: center;
+}
+
+.sched-empty svg {
+	width: 26px;
+	height: 26px;
+	color: #C4BBAC;
+}
+
+.sched-empty b {
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--text-body);
+}
+
+.sched-empty span {
+	font-size: 12px;
+	color: var(--text-muted);
+}
+
+/* display 를 따로 지정한 요소는 hidden 속성만으로 숨겨지지 않는다.
+   (브라우저 기본값 display:none 을 우리 규칙이 덮어써 버리기 때문)
+   그래서 숨김이 필요한 것만 콕 집어 다시 적어 준다. */
+.sched-empty[hidden],
+.sched-table-wrap[hidden] {
+	display: none;
+}
+
+/* ---------- 가격 정보 ---------- */
+.price-row {
+	display: flex;
+	align-items: flex-start;
+	gap: 16px;
+}
+
+.price-row + .price-row {
+	margin-top: 14px;
+}
+
+/* 정가는 라벨이 1줄, 희망가는 2줄이다.
+   라벨 칸 높이를 고정해 두면 줄 수가 달라도 입력칸이 같은 높이에서 시작한다.
+   (아래쪽 기준으로 맞추면, 입력 밑에 도움말이 붙은 칸만 위로 밀려 올라간다) */
+.price-row .sched-cell__label {
+	min-height: 36px;   /* 2줄 라벨이 실측 35.5px 라 그보다 커야 한다 */
+}
+
+/* 입력 오른쪽에 "원" / "명" 을 붙인다 */
+.unit-input {
+	position: relative;
+}
+
+.unit-input .input {
+	padding-right: 38px;
+	text-align: left;
+	font-variant-numeric: tabular-nums;
+}
+
+.unit-input__unit {
+	position: absolute;
+	top: 50%;
+	right: 14px;
+	transform: translateY(-50%);
+	font-size: 13px;
+	color: var(--text-muted);
+	pointer-events: none;
+}
+
+/* 스위치 (재료비 포함) */
+.switch {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	height: 40px;
+	font-size: 13px;
+	color: var(--text-body);
+	cursor: pointer;
+	user-select: none;
+}
+
+.switch input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	opacity: 0;
+}
+
+.switch__track {
+	position: relative;
+	width: 40px;
+	height: 23px;
+	flex: none;
+	border-radius: 999px;
+	background: #D9D3C7;
+	transition: background .15s;
+}
+
+.switch__track::after {
+	content: "";
+	position: absolute;
+	top: 3px;
+	left: 3px;
+	width: 17px;
+	height: 17px;
+	border-radius: 50%;
+	background: #fff;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, .18);
+	transition: transform .15s;
+}
+
+.switch input:checked + .switch__track {
+	background: var(--green-600);
+}
+
+.switch input:checked + .switch__track::after {
+	transform: translateX(17px);
+}
+
+.switch input:focus-visible + .switch__track {
+	box-shadow: 0 0 0 3px var(--green-100);
+}
+
+.switch__hint {
+	width: 14px;
+	height: 14px;
+	color: var(--text-muted);
+}
+
+/* ---------- 오른쪽 미리보기 ---------- */
+.preview-card > .card__head {
+	padding: 20px 20px 0;
+}
+
+.preview-card .card__title {
+	font-size: 15px;
+}
+
+.preview-card > .card__body {
+	padding: 14px 20px 20px;
+}
+
+/* 작은 달력 */
+.mini-cal {
+	padding: 14px 12px 12px;
+	border: 1px solid var(--border);
+	border-radius: 10px;
+	background: #fff;
+}
+
+.mini-cal__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 10px;
+}
+
+.mini-cal__title {
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--text-strong);
+	font-variant-numeric: tabular-nums;
+}
+
+.mini-cal__nav {
+	display: grid;
+	place-items: center;
+	width: 26px;
+	height: 26px;
+	border-radius: 8px;
+	color: var(--text-muted);
+	transition: background .15s, color .15s;
+}
+
+.mini-cal__nav:hover {
+	background: var(--bg-soft);
+	color: var(--text-strong);
+}
+
+.mini-cal__nav svg {
+	width: 15px;
+	height: 15px;
+}
+
+.mini-cal__grid {
+	display: grid;
+	grid-template-columns: repeat(7, minmax(0, 1fr));
+	gap: 2px;
+	text-align: center;
+}
+
+.mini-cal__dow {
+	padding: 2px 0 6px;
+	font-size: 11px;
+	color: var(--text-muted);
+}
+
+.mini-cal__day {
+	display: grid;
+	place-items: center;
+	height: 28px;
+	border-radius: 50%;
+	font-size: 12px;
+	color: var(--text-body);
+	font-variant-numeric: tabular-nums;
+}
+
+/* 토요일은 파랑, 지난달·다음달 날짜는 흐리게 */
+.mini-cal__day--sat { color: #2C6ECB; }
+.mini-cal__day--out { color: #CBC4B7; }
+
+/* 일정이 잡힌 날 */
+.mini-cal__day--on {
+	background: var(--green-600);
+	color: #fff;
+	font-weight: 700;
+}
+
+.mini-cal__legend {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin-top: 10px;
+	font-size: 11px;
+	color: var(--text-muted);
+}
+
+.mini-cal__dot {
+	width: 8px;
+	height: 8px;
+	flex: none;
+	border-radius: 50%;
+	background: var(--green-600);
+}
+
+/* 예정 일정 / 예상 정원 */
+.preview-stats {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
+	margin-top: 12px;
+}
+
+.preview-stat {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	min-width: 0;
+	padding: 12px 12px;
+	border: 1px solid var(--border);
+	border-radius: 10px;
+	background: #fff;
+}
+
+.preview-stat svg {
+	width: 19px;
+	height: 19px;
+	flex: none;
+	color: var(--green-600);
+}
+
+.preview-stat__label {
+	font-size: 11px;
+	color: var(--text-muted);
+}
+
+.preview-stat__value {
+	margin-top: 1px;
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--text-strong);
+	white-space: nowrap;
+}
+
+/* 클래스 가격 */
+.preview-price {
+	margin-top: 10px;
+	padding: 16px;
+	border: 1px solid #D8E8DD;
+	border-radius: 10px;
+	background: #F1F8F3;
+}
+
+.preview-price__label {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--text-body);
+}
+
+.preview-price__sub {
+	font-weight: 500;
+	color: var(--text-muted);
+}
+
+.preview-price__amount {
+	margin-top: 4px;
+	font-size: 28px;
+	font-weight: 700;
+	line-height: 1.2;
+	color: var(--green-700);
+	letter-spacing: -.02em;
+	font-variant-numeric: tabular-nums;
+}
+
+.preview-price__amount small {
+	font-size: 14px;
+	font-weight: 700;
+}
+
+.preview-price__amount em {
+	font-size: 13px;
+	font-weight: 600;
+	font-style: normal;
+	color: var(--text-body);
+}
+
+.preview-price__note {
+	margin-top: 4px;
+	font-size: 11px;
+	color: var(--text-muted);
+}
+
+/* 진행 상태 */
+.preview-state {
+	margin-top: 10px;
+	padding: 14px 16px;
+	border: 1px solid var(--border);
+	border-radius: 10px;
+	background: var(--bg-soft);
+}
+
+.preview-state__row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+}
+
+.preview-state__label {
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--text-body);
+}
+
+.preview-state__pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	height: 28px;
+	padding: 0 11px;
+	border: 1px solid var(--green-500);
+	border-radius: 8px;
+	background: #fff;
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--green-700);
+	white-space: nowrap;
+}
+
+.preview-state__pill svg {
+	width: 14px;
+	height: 14px;
+	flex: none;
+}
+
+.preview-state__desc {
+	margin-top: 8px;
+	font-size: 11px;
+	line-height: 1.5;
+	color: var(--text-muted);
+}
+
+/* ---------- 반응형 ---------- */
+@media (max-width: 1160px) {
+	.schedule-grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.preview-stats {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 720px) {
+	.sched-row {
+		flex-wrap: wrap;
+	}
+
+	.sched-cell,
+	.sched-cell--grow {
+		flex: 1 1 calc(50% - 6px);
+	}
+
+	.sched-cell--auto,
+	.sched-add {
+		flex: 1 1 100%;
+		width: 100%;
+	}
+
+	.day-chips {
+		grid-template-columns: repeat(4, minmax(0, 1fr));
+	}
+
+	.price-row {
+		flex-wrap: wrap;
+	}
+
+	.price-row > * {
+		flex: 1 1 calc(50% - 8px);
+	}
+
+	.switch {
+		flex: 1 1 100%;
+	}
+}

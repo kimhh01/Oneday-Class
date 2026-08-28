@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.oneclass.admin.member.AdminMemberDAO">
+
+
+	<!-- 회원 ResultMap -->
+	<resultMap id="adminMemberResultMap"
+		type="kr.co.oneclass.admin.member.AdminMemberDTO">
+
+		<id property="memberCode" column="MEMBER_CODE" />
+
+		<result property="phone" column="PHONE" />
+		<result property="email" column="EMAIL" />
+		<result property="zipcode" column="ZIPCODE" />
+		<result property="address" column="ADDRESS" />
+		<result property="address2" column="ADDRESS2" />
+		<result property="name" column="NAME" />
+		<result property="status" column="STATUS" />
+
+		<result property="humanDate" column="HUMAN_DATE" />
+		<result property="smsReceive" column="SMS_RECEIVE" />
+		<result property="emailReceive" column="EMAIL_RECEIVE" />
+		<result property="image" column="IMAGE" />
+		<result property="inputDate" column="INPUT_DATE" />
+
+		<result property="reservationNum" column="RESERVATION_NUM" />
+		<result property="totalPayment" column="TOTAL_PAYMENT" />
+		<result property="cancelCount" column="CANCEL_COUNT" />
+		<result property="lastLoginDate" column="LAST_LOGIN_DATE" />
+
+	</resultMap>
+
+
+	<!-- 예약 / 결제 ResultMap -->
+	<resultMap id="adminMemberReservationResultMap"
+		type="kr.co.oneclass.admin.member.AdminMemberReservationDTO">
+
+		<id property="reservationCode" column="RESERVATION_CODE" />
+
+		<result property="classCode" column="CLASS_CODE" />
+		<result property="className" column="CLASS_NAME" />
+
+		<result property="reservationDate" column="RESERVATION_DATE" />
+		<result property="peopleNumber" column="PEOPLE_NUMBER" />
+		<result property="reservationStatus"
+			column="RESERVATION_STATUS" />
+
+		<result property="paymentCode" column="PAYMENT_CODE" />
+		<result property="amount" column="AMOUNT" />
+		<result property="means" column="MEANS" />
+		<result property="paymentDate" column="PAYMENT_DATE" />
+		<result property="paymentStatus" column="PAYMENT_STATUS" />
+
+		<result property="refund" column="REFUND" />
+		<result property="refundDate" column="REFUND_DATE" />
+
+	</resultMap>
+
+
+	<!-- 회원 목록 -->
+	<select id="selectMemberList" resultMap="adminMemberResultMap">
+		SELECT
+		MEMBER_CODE,
+		PHONE,
+		EMAIL,
+		NAME,
+		STATUS,
+		INPUT_DATE
+
+		FROM (
+
+		SELECT
+		A.*,
+		ROWNUM RN
+
+		FROM (
+
+		SELECT
+		M.MEMBER_CODE,
+		M.PHONE,
+		M.EMAIL,
+		M.NAME,
+		M.STATUS,
+		M.INPUT_DATE
+
+		FROM MEMBER M
+		<where>
+
+			<if
+				test="searchDTO.keyword != null
+						and searchDTO.keyword != ''">
+				AND (
+				M.NAME LIKE '%' || #{searchDTO.keyword} || '%'
+				OR M.EMAIL
+				LIKE '%' || #{searchDTO.keyword} || '%'
+				OR M.PHONE LIKE '%' ||
+				#{searchDTO.keyword} || '%'
+				)
+			</if>
+
+			<if
+				test="searchDTO.status != null
+						and searchDTO.status != ''">
+				AND M.STATUS = #{searchDTO.status}
+			</if>
+		</where>
+		ORDER BY M.MEMBER_CODE DESC
+		) A
+
+		WHERE ROWNUM &lt;= #{endRow}
+		)
+
+		WHERE RN
+		&gt;= #{startRow}
+	</select>
+
+	<select id="selectMemberCount" resultType="int">
+		SELECT COUNT(*)
+
+		FROM MEMBER M
+
+		<where>
+
+			<if
+				test="searchDTO.keyword != null
+				and searchDTO.keyword != ''">
+				AND (
+				M.NAME LIKE '%' || #{searchDTO.keyword} || '%'
+				OR M.EMAIL
+				LIKE '%' || #{searchDTO.keyword} || '%'
+				OR M.PHONE LIKE '%' ||
+				#{searchDTO.keyword} || '%'
+				)
+			</if>
+
+			<if test="searchDTO.status != null
+				and searchDTO.status != ''">
+				AND M.STATUS = #{searchDTO.status}
+			</if>
+
+		</where>
+
+	</select>
+
+	<select id="selectMemberByCode" resultMap="adminMemberResultMap">
+		SELECT
+		M.MEMBER_CODE,
+		M.PHONE,
+		M.EMAIL,
+		M.ZIPCODE,
+		M.ADDRESS,
+		M.ADDRESS2,
+		M.NAME,
+		M.STATUS,
+		M.HUMAN_DATE,
+		M.SMS_RECEIVE,
+		M.EMAIL_RECEIVE,
+		M.IMAGE,
+		M.INPUT_DATE,
+
+		(
+		SELECT COUNT(*)
+
+		FROM RESERVATION R
+
+		WHERE R.MEMBER_CODE =
+		M.MEMBER_CODE
+
+		)
+		AS RESERVATION_NUM,
+
+		(
+		SELECT
+		NVL(SUM(P.AMOUNT), 0)
+
+		FROM RESERVATION R
+
+		INNER JOIN PAYMENT P
+		ON
+		P.RESERVATION_CODE = R.RESERVATION_CODE
+
+		WHERE
+		R.MEMBER_CODE =
+		M.MEMBER_CODE
+		AND P.STATUS = '결제완료'
+
+		) AS TOTAL_PAYMENT,
+
+		(
+		SELECT COUNT(*)
+
+		FROM RESERVATION R
+
+		WHERE R.MEMBER_CODE = M.MEMBER_CODE
+		AND R.STATUS = '취소'
+
+		) AS CANCEL_COUNT,
+
+		(
+		SELECT
+		MAX(LH.LOGIN_DATE)
+
+		FROM
+		LOGIN_HISTORY LH
+
+		WHERE LH.MEMBER_CODE =
+		M.MEMBER_CODE
+
+		) AS
+		LAST_LOGIN_DATE
+
+
+		FROM MEMBER M
+
+		WHERE M.MEMBER_CODE =
+		#{memberCode}
+	</select>
+
+	<select id="selectMemberReservationList"
+		resultMap="adminMemberReservationResultMap">
+		SELECT
+		RESERVATION_CODE,
+		CLASS_CODE,
+		CLASS_NAME,
+		RESERVATION_DATE,
+		PEOPLE_NUMBER,
+		RESERVATION_STATUS,
+		PAYMENT_CODE,
+		AMOUNT,
+		MEANS,
+		PAYMENT_DATE,
+		PAYMENT_STATUS,
+		REFUND,
+		REFUND_DATE
+
+		FROM (
+
+		SELECT
+		A.*,
+		ROWNUM RN
+
+		FROM (
+
+		SELECT
+		R.RESERVATION_CODE,
+		R.CLASS_CODE,
+
+		C.NAME
+		AS CLASS_NAME,
+
+		R.RESERVATION_DATE,
+		R.PEOPLE_NUMBER,
+
+		R.STATUS AS
+		RESERVATION_STATUS,
+
+		P.PAYMENT_CODE,
+		P.AMOUNT,
+		P.MEANS,
+		P.PAYMENT_DATE,
+
+		P.STATUS AS PAYMENT_STATUS,
+
+		P.REFUND,
+		P.REFUND_DATE
+
+		FROM RESERVATION R
+
+		INNER JOIN CLASS C
+		ON C.CLASS_CODE = R.CLASS_CODE
+
+		LEFT JOIN PAYMENT P
+		ON
+		P.RESERVATION_CODE = R.RESERVATION_CODE
+
+		WHERE R.MEMBER_CODE =
+		#{memberCode}
+
+		ORDER BY
+		R.RESERVATION_DATE DESC,
+		R.RESERVATION_CODE DESC
+
+		)
+		A
+
+		WHERE ROWNUM &lt;= #{endRow}
+
+		)
+
+		WHERE RN &gt;= #{startRow}
+	</select>
+
+	<select id="selectMemberReservationCount" resultType="int">
+		SELECT
+		COUNT(*)
+
+		FROM RESERVATION
+
+		WHERE MEMBER_CODE = #{memberCode}
+	</select>
+
+	<update id="updateMemberStatus">
+		UPDATE MEMBER
+
+		SET STATUS = #{status}
+
+		<if test="status == '휴면'">
+			,
+			HUMAN_DATE = SYSDATE
+		</if>
+
+		<if test="status == '정상'">
+			,
+			HUMAN_DATE = NULL
+		</if>
+
+		WHERE MEMBER_CODE = #{memberCode}
+	</update>
+
+	<select id="selectReservationForCancel"
+		resultMap="adminMemberReservationResultMap">
+		SELECT
+		R.RESERVATION_CODE,
+		R.CLASS_CODE,
+		C.NAME AS CLASS_NAME,
+		R.RESERVATION_DATE,
+		R.PEOPLE_NUMBER,
+		R.STATUS AS RESERVATION_STATUS,
+		P.PAYMENT_CODE,
+		P.AMOUNT,
+		P.MEANS,
+		P.PAYMENT_DATE,
+		P.STATUS AS
+		PAYMENT_STATUS,
+		P.REFUND,
+		P.REFUND_DATE
+		FROM RESERVATION R
+		JOIN CLASS C
+		ON
+		R.CLASS_CODE = C.CLASS_CODE
+		LEFT JOIN PAYMENT P
+		ON R.RESERVATION_CODE =
+		P.RESERVATION_CODE
+		WHERE R.RESERVATION_CODE = #{reservationCode}
+	</select>
+
+	<update id="updatePaymentRefund">
+		UPDATE PAYMENT
+		SET REFUND = AMOUNT,
+		STATUS = '환불완료',
+		REFUND_DATE = SYSDATE
+		WHERE RESERVATION_CODE = #{reservationCode}
+		AND
+		STATUS = '결제완료'
+	</update>
+
+	<update id="updateReservationCancel">
+		UPDATE RESERVATION
+		SET STATUS = '취소'
+		WHERE
+		RESERVATION_CODE = #{reservationCode}
+		AND STATUS = '예약'
+	</update>
+
+</mapper>

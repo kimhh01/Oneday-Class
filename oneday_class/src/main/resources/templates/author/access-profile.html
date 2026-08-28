@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>작가 프로필 등록 | Oneclass</title>
+<link rel="stylesheet" href="/author/css/common.css" th:href="@{/author/css/common.css}">
+<link rel="stylesheet" href="/author/css/profile.css" th:href="@{/author/css/profile.css}">
+</head>
+<body class="author-page author-onboarding-page">
+<main class="author-onboarding">
+	<a class="author-onboarding__brand" th:href="@{/}">Oneclass</a>
+	<section class="author-onboarding__card">
+		<header class="author-onboarding__head">
+			<span>작가 계정 생성하기</span>
+			<h1>작가 프로필을 입력해주세요</h1>
+			<p>Oneclass에서 작가님의 솜씨를 보여주세요</p>
+		</header>
+
+		<p class="profile-feedback profile-feedback--error" th:if="${profileError}" th:text="${profileError}" role="alert"></p>
+
+		<form method="post" enctype="multipart/form-data" th:action="@{/author/access/profile}" th:object="${profile}" id="authorOnboardingForm">
+			<div class="author-onboarding__photo">
+				<img id="profilePhotoPreview" src="/author/images/photo/studio-profile.png"
+					 th:src="${#strings.isEmpty(profile.profileImagePath) ? '/author/images/photo/studio-profile.png' : profile.profileImagePath}"
+					 alt="프로필 미리보기" onerror="this.onerror=null;this.src='/author/images/photo/studio-profile.png';">
+				<div>
+					<strong>프로필 사진 <span>선택</span></strong>
+					<p>JPG 또는 PNG, 최대 5MB</p>
+					<label for="profilePhoto">사진 선택</label>
+					<input type="file" id="profilePhoto" name="profileFile" accept="image/jpeg,image/png" hidden>
+				</div>
+			</div>
+
+			<div class="profile-fields author-onboarding__fields">
+				<div class="profile-field">
+					<label for="profileName">이름</label>
+					<input id="profileName" th:value="*{authorName}" readonly>
+				</div>
+				<div class="profile-field">
+					<label for="profileEmail">이메일</label>
+					<input type="email" id="profileEmail" th:value="*{email}" readonly>
+				</div>
+				<div class="profile-field">
+					<label for="activityName">작가명 <em>필수</em></label>
+					<input id="activityName" th:field="*{authorNickname}" maxlength="50" required autocomplete="organization-title">
+					<small>클래스와 작가 페이지에 표시되는 이름입니다.</small>
+				</div>
+				<div class="profile-field">
+					<label for="activityRegion">활동 지역 <em>필수</em></label>
+					<div class="profile-select">
+						<select id="activityRegion" th:field="*{activityField}" required>
+							<option value="" disabled>지역을 선택해주세요</option>
+							<option value="서울">서울</option><option value="경기">경기</option><option value="인천">인천</option><option value="부산">부산</option>
+							<option value="대구">대구</option><option value="대전">대전</option><option value="광주">광주</option><option value="제주">제주</option>
+						</select>
+					</div>
+					<small>작가님이 운영하는 클래스의 위치를 입력해주세요.</small>
+				</div>
+				<div class="profile-field profile-field--wide">
+					<label for="introduction">소개글 <em>필수</em></label>
+					<textarea id="introduction" th:field="*{introduction}" maxlength="300" required placeholder="작가님의 활동과 클래스 이야기를 소개해주세요."></textarea>
+					<div class="profile-field-foot"><small>작가님을 소개하는 글을 입력해주세요.</small><span><b id="introCount">0</b> / 300</span></div>
+				</div>
+				<div class="profile-field profile-field--wide">
+					<label for="kakaoLink">카카오톡 채널 링크 <span>선택</span></label>
+					<div class="kakao-input"><span aria-hidden="true">톡</span><input type="url" id="kakaoLink" th:field="*{kakaoUrl}" maxlength="200" placeholder="https://pf.kakao.com/_채널아이디"></div>
+					<small>작가님의 카카오톡 채널을 등록해주세요. 수강생과 소통할 때 사용됩니다.</small>
+				</div>
+			</div>
+
+			<footer class="author-onboarding__actions">
+				<a class="btn btn--ghost" th:href="@{/mypage}">마이페이지로 돌아가기</a>
+				<button type="submit" class="btn btn--primary">프로필 저장하고 시작하기</button>
+			</footer>
+		</form>
+	</section>
+</main>
+
+<script>
+(function(){
+	'use strict';
+	var photoInput=document.getElementById('profilePhoto'),photoPreview=document.getElementById('profilePhotoPreview'),intro=document.getElementById('introduction'),introCount=document.getElementById('introCount'),previewUrl='';
+	function updateIntroCount(){introCount.textContent=intro.value.length;}
+	updateIntroCount();
+	intro.addEventListener('input',updateIntroCount);
+	photoInput.addEventListener('change',function(){var file=photoInput.files[0];if(!file)return;if(previewUrl)URL.revokeObjectURL(previewUrl);previewUrl=URL.createObjectURL(file);photoPreview.src=previewUrl;});
+}());
+</script>
+</body>
+</html>

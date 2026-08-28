@@ -1,0 +1,573 @@
+@charset "UTF-8";
+
+/* =============================================================
+   클래스 등록 05 · 커리큘럼
+   - class-register.css의 제목, 단계 표시, 하단 액션 바를 재사용한다.
+   - 한 커리큘럼 단계는 제목, 내용, 이미지 한 장으로만 구성한다.
+   ============================================================= */
+
+.curriculum-grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1.72fr) minmax(286px, .72fr);
+	gap: 16px;
+	align-items: start;
+}
+
+.curriculum-grid > .card {
+	min-width: 0;
+	border-color: #ECE8E0;
+	border-radius: 12px;
+	box-shadow: 0 4px 16px rgba(60, 45, 30, .045);
+}
+
+.curriculum-grid > .card + .card {
+	margin-top: 0;
+}
+
+.curriculum-editor__head {
+	position: relative;
+	padding: 20px 22px 0;
+}
+
+.curriculum-editor .card-head-icon__title,
+.curriculum-guide h2 {
+	font-family: var(--font-body);
+	font-weight: 700;
+	letter-spacing: -.015em;
+}
+
+.curriculum-count {
+	margin-left: auto;
+	padding: 6px 11px;
+	border-radius: 999px;
+	background: #EEF5EF;
+	font-size: var(--fs-caption);
+	font-weight: 700;
+	color: var(--green-700);
+	white-space: nowrap;
+	font-variant-numeric: tabular-nums;
+}
+
+.curriculum-editor > .card__body {
+	padding: 20px 22px 24px;
+}
+
+/* ---------- 커리큘럼 단계 카드 ---------- */
+.curriculum-list {
+	display: grid;
+	gap: 14px;
+}
+
+.curriculum-step {
+	overflow: hidden;
+	border: 1px solid #E8E2D8;
+	border-radius: 12px;
+	background: #FFF;
+	transition: border-color .18s, box-shadow .18s;
+}
+
+.curriculum-step:focus-within {
+	border-color: #B9D1C1;
+	box-shadow: 0 5px 18px rgba(25, 92, 51, .07);
+}
+
+.curriculum-step__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 14px;
+	min-height: 68px;
+	padding: 13px 16px;
+	border-bottom: 1px solid #EEE9E1;
+	background: linear-gradient(90deg, #FBF8F2 0%, #FEFDFC 100%);
+}
+
+.curriculum-step__heading {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	min-width: 0;
+}
+
+.curriculum-step__number {
+	display: grid;
+	place-items: center;
+	width: 58px;
+	height: 34px;
+	flex: none;
+	border: 1px solid #CADBCD;
+	border-radius: 999px;
+	background: #F0F6F1;
+	font-size: var(--fs-caption);
+	font-weight: 800;
+	letter-spacing: .055em;
+	color: #246740;
+	font-variant-numeric: tabular-nums;
+}
+
+.curriculum-step__heading h3 {
+	font-size: 14px;
+	font-weight: 700;
+	color: var(--text-strong);
+}
+
+.curriculum-step__heading p {
+	margin-top: 3px;
+	overflow: hidden;
+	font-size: var(--fs-caption);
+	color: var(--text-muted);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.curriculum-step__delete {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 5px;
+	height: 32px;
+	flex: none;
+	padding: 0 10px;
+	border: 1px solid #E4DCD0;
+	border-radius: 8px;
+	background: #FFF;
+	font-size: var(--fs-caption);
+	color: #756B5E;
+	transition: border-color .15s, background .15s, color .15s;
+}
+
+.curriculum-step__delete svg {
+	width: 14px;
+	height: 14px;
+}
+
+.curriculum-step__delete:hover:not(:disabled) {
+	border-color: #DBB9B2;
+	background: #FFF6F4;
+	color: #A1493C;
+}
+
+.curriculum-step__delete:disabled {
+	opacity: .42;
+	cursor: not-allowed;
+}
+
+.curriculum-step__body {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 196px;
+	gap: 18px;
+	padding: 17px 16px 18px;
+}
+
+.curriculum-step__fields {
+	display: grid;
+	align-content: start;
+	gap: 14px;
+	min-width: 0;
+}
+
+.curriculum-field__label-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	margin-bottom: 6px;
+}
+
+.curriculum-field__label-row label,
+.curriculum-image-field__label {
+	font-size: 12px;
+	font-weight: 650;
+	color: var(--text-body);
+}
+
+.required {
+	color: #B04D3E;
+}
+
+.curriculum-field__count {
+	font-size: var(--fs-caption);
+	color: #9A9186;
+	font-variant-numeric: tabular-nums;
+}
+
+.curriculum-field__count b {
+	font-weight: 600;
+	color: #5F574E;
+}
+
+.curriculum-field .input {
+	height: 39px;
+	border-radius: 8px;
+}
+
+.curriculum-field .textarea {
+	height: 96px;
+	min-height: 96px;
+	border-radius: 8px;
+	line-height: 1.65;
+	resize: vertical;
+}
+
+/* ---------- 단계별 단일 이미지 ---------- */
+.curriculum-image-field {
+	min-width: 0;
+}
+
+.curriculum-image-field__label {
+	display: block;
+	margin-bottom: 6px;
+}
+
+.curriculum-image {
+	position: relative;
+	display: block;
+	width: 100%;
+	aspect-ratio: 4 / 3;
+	overflow: hidden;
+	border: 1px solid #E2DACE;
+	border-radius: 10px;
+	background: #F3EEE5;
+	cursor: pointer;
+}
+
+.curriculum-image::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border: 2px solid transparent;
+	border-radius: inherit;
+	pointer-events: none;
+	transition: border-color .15s;
+}
+
+.curriculum-image:hover::after,
+.curriculum-image:focus-within::after {
+	border-color: rgba(38, 112, 66, .68);
+}
+
+.curriculum-image img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	transition: transform .22s;
+}
+
+.curriculum-image img.pottery-step--1 {
+	object-position: 0% center;
+}
+
+.curriculum-image img.pottery-step--2 {
+	object-position: 50% center;
+}
+
+.curriculum-image img.pottery-step--3 {
+	object-position: 100% center;
+}
+
+.curriculum-image:hover img {
+	transform: scale(1.025);
+}
+
+.curriculum-image__overlay {
+	position: absolute;
+	right: 9px;
+	bottom: 9px;
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	height: 29px;
+	padding: 0 9px;
+	border: 1px solid rgba(255, 255, 255, .28);
+	border-radius: 7px;
+	background: rgba(31, 28, 24, .66);
+	font-size: var(--fs-caption);
+	font-weight: 650;
+	color: #FFF;
+	backdrop-filter: blur(4px);
+}
+
+.curriculum-image__overlay svg {
+	width: 13px;
+	height: 13px;
+}
+
+.curriculum-image-field__help {
+	margin-top: 6px;
+	font-size: var(--fs-caption);
+	color: var(--text-muted);
+}
+
+/* ---------- 단계 추가 ---------- */
+.curriculum-add {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 11px;
+	width: 100%;
+	min-height: 66px;
+	margin-top: 14px;
+	border: 1px dashed #CFC4B5;
+	border-radius: 11px;
+	background: #FCFAF6;
+	color: var(--text-body);
+	transition: border-color .15s, background .15s, color .15s;
+}
+
+.curriculum-add:hover {
+	border-color: #6A9B78;
+	background: #F2F7F3;
+	color: var(--green-700);
+}
+
+.curriculum-add__icon {
+	display: grid;
+	place-items: center;
+	width: 32px;
+	height: 32px;
+	flex: none;
+	border-radius: 50%;
+	background: #EAF3EC;
+	color: var(--green-700);
+}
+
+.curriculum-add__icon svg {
+	width: 16px;
+	height: 16px;
+}
+
+.curriculum-add > span:last-child {
+	display: grid;
+	gap: 3px;
+	text-align: left;
+}
+
+.curriculum-add b {
+	font-size: 12px;
+	font-weight: 700;
+}
+
+.curriculum-add small {
+	font-size: var(--fs-caption);
+	color: var(--text-muted);
+}
+
+/* ---------- 오른쪽 작성 가이드 ---------- */
+.curriculum-guide {
+	overflow: hidden;
+}
+
+.curriculum-guide__visual {
+	position: relative;
+	height: 190px;
+	overflow: hidden;
+	background: #E9E0D2;
+}
+
+.curriculum-guide__visual::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(180deg, rgba(21, 20, 17, .04) 28%, rgba(21, 20, 17, .65) 100%);
+}
+
+.curriculum-guide__visual img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.curriculum-guide__visual img.pottery-guide-visual {
+	object-position: 72% center;
+}
+.curriculum-guide__visual > span {
+	position: absolute;
+	z-index: 1;
+	right: 18px;
+	bottom: 16px;
+	left: 18px;
+	font-family: var(--font-body);
+	font-size: 20px;
+	font-weight: 700;
+	line-height: 1.35;
+	color: #FFF;
+	text-shadow: 0 1px 7px rgba(0, 0, 0, .28);
+}
+
+.curriculum-guide__body {
+	padding: 20px 19px 21px;
+}
+
+.curriculum-guide h2 {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	font-size: 15px;
+}
+
+.curriculum-guide h2 > span {
+	display: grid;
+	place-items: center;
+	width: 34px;
+	height: 34px;
+	border-radius: 50%;
+	background: #EEF5EF;
+	color: var(--green-700);
+}
+
+.curriculum-guide h2 svg {
+	width: 17px;
+	height: 17px;
+}
+
+.curriculum-guide ul {
+	display: grid;
+	gap: 17px;
+	margin-top: 20px;
+}
+
+.curriculum-guide li {
+	display: flex;
+	align-items: flex-start;
+	gap: 9px;
+}
+
+.curriculum-guide li > svg {
+	width: 15px;
+	height: 15px;
+	flex: none;
+	margin-top: 1px;
+	color: #2A7648;
+}
+
+.curriculum-guide li div {
+	display: grid;
+	gap: 4px;
+}
+
+.curriculum-guide li b {
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--text-body);
+}
+
+.curriculum-guide li span {
+	font-size: var(--fs-caption);
+	line-height: 1.55;
+	color: var(--text-muted);
+}
+
+.curriculum-guide__note {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	margin-top: 21px;
+	padding: 12px;
+	border: 1px solid #E9E1D4;
+	border-radius: 9px;
+	background: #FAF7F1;
+}
+
+.curriculum-guide__note > svg {
+	width: 15px;
+	height: 15px;
+	flex: none;
+	margin-top: 1px;
+	color: #9C794A;
+}
+
+.curriculum-guide__note p {
+	font-size: var(--fs-caption);
+	line-height: 1.55;
+	color: var(--text-muted);
+}
+
+.curriculum-guide__note b {
+	font-weight: 700;
+	color: #6E5637;
+}
+
+/* ---------- 반응형 ---------- */
+@media (max-width: 1180px) {
+	.curriculum-grid {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.curriculum-guide {
+		display: grid;
+		grid-template-columns: minmax(260px, .72fr) minmax(0, 1fr);
+	}
+
+	.curriculum-guide__visual {
+		height: 100%;
+		min-height: 240px;
+	}
+}
+
+@media (max-width: 760px) {
+	.curriculum-editor__head {
+		align-items: flex-start;
+	}
+
+	.curriculum-count {
+		position: absolute;
+		right: 16px;
+		top: 20px;
+	}
+
+	.curriculum-step__head {
+		align-items: flex-start;
+	}
+
+	.curriculum-step__heading {
+		align-items: flex-start;
+	}
+
+	.curriculum-step__heading p,
+	.curriculum-step__delete span {
+		display: none;
+	}
+
+	.curriculum-step__delete {
+		width: 32px;
+		padding: 0;
+	}
+
+	.curriculum-step__body {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.curriculum-image {
+		max-width: 330px;
+	}
+
+	.curriculum-guide {
+		display: block;
+	}
+
+	.curriculum-guide__visual {
+		height: 190px;
+		min-height: 0;
+	}
+}
+
+@media (max-width: 520px) {
+	.curriculum-editor > .card__body {
+		padding-right: 14px;
+		padding-left: 14px;
+	}
+
+	.curriculum-step__head {
+		padding-right: 12px;
+		padding-left: 12px;
+	}
+
+	.curriculum-step__body {
+		padding-right: 12px;
+		padding-left: 12px;
+	}
+
+	.curriculum-step__number {
+		width: 52px;
+	}
+}

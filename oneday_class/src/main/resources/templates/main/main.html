@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CSRF 토큰 메타 태그 -->
+    <meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}"/>
+    <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : ''}"/>
+    <title>Oneclass 메인</title>
+    <link rel="stylesheet" th:href="@{/main/css/main.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+</head>
+<body>
+<div th:replace="~{common/header :: headerFragment}"></div>
+    
+    <main class="main-container">
+        <!-- 1. 메인 검색바 -->
+        <div class="search-wrap">
+            <form th:action="@{/search}" method="get" class="search-box">
+                <div class="search-icon">
+                    <img th:src="@{/images/icon/search_icon.svg}" alt="검색" style="width: 20px; height: 20px;">
+                </div>
+                <input class="search-input" type="text" name="keyword" placeholder="원하는 키워드를 검색해보세요.">
+                <button type="submit" class="search-btn">검색</button>
+            </form>
+        </div>
+
+        <!-- 2. 히어로 섹션 및 히어로 검색 바 -->
+        <section class="hero-section">
+            <div class="hero-text">
+                <h1><span>Oneclass</span>에서<br>당신의 취미를 찾아보세요</h1>
+                <p>소통을 갈망하고, 입시와 취업에 지친 일상 속에서 나를 찾는 시간.<br>Oneclass에서 특별한 클래스를 만나보세요.</p>
+            </div>
+            
+            <div class="hero-banner">
+                <img th:src="@{/images/banner/main_banner.jpg}" alt="메인배너" onerror="this.src='/images/class/dessert1.jpg';">
+                
+                <form th:action="@{/main/search-available}" method="get" class="hero-floating-search">
+                    <input type="hidden" name="categoryCode" id="selectedCategoryInput" value="0">
+
+                    <div class="float-input-group hover-dropdown-container">
+                        <div class="category-flex-wrapper">
+                            <div class="search-icon">
+                                <img th:src="@{/images/icon/search_icon.svg}" alt="카테고리" style="width: 20px; height: 20px;">
+                            </div>
+                            <span class="group-label">카테고리 |</span>
+                            <span class="selected-text" id="selectedCategoryText">전체 카테고리</span>
+                            <svg class="arrow-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="6 9 12 15 18 9"></polyline>
+                            </svg>
+                        </div>
+
+        <div class="dropdown-menu-box">
+    <div class="dropdown-inner">
+        <!-- 기본 전체 선택 -->
+        <a href="#" class="dropdown-item" data-code="0">전체 카테고리</a>
+        
+        <!-- DB에서 들어온 카테고리 목록 동적 반복 출력 (대분류만 노출) -->
+        <th:block th:if="${categoryList != null}">
+            <th:block th:each="cat : ${categoryList}" th:if="${cat.parentCategoryCode == null}">
+                <a href="#" class="dropdown-item" 
+                   th:data-code="${cat.categoryCode}" 
+                   th:text="${cat.categoryName}">카테고리명</a>
+            </th:block>
+        </th:block>
+    </div>
+</div>
+
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <div class="float-input-group schedule-group">
+                        <span class="calendar-icon">
+                            <img th:src="@{/images/icon/calendar_icon.svg}" alt="일정" style="width: 20px; height: 20px;">
+                        </span>
+                        <span class="group-label">일정 |</span>
+                        <input type="date" name="date" class="search-date-input" required>
+                    </div>
+
+                    <button type="submit">검색</button>
+                </form>
+
+            </div>
+        </section>
+   
+        <!-- 3. Quick 퀵 메뉴 아이콘 탭 -->
+        <section class="category-nav">
+            <a th:href="@{/category}" class="category-item">
+                <div class="category-icon">
+                    <img th:src="@{/images/icon/category_icon.svg}" alt="전체" style="width: 36px; height: 36px;">
+                </div>
+                <span class="category-name">카테고리 전체</span>
+            </a>
+            
+            <a th:href="@{/map}" class="category-item">
+                <div class="category-icon">
+                    <img th:src="@{/images/icon/map_icon.svg}" alt="지역" style="width: 36px; height: 36px;">
+                </div>
+                <span class="category-name">지역별 찾기</span>
+            </a>
+
+            <a th:href="@{/topCategory/beauty}" class="category-item">
+                <div class="category-icon">
+                    <img th:src="@{/images/icon/beauty_icon.svg}" alt="뷰티" style="width: 36px; height: 36px;">
+                </div>
+                <span class="category-name">인기 뷰티</span>
+            </a>
+
+            <a th:href="@{/topCategory/baking}" class="category-item">
+                <div class="category-icon">
+                    <img th:src="@{/images/icon/baking_icon.svg}" alt="베이킹" style="width: 36px; height: 36px;">
+                </div>
+                <span class="category-name">인기 베이킹</span>
+            </a>
+            
+            <a th:href="@{/topCategory/activity}" class="category-item">
+                <div class="category-icon">
+                    <img th:src="@{/images/icon/activity_icon.svg}" alt="액티비티" style="width: 36px; height: 36px;">
+                </div>
+                <span class="category-name">인기 액티비티</span>
+            </a>
+            
+           
+            <a th:href="@{/category/class(sameDayOnly=true)}" class="category-item">
+                <div class="category-icon">
+                    <img th:src="@{/images/icon/today_icon.svg}" alt="당일" style="width: 36px; height: 36px;">      
+                </div>
+                <span class="category-name">당일 예약</span>
+            </a>
+            
+            <a th:href="@{/category/class(sameWeekOnly=true)}" class="category-item">
+                <div class="category-icon">
+                    <img th:src="@{/images/icon/weekend_icon.svg}" alt="주말" style="width: 36px; height: 36px;">      
+                </div>
+                <span class="category-name">주말 예약</span>
+            </a>
+        </section>
+
+        <!-- 4. 이달의 인기클래스 (상위 3개) -->
+        <section class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">Oneclass가 검증한 이달의 인기클래스!</h2>
+                <span class="view-all">
+                    <a th:href="@{/category/class}">전체보기 &gt;</a>
+                </span>
+            </div>
+            
+            <div class="grid-3">
+                <div class="class-card" th:each="cls : ${topRatedList}">
+                    <div style="position: relative; width: 100%;">
+                        <!-- 찜 버튼 -->
+                       <button type="button" class="bookmark-btn" 
+        th:data-class-code="${cls.classCode}" 
+        onclick="toggleBookmark(event, this)">
+    <svg width="20" height="20" viewBox="0 0 24 24" 
+         th:fill="${bookmarkedClassCodes != null and #lists.contains(bookmarkedClassCodes, cls.classCode)} ? '#e33838' : 'none'" 
+         stroke="#e33838" stroke-width="2">
+        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+    </svg>
+</button>
+                        <a th:href="@{/classDetail(classCode=${cls.classCode})}">
+                                   <img th:src="${cls.mainImage}" th:alt="${cls.name}">
+                        </a>
+                    </div>
+                    <a th:href="@{/classDetail(classCode=${cls.classCode})}">
+                        <div class="class-info">
+                            <div class="class-loc" th:text="${cls.address}"></div>
+                            <div class="class-name" th:text="${cls.name}"></div>
+                            
+                         <div class="class-price-row">
+    <!-- 1) DTO 할인율 (cls.discountRate) 원본 그대로 복구 -->
+    <span class="discount" 
+          th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}" 
+          th:text="${cls.discountRate + '%'}"></span>
+    
+    <!-- 2) 정가 취소선 -->
+    <span class="original" 
+          th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}" 
+          th:text="${#numbers.formatInteger(cls.desiredPrice, 0, 'COMMA')}"></span>
+    
+    <!-- 3) 최종 판매가 -->
+    <span class="final" 
+          th:text="${#numbers.formatInteger(cls.price, 0, 'COMMA') + '원'}"></span>
+</div>
+
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. 어디에서 놀까요? -->
+<section class="content-section">
+    <div class="section-header">
+        <h2 class="section-title">어디에서 놀까요?</h2>
+    </div>
+    
+    <!-- 화살표 및 슬라이더 컨테이너 래퍼 -->
+    <div class="location-slider-wrapper">
+        <button type="button" class="slide-arrow prev-arrow" onclick="scrollLocations(-1)" aria-label="이전">&#10094;</button>
+        
+  <div class="location-circles" id="locationContainer">
+    <!-- 1. 내주변 -->
+    <a th:href="@{/map(useLocation=true)}" class="loc-circle my-location">
+        <div class="loc-content">
+            <span class="pin-icon">📍</span>
+            <span class="loc-name">내주변</span>
+        </div>
+    </a>
+
+    <!-- 2. DB 동적 클래스 개수 출력 (지역별 2줄 구성) -->
+    <a th:href="@{/map(keyword='마포')}" class="loc-circle" style="background-image: url('/images/map/hongdae.jpg');">
+        <div class="loc-content">
+            <span class="loc-name">홍대</span>
+            <span class="loc-count" 
+                  th:text="${regionCounts != null ? regionCounts['홍대'] + '개 취미' : '0개 취미'}">0개 취미</span>
+        </div>
+    </a>
+    
+    
+
+    <a th:href="@{/map(keyword='강남')}" class="loc-circle" style="background-image: url('/images/map/gangnam.jpg');">
+        <div class="loc-content">
+            <span class="loc-name">강남</span>
+            <span class="loc-count" 
+                  th:text="${regionCounts != null ? regionCounts['강남'] + '개 취미' : '0개 취미'}">0개 취미</span>
+        </div>
+    </a>
+
+    <a th:href="@{/map(keyword='성수')}" class="loc-circle" style="background-image: url('/images/map/seungsu.jpg');">
+        <div class="loc-content">
+            <span class="loc-name">성수</span>
+            <span class="loc-count" 
+                  th:text="${regionCounts != null ? regionCounts['성수'] + '개 취미' : '0개 취미'}">0개 취미</span>
+        </div>
+    </a>
+
+    <a th:href="@{/map(keyword='송파')}" class="loc-circle" style="background-image: url('/images/map/songpa.jpg');">
+        <div class="loc-content">
+            <span class="loc-name">송파</span>
+            <span class="loc-count" 
+                  th:text="${regionCounts != null ? regionCounts['송파'] + '개 취미' : '0개 취미'}">0개 취미</span>
+        </div>
+    </a>
+
+    <a th:href="@{/map(keyword='마포')}" class="loc-circle"style="background-image: url('/images/map/hongdae.jpg');">
+        <div class="loc-content">
+            <span class="loc-name">마포</span>
+            <span class="loc-count" 
+                  th:text="${regionCounts != null ? regionCounts['마포'] + '개 취미' : '0개 취미'}">0개 취미</span>
+        </div>
+    </a>
+
+    <a th:href="@{/map(keyword='잠실')}" class="loc-circle"style="background-image: url('/images/map/zamsil.jpg');">
+        <div class="loc-content">
+            <span class="loc-name">잠실</span>
+            <span class="loc-count" 
+                  th:text="${regionCounts != null ? regionCounts['잠실'] + '개 취미' : '0개 취미'}">0개 취미</span>
+        </div>
+    </a>
+
+    <a th:href="@{/map(keyword='용산')}" class="loc-circle"style="background-image: url('/images/map/yongsan.jpg');">
+        <div class="loc-content">
+            <span class="loc-name">용산</span>
+            <span class="loc-count" 
+                  th:text="${regionCounts != null ? regionCounts['용산'] + '개 취미' : '0개 취미'}">0개 취미</span>
+        </div>
+    </a>
+
+    <a th:href="@{/map(keyword='부산')}" class="loc-circle"style="background-image: url('/images/map/busan.jpg');">
+        <div class="loc-content">
+            <span class="loc-name">부산</span>
+            <span class="loc-count" 
+                  th:text="${regionCounts != null ? regionCounts['부산'] + '개 취미' : '0개 취미'}">0개 취미</span>
+        </div>
+    </a>
+    
+    <a th:href="@{/map(keyword='수원')}" class="loc-circle"style="background-image: url('/images/map/suwon.jpg');">
+        <div class="loc-content">
+            <span class="loc-name">수원</span>
+            <span class="loc-count" 
+                  th:text="${regionCounts != null ? regionCounts['부산'] + '개 취미' : '0개 취미'}">0개 취미</span>
+        </div>
+    </a>
+    
+    <a th:href="@{/map(keyword='광주')}" class="loc-circle"style="background-image: url('/images/map/qwangju.jpg');">
+        <div class="loc-content">
+            <span class="loc-name">광주</span>
+            <span class="loc-count" 
+                  th:text="${regionCounts != null ? regionCounts['부산'] + '개 취미' : '0개 취미'}">0개 취미</span>
+        </div>
+    </a>
+    
+    <a th:href="@{/map(keyword='대전')}" class="loc-circle"style="background-image: url('/images/map/daejeon.jpg');">
+        <div class="loc-content">
+            <span class="loc-name">대전</span>
+            <span class="loc-count" 
+                  th:text="${regionCounts != null ? regionCounts['부산'] + '개 취미' : '0개 취미'}">0개 취미</span>
+        </div>
+    </a>
+    
+    
+    
+    
+</div>
+
+        <button type="button" class="slide-arrow next-arrow" onclick="scrollLocations(1)" aria-label="다음">&#10095;</button>
+    </div>
+</section>
+
+        <!-- 6. 인기 디저트 클래스 (상위 5개) -->
+        <section class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">인기 디저트 클래스 🍰</h2>
+                <span class="view-all">
+                    <a th:href="@{/category/class(categoryCode=2)}">전체보기 &gt;</a>
+                </span>
+            </div>
+            
+            <div class="grid-5">
+                <div class="class-card" th:each="cls : ${bakingList}">
+                    <div style="position: relative; width: 100%;">
+                        <!-- 찜 버튼 -->
+                        <button type="button" class="bookmark-btn" 
+                                th:data-class-code="${cls.classCode}" 
+                                onclick="toggleBookmark(event, this)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" 
+                                 th:fill="${bookmarkedClassCodes != null and #lists.contains(bookmarkedClassCodes, cls.classCode)} ? '#e33838' : 'none'" 
+                                 stroke="#e33838" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </button>
+                        <a th:href="@{/classDetail(classCode=${cls.classCode})}">
+                            <img th:src="${cls.mainImage}" th:alt="${cls.name}">
+                        </a>
+                    </div>
+                    <a th:href="@{/classDetail(classCode=${cls.classCode})}">
+                        <div class="class-info">
+                            <div class="class-loc" th:text="${cls.address}"></div>
+                            <div class="class-name" th:text="${cls.name}"></div>
+                            
+                           <div class="class-price-row">
+    <!-- 1) DTO 할인율 (cls.discountRate) 원본 그대로 복구 -->
+    <span class="discount" 
+          th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}" 
+          th:text="${cls.discountRate + '%'}"></span>
+    
+    <!-- 2) 정가 취소선 -->
+    <span class="original" 
+          th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}" 
+          th:text="${#numbers.formatInteger(cls.desiredPrice, 0, 'COMMA')}"></span>
+    
+    <!-- 3) 최종 판매가 -->
+    <span class="final" 
+          th:text="${#numbers.formatInteger(cls.price, 0, 'COMMA') + '원'}"></span>
+</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. 인기 메이크업/뷰티 클래스 (상위 3개) -->
+        <section class="content-section">
+            <div class="section-header">
+                <h2 class="section-title">휴가 전 이미지 변신!<br>나에게 어울리는 메이크업 찾기 💄✨</h2>
+                <span class="view-all">
+                    <a th:href="@{/category/class(categoryCode=5)}">전체보기 &gt;</a>
+                </span>
+            </div>
+            <div class="grid-3">
+                <div class="class-card" th:each="cls : ${beautyList}">
+                    <div style="position: relative; width: 100%;">
+                        <!-- 찜 버튼 -->
+                        <button type="button" class="bookmark-btn" 
+                                th:data-class-code="${cls.classCode}" 
+                                onclick="toggleBookmark(event, this)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" 
+                                 th:fill="${bookmarkedClassCodes != null and #lists.contains(bookmarkedClassCodes, cls.classCode)} ? '#e33838' : 'none'" 
+                                 stroke="#e33838" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </button>
+                        <a th:href="@{/classDetail(classCode=${cls.classCode})}">
+                                <img th:src="${cls.mainImage}" th:alt="${cls.name}">
+                        </a>
+                    </div>
+                    <a th:href="@{/classDetail(classCode=${cls.classCode})}">
+                        <div class="class-info">
+                            <div class="class-loc" th:text="${cls.address}"></div>
+                            <div class="class-name" th:text="${cls.name}"></div>
+                            
+                            <div class="class-price-row">
+    <!-- 1) DTO 할인율 (cls.discountRate) 원본 그대로 복구 -->
+    <span class="discount" 
+          th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}" 
+          th:text="${cls.discountRate + '%'}"></span>
+    
+    <!-- 2) 정가 취소선 -->
+    <span class="original" 
+          th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}" 
+          th:text="${#numbers.formatInteger(cls.desiredPrice, 0, 'COMMA')}"></span>
+    
+    <!-- 3) 최종 판매가 -->
+    <span class="final" 
+          th:text="${#numbers.formatInteger(cls.price, 0, 'COMMA') + '원'}"></span>
+</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+  
+    <div th:replace="~{common/footer :: footerFragment}"></div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const dropdownItems = document.querySelectorAll('.dropdown-item');
+        const selectedText = document.getElementById('selectedCategoryText');
+        const hiddenInput = document.getElementById('selectedCategoryInput');
+
+        dropdownItems.forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const selectedValue = this.textContent.trim();
+                const categoryCode = this.getAttribute('data-code');
+                
+                selectedText.textContent = selectedValue;
+                hiddenInput.value = categoryCode;
+            });
+        });
+    });
+ // 지역 동그라미 좌우 좌우 스크롤 함수
+    function scrollLocations(direction) {
+        const container = document.getElementById('locationContainer');
+        if (container) {
+            const scrollAmount = 300; // 한 번 클릭 시 이동할 거리(px)
+            container.scrollBy({
+                left: direction * scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    }
+    // 관심 클래스 찜 토글 비동기 함수
+    function toggleBookmark(event, btn) {
+        event.stopPropagation();
+        event.preventDefault();
+
+        const classCode = btn.getAttribute('data-class-code');
+        const tokenMeta = document.querySelector("meta[name='_csrf']");
+        const headerMeta = document.querySelector("meta[name='_csrf_header']");
+        
+        const headers = {
+            'Content-Type': 'application/x-www-form-urlencoded'
+        };
+
+        if (tokenMeta && headerMeta && tokenMeta.getAttribute("content")) {
+            headers[headerMeta.getAttribute("content")] = tokenMeta.getAttribute("content");
+        }
+
+        fetch('/mypage/bookmark/toggle', {
+            method: 'POST',
+            headers: headers,
+            body: 'classCode=' + encodeURIComponent(classCode)
+        })
+        .then(response => response.text())
+        .then(data => {
+            const svg = btn.querySelector('svg');
+            if (data === 'ADDED') {
+                if (svg) svg.setAttribute('fill', '#e33838');
+                if (confirm('관심 클래스에 추가되었습니다!\n마이페이지 관심 클래스로 이동하시겠습니까?')) {
+                    location.href = '/mypage/bookmark';
+                }
+            } else if (data === 'REMOVED') {
+                if (svg) svg.setAttribute('fill', 'none');
+                alert('관심 클래스에서 해제되었습니다.');
+            } else if (data === 'LOGIN_REQUIRED') {
+                alert('로그인이 필요한 서비스입니다.');
+                location.href = '/member/login';
+            } else {
+                alert('처리 중 오류가 발생했습니다.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+    </script>
+</body>
+</html>

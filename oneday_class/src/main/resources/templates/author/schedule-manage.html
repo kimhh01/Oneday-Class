@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>일정 관리 | Oneclass</title>
+<link rel="stylesheet" href="/author/css/common.css" th:href="@{/author/css/common.css}">
+<link rel="stylesheet" href="/author/css/header.css" th:href="@{/author/css/header.css}">
+<link rel="stylesheet" href="/author/css/sidebar.css" th:href="@{/author/css/sidebar.css}">
+<link rel="stylesheet" href="/author/css/management.css" th:href="@{/author/css/management.css}">
+<link rel="stylesheet" href="/author/css/class-manage.css" th:href="@{/author/css/class-manage.css}">
+<link rel="stylesheet" href="/author/css/schedule-manage.css" th:href="@{/author/css/schedule-manage.css}">
+<script src="/author/js/layout.js" th:src="@{/author/js/layout.js}" defer></script>
+</head>
+<body class="author-page management-page" data-menu="schedule" data-page="일정 관리">
+
+<div class="app">
+	<div th:replace="~{author/fragments/icons :: icons}"></div>
+	<div th:replace="~{author/fragments/header :: header}"></div>
+
+	<div class="app-body">
+		<div th:replace="~{author/fragments/sidebar :: sidebar}"></div>
+
+		<main class="content">
+			<div class="content__inner">
+				<header class="mgmt-head">
+					<div>
+						<h1 class="page-title">일정 관리</h1>
+						<p class="page-desc mgmt-head__desc">승인된 내 클래스 일정을 한곳에서 확인하고 모집 인원을 관리할 수 있어요.</p>
+					</div>
+					<div class="mgmt-head__actions">
+						<a class="btn btn--outline" th:href="@{/author/classes}">
+							<svg aria-hidden="true"><use href="#icon-list"></use></svg> 클래스 관리
+						</a>
+					</div>
+				</header>
+
+				<p class="form-success" th:if="${managementMessage}" th:text="${managementMessage}" role="status"></p>
+				<p class="form-error" th:if="${managementError}" th:text="${managementError}" role="alert"></p>
+
+				<details class="schedule-create-panel">
+					<summary><svg aria-hidden="true"><use href="#icon-plus-box"></use></svg> 새 일정 등록</summary>
+					<form method="post" th:action="@{/author/schedules}" class="schedule-operation-form">
+						<label>클래스
+							<select name="classCode" required>
+								<option value="">클래스를 선택해주세요</option>
+								<option th:each="item : ${scheduleClasses}" th:value="${item.classCode}"
+									th:text="${item.classTitle + ' · ' + (item.classStatus == '모집중' ? '공개' : '비공개')}">클래스</option>
+							</select>
+						</label>
+						<label>수업일<input type="date" name="scheduleDate" required></label>
+						<label>시작 시간<input type="time" name="startTime" required></label>
+						<label>종료 시간<input type="time" name="endTime" required></label>
+						<label>최소 인원<input type="number" name="minPeople" min="1" max="100" value="1" required></label>
+						<label>최대 인원<input type="number" name="maxPeople" min="1" max="100" value="6" required></label>
+						<button class="btn btn--primary" type="submit" th:disabled="${#lists.isEmpty(scheduleClasses)}">일정 등록</button>
+					</form>
+					<p th:if="${#lists.isEmpty(scheduleClasses)}">일정을 추가할 수 있는 승인 클래스가 없습니다.</p>
+				</details>
+
+				<section class="mgmt-stats" aria-label="조회된 일정 운영 지표">
+					<div class="mgmt-stat">
+						<span class="mgmt-stat__icon"><svg aria-hidden="true"><use href="#icon-calendar"></use></svg></span>
+						<div class="mgmt-stat__body">
+							<p class="mgmt-stat__label">조회된 일정</p>
+							<p class="mgmt-stat__value"><th:block th:text="${summary.scheduleCount}">0</th:block><small>건</small></p>
+							<p class="mgmt-stat__caption">현재 검색 조건 기준</p>
+						</div>
+					</div>
+					<div class="mgmt-stat">
+						<span class="mgmt-stat__icon"><svg aria-hidden="true"><use href="#icon-calendar-check"></use></svg></span>
+						<div class="mgmt-stat__body">
+							<p class="mgmt-stat__label">모집 중 일정</p>
+							<p class="mgmt-stat__value"><th:block th:text="${summary.recruitingScheduleCount}">0</th:block><small>건</small></p>
+							<p class="mgmt-stat__caption">현재 모집 가능한 일정</p>
+						</div>
+					</div>
+					<div class="mgmt-stat">
+						<span class="mgmt-stat__icon"><svg aria-hidden="true"><use href="#icon-users"></use></svg></span>
+						<div class="mgmt-stat__body">
+							<p class="mgmt-stat__label">활성 신청 인원</p>
+							<p class="mgmt-stat__value"><th:block th:text="${#numbers.formatInteger(summary.reservedCount, 1, 'COMMA')}">0</th:block><small>명</small></p>
+							<p class="mgmt-stat__caption">취소되지 않은 예약 기준</p>
+						</div>
+					</div>
+					<div class="mgmt-stat">
+						<span class="mgmt-stat__icon"><svg aria-hidden="true"><use href="#icon-plus-box"></use></svg></span>
+						<div class="mgmt-stat__body">
+							<p class="mgmt-stat__label">남은 자리</p>
+							<p class="mgmt-stat__value"><th:block th:text="${#numbers.formatInteger(summary.remainingSeatCount, 1, 'COMMA')}">0</th:block><small>석</small></p>
+							<p class="mgmt-stat__caption">모집 중 일정 합계</p>
+						</div>
+					</div>
+				</section>
+
+				<form class="mgmt-filter schedule-filter" method="get" th:action="@{/author/schedules}" aria-label="일정 검색 조건">
+					<div class="mgmt-filter__field">
+						<label class="mgmt-filter__label" for="scheduleFrom">수업 기간</label>
+						<div class="mgmt-daterange">
+							<input class="input" type="date" id="scheduleFrom" name="from" th:value="${fromDate}">
+							<span class="mgmt-daterange__sep" aria-hidden="true">~</span>
+							<input class="input" type="date" id="scheduleTo" name="to" th:value="${toDate}" aria-label="종료일">
+						</div>
+					</div>
+					<div class="mgmt-filter__field">
+						<label class="mgmt-filter__label" for="scheduleStatus">일정 상태</label>
+						<div class="select">
+							<select id="scheduleStatus" name="scheduleStatus">
+								<option value="all" th:selected="${scheduleStatus == null or scheduleStatus == 'all'}">전체</option>
+								<option value="모집중" th:selected="${scheduleStatus == '모집중'}">모집 중</option>
+								<option value="모집 마감" th:selected="${scheduleStatus == '모집 마감'}">모집 마감</option>
+								<option value="진행 중" th:selected="${scheduleStatus == '진행 중'}">진행 중</option>
+								<option value="진행 완료" th:selected="${scheduleStatus == '진행 완료'}">진행 완료</option>
+							</select>
+							<svg class="select__arrow" aria-hidden="true"><use href="#icon-chevron-down"></use></svg>
+						</div>
+					</div>
+					<div class="mgmt-filter__field">
+						<label class="mgmt-filter__label" for="scheduleKeyword">키워드 검색</label>
+						<div class="mgmt-search">
+							<input class="input" type="search" id="scheduleKeyword" name="keyword" th:value="${keyword}" placeholder="클래스명, 클래스·일정 코드 검색">
+							<svg class="mgmt-search__icon" aria-hidden="true"><use href="#icon-search"></use></svg>
+						</div>
+					</div>
+					<button type="submit" class="btn btn--primary mgmt-filter__submit"><svg aria-hidden="true"><use href="#icon-search"></use></svg>검색</button>
+				</form>
+
+				<div class="schedule-guide" role="note">
+					<svg aria-hidden="true"><use href="#icon-info"></use></svg>
+					<p>일정 취소시에 자동 알림이 되지 않으니 수강생들에게 연락해 주세요.</p>
+				</div>
+
+				<section class="mgmt-panel" aria-label="일정 목록">
+					<div class="mgmt-panel__scroll">
+						<table class="mgmt-table mgmt-table--schedules">
+							<thead>
+								<tr>
+									<th scope="col" class="col-right">일정 코드</th>
+									<th scope="col">클래스</th>
+									<th scope="col">수업일</th>
+									<th scope="col">시간</th>
+									<th scope="col" class="col-right">최소/최대</th>
+									<th scope="col" class="col-right">신청</th>
+									<th scope="col" class="col-right">남은 자리</th>
+									<th scope="col" class="col-badge">상태</th>
+									<th scope="col" class="col-action">관리</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="schedule : ${schedules}" th:classappend="${schedule.scheduleStatus == '진행 완료'} ? ' schedule-row--past'">
+									<td class="col-num" th:text="${schedule.scheduleCode}">1</td>
+									<td class="schedule-class">
+										<a th:href="@{/author/classes/{classCode}(classCode=${schedule.classCode})}" th:text="${schedule.classTitle}">클래스명</a>
+										<span><th:block th:text="${'CL' + schedule.classCode}">CL1</th:block> · <th:block th:text="${schedule.classStatus == '모집중' ? '공개' : (schedule.classStatus == '준비중' ? '비공개' : schedule.classStatus)}">공개</th:block></span>
+									</td>
+									<td th:text="${#dates.format(schedule.scheduleDate, 'yyyy.MM.dd')}">2026.08.11</td>
+									<td class="col-muted" th:text="${schedule.startTime + ' ~ ' + schedule.endTime}">14:00 ~ 16:00</td>
+									<td class="col-num" th:text="${schedule.minPeople + ' / ' + schedule.maxPeople + '명'}">2 / 6명</td>
+									<td class="col-num" th:text="${schedule.reservedCount + '명'}">0명</td>
+									<td class="col-num" th:text="${schedule.remainingPeople + '석'}">6석</td>
+									<td class="col-badge"><span class="badge" th:classappend="${schedule.scheduleStatus == '모집중'} ? ' badge--green' : (${schedule.scheduleStatus == '모집 마감'} ? ' badge--blue' : ' badge--gray')" th:text="${schedule.scheduleStatus == '모집중' ? '모집 중' : schedule.scheduleStatus}">모집 중</span></td>
+									<td class="schedule-actions col-action">
+										<div th:if="${schedule.editableYn == 'Y' and schedule.classStatus != '폐강'}">
+											<button th:if="${schedule.scheduleStatus == '모집중' and schedule.editableYn == 'Y' and schedule.reservedCount == 0}" type="button" class="btn btn--ghost btn--sm schedule-edit-button"
+												th:attr="data-url=@{/author/classes/schedules/{scheduleCode}/details(scheduleCode=${schedule.scheduleCode})},data-class-code=${schedule.classCode},data-date=${#dates.format(schedule.scheduleDate, 'yyyy-MM-dd')},data-start=${schedule.startTime},data-end=${schedule.endTime},data-min=${schedule.minPeople},data-max=${schedule.maxPeople}">일정 수정</button>
+											<form th:if="${schedule.scheduleStatus == '모집 마감' and schedule.maxPeople > schedule.reservedCount}" class="schedule-reopen-form" method="post" th:action="@{/author/classes/schedules/{scheduleCode}/reopen(scheduleCode=${schedule.scheduleCode})}">
+												<button type="submit" class="btn btn--outline btn--sm">다시 열기</button>
+											</form>
+											<form th:if="${schedule.scheduleStatus == '모집중'}" class="schedule-cancel-form" method="post" th:action="@{/author/classes/schedules/{scheduleCode}/cancel(scheduleCode=${schedule.scheduleCode})}" th:attr="data-reserved=${schedule.reservedCount}">
+												<input type="hidden" name="classCode" th:value="${schedule.classCode}">
+												<input type="hidden" name="source" value="schedules">
+												<button type="submit" class="btn btn--danger btn--sm">일정 취소</button>
+											</form>
+										</div>
+										<span class="col-muted" th:unless="${schedule.editableYn == 'Y' and schedule.classStatus != '폐강'}">변경 불가</span>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<p class="mgmt-empty" th:hidden="${not #lists.isEmpty(schedules)}">조건에 맞는 일정이 없습니다.</p>
+				</section>
+
+				<nav class="mgmt-pager" th:if="${totalPages > 1}" aria-label="일정 목록 페이지">
+					<a th:if="${currentPage > 1}"
+					   th:href="@{/author/schedules(page=${currentPage - 1},scheduleStatus=${scheduleStatus},keyword=${keyword},from=${fromDate},to=${toDate})}"
+					   aria-label="이전 페이지">
+						<svg aria-hidden="true"><use href="#icon-chevron-left"></use></svg>
+					</a>
+					<a th:each="pageNumber : ${#numbers.sequence(1, totalPages)}"
+					   th:if="${pageNumber >= currentPage - 2 and pageNumber <= currentPage + 2}"
+					   th:href="@{/author/schedules(page=${pageNumber},scheduleStatus=${scheduleStatus},keyword=${keyword},from=${fromDate},to=${toDate})}"
+					   th:attr="aria-current=${pageNumber == currentPage ? 'page' : null}"
+					   th:text="${pageNumber}">1</a>
+					<a th:if="${currentPage < totalPages}"
+					   th:href="@{/author/schedules(page=${currentPage + 1},scheduleStatus=${scheduleStatus},keyword=${keyword},from=${fromDate},to=${toDate})}"
+					   aria-label="다음 페이지">
+						<svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg>
+					</a>
+				</nav>
+
+				<dialog class="schedule-edit-dialog" id="scheduleEditDialog" aria-labelledby="scheduleEditTitle">
+					<form method="post" id="scheduleEditForm" class="schedule-operation-form schedule-operation-form--dialog">
+						<input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+						<header><div><small>예약 없는 일정만 변경 가능</small><h2 id="scheduleEditTitle">일정 정보 수정</h2></div><button type="button" data-close-schedule-edit aria-label="닫기">×</button></header>
+						<input type="hidden" name="classCode" id="editClassCode">
+						<label>수업일<input type="date" name="scheduleDate" id="editScheduleDate" required></label>
+						<label>시작 시간<input type="time" name="startTime" id="editStartTime" required></label>
+						<label>종료 시간<input type="time" name="endTime" id="editEndTime" required></label>
+						<label>최소 인원<input type="number" name="minPeople" id="editMinPeople" min="1" max="100" required></label>
+						<label>최대 인원<input type="number" name="maxPeople" id="editMaxPeople" min="1" max="100" required></label>
+						<footer><button type="button" class="btn btn--ghost" data-close-schedule-edit>취소</button><button type="submit" class="btn btn--primary">변경 저장</button></footer>
+					</form>
+				</dialog>
+
+				<dialog class="mgmt-dialog mgmt-dialog--center" id="scheduleFeedbackDialog" aria-labelledby="scheduleFeedbackTitle">
+					<div class="mgmt-dialog__head"></div>
+					<div class="mgmt-dialog__body">
+						<span class="mgmt-dialog__mark mgmt-dialog__mark--warn" aria-hidden="true">
+							<svg><use href="#icon-alert"></use></svg>
+						</span>
+						<h2 class="mgmt-dialog__title" id="scheduleFeedbackTitle">일정을 저장할 수 없습니다</h2>
+						<p class="mgmt-dialog__desc" id="scheduleFeedbackMessage">일정 정보를 다시 확인해주세요.</p>
+					</div>
+					<div class="mgmt-dialog__foot">
+						<button type="button" class="btn btn--primary" data-close-schedule-feedback>확인</button>
+					</div>
+				</dialog>
+
+				<footer class="site-footer" th:replace="~{author/fragments/footer :: footer}"></footer>
+			</div>
+		</main>
+	</div>
+</div>
+
+<script>
+(function () {
+	'use strict';
+	var feedbackDialog = document.getElementById('scheduleFeedbackDialog');
+	var feedbackTitle = document.getElementById('scheduleFeedbackTitle');
+	var feedbackMessage = document.getElementById('scheduleFeedbackMessage');
+
+	function showScheduleFeedback(message, title) {
+		feedbackTitle.textContent = title || '일정을 저장할 수 없습니다';
+		feedbackMessage.textContent = message;
+		if (!feedbackDialog.open) { feedbackDialog.showModal(); }
+	}
+
+	function twoDigits(number) { return String(number).padStart(2, '0'); }
+	function localDateKey(date) {
+		return date.getFullYear() + '-' + twoDigits(date.getMonth() + 1) + '-' + twoDigits(date.getDate());
+	}
+	function nextMinuteKey() {
+		var minute = new Date();
+		minute.setSeconds(0, 0);
+		minute.setMinutes(minute.getMinutes() + 1);
+		return twoDigits(minute.getHours()) + ':' + twoDigits(minute.getMinutes());
+	}
+	function minuteAfter(time) {
+		var parts = time.split(':').map(Number);
+		var minutes = parts[0] * 60 + parts[1] + 1;
+		return twoDigits(Math.floor(minutes / 60) % 24) + ':' + twoDigits(minutes % 60);
+	}
+
+	function syncScheduleLimits(form) {
+		var dateInput = form.querySelector('input[name="scheduleDate"]');
+		var startInput = form.querySelector('input[name="startTime"]');
+		var endInput = form.querySelector('input[name="endTime"]');
+		var today = localDateKey(new Date());
+		dateInput.min = today;
+		if (dateInput.value === today) {
+			startInput.min = nextMinuteKey();
+		} else {
+			startInput.removeAttribute('min');
+		}
+		if (startInput.value) {
+			endInput.min = minuteAfter(startInput.value);
+		} else {
+			endInput.removeAttribute('min');
+		}
+	}
+
+	function validateScheduleForm(form) {
+		var date = form.querySelector('input[name="scheduleDate"]').value;
+		var start = form.querySelector('input[name="startTime"]').value;
+		var end = form.querySelector('input[name="endTime"]').value;
+		if (!date || !start || !end) { return true; }
+		if (new Date(date + 'T' + start).getTime() <= Date.now()) {
+			showScheduleFeedback('이미 지난 시간은 선택할 수 없습니다. 현재 시간 이후로 다시 선택해주세요.');
+			return false;
+		}
+		if (end <= start) {
+			showScheduleFeedback('종료 시간은 시작 시간보다 늦게 선택해주세요.');
+			return false;
+		}
+		return true;
+	}
+
+	document.querySelectorAll('.schedule-operation-form').forEach(function (form) {
+		var dateInput = form.querySelector('input[name="scheduleDate"]');
+		var startInput = form.querySelector('input[name="startTime"]');
+		var endInput = form.querySelector('input[name="endTime"]');
+		if (!dateInput || !startInput) { return; }
+		syncScheduleLimits(form);
+		dateInput.addEventListener('change', function () { syncScheduleLimits(form); });
+		startInput.addEventListener('focus', function () { syncScheduleLimits(form); });
+		startInput.addEventListener('change', function () { syncScheduleLimits(form); });
+		dateInput.addEventListener('invalid', function (event) {
+			if (dateInput.validity.rangeUnderflow) {
+				event.preventDefault();
+				showScheduleFeedback('이미 지난 날짜는 선택할 수 없습니다.');
+			}
+		});
+		startInput.addEventListener('invalid', function (event) {
+			if (startInput.validity.rangeUnderflow) {
+				event.preventDefault();
+				showScheduleFeedback('이미 지난 시간은 선택할 수 없습니다. 현재 시간 이후로 다시 선택해주세요.');
+			}
+		});
+		endInput.addEventListener('invalid', function (event) {
+			if (endInput.validity.rangeUnderflow) {
+				event.preventDefault();
+				showScheduleFeedback('종료 시간은 시작 시간보다 늦게 선택해주세요.');
+			}
+		});
+		form.addEventListener('submit', function (event) {
+			if (!validateScheduleForm(form)) { event.preventDefault(); }
+		});
+	});
+
+	document.querySelectorAll('[data-close-schedule-feedback]').forEach(function (button) {
+		button.addEventListener('click', function () { feedbackDialog.close(); });
+	});
+	feedbackDialog.addEventListener('click', function (event) {
+		if (event.target === feedbackDialog) { feedbackDialog.close(); }
+	});
+	var serverError = document.querySelector('.form-error');
+	if (serverError && serverError.textContent.trim()) {
+		showScheduleFeedback(serverError.textContent.trim());
+	}
+
+	document.querySelectorAll('.schedule-cancel-form').forEach(function (form) {
+		form.addEventListener('submit', function (event) {
+			var reserved = Number(form.dataset.reserved || 0);
+			var message = reserved > 0
+				? '이 일정을 취소하면 예약 ' + reserved + '명의 예약·결제 상태가 취소·환불완료로 변경됩니다.\n자동 메시지는 발송되지 않으므로 카카오톡 안내가 필요합니다. 계속하시겠습니까?'
+				: '이 일정을 취소하고 모집을 마감하시겠습니까?';
+			if (!window.confirm(message)) { event.preventDefault(); }
+		});
+	});
+
+	var editDialog = document.getElementById('scheduleEditDialog');
+	var editForm = document.getElementById('scheduleEditForm');
+	document.querySelectorAll('.schedule-edit-button').forEach(function (button) {
+		button.addEventListener('click', function () {
+			editForm.action = button.dataset.url;
+			document.getElementById('editClassCode').value = button.dataset.classCode;
+			document.getElementById('editScheduleDate').value = button.dataset.date;
+			document.getElementById('editStartTime').value = button.dataset.start;
+			document.getElementById('editEndTime').value = button.dataset.end;
+			document.getElementById('editMinPeople').value = button.dataset.min;
+			document.getElementById('editMaxPeople').value = button.dataset.max;
+			syncScheduleLimits(editForm);
+			editDialog.showModal();
+		});
+	});
+	document.querySelectorAll('[data-close-schedule-edit]').forEach(function (button) {
+		button.addEventListener('click', function () { editDialog.close(); });
+	});
+}());
+</script>
+</body>
+</html>

@@ -1,0 +1,253 @@
+.notice-page {
+	padding-bottom: 50px
+}
+
+.page-top {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 20px
+}
+
+.page-top h1 {
+	margin: 0
+}
+
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	height: 42px;
+	padding: 0 15px;
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	background: #fff;
+	color: #596174;
+	text-decoration: none;
+	font-weight: 700;
+	cursor: pointer
+}
+
+.primary {
+	border-color: #ff6b5f;
+	background: #ff6b5f;
+	color: #fff
+}
+
+.dark {
+	border-color: #31394b;
+	background: #31394b;
+	color: #fff
+}
+
+.search-box {
+	display: flex;
+	gap: 10px;
+	padding: 16px 18px;
+	margin-bottom: 16px;
+	border: 1px solid var(--line);
+	border-radius: 13px;
+	background: #fff
+}
+
+.search-box input, .search-box select {
+	height: 42px;
+	padding: 0 12px;
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	background: #fff
+}
+
+.search-box input {
+	width: 310px
+}
+
+.panel {
+	overflow: hidden;
+	margin-bottom: 18px;
+	border: 1px solid var(--line);
+	border-radius: 13px;
+	background: #fff
+}
+
+.summary, .panel h3 {
+	margin: 0;
+	padding: 16px 18px;
+	border-bottom: 1px solid var(--line);
+	font-size: 13px
+}
+
+.panel table {
+	width: 100%;
+	border-collapse: collapse
+}
+
+.panel th, .panel td {
+	padding: 14px;
+	border-bottom: 1px solid #eef0f3;
+	text-align: center;
+	font-size: 13px
+}
+
+.panel th {
+	background: #fafbfc;
+	color: #667085
+}
+
+.panel td.title {
+	text-align: left;
+	font-weight: 700
+}
+
+.badge {
+	display: inline-flex;
+	padding: 4px 10px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 700;
+	background: #eaf3ff
+}
+
+.public {
+	color: #268956;
+	background: #e8f6ed
+}
+
+.private {
+	color: #687080;
+	background: #eef0f3
+}
+
+.detail {
+	color: #596174;
+	text-decoration: none
+}
+
+.pagination {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	margin-top: 18px;
+}
+
+.pagination a {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 34px;
+	height: 34px;
+	padding: 0 10px;
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	background: #fff;
+	color: #687080;
+	font-size: 12px;
+	font-weight: 700;
+	text-decoration: none;
+	transition: background-color .15s ease, border-color .15s ease, color
+		.15s ease;
+}
+
+.pagination a:hover {
+	border-color: var(--primary);
+	background: var(--primary-soft);
+	color: var(--primary-dark);
+}
+
+.pagination a.active {
+	border-color: var(--primary);
+	background: var(--primary);
+	color: #fff;
+}
+
+.pagination a.active:hover {
+	border-color: var(--primary);
+	background: var(--primary);
+	color: #fff;
+}
+
+.info {
+	display: grid;
+	grid-template-columns: 140px 1fr 140px 1fr;
+	margin: 0
+}
+
+.info dt, .info dd {
+	margin: 0;
+	padding: 16px;
+	border-bottom: 1px solid #eef0f3
+}
+
+.info dt {
+	background: #fafbfc;
+	font-weight: 700
+}
+
+.content>div {
+	min-height: 250px;
+	padding: 24px;
+	white-space: pre-wrap;
+	line-height: 1.8
+}
+
+.form-panel {
+	padding-bottom: 15px
+}
+
+.row {
+	display: grid;
+	grid-template-columns: 120px 1fr;
+	gap: 18px;
+	padding: 14px 18px;
+	border-bottom: 1px solid #eef0f3
+}
+
+.row>label {
+	font-weight: 700;
+	padding-top: 10px
+}
+
+.row input[type=text], .row select {
+	height: 44px;
+	padding: 0 12px;
+	border: 1px solid var(--line);
+	border-radius: 8px
+}
+
+.row textarea {
+	min-height: 350px;
+	padding: 15px;
+	border: 1px solid var(--line);
+	border-radius: 8px;
+	resize: vertical
+}
+
+.check {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 44px
+}
+
+.check input[type=checkbox] {
+	width: 18px;
+	height: 18px
+}
+
+.check small {
+	margin-left: 8px;
+	color: #999
+}
+
+.actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px
+}
+
+.flash {
+	padding: 12px;
+	background: #f3faf5;
+	border-radius: 8px
+}

@@ -1,0 +1,278 @@
+@charset "UTF-8";
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #f2f4f2;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #1a1a1a;
+}
+
+/* 전체 모달 오버레이 */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 1000;
+}
+
+/* 모달 메인 카드 */
+.modal-card {
+    width: 100%;
+    max-width: 620px;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* 1. 헤더 */
+.modal-header {
+    padding: 28px 28px 20px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #111111;
+    margin-bottom: 6px;
+}
+
+.modal-subtitle {
+    font-size: 13.5px;
+    color: #777777;
+}
+
+.btn-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+}
+
+/* 2. 바디 */
+.modal-body {
+    padding: 24px 28px;
+}
+
+.section-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: #222222;
+    margin-bottom: 14px;
+}
+
+/* 옵션 카드 그리드 (파일 업로드 / 기본 이미지) */
+.option-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.option-card {
+    border: 1.5px solid #e2e8f0;
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 24px 16px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.option-card:hover {
+    border-color: #356846;
+}
+
+.option-card.active {
+    border-color: #356846;
+    background-color: #f4f8f4;
+}
+
+.card-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111111;
+    margin-bottom: 4px;
+}
+
+.card-desc {
+    font-size: 12px;
+    color: #777777;
+}
+
+/* 파일 드롭존 영역 */
+.dropzone {
+    border: 1.5px dashed #d1d5db;
+    border-radius: 12px;
+    background-color: #ffffff;
+    padding: 32px 20px;
+    text-align: center;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+}
+
+.dropzone:hover,
+.dropzone.dragover {
+    background-color: #f4f8f4;
+    border-color: #356846;
+}
+
+/* 파일 선택 완료 시 스타일 */
+.dropzone.has-file {
+    border: 1.5px solid #356846;
+    background-color: #f7fbf7;
+}
+
+.dropzone input[type="file"] {
+    display: none;
+}
+
+.cloud-icon {
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: center;
+}
+
+.dropzone-text {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #333333;
+    margin-bottom: 4px;
+}
+
+.file-name-highlight {
+    color: #356846;
+    font-weight: 700;
+}
+
+.dropzone-sub {
+    font-size: 12px;
+    color: #888888;
+}
+
+/* 기본 이미지 선택 프리뷰 영역 */
+.default-preview-zone {
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    background-color: #fbfcfb;
+    padding: 28px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.default-avatar-preview {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 12px;
+    border: 2px solid #e2efe0;
+    background-color: #e2efcb;
+}
+
+.default-avatar-preview img,
+.default-avatar-svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.default-preview-text {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: #356846;
+}
+
+/* 3. 푸터 */
+.modal-footer {
+    padding: 16px 28px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    background-color: #ffffff;
+}
+
+.btn-cancel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 110px;
+    height: 42px;
+    border: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333333;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.btn-cancel:hover {
+    background-color: #f5f5f5;
+}
+
+.btn-save {
+    width: 130px;
+    height: 42px;
+    border: none;
+    background-color: #356846;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.btn-save:hover {
+    background-color: #2a5337;
+}
+
+/* 모바일 대응 */
+@media (max-width: 520px) {
+    .option-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-card {
+        border-radius: 12px;
+    }
+}

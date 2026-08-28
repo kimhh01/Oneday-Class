@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>문의 상세 | Oneclass</title>
+    <!-- CSS 연결 -->
+    <link rel="stylesheet" th:href="@{/profile/css/profile.css}">
+    <link rel="stylesheet" th:href="@{/fragments/css/sideBar.css}">
+    <link rel="stylesheet" th:href="@{/inquiry/css/inquiry_detail.css}">
+</head>
+<body>
+
+<div th:replace="~{common/header :: headerFragment}"></div>
+
+<!-- 메인 컨테이너 -->
+<div class="inquiry-wrapper">
+    <div class="inquiry-container">
+
+        <!-- 1. 좌측 사이드바 Fragment 불러오기 -->
+        <aside th:replace="~{fragments/sideBar :: sidebar('inquiry')}"></aside>
+
+        <!-- 2. 우측 메인 문의 상세 콘텐츠 영역 -->
+        <main class="inquiry-main">
+            
+            <!-- 페이지 헤더 -->
+            <div class="page-header">
+                <div class="header-top">
+                    <a th:href="@{/mypage/inquiry}" class="btn-back-link">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#222222" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                        <h1 class="page-title">문의 상세</h1>
+                    </a>
+                    
+                    <span class="badge-status-top" 
+                          th:classappend="${inquiry.status == 'COMPLETED' or inquiry.status == '답변 완료'} ? 'status-completed' : 'status-waiting'"
+                          th:text="${inquiry.status == 'COMPLETED' or inquiry.status == '답변 완료' ? '답변 완료' : '답변 대기'}">
+                        답변 완료
+                    </span>
+                </div>
+                <p class="page-subtitle">문의하신 내용을 확인하실 수 있습니다.</p>
+            </div>
+
+            <!-- 문의 상세 정보 테이블 카드 -->
+            <div class="detail-card">
+                
+                <!-- Row 1: 문의번호 & 등록일 -->
+                <div class="detail-row row-split">
+                    <div class="detail-col">
+                        <div class="cell-label">문의번호</div>
+                        <div class="cell-value" th:text="${inquiry.inquiryCode}">25</div>
+                    </div>
+                    <div class="detail-col">
+                        <div class="cell-label">등록일</div>
+                        <div class="cell-value" th:text="${inquiry.inquiryDate}">2026.08.11 14:32</div>
+                    </div>
+                </div>
+
+                <!-- Row 2: 문의 유형 & 답변 상태 -->
+                <div class="detail-row row-split">
+                    <div class="detail-col">
+                        <div class="cell-label">문의 유형</div>
+                        <div class="cell-value">
+                            <span class="badge-type" th:text="${inquiry.inquiryTypeName}">서비스 문의</span>
+                        </div>
+                    </div>
+                    <div class="detail-col">
+                        <div class="cell-label">답변 상태</div>
+                        <div class="cell-value">
+                            <span class="badge-status" 
+                                  th:classappend="${inquiry.status == 'COMPLETED' or inquiry.status == '답변 완료'} ? 'status-completed' : 'status-waiting'"
+                                  th:text="${inquiry.status == 'COMPLETED' or inquiry.status == '답변 완료' ? '답변 완료' : '답변 대기'}">
+                                답변 완료
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 3: 제목 -->
+                <div class="detail-row row-full">
+                    <div class="cell-label">제목</div>
+                    <div class="cell-value font-bold" th:text="${inquiry.title}">클래스 예약 관련 문의드립니다.</div>
+                </div>
+
+                <!-- Row 4: 문의 내용 -->
+                <div class="detail-row row-full align-top">
+                    <div class="cell-label">문의 내용</div>
+                    <div class="cell-value content-text" th:text="${inquiry.content}">
+                        안녕하세요. 클래스 예약을 했는데 일정 변경이 가능한지 궁금합니다.
+                    </div>
+                </div>
+
+                <!-- Row 5: 첨부 사진 (있을 경우만 표시) -->
+                <div class="detail-row row-full align-top" th:if="${inquiry.inquiryImg != null and inquiry.inquiryImg != ''}">
+                    <div class="cell-label">첨부 사진</div>
+                    <div class="cell-value">
+                        <div class="img-preview-box">
+                            <img th:src="${inquiry.inquiryImg}" alt="첨부 이미지" onError="this.style.display='none';">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 6: 관리자 답변 -->
+                <div class="detail-row row-full align-top">
+                    <div class="cell-label">관리자 답변</div>
+                    <div class="cell-value">
+                        <!-- 답변이 작성된 경우 -->
+                        <div class="answer-box answered" th:if="${inquiry.answerContent != null and inquiry.answerContent != ''}">
+                            <p class="answer-text" th:text="${inquiry.answerContent}">
+                                안녕하세요 고객님. 예약일 하루 전까지 변경 가능합니다. 감사합니다.
+                            </p>
+                            <p class="answer-date" th:if="${inquiry.answerDate != null and inquiry.answerDate != ''}" 
+                               th:text="|답변일 : ${inquiry.answerDate}|">답변일 : 2026.08.11 15:08</p>
+                        </div>
+
+                        <!-- 답변 대기 상태인 경우 -->
+                        <div class="answer-box waiting" th:if="${inquiry.answerContent == null or inquiry.answerContent == ''}">
+                            <p class="waiting-text">담당자가 문의 내용을 확인 후 빠른 시일 내에 답변드리겠습니다.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 하단 목록으로 버튼 -->
+            <div class="bottom-action">
+                <a th:href="@{/mypage/inquiry}" class="btn-list">목록으로</a>
+            </div>
+
+        </main>
+
+    </div>
+</div>
+<div th:replace="~{common/footer :: footerFragment}"></div>
+</body>
+</html>

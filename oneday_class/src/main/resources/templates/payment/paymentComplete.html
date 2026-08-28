@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>결제 완료! 클래스 예약이 확정되었습니다. | Oneclass</title>
+<!-- 1. 기존 공통 payment.css 적용 -->
+<link rel="stylesheet" th:href="@{/payment/css/payment.css}">
+<link rel="stylesheet" th:href="@{/payment/css/paymentComplete.css}">
+</head>
+<body>
+
+	<div class="container" style="max-width: 800px;">
+		<div th:replace="~{common/header :: headerFragment}"></div>
+
+		<!-- Title Section -->
+		<section class="title-section">
+			<h1 class="main-title">결제 완료! 클래스 예약이 확정되었습니다.</h1>
+
+			<!-- Progress Bar (기존 payment.css 스타일 자동 적용) -->
+			<div class="progress-bar">
+				<div class="step">
+					<span>1</span> 클래스 선택
+				</div>
+				<div class="line"></div>
+				<div class="step">
+					<span>2</span> 예약 정보
+				</div>
+				<div class="line"></div>
+				<div class="step">
+					<span>3</span> 결제
+				</div>
+				<div class="line"></div>
+				<div class="step active">
+					<span>4</span> 결제 완료
+				</div>
+			</div>
+		</section>
+
+		<!-- Main Receipt Card -->
+		<main class="complete-card">
+			<!-- Success Icon -->
+			<div class="success-icon-box">
+				<div class="success-icon">✓</div>
+			</div>
+
+			<!-- Reservation Metadata -->
+			<div class="reservation-meta">
+				<p>
+					<strong>주문번호:</strong> <span th:text="${orderId}">C101-20260720-001</span>
+				</p>
+				<p>
+					<strong>결제 일시:</strong> <span
+						th:text="${#dates.format(#dates.createNow(), 'yyyy.MM.dd a hh:mm')}">2026.07.20
+						오후 02:26</span>
+				</p>
+			</div>
+
+			<div class="complete-divider"></div>
+
+			<!-- Class Info (기존 payment.css의 order-info-block 재활용) -->
+			<div class="order-info-block"
+				style="position: static; border: none; padding: 0;">
+				<img class="class-image"
+					th:src="${classImage != null and !classImage.isEmpty() ? (classImage.startsWith('/') or classImage.startsWith('http') ? classImage : '/' + classImage) : '/images/default.jpg'}"
+					alt="클래스 이미지"
+					onerror="this.onerror=null; this.src='/images/default.jpg';">
+				<div class="class-details">
+					<h3 class="class-title" th:text="${classInfo.name}">토끼 빵 만들기</h3>
+					<span class="class-badge"
+						th:text="${category?.categoryName} ?: '클래스'">베이킹</span>
+
+					<div class="class-meta-item">
+						<span class="meta-icon">📅</span> <span
+							th:text="${schedule.classDate}">2026.07.25 (토) 14:00~16:30</span>
+					</div>
+					<div class="class-meta-item">
+						<span class="meta-icon">📍</span> <span
+							th:text="${classInfo.address}">서울 마포구 스튜디오</span>
+					</div>
+					<div class="class-meta-item">
+						<span class="meta-icon">👤</span> <span
+							th:text="|성인 ${peopleCount}명|">성인 1명</span>
+					</div>
+				</div>
+			</div>
+
+			<div class="complete-divider"></div>
+
+			<!-- Payment Summary -->
+			<div class="final-price-row">
+				<span class="final-price-title">최종 결제 금액</span> <span
+					class="final-price-value"
+					th:text="${#numbers.formatInteger(amount != null ? amount : 0, 0, 'COMMA') + '원'}">45,000원</span>
+			</div>
+		</main>
+
+		<!-- Notice Box (기존 payment.css의 bottom-notice-box 재활용) -->
+		<section class="bottom-notice-box">
+			<h3 class="bottom-notice-title">중요 안내 사항</h3>
+			<ul class="bottom-notice-list">
+				<li>클래스 시작 3일 전까지 100% 환불 가능합니다.</li>
+				<li>클래스 시작 2일 전부터는 환불이 불가합니다.</li>
+				<li>클래스 모집 인원 미달 시, 클래스가 취소될 수 있으며 이 경우 전액 환불됩니다.</li>
+				<li>스튜디오 방문 안내 사항을 사전에 확인하여 원활한 참가가 될 수 있도록 지참하시기 바랍니다.</li>
+			</ul>
+		</section>
+
+		<!-- Buttons -->
+		<div
+			style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 50px;">
+			<a href="/mypage/purchase" class="btn-filled">예약 내역 확인하기</a> <a
+				href="/" class="btn-outlined">홈으로 이동</a>
+		</div>
+
+		<div th:replace="~{common/footer :: footerFragment}"></div>
+	</div>
+
+</body>
+</html>

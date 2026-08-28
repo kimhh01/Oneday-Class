@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.oneclass.review.UserReviewDAO">
+
+    <!-- 1. 리뷰 작성 페이지용 조회 (WHERE 조건을 reservation_code로 변경) -->
+    <select id="selectReview" resultType="kr.co.oneclass.review.Review">
+        SELECT 
+            r.reservation_code AS reservationCode,
+            r.class_code AS classCode,
+            r.member_code AS memberCode,
+            r.schedule_code AS scheduleCode,
+            r.reservation_date AS reservationDate,
+            r.people_number AS peopleNum,
+            r.status AS status,
+            c.price AS price,
+            c.name AS className,
+            cr.activity_name AS activityName,
+            img.image AS classImg
+        FROM reservation r
+        JOIN class c ON r.class_code = c.class_code
+        LEFT JOIN creator cr ON c.operator_code = cr.operator_code
+        LEFT JOIN class_img img ON c.class_code = img.class_code 
+                               AND img.type = '대표' 
+                               AND img.sort_order = 1
+        <!-- 💡 클래스 번호 대신 예약 번호로 정확히 1건을 조회 -->
+        WHERE r.reservation_code = #{reservationCode}
+    </select>
+
+    <!-- 2. 리뷰 저장 (reservation_code 저장 구문 추가) -->
+    <insert id="insertReview" parameterType="kr.co.oneclass.review.ReviewDTO">
+        <selectKey keyProperty="reviewCode" resultType="int" order="BEFORE">
+            SELECT SEQ_REVIEW.NEXTVAL FROM DUAL
+        </selectKey>
+        INSERT INTO review (
+            review_code,
+            reservation_code, /* 💡 추가 */
+            member_code,
+            class_code,
+            star_rating,
+            content,
+            input_date
+        ) VALUES (
+            #{reviewCode},
+            #{reservationCode}, /* 💡 추가 */
+            #{memberCode},
+            #{classCode},
+            #{rating},
+            #{reviewContent},
+            SYSDATE
+        )
+    </insert>
+
+    <!-- 3. 리뷰 이미지 저장 (기존 동일) -->
+    <insert id="insertReviewImg">
+        INSERT INTO review_img (
+            review_img_code,
+            review_code,
+            review_img
+        ) VALUES (
+            SEQ_REVIEW_IMG.NEXTVAL,
+            #{reviewCode},
+            #{imagePath}
+        )
+    </insert>
+
+</mapper>

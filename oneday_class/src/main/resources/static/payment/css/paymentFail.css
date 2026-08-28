@@ -1,0 +1,71 @@
+@charset "UTF-8";
+/* 실패 페이지 전용 스타일 추가 및 덮어쓰기 */
+	.fail-icon-box {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		margin: 20px 0;
+	}
+	.fail-icon {
+		width: 64px;
+		height: 64px;
+		border-radius: 50%;
+		background-color: #fee2e2;
+		color: #ef4444;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		font-size: 36px;
+		font-weight: bold;
+	}
+	.error-info-block {
+		background-color: #f9fafb;
+		border: 1px solid #e5e7eb;
+		border-radius: 8px;
+		padding: 16px 20px;
+		margin-top: 20px;
+		text-align: left;
+	}
+	.error-info-item {
+		display: flex;
+		margin-bottom: 8px;
+		font-size: 14px;
+	}
+	.error-info-item:last-child {
+		margin-bottom: 0;
+	}
+	.error-label {
+		width: 90px;
+		color: #6b7280;
+		font-weight: 500;
+	}
+	.error-value {
+		color: #111827;
+		font-weight: 600;
+	}
+	.error-message-text {
+		color: #dc2626;
+	}
+	.btn-secondary-outline {
+		background-color: #ffffff;
+		border: 1px solid #107c41;
+		color: #107c41;
+		font-weight: bold;
+		padding: 14px 0;
+		border-radius: 6px;
+		width: 100%;
+		cursor: pointer;
+		font-size: 16px;
+		margin-top: 10px;
+	}
+	.btn-primary-filled {
+		background-color: #107c41;
+		border: none;
+		color: #ffffff;
+		font-weight: bold;
+		padding: 14px 0;
+		border-radius: 6px;
+		width: 100%;
+		cursor: pointer;
+		font-size: 16px;
+	}

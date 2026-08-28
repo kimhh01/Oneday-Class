@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CSRF 메타 태그 -->
+    <meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}"/>
+    <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : ''}"/>
+    <title>검색 결과 - 상세 보기 | Oneclass</title>
+    <link rel="stylesheet" th:href="@{/search/css/search.css}">
+</head>
+<body>
+
+    <div th:replace="~{common/header :: headerFragment}"></div>
+
+    <main class="main-container">
+        <!-- 상단 검색바 영역 -->
+        <form th:action="@{/search}" method="get" class="search-area">
+            <div class="search-input-wrap">
+                <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="search" name="keyword" id="searchInput" class="search-input" th:value="${keyword}">
+                <div class="clear-btn" onclick="clearSearchText()">✖</div>
+            </div>
+        </form>
+
+        <!-- 탭 메뉴 -->
+        <div class="tab-nav">
+            <a th:href="@{/search/creator-more(keyword=${keyword})}" 
+               class="tab-btn" 
+               th:classappend="${activeTab == 'artist' ? 'active' : ''}">작가</a>
+            
+            <a th:href="@{/search/class-more(keyword=${keyword})}" 
+               class="tab-btn" 
+               th:classappend="${activeTab == 'class' ? 'active' : ''}">클래스</a>
+        </div>
+
+     <!-- ================= [1] 작가 탭 컨텐츠 ================= -->
+        <div id="tab-artist" class="tab-content" th:classappend="${activeTab == 'artist' ? 'active' : ''}">
+            
+            <div th:if="${#lists.isEmpty(creatorList)}" style="color: #888; padding: 40px 0; text-align: center;">
+                검색된 작가가 없습니다.
+            </div>
+
+            <!-- 작가 리스트 반복 -->
+            <div class="artist-group" th:each="creator : ${creatorList}" th:if="${!#lists.isEmpty(creatorList)}">
+                
+                <!-- 💡 div.artist-profile -> a.artist-profile 로 변경 -->
+                <a th:href="@{/creatorDetail(creatorCode=${creator.operatorCode})}" 
+                   class="artist-profile" 
+                   style="text-decoration: none; color: inherit; cursor: pointer;">
+                    <img th:src="${creator.profileImage != null ? creator.profileImage : '/images/tutor/default_tutor.png'}" 
+                         th:alt="${creator.activityName}" class="artist-img">
+                    <div>
+                        <div class="artist-name" th:text="${creator.activityName}">작가 이름</div>
+                        <div class="artist-status" 
+                             th:text="${creator.classList != null and !#lists.isEmpty(creator.classList) ? '진행중 클래스 ' + #lists.size(creator.classList) + '개' : '클래스 준비중'}">
+                            진행중 클래스 0개
+                        </div>
+                    </div>
+                </a>
+
+                <!-- 작가별 클래스 목록 그리드 -->
+                <div class="artist-classes-grid" th:if="${creator.classList != null and !#lists.isEmpty(creator.classList)}">
+                    <div class="sub-class-card" th:each="cls : ${creator.classList}" style="position: relative;">
+                        <!-- 찜(북마크) 버튼 -->
+                        <button type="button" class="bookmark-btn" 
+                                th:data-class-code="${cls.classCode}" 
+                                onclick="toggleBookmark(event, this)">
+                            <svg width="20" height="20" viewBox="0 0 24 24" 
+                                 th:fill="${bookmarkedClassCodes != null and #lists.contains(bookmarkedClassCodes, cls.classCode)} ? '#e33838' : 'none'" 
+                                 stroke="#e33838" stroke-width="2">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                        </button>
+
+                        <a th:href="@{/classDetail(classCode=${cls.classCode})}">
+                            <img th:src="${cls.mainImage != null ? cls.mainImage : '/images/class/default_class.png'}" 
+                                 th:alt="${cls.name}" class="sub-class-img">
+                            <div class="sub-class-title" th:text="${cls.name}">클래스 제목</div>
+                            <div class="sub-class-price">
+                                <span class="final-price" th:text="${cls.price != null ? #numbers.formatInteger(cls.price, 0, 'COMMA') + '원' : '0원'}">가격</span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 작가 페이징 -->
+            <div class="pagination" th:if="${!#lists.isEmpty(creatorList)}">
+                <button class="page-btn page-arrow">&lt;</button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn page-arrow">&gt;</button>
+            </div>
+        </div>
+        
+        <!-- ================= [2] 클래스 탭 컨텐츠 ================= -->
+        <div id="tab-class" class="tab-content" th:classappend="${activeTab == 'class' ? 'active' : ''}">
+            
+            <div th:if="${#lists.isEmpty(classList)}" style="color: #888; padding: 40px 0; text-align: center;">
+                검색된 클래스가 없습니다.
+            </div>
+
+            <div class="class-list" th:if="${!#lists.isEmpty(classList)}">
+                <div class="class-item" th:each="cls : ${classList}" style="position: relative;">
+                    <!-- 찜(북마크) 버튼 -->
+                    <button type="button" class="bookmark-btn" 
+                            th:data-class-code="${cls.classCode}" 
+                            onclick="toggleBookmark(event, this)">
+                        <svg width="20" height="20" viewBox="0 0 24 24" 
+                             th:fill="${bookmarkedClassCodes != null and #lists.contains(bookmarkedClassCodes, cls.classCode)} ? '#e33838' : 'none'" 
+                             stroke="#e33838" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                    </button>
+                    <a th:href="@{/classDetail(classCode=${cls.classCode})}" style="display: flex; gap: 20px; width: 100%; text-decoration: none; color: inherit;">
+                        <img th:src="${cls.mainImage != null ? cls.mainImage : '/images/class/default_class.png'}" 
+                             th:alt="${cls.name}" class="class-img">
+                        <div class="class-info">
+                            <div class="class-location" th:text="${cls.address}">지역</div>
+                            <div class="class-title" th:text="${cls.name}">클래스명</div>
+                            <div class="class-price-info">
+                                <span class="final-price" th:text="${cls.price != null ? #numbers.formatInteger(cls.price, 0, 'COMMA') + '원' : '0원'}">가격</span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- 클래스 페이징 -->
+            <div class="pagination" th:if="${!#lists.isEmpty(classList)}">
+                <button class="page-btn page-arrow">&lt;</button>
+                <button class="page-btn active">1</button>
+                <button class="page-btn page-arrow">&gt;</button>
+            </div>
+        </div>
+            
+    </main>
+
+    <div th:replace="~{common/footer :: footerFragment}"></div>
+
+    <script>
+        function clearSearchText() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = '';
+            searchInput.focus();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            document.querySelector(`[data-target="${tabId}"]`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // 찜(북마크) 토글 비동기 함수
+        function toggleBookmark(event, btn) {
+            event.stopPropagation();
+            event.preventDefault();
+
+            const classCode = btn.getAttribute('data-class-code');
+            const tokenMeta = document.querySelector("meta[name='_csrf']");
+            const headerMeta = document.querySelector("meta[name='_csrf_header']");
+            
+            const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+            if (tokenMeta && headerMeta && tokenMeta.getAttribute("content")) {
+                headers[headerMeta.getAttribute("content")] = tokenMeta.getAttribute("content");
+            }
+
+            fetch('/mypage/bookmark/toggle', {
+                method: 'POST',
+                headers: headers,
+                body: 'classCode=' + encodeURIComponent(classCode)
+            })
+            .then(response => response.text())
+            .then(data => {
+                const svg = btn.querySelector('svg');
+                if (data === 'ADDED') {
+                    if (svg) svg.setAttribute('fill', '#e33838');
+                    if (confirm('관심 클래스에 추가되었습니다!\n마이페이지 관심 클래스로 이동하시겠습니까?')) {
+                        location.href = '/mypage/bookmark';
+                    }
+                } else if (data === 'REMOVED') {
+                    if (svg) svg.setAttribute('fill', 'none');
+                    alert('관심 클래스에서 해제되었습니다.');
+                } else if (data === 'LOGIN_REQUIRED') {
+                    alert('로그인이 필요한 서비스입니다.');
+                    location.href = '/member/login';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>

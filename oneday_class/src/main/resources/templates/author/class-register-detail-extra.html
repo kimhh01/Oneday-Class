@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title th:text="${editMode == true ? '클래스 수정 · 추가 정보 | Oneclass' : '클래스 등록 · 추가 정보 | Oneclass'}">클래스 등록 · 추가 정보 | Oneclass</title>
+<link rel="stylesheet" href="/author/css/common.css" th:href="@{/author/css/common.css}">
+<link rel="stylesheet" href="/author/css/header.css" th:href="@{/author/css/header.css}">
+<link rel="stylesheet" href="/author/css/sidebar.css" th:href="@{/author/css/sidebar.css}">
+<link rel="stylesheet" href="/author/css/class-register.css" th:href="@{/author/css/class-register.css}">
+<link rel="stylesheet" href="/author/css/class-register-detail.css?v=20260812-2" th:href="@{/author/css/class-register-detail.css(v='20260812-2')}">
+<link rel="stylesheet" href="/author/css/class-edit.css" th:href="@{/author/css/class-edit.css}">
+<script src="/author/js/layout.js" th:src="@{/author/js/layout.js}" defer></script>
+<script src="/author/js/class-register-draft.js" th:src="@{/author/js/class-register-draft.js}" defer></script>
+<script src="/author/js/class-register-detail.js?v=20260812" th:src="@{/author/js/class-register-detail.js(v=20260812)}" defer></script>
+</head>
+<body class="author-page register-form-page register-detail-page" data-menu="class-register" data-page="클래스 등록"
+	  th:attr="data-menu=${editMode == true ? 'class-manage' : 'class-register'},data-page=${editMode == true ? '클래스 수정' : '클래스 등록'}">
+
+<div class="app">
+	<div th:replace="~{author/fragments/icons :: icons}"></div>
+	<div th:replace="~{author/fragments/header :: header}"></div>
+
+	<div class="app-body">
+		<div th:replace="~{author/fragments/sidebar :: sidebar}"></div>
+
+		<main class="content">
+			<div class="content__inner">
+				<header class="register-page-head register-page-head--compact">
+					<h1 class="page-title" th:text="${editMode == true ? '클래스 수정' : '클래스 등록하기'}">클래스 등록하기</h1>
+					<p class="page-desc" th:text="${editMode == true ? '상세 정보 2/2를 수정합니다.' : '제공사항·준비물·태그를 등록해주세요.'}">제공사항·준비물·태그를 등록해주세요.</p>
+					<p class="reply-error" th:if="${registerError}" th:text="${registerError}">입력값을 확인해주세요.</p>
+				</header>
+				<p class="class-edit-notice" th:if="${editMode == true}">수정 내용은 별도 관리자 검수 없이 저장 즉시 반영됩니다.</p>
+				<div th:replace="~{author/fragments/class-register-steps :: steps(${detailForm.classCode}, 4, ${editMode}, ${editStep})}"></div>
+
+				<form class="detail-layout" id="detailForm" method="post" enctype="multipart/form-data" novalidate data-draft-form
+					  th:action="${editMode == true ? editFormAction : '/author/classes/register/detail-extra'}" th:object="${detailForm}">
+					<input type="hidden" name="classCode" th:value="${detailForm.classCode}">
+					<section class="detail-form-card" aria-labelledby="detailExtraTitle">
+						<h2 id="detailExtraTitle">추가 정보 등록 <small class="detail-form-step">2 / 2</small></h2>
+
+						<section class="detail-section" aria-labelledby="offeringTitle">
+							<div class="detail-section__heading detail-section__heading--inline">
+								<h3 id="offeringTitle">추가 제공사항 <small>(복수 선택 가능)</small></h3>
+							</div>
+							<div class="offering-options">
+								<label class="offering-option" th:each="offering : ${offerings}">
+									<input type="checkbox" name="optionCodeList" th:value="${offering.offeringCode}" th:checked="${detailForm.optionCodeList.contains(offering.offeringCode)}">
+									<span><svg aria-hidden="true"><use href="#icon-check"></use></svg></span><th:block th:text="${offering.offeringName}">제공사항</th:block>
+								</label>
+							</div>
+							<label class="field-label" for="offeringNote">추가 제공사항 및 유의사항</label>
+							<div class="token-input">
+								<input class="input" id="offeringNote" type="text" maxlength="80" placeholder="예: 개인 앞치마 지참 권장 / 알레르기가 있으면 미리 알려주세요.">
+								<button class="token-input__add" id="noticeAdd" type="button" aria-label="추가 유의사항 등록"><svg aria-hidden="true"><use href="#icon-plus"></use></svg></button>
+							</div>
+							<div class="token-list" id="noticeList" aria-label="등록된 추가 유의사항">
+								<span class="token" th:each="notice : *{noticeList}"><th:block th:text="${notice}">추가 유의사항</th:block><button type="button" th:attr="aria-label=${notice + ' 삭제'}"><svg aria-hidden="true"><use href="#icon-x"></use></svg></button><input type="hidden" name="noticeList" th:value="${notice}"></span>
+							</div>
+						</section>
+
+						<section class="detail-section" aria-labelledby="materialTitle">
+							<div class="detail-section__heading detail-section__heading--inline">
+								<div><h3 id="materialTitle">준비물 / 재료 안내 <small>(최대 10개)</small></h3><p>수강생과 관리자에게 표시할 준비물 또는 제공 재료를 입력해주세요.</p></div>
+								<button class="token-input__add" id="materialAdd" type="button" aria-label="준비물 추가"><svg aria-hidden="true"><use href="#icon-plus"></use></svg></button>
+							</div>
+							<div class="material-edit-list" id="materialList">
+								<div class="material-edit-row" th:each="materialName, stat : *{materialNameList}">
+									<input class="input" type="text" name="materialNameList" maxlength="30" th:value="${materialName}" placeholder="준비물 이름" required>
+									<input class="input" type="text" name="materialContentList" maxlength="80" th:value="${detailForm.materialContentList[stat.index]}" placeholder="예: 개별 지참 / 수업에서 제공" required>
+									<button type="button" aria-label="준비물 삭제"><svg aria-hidden="true"><use href="#icon-x"></use></svg></button>
+								</div>
+							</div>
+							<p class="material-empty" id="materialEmpty" th:hidden="${not #lists.isEmpty(detailForm.materialNameList)}">등록된 준비물이 없습니다. 필요한 경우 추가해주세요.</p>
+						</section>
+
+						<section class="detail-section" aria-labelledby="tagTitle">
+							<div class="detail-section__heading">
+								<h3 id="tagTitle">태그 입력</h3>
+								<p>검색에 활용할 핵심 키워드를 최대 8개까지 추가할 수 있어요.</p>
+							</div>
+							<div class="token-input token-input--inside">
+								<input class="input" id="tagInput" type="text" maxlength="18" placeholder="태그를 입력하고 Enter를 눌러주세요.">
+							</div>
+							<div class="token-list" id="tagList" aria-label="등록된 검색 태그">
+								<span class="token" th:each="tag : *{tagList}"><th:block th:text="${tag}">태그</th:block><button type="button" th:attr="aria-label=${tag + ' 삭제'}"><svg aria-hidden="true"><use href="#icon-x"></use></svg></button><input type="hidden" name="tagList" th:value="${tag}"></span>
+							</div>
+						</section>
+
+					</section>
+
+					<aside class="detail-guide" aria-labelledby="guideTitle">
+						<div class="detail-guide__head">
+							<span class="detail-guide__icon"><svg aria-hidden="true"><use href="#icon-bulb"></use></svg></span>
+							<div><h2 id="guideTitle">더 매력적인 클래스가 되는 팁!</h2><p>추가 정보를 확인해주세요.</p></div>
+						</div>
+						<section class="guide-item"><h3><svg aria-hidden="true"><use href="#icon-check-circle"></use></svg>제공사항</h3><ul><li>수강생이 실제로 이용할 수 있는 항목만 선택해 주세요.</li><li>별도 준비물이나 유의사항을 함께 적어주세요.</li></ul></section>
+						<section class="guide-item"><h3><svg aria-hidden="true"><use href="#icon-pencil"></use></svg>태그 입력</h3><ul><li>검색에 도움이 되는 핵심 단어를 입력해 주세요.</li><li>태그는 최대 8개까지 등록할 수 있어요.</li></ul></section>
+						<div class="guide-tip"><svg aria-hidden="true"><use href="#icon-check-circle"></use></svg><p>등록한 정보는 클래스 상세 페이지와 검색 결과에 활용됩니다.</p></div>
+					</aside>
+
+					<div class="step-actions detail-actions">
+						<button type="submit" name="saveMode" value="stay" class="btn btn--ghost btn--lg step-actions__save"><svg aria-hidden="true"><use href="#icon-bookmark"></use></svg><span th:text="${editMode == true ? '저장' : '임시 저장'}">임시 저장</span></button>
+						<div class="step-actions__nav">
+							<a th:href="${editMode == true ? '/author/classes/' + editClassCode + '/edit/detail' : '/author/classes/register/detail?classCode=' + detailForm.classCode}" class="btn btn--ghost btn--lg step-actions__previous">이전 단계</a>
+							<button type="submit" name="saveMode" value="next" class="btn btn--primary btn--lg step-actions__next"><span>다음 단계</span><span class="step-actions__next-icon"><svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg></span></button>
+						</div>
+					</div>
+				</form>
+
+				<footer class="site-footer" th:replace="~{author/fragments/footer :: footer}"></footer>
+			</div>
+		</main>
+	</div>
+</div>
+</body>
+</html>

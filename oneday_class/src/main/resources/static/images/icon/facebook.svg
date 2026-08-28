@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <!-- 배경 둥근 사각형 (검은색) -->
+  <rect x="4" y="4" width="40" height="40" rx="12" fill="#000000"/>
+  
+  <!-- 페이스북 f 심볼 (흰색) -->
+  <path fill="#FFFFFF" d="M30 14h-3.5c-2.2 0-3.7 1.4-3.7 3.8v2.7h-3.3v4.3h3.3v10.7h5V24.8h3.4l.5-4.3h-3.9v-2.3c0-1.2.3-1.8 1.8-1.8H30V14z"/>
+</svg>

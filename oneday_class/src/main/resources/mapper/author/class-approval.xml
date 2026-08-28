@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 일반 등록 초안은 제외하고, 수정 중인 클래스부터 검수·운영 결과까지 표시한다. -->
+<mapper namespace="kr.co.oneclass.author.classapproval.ClassApprovalDAO">
+
+	<select id="selectClassApprovalList" parameterType="map"
+		resultType="kr.co.oneclass.author.classapproval.ClassApprovalDTO">
+		SELECT
+			c.CLASS_CODE,
+			c.OPERATOR_CODE AS AUTHOR_CODE,
+			c.NAME AS CLASS_TITLE,
+			(
+				SELECT MIN(ci.IMAGE) KEEP (DENSE_RANK FIRST ORDER BY ci.SORT_ORDER, ci.CLASS_IMG_CODE)
+				FROM CLASS_IMG ci
+				WHERE ci.CLASS_CODE = c.CLASS_CODE
+				  AND ci.TYPE = '대표'
+			) AS THUMBNAIL_PATH,
+			(
+				SELECT ct.NAME
+				FROM CATEGORY ct
+				WHERE ct.CATEGORY_CODE = c.CATEGORY_CODE
+			) AS CATEGORY_NAME,
+			'개별일정' AS SCHEDULE_TYPE,
+			c.DESIRED_PRICE,
+			c.WRITE_DATE AS REGISTERED_DATE,
+			(
+				SELECT MIN(r.OPERATION_START_DATE)
+				FROM CLASS_REPEAT_RULE r
+				WHERE r.CLASS_CODE = c.CLASS_CODE
+			) AS RECRUIT_START_DATE,
+			(
+				SELECT MAX(r.OPERATION_END_DATE)
+				FROM CLASS_REPEAT_RULE r
+				WHERE r.CLASS_CODE = c.CLASS_CODE
+			) AS RECRUIT_END_DATE,
+			c.APPROVAL_STATUS,
+			c.STATUS AS CLASS_STATUS,
+			c.APPROVAL_MEMO AS REJECTION_REASON
+		FROM CLASS c
+		WHERE c.OPERATOR_CODE = #{authorCode}
+		  AND c.APPROVAL_STATUS IN ('수정중', '대기', '승인', '반려', '중지')
+		<if test="approvalStatus != null and approvalStatus != '' and approvalStatus != 'all'">
+			AND c.APPROVAL_STATUS = #{approvalStatus}
+		</if>
+		<if test="keyword != null and keyword != ''">
+			AND c.NAME LIKE '%' || #{keyword} || '%'
+		</if>
+		ORDER BY c.WRITE_DATE DESC, c.CLASS_CODE DESC
+	</select>
+
+	<select id="selectRejectionReason" parameterType="map" resultType="string">
+		SELECT NVL(c.APPROVAL_MEMO, '반려 사유가 등록되지 않았습니다.')
+		FROM CLASS c
+		WHERE c.OPERATOR_CODE = #{authorCode}
+		  AND c.CLASS_CODE = #{classCode}
+		  AND c.APPROVAL_STATUS = '반려'
+		  AND c.STATUS = '대기중'
+	</select>
+
+	<update id="startApprovedClass" parameterType="map">
+		UPDATE CLASS
+		SET STATUS = '모집중'
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND APPROVAL_STATUS = '승인'
+		  AND STATUS = '대기중'
+	</update>
+
+	<select id="selectSuspensionReason" parameterType="map" resultType="string">
+		SELECT NVL(c.APPROVAL_MEMO, '관리자에 의해 클래스 운영이 중지되었습니다.')
+		FROM CLASS c
+		WHERE c.OPERATOR_CODE = #{authorCode}
+		  AND c.CLASS_CODE = #{classCode}
+		  AND c.APPROVAL_STATUS = '중지'
+		  AND c.STATUS = '대기중'
+	</select>
+
+	<update id="reopenSuspendedClass" parameterType="map">
+		UPDATE CLASS
+		SET APPROVAL_STATUS = '수정중',
+			STATUS = '준비중',
+			REGISTER_STEP = 'basic',
+			WRITE_DATE = SYSDATE
+		WHERE CLASS_CODE = #{classCode}
+		  AND OPERATOR_CODE = #{authorCode}
+		  AND APPROVAL_STATUS = '중지'
+		  AND STATUS = '대기중'
+	</update>
+
+</mapper>

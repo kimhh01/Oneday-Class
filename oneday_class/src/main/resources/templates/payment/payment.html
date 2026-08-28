@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>결제하기 | Oneclass</title>
+<link rel="stylesheet" th:href="@{/payment/css/payment.css}">
+<script src="https://js.tosspayments.com/v2/standard"></script>
+</head>
+<body>
+
+	<div class="container">
+		<div th:replace="~{common/header :: headerFragment}"></div>
+
+		<!-- Title Section -->
+		<section class="title-section">
+			<h1 class="main-title">결제하기</h1>
+			<p class="sub-title">주문 정보를 확인하고 결제를 진행해주세요.</p>
+
+			<!-- Progress Bar -->
+			<div class="progress-bar">
+				<div class="step">
+					<span>1</span> 클래스 선택
+				</div>
+				<div class="line"></div>
+				<div class="step">
+					<span>2</span> 예약 정보
+				</div>
+				<div class="line"></div>
+				<div class="step active">
+					<span>3</span> 결제
+				</div>
+				<div class="line"></div>
+				<div class="step">
+					<span>4</span> 결제 완료
+				</div>
+			</div>
+		</section>
+
+		<!-- Main Payment Form -->
+		<form th:action="@{/checkout/submit}" method="POST">
+			<input type="hidden" name="scheduleCode"
+				th:value="${schedule.scheduleCode}" />
+
+			<!-- Layout Container -->
+			<div class="checkout-layout">
+
+				<!-- Left Column -->
+				<div class="main-content">
+
+					<!-- 1. 주문 정보 -->
+					<h2 class="section-title">1. 주문 정보</h2>
+					<div class="form-group-box">
+						<div class="order-info-block">
+							<img class="class-image"
+								src="https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=300&auto=format&fit=crop"
+								th:src="${classInfo.mainImage != null and !classInfo.mainImage.isEmpty() ? classInfo.mainImage : '/images/default.jpg'}"
+								alt="클래스 이미지">
+							<div class="class-details">
+								<h3 class="class-title" th:text="${classInfo.name}">토끼 빵
+									만들기</h3>
+								<span class="class-badge" th:text="${category.categoryName}">베이킹</span>
+
+								<div class="class-meta-item">
+									<span class="meta-icon">📅</span> <span
+										th:text="${schedule.classDate}">2026.07.25 (토) 14:00 ~
+										16:30</span>
+								</div>
+								<div class="class-meta-item">
+									<span class="meta-icon">📍</span> <span
+										th:text="${classInfo.address}">서울 마포구 원데이클래스 스튜디오</span>
+								</div>
+								<div class="class-meta-item">
+									<span class="meta-icon">👤</span> <span>성인 1명</span>
+								</div>
+							</div>
+							<div class="price-tag"
+								th:text="${#numbers.formatInteger(classInfo.price != null ? classInfo.price : 45000, 0, 'COMMA') + '원'}">45,000원</div>
+						</div>
+					</div>
+
+					<!-- 2. 인원 수 변경 -->
+					<h2 class="section-title">2. 인원 수 변경</h2>
+					<div class="form-group-box border-green">
+						<div class="people-change-row">
+							<span class="people-type">성인 (만 19세 이상)</span>
+							<div class="quantity-control">
+								<button type="button" class="btn-qty" onclick="changeQty(-1)">-</button>
+								<span class="qty-num" id="personCount">1</span>
+								<button type="button" class="btn-qty" onclick="changeQty(1)">+</button>
+							</div>
+							<span class="people-row-price" id="peopleTotalPrice"
+								th:text="${#numbers.formatInteger(classInfo.price != null ? classInfo.price : 45000, 0, 'COMMA') + '원'}">45,000원</span>
+						</div>
+
+						<div class="people-summary-footer">
+							<p class="notice-text"
+								th:text="|• 클래스별 최소 1명 ~ ${schedule.remainingPeople}명까지 예약 가능합니다.|"></p>
+							<div class="summary-results">
+								<div class="result-line">
+									<span>인원 합계</span> <strong id="summaryPeopleCount">1명</strong>
+								</div>
+								<div class="result-line green-text">
+									<span>금액 합계</span> <strong id="summaryTotalPrice"
+										th:text="${#numbers.formatInteger(classInfo.price != null ? classInfo.price : 45000, 0, 'COMMA') + '원'}">45,000원</strong>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					<!-- 3. 결제 수단 -->
+					<h2 class="section-title">3. 결제 수단</h2>
+					<div class="form-group-box">
+						<div class="payment-options">
+
+							<!-- 신용/체크카드 -->
+							<label class="payment-option active" id="cardLabel"> <input
+								type="radio" name="paymentMethod" value="신용카드" checked
+								onclick="togglePayment(this)"> <span
+								class="radio-circle"></span> <span class="pay-icon">💳</span> <span
+								class="pay-text"> <span class="pay-title">신용/체크카드</span>
+									<span class="pay-desc">카드로 간편하게 결제</span>
+							</span>
+							</label>
+
+							<!-- 네이버페이 -->
+							<label class="payment-option" id="naverLabel"> <input
+								type="radio" name="paymentMethod" value="네이버페이"
+								onclick="togglePayment(this)"> <span
+								class="radio-circle"></span> <span class="pay-icon npay">N
+									Pay</span> <span class="pay-text"> <span class="pay-title">네이버페이</span>
+									<span class="pay-desc">네이버페이로 간편하게 결제</span>
+							</span>
+							</label>
+						</div>
+
+
+					</div>
+
+					<!-- 결제 버튼 -->
+					<div class="submit-block">
+						<button type="submit" class="btn-submit">
+							<span class="lock-icon">🔒</span> <span id="btnSubmitPrice"
+								th:text="${#numbers.formatInteger(classInfo.price != null ? classInfo.price : 45000, 0, 'COMMA') + '원 결제하기'}">45,000원
+								결제하기</span>
+						</button>
+						<p class="submit-info-text">결제 버튼을 클릭하면 결제에 동의한 것으로 간주됩니다.</p>
+					</div>
+
+				</div>
+
+				<!-- Right Column (Sidebar) -->
+				<aside class="sidebar">
+
+					<!-- 주문 요약 Widget -->
+					<div class="sidebar-widget">
+						<h3 class="widget-title">주문 요약</h3>
+
+						<div class="mini-class-block">
+							<img class="mini-class-image"
+								src="https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=150&auto=format&fit=crop"
+								th:src="${classInfo.mainImage != null and !classInfo.mainImage.isEmpty() ? classInfo.mainImage : '/images/default.jpg'}"
+								alt="미니 썸네일">
+							<div class="mini-class-info">
+								<h4 class="mini-class-title" th:text="${classInfo.name}">토끼
+									빵 만들기</h4>
+								<span class="mini-class-badge"
+									th:text="${category.categoryName}">베이킹</span> <span
+									class="mini-class-date" th:text="${schedule.classDate}">2026.07.25
+									(토) 14:00</span>
+								<div class="mini-class-bottom">
+									<span class="mini-attendees">성인 1명</span> <span
+										class="mini-price"
+										th:text="${#numbers.formatInteger(classInfo.price != null ? classInfo.price : 45000, 0, 'COMMA') + '원'}">45,000원</span>
+								</div>
+							</div>
+						</div>
+
+						<div class="summary-lines">
+							<div class="summary-line">
+								<span>클래스 금액</span> <span
+									th:text="${#numbers.formatInteger(classInfo.price != null ? classInfo.price : 45000, 0, 'COMMA') + '원'}">45,000원</span>
+							</div>
+
+							<div class="summary-line highlight-people">
+								<span>인원 합계</span> <span id="sidebarPeopleCount">1명</span>
+							</div>
+
+							<div class="summary-line total">
+								<span>최종 결제 금액</span> <span class="total-price"
+									id="sidebarTotalPrice"
+									th:text="${#numbers.formatInteger(classInfo.price != null ? classInfo.price : 45000, 0, 'COMMA') + '원'}">45,000원</span>
+							</div>
+						</div>
+					</div>
+
+					<!-- SSL / CS Info Widget -->
+					<div class="sidebar-info-box">
+						<div class="info-item">
+							<span class="info-icon">🛡️</span>
+							<div class="info-item-text">
+								<strong>안심 결제</strong> <span>SSL 보안으로 안전하게 결제가 진행됩니다.</span>
+							</div>
+						</div>
+						<div class="info-item">
+							<span class="info-icon">⏰</span>
+							<div class="info-item-text">
+								<strong>예약 변경 / 환불</strong> <span>클래스 시작 3일 전까지 변경 및 환불이
+									가능합니다.</span>
+							</div>
+						</div>
+						<div class="info-item">
+							<span class="info-icon">🎧</span>
+							<div class="info-item-text">
+								<strong>고객센터</strong> <span>결제 관련 문의는 고객센터로 연락해주세요. (평일
+									09:00 - 18:00)</span>
+							</div>
+						</div>
+					</div>
+
+				</aside>
+
+			</div>
+		</form>
+
+		<!-- Bottom Precautions Box -->
+		<section class="bottom-notice-box">
+			<h3 class="bottom-notice-title">유의사항</h3>
+			<ul class="bottom-notice-list">
+				<li>클래스 시작 3일 전까지 100% 환불 가능합니다.</li>
+				<li>클래스 시작 2일 전부터는 환불이 불가합니다.</li>
+				<li>클래스 인원 미달 시, 클래스가 취소될 수 있으며 이 경우 전액 환불됩니다.</li>
+			</ul>
+		</section>
+
+		<div th:replace="~{common/footer :: footerFragment}"></div>
+	</div>
+
+	<script th:inline="javascript">
+		// 1. 기본 데이터 초기화 (Thymeleaf 인라인 주석 문법 적용)
+		const unitPrice = /*[[${classInfo.price}]]*/ 45000;          // 숫자
+		const remainingPeople = /*[[${schedule.remainingPeople}]]*/ 10; // 숫자
+		const className = /*[[${classInfo.name}]]*/ '클래스명';       // 문자열
+		const scheduleCode = /*[[${scheduleCode}]]*/ 0;
+		const loginMemberCode = /*[[${session.loginMember != null ? session.loginMember.memberCode : 0}]]*/ 0;
+		let currentCount = 1;
+
+		// 2. 토스페이먼츠 SDK 초기화
+		const clientKey = "test_ck_ma60RZblrq5wx4j5Pa9ZrwzYWBn1";
+		const tossPayments = TossPayments(clientKey);
+		const payment = tossPayments.payment({
+			customerKey: "GUEST_" + new Date().getTime()
+		});
+
+		// 3. 인원 수 변경 함수
+		function changeQty(diff) {
+			let newCount = currentCount + diff;
+			if (newCount < 1) newCount = 1;
+			if (newCount > remainingPeople) {
+				alert('최대 ' + remainingPeople + '명까지 예약 가능합니다.');
+				return;
+			}
+			currentCount = newCount;
+			
+			const totalPrice = unitPrice * currentCount;
+			const formattedPrice = totalPrice.toLocaleString() + '원';
+
+			document.getElementById('personCount').innerText = currentCount;
+			document.getElementById('peopleTotalPrice').innerText = formattedPrice;
+			document.getElementById('summaryPeopleCount').innerText = currentCount + '명';
+			document.getElementById('summaryTotalPrice').innerText = formattedPrice;
+			document.getElementById('sidebarPeopleCount').innerText = currentCount + '명';
+			document.getElementById('sidebarTotalPrice').innerText = formattedPrice;
+			document.getElementById('btnSubmitPrice').innerText = formattedPrice + ' 결제하기';
+		}
+
+		// 4. 결제 수단 선택 UX 함수
+		function togglePayment(element) {
+			document.querySelectorAll('.payment-option').forEach(function(opt) {
+				opt.classList.remove('active');
+			});
+			element.closest('.payment-option').classList.add('active');
+		}
+
+		// 5. 폼 제출 시 토스 결제창 요청 처리
+		document.querySelector('form').addEventListener('submit', async function(e) {
+		    e.preventDefault(); // 기본 폼 제출 방지
+
+		    const selectedMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+		    const totalPrice = unitPrice * currentCount; // 최종 결제 금액
+		    
+		    const orderId = "ORDER_" + new Date().getTime();
+		    const orderName = className + (currentCount > 1 ? ` 외 ${currentCount - 1}명` : "");
+
+		    // 성공/실패 URL 설정
+		    const successUrl = `${window.location.origin}/payment/paymentComplete?scheduleCode=${scheduleCode}&peopleCount=${currentCount}&paymentMethod=${encodeURIComponent(selectedMethod)}&memberCode=${loginMemberCode}`;
+		    const failUrl = `${window.location.origin}/payment/fail`;
+
+		    // 공통 결제 정보 객체
+		    const basePaymentData = {
+		        amount: { currency: "KRW", value: totalPrice },
+		        orderId: orderId,
+		        orderName: orderName,
+		        successUrl: successUrl,
+		        failUrl: failUrl,
+		    };
+
+		    try {
+		        if (selectedMethod === '신용카드') {
+		            // 1) 일반 신용/체크카드 결제창 호출
+		            await payment.requestPayment({
+		                ...basePaymentData,
+		                method: "CARD", 
+		                card: {
+		                    flowMode: "DEFAULT",
+		                    useCardPoint: false,
+		                    useAppCardOnly: false
+		                }
+		            });
+		        } else if (selectedMethod === '네이버페이') {
+		            // 2) 네이버페이 결제창 호출 (SDK v2 표준 규칙)
+		            await payment.requestPayment({
+		                ...basePaymentData,
+		                method: "CARD", 
+		                card: {
+		                    flowMode: "DIRECT", // 간편결제 창으로 바로 이동
+		                    easyPay: "NAVERPAY" // 문자열 형태로 네이버페이 지정
+		                }
+		            });
+		        }
+		    } catch (error) {
+		        if (error.code === 'USER_CANCEL') {
+		            console.log('사용자가 결제창을 닫았습니다.');
+		        } else {
+		            alert('결제 요청 중 오류가 발생했습니다: ' + error.message);
+		        }
+		    }
+		});
+	</script>
+</body>
+</html>

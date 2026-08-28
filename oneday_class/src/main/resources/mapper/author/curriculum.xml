@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.oneclass.author.classbasic.CurriculumDAO">
+
+	<select id="selectCurriculumStepList" parameterType="map"
+		resultType="kr.co.oneclass.author.classbasic.CurriculumStepDTO">
+		SELECT
+			cc.CURRICULUM_CODE,
+			cc.CLASS_CODE,
+			cc.CURRICULUM_TYPE AS STEP_NO,
+			cc.CURRICULUM_TITLE AS TITLE,
+			cc.CURRICULUM_CONTENT AS CONTENT,
+			cc.CURRICULUM_IMG AS IMAGE_PATH
+		FROM CLASS_CURRICULUM cc
+		JOIN CLASS c ON c.CLASS_CODE = cc.CLASS_CODE
+		WHERE cc.CLASS_CODE = #{classCode}
+		  AND c.OPERATOR_CODE = #{authorCode}
+		ORDER BY cc.CURRICULUM_TYPE, cc.CURRICULUM_CODE
+	</select>
+
+	<delete id="deleteCurriculumStepList" parameterType="int">
+		DELETE FROM CLASS_CURRICULUM
+		WHERE CLASS_CODE = #{classCode}
+	</delete>
+
+	<insert id="insertCurriculumStep"
+		parameterType="kr.co.oneclass.author.classbasic.CurriculumStepDTO">
+		<selectKey keyProperty="curriculumCode" resultType="int" order="BEFORE">
+			SELECT SEQ_CLASS_CURRICULUM_CODE.NEXTVAL
+			FROM DUAL
+		</selectKey>
+		INSERT INTO CLASS_CURRICULUM (
+			CURRICULUM_CODE, CLASS_CODE, CURRICULUM_TYPE,
+			CURRICULUM_TITLE, CURRICULUM_CONTENT, CURRICULUM_IMG
+		) VALUES (
+			#{curriculumCode}, #{classCode}, #{stepNo},
+			#{title}, #{content}, #{imagePath}
+		)
+	</insert>
+
+</mapper>

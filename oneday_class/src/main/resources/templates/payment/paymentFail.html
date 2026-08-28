@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>결제 실패 | Oneclass</title>
+<!-- 기존 payment.css 디자인을 그대로 재활용하거나 필요에 따라 결제완료/실패 css 적용 -->
+<link rel="stylesheet" th:href="@{/payment/css/payment.css}">
+<link rel="stylesheet" th:href="@{/payment/css/paymentFail.css}">
+</head>
+<body>
+
+	<div class="container">
+		<div th:replace="~{common/header :: headerFragment}"></div>
+
+		<!-- Title Section -->
+		<section class="title-section">
+			<h1 class="main-title">결제에 실패하였습니다.</h1>
+			<p class="sub-title">주문 진행 중 오류가 발생했습니다. 아래 실패 원인을 확인해주세요.</p>
+
+			<!-- Progress Bar -->
+			<div class="progress-bar">
+				<div class="step">
+					<span>1</span> 클래스 선택
+				</div>
+				<div class="line"></div>
+				<div class="step">
+					<span>2</span> 예약 정보
+				</div>
+				<div class="line"></div>
+				<div class="step">
+					<span>3</span> 결제
+				</div>
+				<div class="line"></div>
+				<div class="step active">
+					<span>!</span> 결제 실패
+				</div>
+			</div>
+		</section>
+
+		<!-- Main Fail Info Section -->
+		<main class="main-content-center" style="max-width: 680px; margin: 0 auto;">
+			<div class="form-group-box" style="text-align: center; padding: 40px 30px;">
+				
+				<!-- 실패 X 아이콘 -->
+				<div class="fail-icon-box">
+					<div class="fail-icon">✕</div>
+				</div>
+
+				<h2 style="font-size: 20px; font-weight: bold; margin-bottom: 10px; color: #111827;">
+					결제가 정상적으로 처리되지 않았습니다.
+				</h2>
+				<p style="color: #6b7280; font-size: 14px; margin-bottom: 24px;">
+					동일한 현상이 반복될 경우 고객센터로 문의해 주시기 바랍니다.
+				</p>
+
+				<!-- 오류 상세 내역 -->
+				<div class="error-info-block">
+					<div class="error-info-item">
+						<span class="error-label">오류 코드</span>
+						<span class="error-value" th:text="${param.code != null ? param.code : 'PAY_PROCESS_FAILED'}">PAY_PROCESS_FAILED</span>
+					</div>
+					<div class="error-info-item">
+						<span class="error-label">실패 사유</span>
+						<span class="error-value error-message-text" 
+						      th:text="${param.message != null ? param.message : '사용자에 의해 결제가 취소되었거나 잔액이 부족합니다.'}">
+							사용자에 의해 결제가 취소되었거나 잔액이 부족합니다.
+						</span>
+					</div>
+					<div class="error-info-item">
+						<span class="error-label">시도 일시</span>
+						<span class="error-value" th:text="${#temporals.format(#temporals.createNow(), 'yyyy.MM.dd a hh:mm')}">2026.08.11 오후 08:30</span>
+					</div>
+				</div>
+
+			</div>
+
+			<!-- 중요 안내 사항 -->
+			<section class="bottom-notice-box" style="margin-top: 30px;">
+				<h3 class="bottom-notice-title">안내 사항</h3>
+				<ul class="bottom-notice-list">
+					<li>결제 승인이 완료되지 않았으므로 금액이 차감되지 않았습니다.</li>
+					<li>카드 한도 초과, 잔액 부족, 결제 창 닫기 등의 이유로 실패할 수 있습니다.</li>
+					<li>지속적으로 실패할 경우 이용하시는 카드사 또는 고객센터로 문의 바랍니다.</li>
+					<li>고객센터: cs@class101.co.kr | 전화: 1588-7822</li>
+				</ul>
+			</section>
+
+			<!-- 버튼 영역 -->
+			<div style="margin-top: 30px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 60px;">
+				<button type="button" class="btn-primary-filled" onclick="history.back()">
+					다시 결제 시도하기
+				</button>
+				<button type="button" class="btn-secondary-outline" onclick="location.href='/'">
+					홈으로 이동
+				</button>
+			</div>
+		</main>
+
+		<div th:replace="~{common/footer :: footerFragment}"></div>
+	</div>
+
+</body>
+</html>

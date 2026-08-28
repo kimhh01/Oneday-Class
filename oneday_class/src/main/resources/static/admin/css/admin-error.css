@@ -1,0 +1,104 @@
+/* =========================================
+   관리자 404 Error Page
+========================================= */
+.admin-error-page {
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 40px;
+}
+
+.admin-error-panel {
+	width: 100%;
+	max-width: 620px;
+	padding: 52px 40px;
+	border: 1px solid var(--line);
+	border-radius: 14px;
+	background: #fff;
+	box-shadow: var(--shadow);
+	text-align: center;
+}
+
+.admin-error-icon {
+	width: 58px;
+	height: 58px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: 0 auto 20px;
+	border-radius: 14px;
+	color: #fff;
+	background: var(--primary);
+	font-size: 28px;
+	font-weight: 800;
+}
+
+.admin-error-panel h1 {
+	margin: 0;
+	color: #202534;
+	font-size: 24px;
+	font-weight: 800;
+}
+
+.admin-error-panel p {
+	margin: 14px 0 30px;
+	color: #7b8292;
+	font-size: 13px;
+	line-height: 1.7;
+}
+
+.admin-error-actions {
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+}
+
+.error-btn {
+	min-width: 130px;
+	height: 42px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0 16px;
+	border-radius: 8px;
+	cursor: pointer;
+	font-size: 13px;
+	font-weight: 700;
+	text-decoration: none;
+}
+
+.error-btn.primary {
+	border: 0;
+	color: #fff;
+	background: var(--primary);
+}
+
+.error-btn.primary:hover {
+	background: var(--primary-dark);
+}
+
+.error-btn.secondary {
+	border: 1px solid var(--line);
+	color: #687080;
+	background: #fff;
+}
+
+.error-btn.secondary:hover {
+	background: #f8f9fb;
+}
+
+@media ( max-width : 700px) {
+	.admin-error-page {
+		padding: 20px;
+	}
+	.admin-error-panel {
+		padding: 38px 24px;
+	}
+	.admin-error-actions {
+		flex-direction: column;
+	}
+	.error-btn {
+		width: 100%;
+	}
+}

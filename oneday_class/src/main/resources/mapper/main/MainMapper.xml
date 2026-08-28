@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.oneclass.main.MainDAO">
+
+    <!-- 선택한 카테고리의 인기 클래스 N개 조회 -->
+    <select id="selectTopRatedClass" resultType="kr.co.oneclass.main.ClassDTO">
+        SELECT * FROM (
+            SELECT 
+                c.class_code as classCode, 
+                c.category_code as categoryCode, 
+                c.name, 
+                c.price, 
+                c.desired_price as desiredPrice, 
+                c.address, 
+                c.star_rating_avg as starRatingAvg, 
+                c.single_introduce as singleIntroduce,
+                (SELECT ci.image 
+                 FROM CLASS_IMG ci 
+                 WHERE ci.class_code = c.class_code 
+                   AND ci.sort_order = 1 
+                   AND ROWNUM = 1) as mainImage
+            FROM CLASS c
+            <where>
+                AND c.status = '모집중'
+                <if test="categoryCode != 0">
+                    AND (c.category_code = #{categoryCode} 
+                         OR c.category_code IN (SELECT category_code FROM CATEGORY WHERE parents_category = #{categoryCode}))
+                </if>
+            </where>
+            ORDER BY c.star_rating_avg DESC NULLS LAST, c.class_code DESC
+        ) WHERE ROWNUM &lt;= #{limitCount}
+    </select>
+
+    <!-- 선택한 카테고리의 인기 클래스 전체 -->
+    <select id="selectTopRatedClassList" parameterType="long" resultType="kr.co.oneclass.main.ClassDTO">
+        SELECT 
+            c.class_code as classCode, 
+            c.category_code as categoryCode, 
+            c.name, 
+            c.price, 
+            c.desired_price as desiredPrice, 
+            c.address, 
+            c.star_rating_avg as starRatingAvg, 
+            c.single_introduce as singleIntroduce,
+            (SELECT ci.image 
+             FROM CLASS_IMG ci 
+             WHERE ci.class_code = c.class_code 
+               AND ci.sort_order = 1 
+               AND ROWNUM = 1) as mainImage
+        FROM CLASS c
+        <where>
+            AND c.status = '모집중'
+            <if test="categoryCode != 0">
+                AND (c.category_code = #{categoryCode} 
+                     OR c.category_code IN (SELECT category_code FROM CATEGORY WHERE parents_category = #{categoryCode}))
+            </if>
+        </where>
+        ORDER BY c.star_rating_avg DESC NULLS LAST, c.class_code DESC
+    </select>
+
+    <!-- 당일 예약 가능한 클래스 -->
+    <select id="selectTodayClass" resultType="kr.co.oneclass.main.ClassDTO">
+        SELECT DISTINCT 
+            c.class_code as classCode, 
+            c.category_code as categoryCode, 
+            c.name, 
+            c.price, 
+            c.desired_price as desiredPrice, 
+            c.address, 
+            c.star_rating_avg as starRatingAvg, 
+            c.single_introduce as singleIntroduce,
+            (SELECT ci.image 
+             FROM CLASS_IMG ci 
+             WHERE ci.class_code = c.class_code 
+               AND ci.sort_order = 1 
+               AND ROWNUM = 1) as mainImage
+        FROM CLASS c
+        JOIN CLASS_REPEAT_RULE r ON c.class_code = r.class_code
+        JOIN SCHEDULE s ON r.repeat_rule_code = s.repeat_rule_code
+        WHERE c.status = '모집중'
+          AND TO_CHAR(s.class_date, 'YYYY-MM-DD') = TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+          AND s.sold_out_yn = 'N'
+          AND s.remaining_people > 0
+    </select>
+
+    <!-- 주말 예약 가능한 클래스 -->
+    <select id="selectWeekendClass" resultType="kr.co.oneclass.main.ClassDTO">
+        SELECT DISTINCT 
+            c.class_code as classCode, 
+            c.category_code as categoryCode, 
+            c.name, 
+            c.price, 
+            c.desired_price as desiredPrice, 
+            c.address, 
+            c.star_rating_avg as starRatingAvg, 
+            c.single_introduce as singleIntroduce,
+            (SELECT ci.image 
+             FROM CLASS_IMG ci 
+             WHERE ci.class_code = c.class_code 
+               AND ci.sort_order = 1 
+               AND ROWNUM = 1) as mainImage
+        FROM CLASS c
+        JOIN CLASS_REPEAT_RULE r ON c.class_code = r.class_code
+        JOIN SCHEDULE s ON r.repeat_rule_code = s.repeat_rule_code
+        WHERE c.status = '모집중'
+          AND TO_CHAR(s.class_date, 'DY', 'NLS_DATE_LANGUAGE=AMERICAN') IN ('SAT', 'SUN')
+          AND s.class_date >= TRUNC(SYSDATE)
+          AND s.sold_out_yn = 'N'
+          AND s.remaining_people > 0
+    </select>
+
+    <!-- 카테고리와 선택 날짜/시간 조건 검색 -->
+    <select id="selectAvailableClass" resultType="kr.co.oneclass.main.ClassDTO">
+        SELECT DISTINCT 
+            c.class_code as classCode, 
+            c.category_code as categoryCode, 
+            c.name, 
+            c.price, 
+            c.desired_price as desiredPrice, 
+            c.address, 
+            c.star_rating_avg as starRatingAvg, 
+            c.single_introduce as singleIntroduce,
+            (SELECT ci.image 
+             FROM CLASS_IMG ci 
+             WHERE ci.class_code = c.class_code 
+               AND ci.sort_order = 1 
+               AND ROWNUM = 1) as mainImage
+        FROM CLASS c
+        JOIN CLASS_REPEAT_RULE r ON c.class_code = r.class_code
+        JOIN SCHEDULE s ON r.repeat_rule_code = s.repeat_rule_code
+        <where>
+            AND c.status = '모집중'
+            <if test="categoryCode != 0">
+                AND (c.category_code = #{categoryCode} 
+                     OR c.category_code IN (SELECT category_code FROM CATEGORY WHERE parents_category = #{categoryCode}))
+            </if>
+            <if test="scheduleDTO != null and scheduleDTO.date != null">
+                AND TRUNC(s.class_date) = TRUNC(#{scheduleDTO.date})
+            </if>
+            <if test="scheduleDTO != null and scheduleDTO.startTime != null and scheduleDTO.startTime != ''">
+                AND s.start_time &gt;= #{scheduleDTO.startTime}
+            </if>
+            AND s.sold_out_yn = 'N'
+            AND s.remaining_people > 0
+        </where>
+    </select>
+
+    <!-- 메인 서비스에서 별도로 호출하는 클래스 이미지 조회 쿼리 -->
+    <select id="selectImage" parameterType="long" resultType="kr.co.oneclass.main.ClassImageDTO">
+        SELECT 
+            class_img_code as classImgCode, 
+            class_code as classCode, 
+            type, 
+            image, 
+            sort_order as sortOrder
+        FROM CLASS_IMG
+        WHERE class_code = #{classCode}
+        ORDER BY sort_order ASC
+    </select>
+
+    <!-- 메인 검색바 드롭다운용 카테고리 목록 조회 -->
+    <select id="selectCategoryList" resultType="kr.co.oneclass.category.CategoryDTO">
+        SELECT 
+            category_code as categoryCode,
+            name as categoryName,
+            parents_category as parentCategoryCode
+        FROM CATEGORY
+        ORDER BY category_code ASC
+    </select>
+
+    <!-- 지역별 등록된 클래스 개수 집계 -->
+    <select id="selectRegionClassCount" parameterType="string" resultType="int">
+        SELECT COUNT(*) 
+        FROM CLASS 
+        WHERE ADDRESS LIKE '%' || #{keyword} || '%'
+          AND STATUS = '모집중'
+    </select>
+
+</mapper>

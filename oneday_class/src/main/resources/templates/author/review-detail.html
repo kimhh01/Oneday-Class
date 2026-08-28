@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>리뷰 상세 | 숨쉬당 원데이 클래스</title>
+<link rel="stylesheet" th:href="@{/author/css/common.css}">
+<link rel="stylesheet" th:href="@{/author/css/header.css}">
+<link rel="stylesheet" th:href="@{/author/css/sidebar.css}">
+<link rel="stylesheet" th:href="@{/author/css/management.css}">
+<link rel="stylesheet" th:href="@{/author/css/review.css}">
+<script th:src="@{/author/js/layout.js}" defer></script>
+</head>
+<body class="author-page management-page review-detail-page" data-menu="review" data-page="리뷰 상세">
+<div class="app">
+	<div th:replace="~{author/fragments/icons :: icons}"></div>
+	<div th:replace="~{author/fragments/header :: header}"></div>
+	<div class="app-body">
+		<div th:replace="~{author/fragments/sidebar :: sidebar}"></div>
+		<main class="content">
+			<div class="content__inner review-detail-content" th:with="replied=${review.replyContent != null and !#strings.isEmpty(review.replyContent)}">
+				<header class="review-detail-head">
+					<nav aria-label="현재 위치"><a th:href="@{/author}">작가페이지</a><span>›</span><a th:href="@{/author/reviews}">리뷰 관리</a><span>›</span><strong>리뷰 상세</strong></nav>
+					<a class="btn btn--ghost" th:href="@{/author/reviews}"><svg aria-hidden="true"><use href="#icon-list"></use></svg>목록으로 돌아가기</a>
+				</header>
+				<p class="reply-error" th:if="${errorMessage}" th:text="${errorMessage}" role="alert">입력 내용을 확인해주세요.</p>
+
+				<div class="review-detail-grid">
+					<article class="review-detail-card">
+						<span class="badge review-detail-status" th:classappend="${replied} ? 'badge--green'" th:text="${replied} ? '답글 완료' : '미답글'">상태</span>
+						<a class="review-detail-class" th:href="@{/author/classes/{code}(code=${review.classCode})}"><span th:text="${review.classTitle}">클래스명</span><svg aria-hidden="true"><use href="#icon-chevron-right"></use></svg></a>
+
+						<div class="reviewer">
+							<span class="reviewer__avatar">
+								<img th:if="${review.memberProfilePath != null and !#strings.isEmpty(review.memberProfilePath)}" th:src="${review.memberProfilePath}" alt="" onerror="this.hidden=true;this.nextElementSibling.hidden=false;">
+								<span hidden th:if="${review.memberProfilePath != null and !#strings.isEmpty(review.memberProfilePath)}" th:text="${#strings.substring(review.memberName, 0, 1)}">수</span>
+								<span th:unless="${review.memberProfilePath != null and !#strings.isEmpty(review.memberProfilePath)}" th:text="${#strings.substring(review.memberName, 0, 1)}">수</span>
+							</span>
+							<div class="reviewer__info"><strong th:text="${review.memberName}">수강생</strong><span>수강생</span><time th:text="${#dates.format(review.reviewDate, 'yyyy.MM.dd')}">작성일</time></div>
+							<div class="review-detail-rating"><span>평점</span><span class="review-stars" th:attr="aria-label=|별점 ${#numbers.formatDecimal(review.rating, 1, 1)}점|"><span aria-hidden="true" th:each="star : ${#numbers.sequence(1, 5)}" th:classappend="${star <= review.rating} ? ' is-filled'">★</span><small th:text="${#numbers.formatDecimal(review.rating, 1, 1)}">5.0</small></span></div>
+						</div>
+
+						<p class="review-detail-copy" th:text="${review.reviewContent}">리뷰 내용</p>
+
+						<section class="review-attachments" th:unless="${#lists.isEmpty(review.imageList)}">
+							<h2>첨부 사진 <span th:text="|(${#lists.size(review.imageList)})|">(0)</span></h2>
+							<div class="review-attachments__grid"><button type="button" th:each="image : ${review.imageList}"><img th:src="${image.imagePath}" alt="리뷰 첨부 이미지" loading="lazy"></button></div>
+						</section>
+
+						<section class="detail-reply" th:if="${replied and mode != 'edit'}">
+							<div><span class="badge badge--green">작가 답글</span><time th:text="${#dates.format(review.replyDate, 'yyyy.MM.dd HH:mm')}">답글일</time></div>
+							<p th:text="${review.replyContent}">답글 내용</p>
+						</section>
+
+						<form class="reply-editor" th:if="${!replied}" method="post" th:action="@{/author/reviews/reply}">
+							<input type="hidden" name="reviewCode" th:value="${review.reviewCode}">
+							<label for="newReplyContent">답글 내용</label>
+							<textarea class="textarea" id="newReplyContent" name="replyContent" maxlength="255" required placeholder="수강생에게 전달할 답글을 입력해주세요."></textarea>
+							<div><span>최대 255자</span><a class="btn btn--ghost" th:href="@{/author/reviews}">취소</a><button class="btn btn--primary" type="submit">답글 저장</button></div>
+						</form>
+
+						<form class="reply-editor" th:if="${replied and mode == 'edit'}" method="post" th:action="@{/author/reviews/reply/edit}">
+							<input type="hidden" name="reviewCode" th:value="${review.reviewCode}">
+							<label for="editReplyContent">답글 내용</label>
+							<textarea class="textarea" id="editReplyContent" name="replyContent" maxlength="255" required th:text="${review.replyContent}"></textarea>
+							<div><span>최대 255자</span><a class="btn btn--ghost" th:href="@{/author/reviews/{code}(code=${review.reviewCode})}">취소</a><button class="btn btn--primary" type="submit">답글 저장</button></div>
+						</form>
+					</article>
+
+					<aside class="review-detail-side">
+						<section>
+							<h2>리뷰 정보</h2>
+							<dl>
+								<div><dt>리뷰 번호</dt><dd th:text="|RV${review.reviewCode}|">RV1</dd></div>
+								<div><dt>작성일</dt><dd th:text="${#dates.format(review.reviewDate, 'yyyy.MM.dd')}">작성일</dd></div>
+								<div><dt>클래스</dt><dd th:text="${review.classTitle}">클래스명</dd></div>
+								<div><dt>답글 상태</dt><dd><span class="badge" th:classappend="${replied} ? 'badge--green'" th:text="${replied} ? '답글 완료' : '미답글'">상태</span></dd></div>
+							</dl>
+						</section>
+						<section class="review-management">
+							<h2>관리</h2>
+							<a class="btn btn--outline" th:if="${replied}" th:href="@{/author/reviews/{code}(code=${review.reviewCode},mode='edit')}"><svg aria-hidden="true"><use href="#icon-chat"></use></svg>답글 수정</a>
+							<form th:if="${replied}" method="post" th:action="@{/author/reviews/{code}/reply/delete(code=${review.reviewCode})}" onsubmit="return confirm('답글을 삭제하시겠습니까?');"><button class="btn review-delete-button" type="submit">답글 삭제</button></form>
+							<a class="btn btn--primary" th:unless="${replied}" href="#newReplyContent">답글 작성</a>
+						</section>
+					</aside>
+				</div>
+				<div th:replace="~{author/fragments/footer :: footer}"></div>
+			</div>
+		</main>
+	</div>
+</div>
+<dialog class="review-lightbox" id="reviewLightbox"><button type="button" class="review-lightbox__close" aria-label="닫기"><svg><use href="#icon-x"></use></svg></button><div class="review-lightbox__inner"><img src="" alt=""></div></dialog>
+<script>
+(function () {
+	var dialog = document.getElementById('reviewLightbox');
+	var target = dialog.querySelector('img');
+	document.querySelectorAll('.review-attachments__grid button').forEach(function (button) {
+		button.addEventListener('click', function () { var image = button.querySelector('img'); target.src = image.src; target.alt = image.alt; dialog.showModal(); });
+	});
+	dialog.querySelector('button').addEventListener('click', function () { dialog.close(); });
+}());
+</script>
+</body>
+</html>

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>클래스 관리</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" th:href="@{/admin/css/admin-common.css}">
+<link rel="stylesheet" th:href="@{/admin/css/admin-layout.css}">
+<link rel="stylesheet" th:href="@{/admin/css/writer-class.css}">
+</head>
+<body>
+	<div class="shell">
+		<aside
+			th:replace="~{admin/fragments/sideMenu :: sideMenu('ondayclass')}"></aside>
+		<main>
+			<h1 class="page-title">클래스 관리</h1>
+			<form class="search" th:action="@{/admin/onedayclass}" method="get">
+
+				<input name="keyword" th:value="${searchDTO.keyword}"
+					placeholder="클래스명, 작가명, 활동명 검색"> <select
+					name="approvalStatus">
+
+					<option value="">전체 승인상태</option>
+
+					<option value="승인"
+						th:selected="${searchDTO.approvalStatus == '승인'}">승인</option>
+
+					<option value="대기"
+						th:selected="${searchDTO.approvalStatus == '대기'}">대기</option>
+
+					<option value="작성중"
+						th:selected="${searchDTO.approvalStatus == '작성중'}">작성중</option>
+
+					<option value="수정중"
+						th:selected="${searchDTO.approvalStatus == '수정중'}">수정중</option>
+
+					<option value="반려"
+						th:selected="${searchDTO.approvalStatus == '반려'}">반려</option>
+
+					<option value="중지"
+						th:selected="${searchDTO.approvalStatus == '중지'}">중지</option>
+
+				</select> <select name="classStatus">
+
+					<option value="">전체 공개상태</option>
+
+					<option value="준비중" th:selected="${searchDTO.classStatus == '준비중'}">
+						준비중</option>
+
+					<option value="모집중" th:selected="${searchDTO.classStatus == '모집중'}">
+						모집중</option>
+
+					<option value="폐강" th:selected="${searchDTO.classStatus == '폐강'}">
+						폐강</option>
+
+					<option value="대기중" th:selected="${searchDTO.classStatus == '대기중'}">
+						대기중</option>
+
+				</select>
+
+				<button type="submit">검색</button>
+
+				<a th:href="@{/admin/onedayclass}"> 초기화 </a>
+
+			</form>
+			<section class="panel">
+
+				<div class="summary">
+					전체 클래스 <b th:text="${classCount} + '개'"> 0개 </b>
+				</div>
+
+				<table>
+
+					<thead>
+						<tr>
+							<th>클래스</th>
+							<th>작가 / 활동명</th>
+							<th>카테고리</th>
+							<th>모집 기간</th>
+							<th>가격</th>
+							<th>승인상태</th>
+							<th>공개상태</th>
+							<th>관리</th>
+						</tr>
+					</thead>
+
+					<tbody>
+
+						<tr th:each="c : ${classes}">
+
+							<td><b th:text="${c.className}"></b> <small
+								th:text="${c.region + ' · ' + c.runningTime + '분'}"> </small></td>
+
+							<td><b th:text="${c.writerName}"></b> <small
+								th:text="${c.workshopName}"> </small></td>
+
+							<td th:text="${c.categoryName}"></td>
+
+							<td><span
+								th:text="${c.recruitmentStartDate != null
+						? #dates.format(
+							c.recruitmentStartDate,
+							'yyyy.MM.dd'
+						)
+						: '-'}">
+							</span> ~ <span
+								th:text="${c.recruitmentEndDate != null
+						? #dates.format(
+							c.recruitmentEndDate,
+							'yyyy.MM.dd'
+						)
+						: '-'}">
+							</span></td>
+
+							<td
+								th:text="${#numbers.formatInteger(
+					c.salePrice,
+					0,
+					'COMMA'
+				)} + '원'">
+							</td>
+
+							<td><span class="status-badge"
+								th:classappend="${c.approvalStatus == '승인'} ? 'approval-approved' :
+						(${c.approvalStatus == '대기'} ? 'approval-waiting' :
+						(${c.approvalStatus == '작성중'} ? 'approval-writing' :
+						(${c.approvalStatus == '수정중'} ? 'approval-editing' :
+						(${c.approvalStatus == '반려'} ? 'approval-rejected' :
+						'approval-stopped'))))"
+								th:text="${c.approvalStatus}"> </span></td>
+
+							<td><span class="status-badge"
+								th:classappend="${c.classStatus == '준비중'} ? 'class-ready' :
+						(${c.classStatus == '모집중'} ? 'class-recruiting' :
+						(${c.classStatus == '폐강'} ? 'class-closed' :
+						'class-waiting'))"
+								th:text="${c.classStatus}"> </span></td>
+
+							<td><a class="action"
+								th:href="@{/admin/onedayclass/{id}(
+						id=${c.classCode}
+					)}">
+									상세 </a></td>
+
+						</tr>
+
+						<tr th:if="${#lists.isEmpty(classes)}">
+
+							<td colspan="8" class="empty">조회된 클래스가 없습니다.</td>
+
+						</tr>
+
+					</tbody>
+
+				</table>
+
+			</section>
+			<div class="pagination" th:if="${page.totalPage > 1}">
+
+				<a th:if="${page.startPage > 1}"
+					th:href="@{/admin/onedayclass(
+			page=${page.startPage - 1},
+			keyword=${searchDTO.keyword},
+			approvalStatus=${searchDTO.approvalStatus},
+			classStatus=${searchDTO.classStatus}
+		)}">
+					이전 </a> <a
+					th:each="pageNum :
+			${#numbers.sequence(
+				page.startPage,
+				page.endPage
+			)}"
+					th:href="@{/admin/onedayclass(
+			page=${pageNum},
+			keyword=${searchDTO.keyword},
+			approvalStatus=${searchDTO.approvalStatus},
+			classStatus=${searchDTO.classStatus}
+		)}"
+					th:text="${pageNum}"
+					th:classappend="${pageNum == page.currentPage}
+			? ' active'
+			: ''">
+				</a> <a th:if="${page.endPage < page.totalPage}"
+					th:href="@{/admin/onedayclass(
+			page=${page.endPage + 1},
+			keyword=${searchDTO.keyword},
+			approvalStatus=${searchDTO.approvalStatus},
+			classStatus=${searchDTO.classStatus}
+		)}">
+					다음 </a>
+
+			</div>
+		</main>
+	</div>
+</body>
+</html>

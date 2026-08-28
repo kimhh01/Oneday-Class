@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}"/>
+  <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : ''}"/>
+
+  <title>인기 액티비티 클래스</title>
+     
+  <link rel="stylesheet" th:href="@{/topCategory/css/top_category.css}">
+  
+  <style>
+    :root{
+      --main-color:#f3b51b;
+      --soft-color:#fff3c7;
+      --banner-light:#ffe49a;
+      --banner-dark:#f5bf3d;
+    }
+  </style>
+</head>
+<body>
+<div th:replace="~{common/header :: headerFragment}"></div>
+
+  <div class="page">
+
+    <!-- 1. 메인 검색바 -->
+    <div class="search-wrap">
+        <form th:action="@{/search}" method="get" class="search-box">
+            <div class="search-icon">
+                <img th:src="@{/images/icon/search_icon.svg}" alt="검색" style="width: 20px; height: 20px;">
+            </div>
+            <input class="search-input" type="text" name="keyword" placeholder="원하는 키워드를 검색해보세요.">
+            <button type="submit" class="search-btn">검색</button>
+        </form>
+    </div>
+
+    <section class="visual-copy">
+      <div class="main-copy">실패없는 <span class="point">인기 액티비티</span> 추천!</div>
+      <div class="sub-copy">몸도 마음도 건강해지는 특별한 하루</div>
+    </section>
+
+    <section class="hero">
+       <img th:src="@{/images/banner/activity_mainbanner.png}" alt="액티비티 메인배너">
+    </section>
+
+    <section class="section">
+      <div class="section-top">
+        <h2 class="section-title">지금 가장 인기있는 액티비티 클래스</h2>
+        <a th:href="@{/category/class(categoryCode=3)}" class="more-link">전체보기 〉</a>
+      </div>
+
+      <!-- DB 조회 데이터 없음 -->
+      <div th:if="${#lists.isEmpty(classList)}" style="text-align: center; padding: 60px 0; color: #888;">
+        등록된 인기 액티비티 클래스가 없습니다.
+      </div>
+
+      <!-- DB 동적 리스트 반복 -->
+      <div class="class-list" th:if="${!#lists.isEmpty(classList)}">
+      
+        <article class="class-card" th:each="cls, stat : ${classList}">
+          <div class="class-thumb-wrap">
+            <span class="rank-badge" th:text="${stat.count}">1</span>
+            
+            <!-- 💡 찜(북마크) 버튼 (상태에 따른 th:fill 동적 적용) -->
+            <button type="button" class="bookmark-btn" 
+                    th:data-class-code="${cls.classCode}" 
+                    onclick="toggleBookmark(event, this)">
+              <svg width="20" height="20" viewBox="0 0 24 24" 
+                   th:fill="${bookmarkedClassCodes != null and #lists.contains(bookmarkedClassCodes, cls.classCode)} ? '#e33838' : 'none'" 
+                   stroke="#e33838" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+              </svg>
+            </button>
+
+            <a th:href="@{/classDetail(classCode=${cls.classCode})}">
+              <div class="class-thumb">
+                <!-- 💡 이미지 예외 처리 및 방어 코드 적용 -->
+                <img th:src="${cls.mainImage == null or #strings.isEmpty(cls.mainImage) ? '/images/class/dessert1.jpg' : (cls.mainImage.startsWith('/') or cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage)}" 
+                     th:alt="${cls.name}"
+                     onerror="this.src='/images/class/dessert1.jpg';">
+              </div>
+            </a>
+          </div>
+
+          <a th:href="@{/classDetail(classCode=${cls.classCode})}" style="display: flex; flex: 1; text-decoration: none; color: inherit;">
+            <div class="class-info">
+              <div class="location" th:text="${cls.address}">위치</div>
+              <div class="class-name" th:text="${cls.name}">클래스 제목</div>
+              <div class="meta">
+                <span class="star" th:text="'★ ' + ${cls.starRatingAvg}">★ 5.0</span>
+                <span class="bar">|</span>
+                <span th:text="'조회수 ' + ${cls.viewsCnt}">조회수 0</span>
+              </div>
+            </div>
+
+            <div class="price-box">
+              <span class="discount-badge" 
+                    th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}"
+                    th:text="${cls.discountRate + '% 할인'}">할인</span>
+              <div class="price-row">
+                <span class="discount-rate" 
+                      th:if="${cls.desiredPrice != null and cls.desiredPrice > 0 and cls.desiredPrice > cls.price}"
+                      th:text="${cls.discountRate + '%'}"></span>
+                <span class="final-price" 
+                      th:text="${#numbers.formatInteger(cls.price, 0, 'COMMA') + '원'}">가격</span>
+              </div>
+            </div>
+          </a>
+        </article>
+
+      </div>
+    </section>
+
+  </div>
+  
+<div th:replace="~{common/footer :: footerFragment}"></div>
+
+<script>
+function toggleBookmark(event, btn) {
+    event.stopPropagation();
+    event.preventDefault();
+
+    const classCode = btn.getAttribute('data-class-code');
+    const tokenMeta = document.querySelector("meta[name='_csrf']");
+    const headerMeta = document.querySelector("meta[name='_csrf_header']");
+    
+    const headers = {
+        'Content-Type': 'application/x-www-form-urlencoded'
+    };
+
+    if (tokenMeta && headerMeta && tokenMeta.getAttribute("content")) {
+        headers[headerMeta.getAttribute("content")] = tokenMeta.getAttribute("content");
+    }
+
+    fetch('/mypage/bookmark/toggle', {
+        method: 'POST',
+        headers: headers,
+        body: 'classCode=' + encodeURIComponent(classCode)
+    })
+    .then(response => response.text())
+    .then(data => {
+        const svg = btn.querySelector('svg');
+        if (data === 'ADDED') {
+            if (svg) svg.setAttribute('fill', '#e33838'); // 하트 색 채우기
+            if (confirm('관심 클래스에 추가되었습니다!\n마이페이지 관심 클래스로 이동하시겠습니까?')) {
+                location.href = '/mypage/bookmark';
+            }
+        } else if (data === 'REMOVED') {
+            if (svg) svg.setAttribute('fill', 'none'); // 하트 색 비우기
+            alert('관심 클래스에서 해제되었습니다.');
+        } else if (data === 'LOGIN_REQUIRED') {
+            alert('로그인이 필요한 서비스입니다.');
+            location.href = '/member/login';
+        } else {
+            alert('처리 중 오류가 발생했습니다.');
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+</script>
+
+</body>
+</html>

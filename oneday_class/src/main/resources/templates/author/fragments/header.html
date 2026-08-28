@@ -1,0 +1,44 @@
+<!-- =============================================================
+	 header.html - 상단 공통 헤더
+	 * 브레드크럼 마지막 항목은 각 페이지 body 의 data-page 값으로 채워집니다.
+	   (js/layout.js 참고)
+	 ============================================================= -->
+<header th:fragment="header" class="app-header">
+	<div class="app-header__left">
+		<button type="button" class="icon-btn sidebar-toggle"
+				data-sidebar-toggle aria-controls="sidebar" aria-expanded="false">
+			<svg><use href="#icon-menu"></use></svg>
+			<span class="sr-only">메뉴 열기</span>
+		</button>
+
+		<a href="index.html" th:href="@{/author}" class="mobile-brand" aria-label="Oneclass 작가페이지 홈">
+			<span>Oneclass</span>
+		</a>
+
+		<nav class="breadcrumb" aria-label="현재 위치">
+			<a href="index.html" th:href="@{/author}">작가페이지 홈</a>
+			<svg><use href="#icon-chevron-right"></use></svg>
+			<span class="is-current" data-breadcrumb-current>홈</span>
+		</nav>
+	</div>
+
+	<div class="app-header__right">
+		<div class="user-menu">
+			<button type="button" class="user-chip" data-user-menu-button aria-haspopup="menu" aria-expanded="false" aria-controls="authorUserMenu">
+				<span class="avatar">
+					<img src="/author/images/photo/studio-profile.png"
+						 th:src="${#strings.isEmpty(session.loginAuthorProfileImage)} ? @{/author/images/photo/studio-profile.png} : ${session.loginAuthorProfileImage}"
+						 alt="">
+				</span>
+				<span class="user-chip__name" th:text="|${session.loginAuthorName} 작가님|">작가님</span>
+				<svg><use href="#icon-chevron-down"></use></svg>
+			</button>
+			<nav class="user-menu__panel" id="authorUserMenu" role="menu" hidden>
+				<a role="menuitem" th:href="@{/}">메인페이지로 이동</a>
+				<a role="menuitem" th:href="@{/author/profile}">프로필 관리</a>
+				<a role="menuitem" th:href="@{/mypage}">마이페이지</a>
+				<a role="menuitem" th:href="@{/logout}">로그아웃</a>
+			</nav>
+		</div>
+	</div>
+</header>

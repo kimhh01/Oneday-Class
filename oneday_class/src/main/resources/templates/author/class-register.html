@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>클래스 등록 | Oneclass</title>
+<link rel="stylesheet" href="/author/css/common.css" th:href="@{/author/css/common.css}">
+<link rel="stylesheet" href="/author/css/header.css" th:href="@{/author/css/header.css}">
+<link rel="stylesheet" href="/author/css/sidebar.css" th:href="@{/author/css/sidebar.css}">
+<link rel="stylesheet" href="/author/css/class-register.css" th:href="@{/author/css/class-register.css}">
+<script src="/author/js/layout.js" th:src="@{/author/js/layout.js}" defer></script>
+</head>
+<!--
+	클래스 등록 1단계(등록 시작).
+	등록 흐름: 등록 시작 → 기본 정보 → 일정 및 가격 → 상세 정보 → 커리큘럼 → 미리보기 → 등록 완료
+-->
+<body class="author-page register-start-page" data-menu="class-register" data-page="클래스 등록">
+
+<div class="app">
+	<div th:replace="~{author/fragments/icons :: icons}"></div>
+	<div th:replace="~{author/fragments/header :: header}"></div>
+
+	<div class="app-body">
+		<div th:replace="~{author/fragments/sidebar :: sidebar}"></div>
+
+		<main class="content">
+			<div class="content__inner">
+				<p class="form-error" th:if="${registerError != null}" th:text="${registerError}"></p>
+				<header class="register-page-head">
+					<h1 class="page-title">클래스 등록하기 <svg class="title-leaf" aria-hidden="true"><use href="#icon-title-leaf"></use></svg></h1>
+					<p class="page-desc">당신의 솜씨와 이야기가 누군가의 하루를 특별하게 만듭니다.</p>
+				</header>
+
+				<section class="register-hero" aria-labelledby="startTitle">
+					<div class="register-hero__copy">
+						<p class="register-hero__kicker">ONE-DAY CLASS</p>
+						<h2 id="startTitle">당신의 작품이 되는<br>단 하루의 클래스</h2>
+						<p>
+							손끝에서 시작된 취향과 영감,<br>
+							Oneclass에서 더 많은 사람들과<br>
+							아름답게 나누어 보세요.
+						</p>
+						<form id="registerStartForm" method="post" th:action="@{/author/classes/register/start}">
+							<button type="submit" id="registerStartButton"
+									class="btn btn--primary btn--lg register-hero__button">
+								클래스 등록 시작하기
+							</button>
+						</form>
+					</div>
+					<div class="register-hero__photo" role="img" aria-label="도예, 캔들, 플라워 클래스를 담은 감성적인 작업 사진"></div>
+				</section>
+
+				<div class="draft-choice-modal" id="draftChoiceModal" hidden th:if="${latestDraft != null}">
+					<div class="draft-choice-modal__backdrop" data-modal-close></div>
+					<section class="draft-choice-modal__panel" role="dialog" aria-modal="true"
+							 aria-labelledby="draftChoiceTitle" aria-describedby="draftChoiceDescription" tabindex="-1">
+						<h2 id="draftChoiceTitle">작성 중인 클래스가 있습니다</h2>
+						<p class="draft-choice-modal__name" th:text="${latestDraft.classTitle}">작성 중인 클래스</p>
+						<p id="draftChoiceDescription">기존 초안을 삭제하시겠습니까?</p>
+						<div class="draft-choice-modal__actions">
+							<form method="post" th:action="@{/author/classes/register/restart}">
+								<input type="hidden" name="classCode" th:value="${latestDraft.classCode}">
+								<button type="submit" class="btn btn--lg draft-choice-modal__delete">삭제하고 새로 등록</button>
+							</form>
+							<a class="btn btn--primary btn--lg" th:href="${draftResumeUrl}">이어서 등록</a>
+						</div>
+					</section>
+				</div>
+
+				<section class="start-guide" aria-label="클래스 등록 안내">
+					<article class="start-guide__item">
+						<span class="start-guide__icon"><svg aria-hidden="true"><use href="#icon-clipboard-list"></use></svg></span>
+						<div>
+							<h2>차근차근, 쉬운 등록 가이드</h2>
+							<p>단계별 안내로 클래스 정보를<br>차근차근 입력할 수 있어요.</p>
+						</div>
+					</article>
+					<article class="start-guide__item">
+						<span class="start-guide__icon"><svg aria-hidden="true"><use href="#icon-cloud-check"></use></svg></span>
+						<div>
+							<h2>임시 저장으로 안전하게</h2>
+							<p>단계별 임시 저장을 이용해<br>언제든 이어서 작성할 수 있어요.</p>
+						</div>
+					</article>
+					<article class="start-guide__item">
+						<span class="start-guide__icon"><svg aria-hidden="true"><use href="#icon-image"></use></svg></span>
+						<div>
+							<h2>내가 만들어가는 나만의 클래스</h2>
+							<p>감성적인 이미지로<br>나만의 클래스를 아름답게 만들어보세요.</p>
+						</div>
+					</article>
+				</section>
+
+				<section class="start-ready" aria-labelledby="readyTitle">
+					<div class="start-ready__title">
+						<span class="start-ready__mark" aria-hidden="true"><svg><use href="#icon-sprout"></use></svg></span>
+						<h2 id="readyTitle">알아두면 좋아요</h2>
+					</div>
+					<ul>
+						<li><svg aria-hidden="true"><use href="#icon-check"></use></svg> 클래스 등록 후 승인과정을 거쳐요</li>
+						<li><svg aria-hidden="true"><use href="#icon-check"></use></svg> 적절하지 않은 내용 첨부시 거절될 수 있어요</li>
+						<li><svg aria-hidden="true"><use href="#icon-check"></use></svg> 승인 완료 후에 클래스가 노출돼요</li>
+					</ul>
+				</section>
+
+				<footer class="site-footer" th:replace="~{author/fragments/footer :: footer}">
+					<div class="site-footer__links">
+						<a href="#" aria-disabled="true" title="준비 중">작가 가이드</a>
+						<a href="#" aria-disabled="true" title="준비 중">공지사항</a>
+						<a href="qna.html" th:href="@{/author/qna}">사업자 문의</a>
+						<a href="#">이용약관</a>
+						<a href="#">개인정보처리방침</a>
+					</div>
+					<p class="site-footer__copy">
+						<b>Oneclass</b> 작가센터 · 평일 10:00 ~ 18:00 (점심 12:00 ~ 13:00)<br>
+						© 2026 Oneclass. All rights reserved.
+					</p>
+				</footer>
+			</div>
+		</main>
+	</div>
+</div>
+
+<script>
+(function () {
+	'use strict';
+	var button = document.getElementById('registerStartButton');
+	var modal = document.getElementById('draftChoiceModal');
+	if (!button) return;
+	if (!modal) {
+		button.form.addEventListener('submit', function () {
+			button.disabled = true;
+		});
+		return;
+	}
+	var panel = modal.querySelector('.draft-choice-modal__panel');
+	var closeTarget = modal.querySelector('[data-modal-close]');
+	var previousFocus = null;
+
+	function openModal() {
+		previousFocus = document.activeElement;
+		modal.hidden = false;
+		document.body.classList.add('has-modal');
+		panel.focus();
+	}
+
+	function closeModal() {
+		modal.hidden = true;
+		document.body.classList.remove('has-modal');
+		if (previousFocus) previousFocus.focus();
+	}
+
+	button.addEventListener('click', function (event) {
+		event.preventDefault();
+		openModal();
+	});
+	closeTarget.addEventListener('click', closeModal);
+	document.addEventListener('keydown', function (event) {
+		if (event.key === 'Escape' && !modal.hidden) closeModal();
+	});
+}());
+</script>
+
+</body>
+</html>

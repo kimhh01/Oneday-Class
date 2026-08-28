@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.oneclass.payment.ReservationDAO">
+
+<select id="selectClassDetailByScheduleCode" parameterType="int" resultType="kr.co.oneclass.common.ClassDTO">
+    SELECT 
+        c.class_code    AS classCode, 
+        c.name          AS name,
+        c.address       AS address,
+        c.address2      AS address2,
+        c.price         AS price,
+        /* 메인 이미지 추가 */
+        (SELECT ci.image 
+         FROM CLASS_IMG ci 
+         WHERE ci.class_code = c.class_code 
+           AND ci.sort_order = 1 
+           AND ROWNUM = 1) AS mainImage
+    FROM class c
+    JOIN class_repeat_rule crr ON c.class_code = crr.class_code
+    JOIN schedule s ON s.repeat_rule_code = crr.repeat_rule_code
+    WHERE s.schedule_code = #{scheduleCode}
+</select>
+<select id="selectClassDetailByScheduleCode2" parameterType="int" resultType="kr.co.oneclass.common.ScheduleDTO">
+select    class_date as classDate,
+      start_time as startTime,
+       end_time as endTime,
+       remaining_people as remainingPeople
+FROM class c
+JOIN class_repeat_rule crr
+  ON c.class_code = crr.class_code
+JOIN schedule s
+  ON s.repeat_rule_code = crr.repeat_rule_code
+WHERE s.schedule_code = #{scheduleCode}
+</select>
+<select id="selectCategory" parameterType="int" resultType="kr.co.oneclass.common.CategoryDTO">
+select cate.name as categoryName
+from category cate
+join class c
+on c.category_code = cate.category_code
+JOIN class_repeat_rule crr
+  ON c.class_code = crr.class_code
+JOIN schedule s
+  ON s.repeat_rule_code = crr.repeat_rule_code
+WHERE s.schedule_code = #{scheduleCode}
+</select>
+<!-- 예약 정보 추가 (수정본) -->
+<insert id="insertReservation" parameterType="kr.co.oneclass.payment.ReservationDTO">
+    <selectKey keyProperty="reservationCode" resultType="int" order="BEFORE">
+        SELECT seq_reservation_code.NEXTVAL FROM dual
+    </selectKey>
+    
+    INSERT INTO reservation (
+        reservation_code, 
+        class_code, 
+        member_code,
+        schedule_code, 
+        reservation_date, 
+        people_number, 
+        status, 
+        price
+    )
+    VALUES (
+        #{reservationCode}, 
+        #{classCode}, 
+        #{memberCode}, 
+        #{scheduleCode},
+        SYSDATE, 
+        #{peopleNumber}, 
+        '예약', 
+        #{totalPrice}
+    )
+</insert>
+<!-- 좌석 수 차감 및 잔여 좌석 0 이하 시 매진(Y) 처리 -->
+<update id="updateRemaining">
+    UPDATE schedule
+    SET remaining_people = remaining_people - #{count},
+        sold_out_yn = CASE 
+                        WHEN (remaining_people - #{count}) &lt;= 0 THEN 'Y'
+                        ELSE sold_out_yn 
+                      END
+    WHERE schedule_code = #{scheduleCode}
+      AND remaining_people >= #{count}
+</update>
+</mapper>

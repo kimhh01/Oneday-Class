@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="kr.co.oneclass.author.common.AuthorSessionDAO">
+
+	<select id="selectByMemberCode" parameterType="int"
+		resultType="kr.co.oneclass.author.common.AuthorSessionDTO">
+		SELECT
+			cr.OPERATOR_CODE AS AUTHOR_CODE,
+			cr.MEMBER_CODE,
+			cr.ACTIVITY_NAME,
+			cr.PROFILE_IMAGE AS PROFILE_IMAGE_PATH,
+			CASE
+				WHEN TRIM(cr.ACTIVITY_NAME) IS NOT NULL
+				 AND TRIM(cr.CREATOR_INTRODUCTION) IS NOT NULL
+				 AND TRIM(cr.ACTIVITY_REGION) IS NOT NULL THEN 1
+				ELSE 0
+			END AS PROFILE_COMPLETE
+		FROM CREATOR cr
+		WHERE cr.MEMBER_CODE = #{memberCode}
+	</select>
+
+	<update id="activateCompletedAuthor" parameterType="int">
+		UPDATE CREATOR
+		SET APPROVAL_STATUS = '승인'
+		WHERE MEMBER_CODE = #{memberCode}
+		  AND APPROVAL_STATUS = '대기'
+		  AND TRIM(ACTIVITY_NAME) IS NOT NULL
+		  AND TRIM(CREATOR_INTRODUCTION) IS NOT NULL
+		  AND TRIM(ACTIVITY_REGION) IS NOT NULL
+	</update>
+</mapper>

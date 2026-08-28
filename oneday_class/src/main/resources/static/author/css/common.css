@@ -1,0 +1,696 @@
+@charset "UTF-8";
+
+/* =============================================================
+   common.css - 전 페이지 공통 (디자인 토큰 / 기본 레이아웃 / 공통 컴포넌트)
+   * 헤더  -> css/header.css
+   * 사이드바 -> css/sidebar.css
+   ============================================================= */
+
+/* ---------- 0. 웹폰트 ----------
+   본문/UI : Pretendard   (한글 UI 가독성 표준, 자간·숫자 정돈됨)
+   제목 포인트 : 고운바탕  (감성 명조. 인사말·로고에만 사용)
+   둘 다 SIL Open Font License 라 상업적 사용 가능.
+   * 지금은 CDN 로드라 인터넷이 필요합니다. 오프라인/사내망에서 쓰려면
+     폰트 파일을 static/fonts 에 내려받고 @font-face 로 바꾸면 됩니다.
+   -------------------------------------------------------------- */
+/* dynamic-subset : 한글을 조각으로 나눠 필요한 만큼만 받는다.
+   variable 통짜(1MB+)를 쓰면 로딩 동안 글자가 안 보이는 구간이 길다. */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard-dynamic-subset.min.css");
+@import url("https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap");
+
+/* ---------- 1. reset ---------- */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+dialog { margin: auto; }
+html, body { height: 100%; }
+body {
+	font-family: var(--font-body);
+	font-size: 14px;
+	line-height: 1.5;
+	color: var(--text-strong);
+	background: var(--bg-page);
+	-webkit-font-smoothing: antialiased;
+}
+ul, ol { list-style: none; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+table { border-collapse: collapse; width: 100%; }
+img { max-width: 100%; display: block; }
+
+/* 아이콘 기본 스타일 - 스프라이트(<use>)로 복제되는 도형까지 상속됩니다 */
+svg {
+	display: block;
+	fill: none;
+	stroke: currentColor;
+	stroke-width: 1.6;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+/* ---------- 2. design token ---------- */
+:root {
+	/* font */
+	--font-body: "Pretendard", "Pretendard Variable", "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", sans-serif;
+	--font-display: "Gowun Batang", "Nanum Myeongjo", "Apple SD Gothic Neo", serif;
+
+	/* color - brand */
+	--green-700: #195B34;
+	--green-600: #226A3C;
+	--green-500: #3FAE6C;
+	--green-100: #E4F4EA;
+	--green-50 : #F2FAF5;
+
+	/* color - text */
+	--text-strong: #1A211C;
+	--text-body  : #4B5550;
+	--text-muted : #8A938D;
+
+	/* color - surface */
+	--bg-page  : #F5F8F6;
+	--bg-card  : #FFFFFF;
+	--bg-soft  : #F7F9F8;
+	--border   : #E5EAE7;
+	--border-strong: #D5DCD8;
+
+	/* color - status */
+	--amber-600: #B4780A;
+	--amber-100: #FDF3DF;
+	--blue-600 : #2C6ECB;
+	--blue-100 : #E7EFFB;
+	--red-600  : #C8442F;
+	--red-100  : #FCEAE6;
+
+	/* layout
+	   --header-h / --sidebar-w 는 여기서만 정의한다.
+	   헤더가 left:var(--sidebar-w) 로 붙어 있어서 페이지 CSS 가 이 값을 다시 잡으면
+	   같은 include 를 써도 상단 바와 사이드바 경계선이 페이지마다 어긋난다.
+	   --gutter-x 는 헤더와 본문이 같은 세로선에 맞도록 공유하는 좌우 여백이다. */
+	--header-h  : 70px;
+	--sidebar-w : 240px;
+	--gutter-x  : 40px;
+	--content-top: 36px;
+	--content-max: 1600px;
+
+	/* spacing - 4px 배수만 사용한다 */
+	--space-1: 4px;
+	--space-2: 8px;
+	--space-3: 12px;
+	--space-4: 16px;
+	--space-5: 20px;
+	--space-6: 24px;
+	--space-8: 32px;
+	--space-10: 40px;
+	--space-12: 48px;
+
+	/* control */
+	--control-sm: 32px;
+	--control-md: 40px;
+	--control-lg: 48px;
+
+	/* shape */
+	--radius-sm: 8px;
+	--radius   : 12px;
+	--radius-lg: 16px;
+	--shadow-card: 0 1px 2px rgba(26, 33, 28, .04);
+	--shadow-pop : 0 8px 24px rgba(26, 33, 28, .10);
+}
+
+/* ---------- 3. layout ---------- */
+.app { min-height: 100%; }
+
+.app-body {
+	display: flex;
+	align-items: flex-start;
+	padding-top: var(--header-h);
+}
+
+.content {
+	flex: 1;
+	min-width: 0;
+	padding: 28px 32px 64px;
+}
+.content__inner { max-width: var(--content-max); margin: 0 auto; }
+
+/* 아이콘 스프라이트(includes/icons.html)는 화면에 보이지 않게 */
+.icon-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+
+/* 일러스트는 위 아이콘 기본값(선만 그리기)을 쓰지 않는다. 각 도형의 fill 을 따른다 */
+.illust { fill: initial; stroke: none; }
+
+/* ---------- 4. avatar ---------- */
+.avatar {
+	display: grid;
+	place-items: center;
+	width: 32px; height: 32px;
+	border-radius: 50%;
+	background: var(--green-100);
+	color: var(--green-700);
+	font-size: 12px;
+	font-weight: 700;
+	overflow: hidden;
+	flex: none;
+}
+.avatar--lg { width: 48px; height: 48px; font-size: 15px; }
+
+/* ---------- 5. button ---------- */
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 4px;
+	height: 34px;
+	padding: 0 14px;
+	border-radius: 8px;
+	font-size: 12.5px;
+	font-weight: 600;
+	white-space: nowrap;
+	border: 1px solid transparent;
+	transition: background .15s, border-color .15s;
+}
+.btn svg { width: 14px; height: 14px; }
+.btn--primary { background: var(--green-600); color: #fff; }
+.btn--primary:hover { background: var(--green-700); }
+.btn--outline {
+	background: var(--bg-card);
+	border-color: var(--green-500);
+	color: var(--green-700);
+}
+.btn--outline:hover { background: var(--green-50); }
+.btn--ghost {
+	background: var(--bg-card);
+	border-color: var(--border-strong);
+	color: var(--text-body);
+}
+.btn--ghost:hover { background: var(--bg-soft); }
+.btn--sm { height: 28px; padding: 0 10px; font-size: 11.5px; }
+
+/* ---------- 6. card ---------- */
+.card {
+	background: var(--bg-card);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-lg);
+	box-shadow: var(--shadow-card);
+}
+.card + .card { margin-top: 20px; }
+.card__head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 18px 20px 12px;
+}
+.card__title { font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
+.card__body { padding: 0 20px 18px; }
+.card__foot {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 12px 20px;
+	border-top: 1px solid var(--border);
+	font-size: 12px;
+	color: var(--text-muted);
+}
+.card__foot svg { width: 14px; height: 14px; flex: none; }
+
+.link-more {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--text-muted);
+}
+.link-more:hover { color: var(--green-700); }
+.link-more svg { width: 13px; height: 13px; }
+
+/* ---------- 7. icon box ---------- */
+.icon-box {
+	display: grid;
+	place-items: center;
+	width: 40px; height: 40px;
+	flex: none;
+	border-radius: var(--radius);
+	background: var(--green-50);
+	color: var(--green-600);
+}
+.icon-box svg { width: 20px; height: 20px; }
+.icon-box--sm { width: 32px; height: 32px; border-radius: var(--radius-sm); }
+.icon-box--sm svg { width: 16px; height: 16px; }
+.icon-box--amber { background: var(--amber-100); color: var(--amber-600); }
+.icon-box--blue  { background: var(--blue-100);  color: var(--blue-600); }
+
+/* ---------- 8. badge ---------- */
+.badge {
+	display: inline-flex;
+	align-items: center;
+	height: 22px;
+	padding: 0 9px;
+	border-radius: 6px;
+	font-size: 11.5px;
+	font-weight: 700;
+	white-space: nowrap;
+}
+.badge--green { background: var(--green-100); color: var(--green-700); }
+.badge--amber { background: var(--amber-100); color: var(--amber-600); }
+.badge--blue  { background: var(--blue-100);  color: var(--blue-600); }
+.badge--red   { background: var(--red-100);   color: var(--red-600); }
+.badge--gray  { background: var(--bg-soft);   color: var(--text-muted); }
+
+/* ---------- 9. table ---------- */
+.table-wrap { overflow-x: auto; }
+.table { font-size: 13px; white-space: nowrap; }
+.table th,
+.table td {
+	padding: 12px 10px;
+	text-align: left;
+	border-bottom: 1px solid var(--border);
+}
+.table thead th {
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--text-muted);
+	background: var(--bg-soft);
+	border-bottom: 1px solid var(--border);
+}
+.table thead th:first-child { border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.table thead th:last-child  { border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+.table tbody tr:last-child td { border-bottom: 0; }
+.table tbody tr:hover td { background: var(--bg-soft); }
+.table .col-center { text-align: center; }
+.table .col-right  { text-align: right; }
+/* 클래스명은 좁은 화면에서 가로 스크롤 대신 줄바꿈 */
+.table__name { font-weight: 600; color: var(--text-strong); white-space: normal; }
+
+/* ---------- 10. util ---------- */
+.sr-only {
+	position: absolute; width: 1px; height: 1px;
+	margin: -1px; padding: 0; overflow: hidden;
+	clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+.text-muted { color: var(--text-muted); }
+
+/* ---------- 11. responsive ---------- */
+@media (max-width: 1024px) {
+	:root { --gutter-x: 24px; }
+	.content { padding: 24px 20px 56px; }
+}
+@media (max-width: 640px) {
+	:root { --gutter-x: 16px; }
+	.content { padding: 20px 14px 48px; }
+	.card__head { padding: 16px 14px 10px; }
+	.card__body { padding: 0 14px 14px; }
+	.card__foot { padding: 10px 14px; }
+}
+
+/* ============ 작가페이지 테마 (.author-page 스코프) ============
+   <body class="author-page"> 가 있는 화면에만 적용. 위 :root 기본값을 덮어쓴다.
+   ============================================================= */
+
+/* ---------- 1. 토큰 ----------
+   상태색은 dataviz 검증 스크립트로 실측해서 고른 값이다.
+   - 기존 red #C8442F 는 amber 와 정상시야 ΔE 12.5 (기준 15 미달) 로 실패 -> #C2306B
+   - 상태색 조합의 색약(deutan) 최저 ΔE 7.0 은 경고 구간이므로
+     상태 표시는 반드시 아이콘/텍스트를 함께 쓴다(색만으로 구분 금지).
+   -------------------------------------------------------------- */
+.author-page {
+	/* 따뜻한 중립 (배경/테두리/글자) */
+	--bg-page   : #FBFAF7;
+	--bg-card   : #FFFFFF;
+	--bg-soft   : #F7F3EB;
+	--border    : #E9E3D8;
+	--border-soft: #F0EADF;
+
+	--text-strong: #221F1A;
+	--text-body  : #575147;
+	--text-muted : #746D62;
+
+	/* 액센트 (아껴 쓴다) */
+	--green-700: #195B34;
+	--green-600: #226A3C;
+	--green-100: #DFECE2;
+	--green-50 : #EEF4EE;
+
+	--amber-600: #A6720C;
+	--amber-100: #F8EEDA;
+	--blue-600 : #2C6ECB;
+	--blue-100 : #E7EFFB;
+	--red-600  : #C2306B;
+	--red-100  : #F9E8EE;
+
+	--on-green: #185C34;
+	--on-amber: #855A08;
+	--on-blue : #23579F;
+	--on-red  : #9E2757;
+
+	--chart-bar : #226A3C;
+	--chart-grid: #EDE7DC;
+
+	/* 타이포 */
+	--fs-page   : 40px;
+	--fs-hero   : 38px;
+	--fs-section: 20px;
+	--fs-title  : 18px;
+	--fs-body   : 14px;
+	--fs-meta   : 13px;
+	--fs-caption: 12px;
+
+	--radius   : 12px;
+	--radius-lg: 12px;
+}
+
+/* ---------- 2. 바탕 / 레이아웃 ---------- */
+.author-page { background: var(--bg-page); }
+/* 1920 모니터에서 1120px 로 가두면 양옆에 280px 씩 빈 공간이 생겨
+   화면이 가운데 떠 있는 팝업처럼 보인다. 넓은 화면까지 채우도록 올린다. */
+.author-page .app-body { display: block; }
+.author-page .content {
+	margin-left: var(--sidebar-w);
+	min-height: calc(100vh - var(--header-h));
+	padding: var(--content-top) var(--gutter-x) 0;
+}
+.author-page .content__inner {
+	width: 100%;
+	max-width: var(--content-max);
+	margin: 0 auto;
+}
+
+/* 사이드바·헤더도 같은 따뜻한 톤을 쓴다 */
+.author-page .app-header,
+.author-page .sidebar { border-color: var(--border); }
+.author-page .nav-link { color: var(--text-body); }
+.author-page .nav-link svg { color: #8C8479; }
+.author-page .nav-link.is-active { background: var(--green-50); color: var(--green-700); }
+.author-page .nav-link.is-active svg { color: var(--green-600); }
+.author-page .guide-card { background: var(--bg-soft); border-color: var(--border); }
+.author-page .icon-btn svg { color: #746D62; }
+
+/* ---------- 3. 카드 ---------- */
+.author-page .card {
+	background: var(--bg-card);
+	border: 1px solid var(--border);
+	border-radius: var(--radius-lg);
+	box-shadow: 0 1px 2px rgba(60, 45, 30, .035);
+}
+.author-page .card + .card { margin-top: 20px; }
+.author-page .card__head {
+	align-items: baseline;
+	padding: 26px 28px 0;
+}
+/* [폰트 규칙] 명조(--font-display)는 브랜드 문구에만 쓴다.
+   = 사이드바 로고 / 헤더 모바일 로고 / 홈 인사말, 이 셋뿐이다.
+   화면 제목·카드 제목·표·숫자 같은 UI 글자는 전부 고딕(--font-body)을 쓴다.
+   관리 화면에서 명조 제목은 획이 얇아 훑어 읽기 어렵다. */
+.author-page .card__title {
+	font-family: var(--font-body);
+	font-size: var(--fs-title);
+	font-weight: 700;
+	letter-spacing: -.01em;
+}
+.author-page .card__body { padding: 18px 28px 26px; }
+
+.author-page .link-more { font-size: var(--fs-meta); }
+
+/* 아이콘 + 제목 + 설명 형태의 카드 헤더 */
+.card-head-icon {
+	display: flex;
+	align-items: flex-start;
+	gap: 12px;
+	padding: 26px 28px 0;
+}
+.card-head-icon .icon-box {
+	width: 36px; height: 36px;
+	border-radius: 10px;
+	background: var(--green-50);
+	color: var(--green-600);
+}
+.card-head-icon .icon-box svg { width: 18px; height: 18px; }
+.card-head-icon__title {
+	font-family: var(--font-body);
+	font-size: var(--fs-title);
+	font-weight: 700;
+	letter-spacing: -.01em;
+}
+.card-head-icon__desc {
+	margin-top: 4px;
+	font-size: var(--fs-meta);
+	color: var(--text-muted);
+}
+
+/* ---------- 4. 뱃지 ---------- */
+.author-page .badge {
+	height: 24px;
+	padding: 0 10px;
+	font-size: var(--fs-meta);
+	font-weight: 600;
+}
+.author-page .badge--green { background: var(--green-100); color: var(--on-green); }
+.author-page .badge--amber { background: var(--amber-100); color: var(--on-amber); }
+.author-page .badge--blue  { background: var(--blue-100);  color: var(--on-blue); }
+.author-page .badge--red   { background: var(--red-100);   color: var(--on-red); }
+.author-page .badge--gray  { background: var(--bg-soft);   color: var(--text-muted); }
+
+/* ---------- 5. 버튼 ---------- */
+/* [모양 규칙] 버튼·뱃지는 알약이 아니라 둥근 사각형이다.
+   버튼 8px / 뱃지 6px / 카드 12px 세 값만 쓴다.
+   (알약 999px 은 헤더의 알림 카운트와 사용자 칩에만 남긴다 - 그건 원형 요소다) */
+.author-page .btn { height: var(--control-md); padding: 0 18px; font-size: 13px; border-radius: 8px; }
+.author-page .btn--sm { height: var(--control-sm); padding: 0 12px; font-size: 12.5px; }
+.author-page .btn--ghost { border-color: var(--border); }
+.author-page .btn--lg { height: var(--control-lg); padding: 0 26px; font-size: 14px; }
+
+.author-page :is(a, button, input, select, textarea):focus-visible {
+	outline: 3px solid rgba(34, 106, 60, .18);
+	outline-offset: 2px;
+}
+
+/* ---------- 6. 페이지 제목 ---------- */
+/* [제목 크기 규칙] 화면 제목은 여기서만 정한다.
+   페이지 CSS 에서 font-size 를 다시 잡지 않는다.
+   40px -> 34px(768) -> 28px(560) 세 단계뿐이다. */
+.page-title {
+	font-family: var(--font-body);
+	font-size: var(--fs-page);
+	font-weight: 700;
+	line-height: 1.25;
+	letter-spacing: -.03em;
+	color: var(--text-strong);
+}
+.page-title + .page-desc {
+	margin-top: 8px;
+	font-size: var(--fs-body);
+	line-height: 1.65;
+	color: var(--text-muted);
+}
+
+.section-title {
+	font-size: var(--fs-section);
+	font-weight: 700;
+	line-height: 1.4;
+	letter-spacing: -.015em;
+	color: var(--text-strong);
+}
+
+/* 준비 중·빈 결과 등 공통 상태 화면 */
+.empty-state {
+	display: grid;
+	place-items: center;
+	min-height: 360px;
+	padding: 48px 24px;
+	text-align: center;
+}
+.empty-state__body { max-width: 560px; }
+.empty-state .page-desc { margin-top: 12px; }
+.empty-state .btn { margin-top: 24px; }
+
+/* ---------- 7. 푸터 ----------
+   본문이 끝나고 바로 잘리면 페이지가 아니라 팝업 창처럼 보인다. */
+.site-footer {
+	margin-top: 56px;
+	padding: 28px 0 40px;
+	border-top: 1px solid var(--border);
+	font-size: var(--fs-meta);
+	color: var(--text-muted);
+}
+.site-footer__links {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 18px;
+	font-weight: 600;
+}
+.site-footer__links a:hover,
+.site-footer__links button:hover { color: var(--green-700); }
+.site-footer__copy { margin-top: 12px; line-height: 1.7; }
+.site-footer__copy b { font-weight: 600; color: var(--text-body); }
+
+/* 페이지별 shell 이 가졌던 하단 패딩은 공통 푸터가 대신한다. */
+.content__inner:has(> .site-footer) { padding-bottom: 0 !important; }
+
+@media (max-width: 1440px) {
+	:root { --gutter-x: 32px; }
+}
+
+@media (max-width: 1024px) {
+	:root { --gutter-x: 24px; --content-top: 32px; }
+	.author-page .content {
+		margin-left: 0;
+		padding: 32px var(--gutter-x) 0;
+	}
+}
+@media (max-width: 768px) {
+	.page-title { font-size: 34px; }
+}
+@media (max-width: 640px) {
+	:root { --header-h: 60px; --gutter-x: 16px; --content-top: 24px; }
+	.author-page .app-body { padding-top: var(--header-h); }
+	.author-page .content { padding: 24px var(--gutter-x) 0; }
+	.author-page .card__head,
+	.card-head-icon { padding: 20px 20px 0; }
+	.author-page .card__body { padding: 14px 20px 20px; }
+}
+@media (max-width: 560px) {
+	.page-title { font-size: 28px; }
+	.empty-state { min-height: 300px; padding: 36px 20px; }
+}
+
+
+/* ============ 폼 공통 (.field / .input / .select / .textarea / .tip) ============
+   등록·프로필·문의 등 입력이 있는 모든 화면에서 쓴다.
+   ============================================================= */
+
+/* ---------- 라벨 + 입력 한 줄 ---------- */
+.field {
+	display: flex;
+	align-items: flex-start;
+	gap: 20px;
+	padding: 16px 0;
+	border-bottom: 1px solid var(--border-soft);
+}
+.field:last-of-type { border-bottom: 0; }
+.field__label {
+	flex: none;
+	width: 84px;
+	padding-top: 13px;
+	font-size: var(--fs-body);
+	font-weight: 700;
+}
+.field__label .req { color: var(--red-600); margin-left: 2px; }
+.field__control { flex: 1; min-width: 0; }
+.field__help {
+	margin-top: 8px;
+	font-size: var(--fs-meta);
+	color: var(--text-muted);
+}
+.field__foot {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 12px;
+}
+.field__count {
+	flex: none;
+	font-size: var(--fs-meta);
+	color: var(--text-muted);
+	font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 입력 ---------- */
+.input,
+.textarea,
+.select select {
+	width: 100%;
+	padding: 0 14px;
+	height: 46px;
+	border: 1px solid var(--border);
+	border-radius: 10px;
+	background: #fff;
+	font-family: inherit;
+	font-size: var(--fs-body);
+	color: var(--text-strong);
+	transition: border-color .15s, box-shadow .15s;
+}
+.input::placeholder,
+.textarea::placeholder { color: #A79E90; }
+.input:focus,
+.textarea:focus,
+.select select:focus {
+	outline: 0;
+	border-color: var(--green-600);
+	box-shadow: 0 0 0 3px var(--green-100);
+}
+.input:disabled,
+.textarea:disabled,
+.select select:disabled {
+	background: var(--bg-soft);
+	color: var(--text-muted);
+	cursor: not-allowed;
+}
+.textarea {
+	height: auto;
+	min-height: 140px;
+	padding: 12px 14px;
+	line-height: 1.75;
+	resize: vertical;
+}
+
+/* ---------- 셀렉트 ---------- */
+.select { position: relative; }
+.select select {
+	appearance: none;
+	-webkit-appearance: none;
+	padding-right: 40px;
+	cursor: pointer;
+}
+.select__arrow {
+	position: absolute;
+	top: 50%; right: 14px;
+	width: 16px; height: 16px;
+	transform: translateY(-50%);
+	color: var(--text-muted);
+	pointer-events: none;
+}
+
+/* ---------- 안내 박스 ---------- */
+.tip {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	margin-top: 20px;
+	padding: 14px 16px;
+	border-radius: var(--radius);
+	background: var(--green-50);
+	font-size: 12.5px;
+	line-height: 1.6;
+	color: var(--text-body);
+}
+.tip svg { width: 15px; height: 15px; flex: none; margin-top: 1px; color: var(--green-600); }
+.tip b { font-weight: 700; color: var(--green-700); margin-right: 4px; }
+
+/* ---------- 반응형 ---------- */
+@media (max-width: 780px) {
+	.field { flex-direction: column; gap: 8px; }
+	.field__label { width: auto; padding-top: 0; }
+}
+
+/* =============================================================
+   작가센터 흰색 작업영역
+   홈 대시보드는 기존의 따뜻한 아이보리 테마를 유지하고,
+   나머지 업무 화면은 문의하기와 같은 흰 바탕·중성 회색 표면을 쓴다.
+   ============================================================= */
+.author-page:not(.dashboard-page) {
+	--bg-page: #FFFFFF;
+	--bg-card: #FFFFFF;
+	--bg-soft: #F7F9F8;
+	--border: #E2E6E2;
+	--border-soft: #EDF0ED;
+	--text-strong: #272C28;
+	--text-body: #565E57;
+	--text-muted: #7D857E;
+	--chart-grid: #E7EBE7;
+	background: #FFFFFF;
+}
+
+.author-page:not(.dashboard-page) .app,
+.author-page:not(.dashboard-page) .app-body,
+.author-page:not(.dashboard-page) .content {
+	background: #FFFFFF !important;
+}

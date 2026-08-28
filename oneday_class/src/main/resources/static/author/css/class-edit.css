@@ -1,0 +1,40 @@
+.class-edit-notice {
+	margin: 18px 0 14px;
+	padding: 14px 18px;
+	border: 1px solid #cfe5d6;
+	border-radius: 12px;
+	background: #f3faf5;
+	color: #285e3b;
+	font-size: 14px;
+	line-height: 1.6;
+}
+
+.class-edit-pricing {
+	max-width: 860px;
+	margin: 0 auto;
+}
+
+.class-edit-pricing .card__body { display: grid; gap: 24px; }
+
+.class-edit-price-fields {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 20px;
+}
+
+.class-edit-checkbox {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-weight: 700;
+}
+
+.class-edit-checkbox input {
+	width: 18px;
+	height: 18px;
+	accent-color: #1f6f43;
+}
+
+@media (max-width: 760px) {
+	.class-edit-price-fields { grid-template-columns: 1fr; }
+}

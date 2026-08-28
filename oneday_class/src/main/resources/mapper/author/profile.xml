@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+	작가 프로필 Mapper.
+
+	작가 정보는 두 테이블에 나뉘어 있다.
+	- CREATOR : 활동명 / 소개 / 활동지역 / SNS / 프로필이미지  → 작가가 수정한다
+	- MEMBER  : 실명 / 이메일                                  → 조회만 한다
+
+	MEMBER 는 member 팀 테이블이고 프로필 폼도 실명·이메일을 th:field 로 묶지 않는다.
+	그래서 UPDATE 는 CREATOR 만 건드린다.
+-->
+<mapper namespace="kr.co.oneclass.author.profile.AuthorDAO">
+
+	<select id="selectAuthorProfile" parameterType="long"
+		resultType="kr.co.oneclass.author.profile.AuthorProfileDTO">
+		SELECT
+			cr.OPERATOR_CODE AS AUTHOR_CODE,
+			m.NAME AS AUTHOR_NAME,
+			m.EMAIL AS EMAIL,
+			cr.ACTIVITY_NAME AS AUTHOR_NICKNAME,
+			cr.CREATOR_INTRODUCTION AS INTRODUCTION,
+			cr.ACTIVITY_REGION AS ACTIVITY_FIELD,
+			cr.SNS_URL AS KAKAO_URL,
+			cr.PROFILE_IMAGE AS PROFILE_IMAGE_PATH
+		FROM CREATOR cr
+		JOIN MEMBER m ON cr.MEMBER_CODE = m.MEMBER_CODE
+		WHERE cr.OPERATOR_CODE = #{authorCode}
+	</select>
+
+	<!--
+		작가 프로필 수정.
+		프로필 이미지는 새로 업로드한 경우에만 SET 한다 - 안 그러면 기존 이미지가 지워진다.
+		실명·이메일은 SET 절에 넣지 말 것 (위 주석 참고).
+	-->
+	<update id="updateAuthorProfile"
+		parameterType="kr.co.oneclass.author.profile.AuthorProfileDTO">
+		UPDATE CREATOR
+		<set>
+			ACTIVITY_NAME = #{authorNickname},
+			CREATOR_INTRODUCTION = #{introduction},
+			ACTIVITY_REGION = #{activityField},
+			SNS_URL = #{kakaoUrl},
+			<if test="profileImagePath != null and profileImagePath != ''">
+				PROFILE_IMAGE = #{profileImagePath},
+			</if>
+		</set>
+		WHERE OPERATOR_CODE = #{authorCode}
+	</update>
+
+	<insert id="insertAuthorProfile"
+		parameterType="kr.co.oneclass.author.profile.AuthorProfileDTO">
+		INSERT INTO CREATOR (
+			OPERATOR_CODE,
+			MEMBER_CODE,
+			ACTIVITY_NAME,
+			CREATOR_INTRODUCTION,
+			ACTIVITY_REGION,
+			SNS_URL,
+			PROFILE_IMAGE,
+			APPROVAL_STATUS,
+			JOIN_DATE
+		) VALUES (
+			SEQ_CREATOR.NEXTVAL,
+			#{memberCode},
+			#{authorNickname},
+			#{introduction},
+			#{activityField},
+			#{kakaoUrl},
+			#{profileImagePath},
+			'승인',
+			SYSDATE
+		)
+	</insert>
+
+</mapper>

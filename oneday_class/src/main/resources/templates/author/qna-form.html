@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>1:1 문의 작성 | Oneclass</title>
+<link rel="stylesheet" th:href="@{/author/css/common.css}"><link rel="stylesheet" th:href="@{/author/css/header.css}"><link rel="stylesheet" th:href="@{/author/css/sidebar.css}"><link rel="stylesheet" th:href="@{/author/css/qna.css(v='20260805-3')}"><script th:src="@{/author/js/layout.js}" defer></script>
+</head>
+<body class="author-page qna-page qna-form-page" data-menu="qna" data-page="1:1 문의 작성">
+<div class="app"><div th:replace="~{author/fragments/icons :: icons}"></div><div th:replace="~{author/fragments/header :: header}"></div><div class="app-body"><div th:replace="~{author/fragments/sidebar :: sidebar}"></div>
+	<main class="content"><div class="content__inner">
+		<header class="qna-page-head"><div><h1 class="page-title">1:1 문의 작성</h1><p class="page-desc">사업 운영과 관련해 확인이 필요한 내용을 남겨주세요.</p></div><a class="btn btn--ghost qna-page-head__action" th:href="@{/author/qna}">문의 목록</a></header>
+		<form class="qna-write-card" method="post" enctype="multipart/form-data" th:action="@{/author/qna}" th:object="${inquiryForm}">
+			<div class="qna-write-card__head"><div><strong>문의 정보 입력</strong><p>정확한 답변을 위해 문의 유형과 제목을 확인해 주세요.</p></div><span><i>*</i> 필수 입력</span></div>
+			<div class="qna-write-card__body">
+				<p class="reply-error" th:if="${errorMessage}" th:text="${errorMessage}">입력값을 확인해 주세요.</p>
+				<div class="qna-write-grid">
+					<div class="qna-field"><label for="inquiryType">문의 유형 <span>*</span></label><div class="select"><select id="inquiryType" th:field="*{inquiryTypeCode}" required><option value="0">문의 유형을 선택해 주세요</option><option th:each="type : ${types}" th:value="${type.inquiryTypeCode}" th:text="${type.inquiryTypeName}">유형</option></select><svg class="select__arrow"><use href="#icon-chevron-down"></use></svg></div></div>
+					<div class="qna-privacy"><strong>개인정보 확인</strong><p>주민등록번호, 계좌 비밀번호 등 답변에 필요하지 않은 민감정보는 입력하지 마세요.</p></div>
+				</div>
+				<div class="qna-field"><div class="qna-field__head"><label for="inquiryTitle">제목 <span>*</span></label><small><b id="titleCount">0</b> / 100</small></div><input class="input" id="inquiryTitle" type="text" maxlength="100" required th:field="*{title}" placeholder="문의 제목을 입력해 주세요."></div>
+				<div class="qna-field"><div class="qna-field__head"><label for="inquiryContent">문의 내용 <span>*</span></label><small><b id="contentCount">0</b> / 500</small></div><textarea class="textarea qna-content-input" id="inquiryContent" maxlength="500" required th:field="*{content}" placeholder="문의 내용을 구체적으로 작성해 주세요."></textarea></div>
+				<div class="qna-write-support"><div class="qna-field qna-upload-field"><label>첨부 이미지</label><label class="qna-upload" for="inquiryFile"><svg><use href="#icon-plus"></use></svg><span><strong>이미지 첨부</strong><small>JPG · PNG, 최대 5MB</small></span></label><input class="sr-only" id="inquiryFile" name="inquiryFile" type="file" accept="image/jpeg,image/png"><ul class="qna-upload-list" id="uploadList"></ul></div></div>
+			</div>
+			<div class="qna-write-actions"><p role="status">접수한 문의와 관리자 답변은 문의 상세에서 확인할 수 있습니다.</p><button class="btn btn--primary" type="submit">문의 접수</button></div>
+		</form>
+		<div th:replace="~{author/fragments/footer :: footer}"></div>
+	</div></main>
+</div></div>
+<script>
+(function () {
+	function counter(id, output) { var input = document.getElementById(id); var count = document.getElementById(output); function update() { count.textContent = input.value.length; } input.addEventListener('input', update); update(); }
+	counter('inquiryTitle', 'titleCount'); counter('inquiryContent', 'contentCount');
+	var file = document.getElementById('inquiryFile'); var list = document.getElementById('uploadList'); file.addEventListener('change', function () { list.replaceChildren(); if (!file.files.length) return; var item = document.createElement('li'); item.textContent = file.files[0].name; list.appendChild(item); });
+}());
+</script>
+</body>
+</html>

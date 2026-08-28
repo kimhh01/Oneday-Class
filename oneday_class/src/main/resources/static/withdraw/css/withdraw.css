@@ -1,0 +1,347 @@
+@charset "UTF-8";
+
+/* 기본 초기화 */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #f2f5f2;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #222222;
+}
+
+/* 감싸는 컨테이너 */
+.withdraw-wrapper {
+    width: 100%;
+    padding: 40px 20px 60px;
+    display: flex;
+    justify-content: center;
+}
+
+.withdraw-container {
+    width: 100%;
+    max-width: 1100px;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+/* 우측 메인 카드 */
+.withdraw-main {
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 36px 36px 40px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+    min-height: 580px;
+}
+
+.withdraw-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #111111;
+    margin-bottom: 24px;
+}
+
+/* 안내사항 전체 박스 */
+.notice-box {
+    border: 1px solid #e5e8e5;
+    border-radius: 12px;
+    padding: 24px 28px;
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.notice-subtitle {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #111111;
+    margin-bottom: 8px;
+}
+
+.notice-list {
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.notice-list li {
+    position: relative;
+    padding-left: 14px;
+    font-size: 13px;
+    line-height: 1.55;
+    color: #444444;
+}
+
+.notice-list li::before {
+    content: "•";
+    position: absolute;
+    left: 2px;
+    top: 0;
+    color: #333333;
+}
+
+/* 관계 법령 회색 박스 */
+.legal-box {
+    background-color: #f7f9f7;
+    border-radius: 10px;
+    padding: 20px 22px;
+    margin-top: 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.legal-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #222222;
+}
+
+.legal-subtitle {
+    font-size: 13px;
+    font-weight: 700;
+    color: #333333;
+    margin-bottom: 6px;
+}
+
+.legal-list {
+    list-style: none;
+    padding-left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.legal-list li {
+    position: relative;
+    padding-left: 14px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: #555555;
+}
+
+.legal-list li::before {
+    content: "•";
+    position: absolute;
+    left: 2px;
+    top: 0;
+    color: #666666;
+}
+
+/* 동의 영역 */
+.agree-section {
+    margin-top: 24px;
+    display: flex;
+    align-items: center;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #111111;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.agree-text {
+    font-size: 14px;
+    font-weight: 700;
+    color: #111111;
+}
+
+/* 페이지 버튼 Group */
+.btn-group {
+    margin-top: 32px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.btn-cancel {
+    height: 42px;
+    padding: 0 24px;
+    border-radius: 8px;
+    border: 1px solid #d0d0d0;
+    background-color: #ffffff;
+    color: #333333;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-cancel:hover {
+    background-color: #f5f5f5;
+}
+
+.btn-withdraw {
+    height: 42px;
+    padding: 0 24px;
+    border-radius: 8px;
+    border: none;
+    background-color: #e51b53;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.btn-withdraw:disabled {
+    background-color: #e0e0e0;
+    color: #a0a0a0;
+    cursor: not-allowed;
+}
+
+/* ========================================== */
+/* 비밀번호 확인 모달 스타일 (이미지 100% 동일) */
+/* ========================================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    background-color: #ffffff;
+    border-radius: 16px;
+    padding: 32px 28px 28px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* X 닫기 버튼 */
+.modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #333333;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.modal-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #111111;
+    margin-bottom: 8px;
+}
+
+.modal-subtitle {
+    font-size: 13.5px;
+    color: #666666;
+    margin-bottom: 24px;
+}
+
+/* 비밀번호 입력 */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.input-label {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #111111;
+}
+
+.modal-input {
+    width: 100%;
+    height: 48px;
+    padding: 0 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+
+.modal-input:focus {
+    border-color: #111111;
+}
+
+/* 에러/안내 메시지 */
+.modal-error-msg {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: #e51b53;
+    margin-bottom: 24px;
+}
+
+.modal-error-msg .icon {
+    font-size: 14px;
+}
+
+/* 모달 버튼 그룹 */
+.modal-btn-group {
+    display: flex;
+    gap: 10px;
+}
+
+.modal-btn-cancel {
+    flex: 1;
+    height: 44px;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    background-color: #ffffff;
+    color: #333333;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.modal-btn-cancel:hover {
+    background-color: #f7f7f7;
+}
+
+.modal-btn-submit {
+    flex: 1;
+    height: 44px;
+    border-radius: 10px;
+    border: none;
+    background-color: #e51b53;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.modal-btn-submit:hover {
+    background-color: #cc1042;
+}

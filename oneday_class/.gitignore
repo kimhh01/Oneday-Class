@@ -31,3 +31,23 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Secret configuration files
+application-secret.properties
+src/main/resources/application-secret.properties
+
+# Local database credentials
+.env
+application-local.properties
+
+# Project documentation and handoff material
+/docs/
+*.md
+
+# Files created while running or testing locally
+/uploads/
+*.log
+*.tmp
+*.bak
+*.orig
+/.apt_generated_tests/

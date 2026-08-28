@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아이디 찾기 결과 | Oneclass</title>
+    <!-- 결과 페이지 전용 CSS 또는 findId.css 연결 -->
+    <link rel="stylesheet" th:href="@{/member/css/findIdResult.css}">
+</head>
+<body>
+
+<div class="login-wrapper">
+
+    <!-- 공통 미니 로고 Fragment -->
+    <div th:replace="~{member/fragments/common :: miniLogo}"></div>
+
+    <div class="login-card">
+
+        <!-- 상단 아이콘 -->
+        <div class="result-icon-wrap">
+            <div class="result-icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="3" y="5" width="18" height="14" rx="3" stroke="#526848" stroke-width="1.8"/>
+                    <path d="M3 7L12 13L21 7" stroke="#526848" stroke-width="1.8" stroke-linecap="round"/>
+                    <circle cx="18" cy="16" r="3.5" fill="#6c8260"/>
+                    <path d="M16.2 16L17.5 17.3L19.8 15" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 헤더 영역 -->
+        <div class="login-card__head">
+            <h2 class="login-card__title">아이디 찾기 결과</h2>
+            <p class="login-card__subtitle">
+                입력하신 정보와 일치하는 아이디입니다.<br>
+                아래 아이디로 로그인해 주세요.
+            </p>
+        </div>
+
+        <!-- 아이디 조회 결과 상자 -->
+        <div class="result-id-box">
+            <div class="result-id-box__icon">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="8" r="4" stroke="#8c9083" stroke-width="1.6"/>
+                    <path d="M5 20c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="#8c9083" stroke-width="1.6" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div class="result-id-box__content">
+                <span class="result-id-box__label">회원 아이디</span>
+                <!-- 컨트롤러에서 넘겨받은 foundId 동적 출력 -->
+                <strong class="result-id-box__value" th:text="${foundId}">somdang1234</strong>
+            </div>
+        </div>
+
+        <!-- 안내사항 영역 -->
+        <div class="result-notice">
+            <div class="result-notice__title">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="9" stroke="#716f64" stroke-width="1.5"/>
+                    <path d="M12 8v4M12 16h.01" stroke="#716f64" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+                <span>안내사항</span>
+            </div>
+            <ul class="result-notice__list">
+                <li>아이디는 로그인 시 사용됩니다.</li>
+                <li>비밀번호가 기억나지 않으시나요? 비밀번호 찾기를 이용해 주세요.</li>
+            </ul>
+        </div>
+
+        <!-- 이동 버튼 그룹 -->
+        <div class="result-buttons">
+            <a th:href="@{/member/login/general}" class="btn btn--primary">로그인하기</a>
+            <a th:href="@{/member/findPassword}" class="btn btn--outline">비밀번호 찾기</a>
+        </div>
+
+    </div>
+
+    <!-- 하단 회원가입 이동 링크 -->
+    <p class="login-signup">
+        아직 계정이 없으신가요?
+        <a th:href="@{/member/signUp}">회원가입</a>
+    </p>
+
+</div>
+
+</body>
+</html>
