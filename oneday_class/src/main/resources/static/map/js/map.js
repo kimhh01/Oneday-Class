@@ -191,36 +191,45 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
 
-        // 좌측 사이드바 카드 HTML 생성
-        if (cardContainer) {
-            let cardHtml = '';
-            classList.forEach(item => {
-                const imgPath = (item.imageList && item.imageList.length > 0) ? item.imageList[0].image : '/images/default.jpg';
-                const formattedPrice = item.price ? Number(item.price).toLocaleString() + '원' : '0원';
-                const targetId = item.classCode || item.classcode || item.classNo || item.id;
+		// 좌측 사이드바 카드 HTML 생성
+		        if (cardContainer) {
+		            let cardHtml = '';
+		            classList.forEach(item => {
+		                // 1. mainImage를 우선 참조하고, 없으면 imageList의 첫번째 이미지 참조
+		                let imgPath = item.mainImage || (item.imageList && item.imageList.length > 0 ? item.imageList[0].image : '');
 
-                cardHtml += `
-                    <div class="class-card" data-id="${targetId}" data-lat="${item.lat}" data-lng="${item.lng}" data-title="${item.name}">
-                        <div class="img-wrapper">
-                            <img src="${imgPath}" class="class-img" alt="클래스 이미지">
-                            <button class="wish-btn" aria-label="관심목록 추가">♡</button>
-                        </div>
-                        <div class="card-info">
-                            <div>
-                                <h3 class="class-title">${item.name}</h3>
-                                <span class="category-badge">${item.categoryName || '클래스'}</span>
-                                <p class="class-address">${item.address || ''}</p>
-                            </div>
-                            <div class="price-row">
-                                <span class="class-price">${formattedPrice}</span>
-                                <span class="class-distance">📍 지도 내 위치</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            cardContainer.innerHTML = cardHtml;
-        }
+		                // 2. 경로 예외 처리 보완
+		                if (!imgPath || imgPath === 'undefined' || imgPath === 'null') {
+		                    imgPath = '/images/default.jpg';
+		                } else if (!imgPath.startsWith('/') && !imgPath.startsWith('http')) {
+		                    imgPath = '/' + imgPath;
+		                }
+
+		                const formattedPrice = item.price ? Number(item.price).toLocaleString() + '원' : '0원';
+		                const targetId = item.classCode || item.classcode || item.classNo || item.id;
+
+		                cardHtml += `
+		                    <div class="class-card" data-id="${targetId}" data-lat="${item.lat}" data-lng="${item.lng}" data-title="${item.name}">
+		                        <div class="img-wrapper">
+		                            <img src="${imgPath}" class="class-img" alt="클래스 이미지" onerror="this.onerror=null; this.src='/images/default.jpg';">
+		                            <button class="wish-btn" aria-label="관심목록 추가">♡</button>
+		                        </div>
+		                        <div class="card-info">
+		                            <div>
+		                                <h3 class="class-title">${item.name}</h3>
+		                                <span class="category-badge">${item.categoryName || '클래스'}</span>
+		                                <p class="class-address">${item.address || ''}</p>
+		                            </div>
+		                            <div class="price-row">
+		                                <span class="class-price">${formattedPrice}</span>
+		                                <span class="class-distance">📍 지도 내 위치</span>
+		                            </div>
+		                        </div>
+		                    </div>
+		                `;
+		            });
+		            cardContainer.innerHTML = cardHtml;
+		        }
 
         // 마커 생성
         classList.forEach(item => {
