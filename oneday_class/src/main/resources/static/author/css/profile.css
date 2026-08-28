@@ -2,7 +2,7 @@
 
 .author-onboarding-page{min-height:100%;background:#F6F4EF!important}
 .author-onboarding{width:min(920px,calc(100% - 32px));margin:0 auto;padding:38px 0 70px}
-.author-onboarding__brand{display:inline-flex;margin-bottom:18px;font-family:var(--font-display);font-size:18px;font-weight:700;color:#286F42}
+.author-onboarding__brand{display:inline-flex;margin-bottom:18px;font-family:Georgia,serif;font-size:27px;font-weight:400;color:#000}
 .author-onboarding__card{overflow:hidden;border:1px solid #E2DDD5;border-radius:16px;background:#fff;box-shadow:0 14px 45px rgba(56,45,33,.08)}
 .author-onboarding__head{padding:30px 34px 25px;border-bottom:1px solid #ECE7E0}
 .author-onboarding__head>span{font-size:12px;font-weight:800;color:#287447}

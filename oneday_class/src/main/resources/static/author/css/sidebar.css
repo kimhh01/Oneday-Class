@@ -55,15 +55,9 @@ body.sidebar-collapsed .content { margin-left: 0; }
 	height: var(--header-h);
 	display: flex;
 	align-items: center;
-	gap: 10px;
 	padding: 0 26px;
 	margin: 0 -18px 18px;
 	border-bottom: 0;
-}
-.sidebar-brand > svg {
-	width: 27px;
-	height: 27px;
-	color: var(--green-700);
 }
 .sidebar-brand__copy {
 	display: flex;
@@ -71,11 +65,12 @@ body.sidebar-collapsed .content { margin-left: 0; }
 	line-height: 1.2;
 }
 .sidebar-brand__copy strong {
-	font-family: var(--font-display);
-	font-size: 17px;
-	letter-spacing: -.02em;
+	font-family: Georgia, serif;
+	font-size: 27px;
+	font-weight: 400;
+	letter-spacing: 0;
+	color: #000;
 }
-.sidebar-brand__copy strong span { font-size: 13px; }
 .sidebar-brand__copy small {
 	margin-top: 4px;
 	font-size: 12px;

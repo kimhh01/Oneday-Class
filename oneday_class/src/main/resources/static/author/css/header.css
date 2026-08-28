@@ -27,12 +27,11 @@
 .mobile-brand {
 	display: none;
 	align-items: center;
-	gap: 7px;
-	font-family: var(--font-display);
-	font-size: 17px;
-	font-weight: 700;
+	font-family: Georgia, serif;
+	font-size: 27px;
+	font-weight: 400;
+	color: #000;
 }
-.mobile-brand svg { width: 21px; height: 21px; color: var(--green-700); }
 
 /* 브레드크럼 (페이지별 위치 표시) */
 .breadcrumb {
