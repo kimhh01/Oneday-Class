@@ -208,9 +208,8 @@
 
 						<div class="img-wrapper">
 							<img
-								th:src="${item.mainImage != null and !item.mainImage.isEmpty() ? item.mainImage : '/images/default.jpg'}"
+								th:src="${item.mainImage != null and !item.mainImage.isEmpty() ? (item.mainImage.startsWith('/') or item.mainImage.startsWith('http') ? item.mainImage : '/' + item.mainImage) : '/images/default.jpg'}"
 								class="class-img" alt="클래스 이미지">
-							<button class="wish-btn" aria-label="관심목록 추가">♡</button>
 						</div>
 
 						<div class="card-info">
