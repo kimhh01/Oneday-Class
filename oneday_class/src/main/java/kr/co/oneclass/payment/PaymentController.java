@@ -48,7 +48,7 @@ public class PaymentController {
             @RequestParam("scheduleCode") int scheduleCode,
             @RequestParam(defaultValue = "1") int peopleCount,
             @RequestParam(defaultValue = "CARD") String paymentMethod,
-            @RequestParam(value = "memberCode", required = false, defaultValue = "0") int memberCodeParam, // 💡 추가
+            @RequestParam(value = "memberCode", required = false, defaultValue = "0") int memberCodeParam,
             HttpSession session, 
             Model model) {
 
@@ -74,10 +74,8 @@ public class PaymentController {
         if (loginMember != null) {
             memberCode = loginMember.getMemberCode();
         } else if (memberCodeParam > 0) {
-            // PG사 리다이렉트로 세션이 잠시 유실되었을 경우 URL 파라미터값 활용
             memberCode = memberCodeParam;
         } else {
-            // 회원 정보를 전혀 찾을 수 없는 경우에만 이동
             return "redirect:/member/login";
         }
 
@@ -92,9 +90,21 @@ public class PaymentController {
             e.printStackTrace(); 
         }
 
+        // 💡 [핵심 추가] classDTO의 mainImage 경로를 추출하여 model에 추가
+        String classImage = classDTO.getMainImage();
+        
+        // 만약 mainImage가 필드로 바로 들어오지 않고 imageList에서 첫 번째 이미지를 가져와야 한다면:
+        if ((classImage == null || classImage.isEmpty()) 
+                && classDTO.getImageList() != null 
+                && !classDTO.getImageList().isEmpty()) {
+            classImage = classDTO.getImageList().get(0).getImage();
+        }
+
         model.addAttribute("classInfo", classDTO);
         model.addAttribute("schedule", schedule);
         model.addAttribute("category", category);
+
+        model.addAttribute("classImage", classImage); // 👈 뷰(paymentComplete.html)로 이미지 경로 전달!
 
         model.addAttribute("orderId", orderId);
         model.addAttribute("amount", amount);
