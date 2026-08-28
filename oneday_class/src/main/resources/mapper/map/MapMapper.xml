@@ -36,10 +36,11 @@
             
             /* 대표 이미지 (SORT_ORDER = 1) */
             (SELECT ci.image 
-             FROM CLASS_IMG ci 
-             WHERE ci.class_code = c.class_code 
-               AND ci.sort_order = 1 
-               AND ROWNUM = 1) AS mainImage,
+ FROM CLASS_IMG ci 
+ WHERE ci.class_code = c.class_code 
+   AND ci.type = '대표'
+   AND ci.sort_order = 1 
+   AND ROWNUM = 1) AS mainImage
             
             /* 스케줄 날짜 목록 (YYYY-MM-DD 형태로 변환하여 쉼표로 연결) */
             (SELECT LISTAGG(TO_CHAR(s.class_date, 'YYYY-MM-DD'), ',') WITHIN GROUP (ORDER BY s.class_date)
