@@ -28,6 +28,9 @@
 		       (SELECT ci.IMAGE FROM CLASS_IMG ci WHERE ci.CLASS_CODE = c.CLASS_CODE AND ROWNUM = 1) as mainImage 
 		FROM CLASS c 
 		<where>
+			<!-- 💡 모집중인 클래스만 조회 -->
+			AND c.STATUS = '모집중'
+
 			<!-- 대분류 카테고리 -->
 			<if test="categoryCode != null and categoryCode > 0">
 				AND (c.CATEGORY_CODE = #{categoryCode}
@@ -56,7 +59,6 @@
 					FROM CLASS_REPEAT_RULE crr
 					JOIN SCHEDULE s ON s.REPEAT_RULE_CODE = crr.REPEAT_RULE_CODE
 					WHERE crr.CLASS_CODE = c.CLASS_CODE
-					<!-- 💡 좌변의 DATE 컬럼도 TO_CHAR로 감싸서 문자열 대 문자열 비교로 변경 -->
 					AND TO_CHAR(s.CLASS_DATE, 'YYYY-MM-DD') = TO_CHAR(CAST(SYS_EXTRACT_UTC(SYSTIMESTAMP) + (9/24) AS DATE), 'YYYY-MM-DD')
 					AND s.START_TIME > TO_CHAR(CAST(SYS_EXTRACT_UTC(SYSTIMESTAMP) + (11/24) AS DATE), 'HH24:MI')
 					AND s.REMAINING_PEOPLE > 0
@@ -70,12 +72,10 @@
 					FROM class_repeat_rule crr
 					JOIN SCHEDULE s ON s.repeat_rule_code = crr.repeat_rule_code
 					WHERE crr.class_code = c.class_code
-					<!-- 💡 좌변의 DATE 컬럼을 TO_CHAR로 변환하여 문자열 비교 -->
 					AND TO_CHAR(s.class_date, 'YYYY-MM-DD') IN (
 						TO_CHAR(TRUNC(SYSDATE, 'IW') + 5, 'YYYY-MM-DD'), /* 이번 주 토요일 */
 						TO_CHAR(TRUNC(SYSDATE, 'IW') + 6, 'YYYY-MM-DD')  /* 이번 주 일요일 */
 					)
-					<!-- 💡 DATE 타입 대 DATE 타입 직접 비교로 수정 -->
 					AND s.class_date &gt;= TRUNC(SYSDATE)
 					AND s.remaining_people > 0
 				)

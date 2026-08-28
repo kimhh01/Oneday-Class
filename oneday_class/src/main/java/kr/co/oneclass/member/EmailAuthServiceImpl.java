@@ -75,8 +75,8 @@ public class EmailAuthServiceImpl implements EmailAuthService {
             SimpleMailMessage message = new SimpleMailMessage();
             // 💡 4. 실제 SMTP 메일 발송 시에는 평문 이메일 사용
             message.setTo(email);
-            message.setSubject("[숨쉬당] 임시 비밀번호가 발급되었습니다.");
-            message.setText("안녕하세요. 숨쉬당입니다.\n\n" +
+            message.setSubject("[Oneclass] 임시 비밀번호가 발급되었습니다.");
+            message.setText("안녕하세요. Oneclass입니다.\n\n" +
                     "회원님의 임시 비밀번호는 [" + tempPassword + "] 입니다.\n" +
                     "로그인 후 마이페이지에서 반드시 비밀번호를 변경해 주세요.");
             mailSender.send(message);

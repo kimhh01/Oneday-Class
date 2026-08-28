@@ -90,7 +90,7 @@
 </button>
 
 						<a th:href="@{/classDetail(classCode=${cls.classCode})}">
-							<img th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}" 
+							<img th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : cls.mainImage}" 
 								 th:alt="${cls.name}" 
 								 style="display: block; width: 100%;">
 						</a>

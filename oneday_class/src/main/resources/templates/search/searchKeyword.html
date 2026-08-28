@@ -86,9 +86,9 @@
 </button>
 
                     <a th:href="@{/classDetail(classCode=${cls.classCode})}" style="display: flex; gap: 20px; width: 100%; text-decoration: none; color: inherit;">
-                        <img th:src="${cls.mainImage != null and cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage}" 
-                             th:alt="${cls.name}" class="class-img"
-                             onerror="this.src='/images/class/dessert1.jpg';">
+                        <img th:src="${cls.mainImage == null or #strings.isEmpty(cls.mainImage) ? '/images/class/dessert1.jpg' : (cls.mainImage.startsWith('/') or cls.mainImage.startsWith('http') ? cls.mainImage : '/images/class/' + cls.mainImage)}" 
+						     th:alt="${cls.name}" class="class-img"
+						     onerror="this.src='/images/class/dessert1.jpg';">
                         
                         <div class="class-info">
                             <div class="class-location" th:text="${cls.address != null ? cls.address : '위치 정보 없음'}">강남구 신사동</div>

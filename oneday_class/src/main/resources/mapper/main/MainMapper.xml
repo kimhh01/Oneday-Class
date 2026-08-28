@@ -23,9 +23,10 @@
                    AND ROWNUM = 1) as mainImage
             FROM CLASS c
             <where>
+                AND c.status = '모집중'
                 <if test="categoryCode != 0">
-                    (c.category_code = #{categoryCode} 
-                     OR c.category_code IN (SELECT category_code FROM CATEGORY WHERE parents_category = #{categoryCode}))
+                    AND (c.category_code = #{categoryCode} 
+                         OR c.category_code IN (SELECT category_code FROM CATEGORY WHERE parents_category = #{categoryCode}))
                 </if>
             </where>
             ORDER BY c.star_rating_avg DESC NULLS LAST, c.class_code DESC
@@ -50,9 +51,10 @@
                AND ROWNUM = 1) as mainImage
         FROM CLASS c
         <where>
+            AND c.status = '모집중'
             <if test="categoryCode != 0">
-                (c.category_code = #{categoryCode} 
-                 OR c.category_code IN (SELECT category_code FROM CATEGORY WHERE parents_category = #{categoryCode}))
+                AND (c.category_code = #{categoryCode} 
+                     OR c.category_code IN (SELECT category_code FROM CATEGORY WHERE parents_category = #{categoryCode}))
             </if>
         </where>
         ORDER BY c.star_rating_avg DESC NULLS LAST, c.class_code DESC
@@ -77,7 +79,8 @@
         FROM CLASS c
         JOIN CLASS_REPEAT_RULE r ON c.class_code = r.class_code
         JOIN SCHEDULE s ON r.repeat_rule_code = s.repeat_rule_code
-        WHERE TRUNC(s.class_date) = TRUNC(SYSDATE)
+        WHERE c.status = '모집중'
+          AND TO_CHAR(s.class_date, 'YYYY-MM-DD') = TO_CHAR(SYSDATE, 'YYYY-MM-DD')
           AND s.sold_out_yn = 'N'
           AND s.remaining_people > 0
     </select>
@@ -101,7 +104,8 @@
         FROM CLASS c
         JOIN CLASS_REPEAT_RULE r ON c.class_code = r.class_code
         JOIN SCHEDULE s ON r.repeat_rule_code = s.repeat_rule_code
-        WHERE TO_CHAR(s.class_date, 'DY', 'NLS_DATE_LANGUAGE=AMERICAN') IN ('SAT', 'SUN')
+        WHERE c.status = '모집중'
+          AND TO_CHAR(s.class_date, 'DY', 'NLS_DATE_LANGUAGE=AMERICAN') IN ('SAT', 'SUN')
           AND s.class_date >= TRUNC(SYSDATE)
           AND s.sold_out_yn = 'N'
           AND s.remaining_people > 0
@@ -127,6 +131,7 @@
         JOIN CLASS_REPEAT_RULE r ON c.class_code = r.class_code
         JOIN SCHEDULE s ON r.repeat_rule_code = s.repeat_rule_code
         <where>
+            AND c.status = '모집중'
             <if test="categoryCode != 0">
                 AND (c.category_code = #{categoryCode} 
                      OR c.category_code IN (SELECT category_code FROM CATEGORY WHERE parents_category = #{categoryCode}))
@@ -165,12 +170,12 @@
         ORDER BY category_code ASC
     </select>
 
-<!-- 지역별 등록된 클래스 개수 집계 -->
-<select id="selectRegionClassCount" parameterType="string" resultType="int">
-    SELECT COUNT(*) 
-    FROM CLASS 
-    WHERE ADDRESS LIKE '%' || #{keyword} || '%'
-</select>
-
+    <!-- 지역별 등록된 클래스 개수 집계 -->
+    <select id="selectRegionClassCount" parameterType="string" resultType="int">
+        SELECT COUNT(*) 
+        FROM CLASS 
+        WHERE ADDRESS LIKE '%' || #{keyword} || '%'
+          AND STATUS = '모집중'
+    </select>
 
 </mapper>
