@@ -347,44 +347,65 @@ ul, li { list-style: none; }
 .location-circles::-webkit-scrollbar {
     display: none; /* Chrome, Safari, Opera */
 }
-/* 동그라미 내부 레이아웃 및 2줄 정렬 */
-.loc-circle { 
-    width: 100px; 
-    height: 100px; 
-    border-radius: 50%; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    cursor: pointer; 
-    flex-shrink: 0; 
-    background-color: #4a6855; 
-    position: relative; 
-    transition: transform 0.2s ease;
-    text-align: center;
+
+/* 동그라미 지역 버튼 (기본 원형 크기 및 배경 설정) */
+.loc-circle {
+    /* 1. 원 크기 고정 (가로/세로 동일) */
+    width: 84px;
+    height: 84px;
+    flex-shrink: 0;                  /* 스크롤 시 원 크기가 줄어들지 않도록 고정 */
+
+    /* 2. 원형 및 레이아웃 */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+
+    /* 3. 배경 이미지 설정 */
+    background-size: cover;          /* 이미지를 원 크기에 맞춰 꽉 채움 */
+    background-position: center;     /* 이미지 중앙 기준 */
+    background-repeat: no-repeat;
+    background-color: #3b5645;       /* 기본 배경색 */
 }
 
-/* 2줄 레이아웃을 만드는 핵심 스타일 */
+/* 이미지 위 어두운 덮개 (글자 잘 보이게 설정) */
+.loc-circle::before {
+    content: '';
+    position: absolute;
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);   /* 어두운 정도 (0.1~0.9) */
+    border-radius: 50%;
+    z-index: 1;
+}
+
+/* 원 내부 2줄 텍스트 레이아웃 */
 .loc-content {
     position: relative;
     z-index: 2;
     display: flex;
-    flex-direction: column; /* 위아래 2줄로 배치 */
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px; /* 위아래 글자 간격 */
+    gap: 2px;
     width: 100%;
+    text-align: center;
 }
 
 /* 윗줄: 지역 이름 */
 .loc-name {
     display: block;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
     color: #ffffff;
     line-height: 1.2;
 }
 
-/* 아랫줄: N개 취미 */
+/* 아랫줄: 개수 텍스트 */
 .loc-count {
     display: block;
     font-size: 11px;

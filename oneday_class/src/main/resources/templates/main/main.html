@@ -210,15 +210,17 @@
     </a>
 
     <!-- 2. DB 동적 클래스 개수 출력 (지역별 2줄 구성) -->
-    <a th:href="@{/map(keyword='마포')}" class="loc-circle">
+    <a th:href="@{/map(keyword='마포')}" class="loc-circle" style="background-image: url('/images/map/hongdae.jpg');">
         <div class="loc-content">
             <span class="loc-name">홍대</span>
             <span class="loc-count" 
                   th:text="${regionCounts != null ? regionCounts['홍대'] + '개 취미' : '0개 취미'}">0개 취미</span>
         </div>
     </a>
+    
+    
 
-    <a th:href="@{/map(keyword='강남')}" class="loc-circle">
+    <a th:href="@{/map(keyword='강남')}" class="loc-circle" style="background-image: url('/images/map/gangnam.jpg');">
         <div class="loc-content">
             <span class="loc-name">강남</span>
             <span class="loc-count" 
@@ -226,7 +228,7 @@
         </div>
     </a>
 
-    <a th:href="@{/map(keyword='성동')}" class="loc-circle">
+    <a th:href="@{/map(keyword='성수')}" class="loc-circle" style="background-image: url('/images/map/seungsu.jpg');">
         <div class="loc-content">
             <span class="loc-name">성수</span>
             <span class="loc-count" 
@@ -234,7 +236,7 @@
         </div>
     </a>
 
-    <a th:href="@{/map(keyword='송파')}" class="loc-circle">
+    <a th:href="@{/map(keyword='송파')}" class="loc-circle" style="background-image: url('/images/map/songpa.jpg');">
         <div class="loc-content">
             <span class="loc-name">송파</span>
             <span class="loc-count" 
@@ -242,7 +244,7 @@
         </div>
     </a>
 
-    <a th:href="@{/map(keyword='마포')}" class="loc-circle">
+    <a th:href="@{/map(keyword='마포')}" class="loc-circle"style="background-image: url('/images/map/hongdae.jpg');">
         <div class="loc-content">
             <span class="loc-name">마포</span>
             <span class="loc-count" 
@@ -250,7 +252,7 @@
         </div>
     </a>
 
-    <a th:href="@{/map(keyword='잠실')}" class="loc-circle">
+    <a th:href="@{/map(keyword='잠실')}" class="loc-circle"style="background-image: url('/images/map/zamsil.jpg');">
         <div class="loc-content">
             <span class="loc-name">잠실</span>
             <span class="loc-count" 
@@ -258,7 +260,7 @@
         </div>
     </a>
 
-    <a th:href="@{/map(keyword='용산')}" class="loc-circle">
+    <a th:href="@{/map(keyword='용산')}" class="loc-circle"style="background-image: url('/images/map/yongsan.jpg');">
         <div class="loc-content">
             <span class="loc-name">용산</span>
             <span class="loc-count" 
@@ -266,7 +268,7 @@
         </div>
     </a>
 
-    <a th:href="@{/map(keyword='부산')}" class="loc-circle">
+    <a th:href="@{/map(keyword='부산')}" class="loc-circle"style="background-image: url('/images/map/busan.jpg');">
         <div class="loc-content">
             <span class="loc-name">부산</span>
             <span class="loc-count" 
@@ -274,7 +276,7 @@
         </div>
     </a>
     
-    <a th:href="@{/map(keyword='수원')}" class="loc-circle">
+    <a th:href="@{/map(keyword='수원')}" class="loc-circle"style="background-image: url('/images/map/suwon.jpg');">
         <div class="loc-content">
             <span class="loc-name">수원</span>
             <span class="loc-count" 
@@ -282,7 +284,7 @@
         </div>
     </a>
     
-    <a th:href="@{/map(keyword='광주')}" class="loc-circle">
+    <a th:href="@{/map(keyword='광주')}" class="loc-circle"style="background-image: url('/images/map/qwangju.jpg');">
         <div class="loc-content">
             <span class="loc-name">광주</span>
             <span class="loc-count" 
@@ -290,7 +292,7 @@
         </div>
     </a>
     
-    <a th:href="@{/map(keyword='대전')}" class="loc-circle">
+    <a th:href="@{/map(keyword='대전')}" class="loc-circle"style="background-image: url('/images/map/daejeon.jpg');">
         <div class="loc-content">
             <span class="loc-name">대전</span>
             <span class="loc-count" 

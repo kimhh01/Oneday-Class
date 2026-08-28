@@ -43,7 +43,7 @@ public class MainController {
         Map<String, String> regionSearchMap = new HashMap<>();
         regionSearchMap.put("홍대", "마포");
         regionSearchMap.put("강남", "강남");
-        regionSearchMap.put("성수", "성동");
+        regionSearchMap.put("성수", "성수");
         regionSearchMap.put("송파", "송파");
         regionSearchMap.put("마포", "마포");
         regionSearchMap.put("잠실", "송파");
